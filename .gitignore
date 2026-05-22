@@ -1,0 +1,12 @@
+# Temp / archive / inputs
+_temp/
+_zip/
+_inputs/
+_archive/
+uploads/
+
+# Fejlesztési tesztek
+test-*.js
+
+# Claude Code lokális beállítások
+.claude/

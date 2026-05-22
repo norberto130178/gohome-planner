@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<title>HazaÚt — Mission Board</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0E1524">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&family=Space+Grotesk:wght@500;700;800&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="styles.css">
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script src="schedules.js"></script>
+<script src="city-buses.js"></script>
+<script src="data.js"></script>
+<script src="i18n.js"></script>
+
+<script type="text/babel" src="route-card.jsx"></script>
+<script type="text/babel" src="app-state.jsx"></script>
+<script type="text/babel" src="variation-2.jsx"></script>
+</head>
+<body style="padding:0;background:#0E1524;">
+
+<div id="root"></div>
+
+<script type="text/babel" data-presets="react">
+function App() {
+  const { state, setState, t, setLang } = window.useAppState();
+  const lang = state.lang;
+  const darkPillStyle = {background: 'rgba(255,255,255,0.1)', color: '#F3E9D2'};
+  const darkPillActiveStyle = {background: '#FFC93C', color: '#0E1524'};
+
+  // Override sub-component styles for dark theme
+  state.DayPicker = (function(OrigDayPicker) {
+    return () => OrigDayPicker({ labelColor: '#FFC93C', pillStyle: darkPillStyle, pillActiveStyle: darkPillActiveStyle });
+  })(state.DayPicker);
+  state.TransferPicker = (function(OrigTransferPicker) {
+    return () => OrigTransferPicker({ labelColor: '#FFC93C', pillStyle: darkPillStyle, pillActiveStyle: darkPillActiveStyle });
+  })(state.TransferPicker);
+  state.DirectionPicker = (function(OrigDirectionPicker) {
+    return () => OrigDirectionPicker({ labelColor: '#FFC93C', pillStyle: darkPillStyle, pillActiveStyle: darkPillActiveStyle });
+  })(state.DirectionPicker);
+  state.StopPicker = (function(OrigStopPicker) {
+    return () => OrigStopPicker({ labelColor: '#FFC93C', pillActiveStyle: darkPillActiveStyle });
+  })(state.StopPicker);
+
+  return (
+    <>
+      <window.V2Variation state={state} setState={setState} t={t} langSwitcher={
+        <div style={{display:"flex",gap:4}}>
+          <button className={`tweaks-pill ${lang==="hu"?"active":""}`} onClick={() => setLang("hu")} style={{background: lang==="hu" ? '#FFC93C' : 'transparent', color: lang==="hu" ? '#0E1524' : '#F3E9D2'}}>HU</button>
+          <button className={`tweaks-pill ${lang==="en"?"active":""}`} onClick={() => setLang("en")} style={{background: lang==="en" ? '#FFC93C' : 'transparent', color: lang==="en" ? '#0E1524' : '#F3E9D2'}}>EN</button>
+        </div>
+      } />
+      <div style={{position:"fixed",bottom:14,left:14,zIndex:9998,display:"flex",gap:8}}>
+        <a href="index.html" style={{background:"#FFF7EC",color:"#2B1E3F",textDecoration:"none",padding:"10px 14px",borderRadius:10,fontWeight:800,fontSize:13,fontFamily:"Nunito,sans-serif",boxShadow:"0 8px 24px rgba(0,0,0,0.3)"}}>← ✨ Playful Timeline</a>
+      </div>
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>

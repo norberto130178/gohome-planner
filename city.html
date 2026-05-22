@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<title>VeszprémBusz — Veszprém helyi járatok</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#FFF7EC">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="styles.css">
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script src="data.js"></script>
+<script src="city-data.js"></script>
+<script src="city-planner.js"></script>
+
+<style>
+.stop-option:hover { background: var(--bg); }
+.city-form-row { display: flex; gap: 10px; align-items: stretch; flex-wrap: wrap; margin-bottom: 10px; }
+.city-swap-btn {
+  background: var(--line); color: var(--ink); border: none; border-radius: 12px;
+  padding: 0 14px; font-size: 18px; cursor: pointer; font-weight: 800;
+  transition: all 0.15s; flex-shrink: 0; align-self: center;
+}
+.city-swap-btn:hover { background: var(--ink); color: white; transform: scale(1.1); }
+.city-stop-label { font-size: 12px; font-weight: 800; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 5px; }
+.city-stop-wrapper { flex: 1; min-width: 180px; }
+.city-results-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+@media (max-width: 1100px) { .city-results-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 700px) {
+  .city-results-grid { grid-template-columns: 1fr; }
+  .v1 { padding: 14px; }
+  .city-form-row { flex-direction: column; }
+  .city-swap-btn { width: 100%; padding: 10px; text-align: center; }
+}
+.city-empty {
+  grid-column: 1 / -1; text-align: center; padding: 60px 20px;
+  background: white; border-radius: var(--radius); box-shadow: var(--shadow);
+}
+.city-bus-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px; border-radius: 50%;
+  color: white; font-weight: 900; font-size: 13px;
+  flex-shrink: 0;
+}
+.city-hero-banner {
+  background: linear-gradient(135deg, #26A69A 0%, #00796B 100%);
+  color: white; padding: 18px 24px; border-radius: var(--radius);
+  margin-bottom: 18px; display: flex; justify-content: space-between;
+  align-items: center; box-shadow: var(--shadow); gap: 16px;
+}
+</style>
+</head>
+<body style="padding:0;">
+
+<div id="root"></div>
+
+<script type="text/babel" data-presets="react">
+// ── Precompute stop → bus lines map (static, computed once) ──────────
+const STOP_LINES = (() => {
+  const map = {};
+  for (const bus of window.CITY_BUSES_FULL) {
+    for (const s of bus.stops) {
+      if (!map[s.name]) map[s.name] = [];
+      if (!map[s.name].some(b => b.id === bus.id))
+        map[s.name].push({ id: bus.id, color: bus.color });
+    }
+  }
+  return map;
+})();
+
+const ALL_STOPS = window.getCityStops();
+
+// ── StopSearch ───────────────────────────────────────────────────────
+function StopSearch({ value, onChange, placeholder, id }) {
+  const [query, setQuery] = React.useState(value || "");
+  const [open, setOpen] = React.useState(false);
+  const ref = React.useRef(null);
+
+  React.useEffect(() => { setQuery(value || ""); }, [value]);
+
+  React.useEffect(() => {
+    function outside(e) {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    }
+    document.addEventListener("mousedown", outside);
+    return () => document.removeEventListener("mousedown", outside);
+  }, []);
+
+  const filtered = React.useMemo(() => {
+    if (!query) return ALL_STOPS;
+    const norm = str => str.normalize("NFD").replace(/[̀-ͯ]/g, "");
+    const queryWords = norm(query.toLowerCase().trim()).split(/\s+/);
+    return ALL_STOPS.filter(s => {
+      const stopWords = norm(s.toLowerCase()).split(/[\s/\-,()+]+/).filter(Boolean);
+      return queryWords.every(qw => stopWords.some(sw => sw.startsWith(qw)));
+    });
+  }, [query]);
+
+  function select(stop) {
+    onChange(stop);
+    setQuery(stop);
+    setOpen(false);
+  }
+
+  function handleChange(e) {
+    setQuery(e.target.value);
+    setOpen(true);
+    if (!e.target.value) onChange("");
+  }
+
+  function handleBlur() {
+    setTimeout(() => {
+      setOpen(false);
+      setQuery(value || "");
+    }, 200);
+  }
+
+  return (
+    <div ref={ref} style={{ position: "relative" }}>
+      <input
+        id={id}
+        type="text"
+        value={query}
+        onChange={handleChange}
+        onFocus={() => setOpen(true)}
+        onBlur={handleBlur}
+        placeholder={placeholder}
+        autoComplete="off"
+        className="v1-time-input"
+        style={{ width: "100%", fontSize: 14 }}
+      />
+      {open && filtered.length > 0 && (
+        <div style={{
+          position: "absolute", top: "calc(100% + 4px)", left: 0, right: 0,
+          zIndex: 200, background: "white", border: "2px solid var(--line)",
+          borderRadius: 12, boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
+          maxHeight: 280, overflowY: "auto"
+        }}>
+          {filtered.map(stop => (
+            <div
+              key={stop}
+              className="stop-option"
+              onMouseDown={e => e.preventDefault()}
+              onClick={() => select(stop)}
+              style={{
+                padding: "9px 14px", cursor: "pointer",
+                borderBottom: "1px solid var(--line)",
+                display: "flex", alignItems: "center", gap: 8,
+                fontSize: 13, fontWeight: 700
+              }}
+            >
+              <span style={{ flex: 1 }}>{stop}</span>
+              <span style={{ display: "flex", gap: 3, flexWrap: "wrap", justifyContent: "flex-end" }}>
+                {(STOP_LINES[stop] || []).slice(0, 5).map(b => (
+                  <span key={b.id} style={{
+                    background: b.color, color: "white", borderRadius: 6,
+                    padding: "1px 6px", fontSize: 11, fontWeight: 800,
+                    lineHeight: "16px"
+                  }}>{b.id}</span>
+                ))}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── CityRouteCard ────────────────────────────────────────────────────
+function CityRouteCard({ route, index, isPrimary, fromStop, toStop, walkMin }) {
+  const U = window.BUS_UTILS;
+  const fmt = m => U.fmtTime(m);
+  const totalMin = route.totalDuration;
+  const totalStr = totalMin >= 60
+    ? `${Math.floor(totalMin / 60)}ó ${totalMin % 60}p`
+    : `${totalMin} perc`;
+
+  const BusIcon = ({ bus }) => (
+    <div className="city-bus-badge" style={{ background: bus.color }}>
+      {bus.id}
+    </div>
+  );
+
+  return (
+    <div className={`route-card ${isPrimary ? "primary" : ""}`}>
+      <div className="route-card-header">
+        <span className="route-card-badge">
+          {isPrimary ? "⭐ Legjobb" : `${index}. alternatíva`}
+        </span>
+        <span className="route-card-total">
+          📍 {fmt(route.arriveAt)} · {totalStr}
+        </span>
+      </div>
+
+      <div className="route-steps">
+        {walkMin > 0 && (
+          <>
+            <div className="route-step">
+              <div className="step-time">{fmt(route.departLeaveOrigin)}</div>
+              <div className="step-icon">🚶</div>
+              <div className="step-body">
+                <div className="step-title">Indulj el</div>
+                <div className="step-sub">{walkMin} perc gyaloglás a megállóhoz</div>
+              </div>
+            </div>
+            <div className="step-connector">
+              <div className="connector-line" />
+            </div>
+          </>
+        )}
+
+        {/* Board bus1 */}
+        <div className="route-step">
+          <div className="step-time">{fmt(route.boardAt)}</div>
+          <BusIcon bus={route.bus1} />
+          <div className="step-body">
+            <div className="step-title">
+              Szállj fel ·{" "}
+              <span style={{ color: route.bus1.color, fontWeight: 800 }}>
+                {route.bus1.label}
+              </span>
+            </div>
+            <div className="step-sub">{fromStop}</div>
+          </div>
+        </div>
+
+        {route.type === "direct" ? (
+          <>
+            <div className="step-connector">
+              <div className="connector-line" />
+              <div className="connector-label">{route.arriveAt - route.boardAt} perc</div>
+            </div>
+            <div className="route-step">
+              <div className="step-time">{fmt(route.arriveAt)}</div>
+              <div className="step-icon step-icon-home">📍</div>
+              <div className="step-body">
+                <div className="step-title" style={{ fontWeight: 800 }}>{toStop}</div>
+                <div className="step-sub">Megérkeztél</div>
+              </div>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="step-connector">
+              <div className="connector-line" />
+              <div className="connector-label">{route.arriveAtTransfer - route.boardAt} perc</div>
+            </div>
+            <div className="route-step">
+              <div className="step-time">{fmt(route.arriveAtTransfer)}</div>
+              <div className="step-icon">🔄</div>
+              <div className="step-body">
+                <div className="step-title">Átszállás</div>
+                <div className="step-sub">{route.transferStopName}</div>
+                <div className="wait-pill">⏱ {route.waitAtTransfer} perc várakozás</div>
+              </div>
+            </div>
+            <div className="step-connector">
+              <div className="connector-line" />
+            </div>
+            <div className="route-step">
+              <div className="step-time">{fmt(route.boardAt2)}</div>
+              <BusIcon bus={route.bus2} />
+              <div className="step-body">
+                <div className="step-title">
+                  Szállj fel ·{" "}
+                  <span style={{ color: route.bus2.color, fontWeight: 800 }}>
+                    {route.bus2.label}
+                  </span>
+                </div>
+                <div className="step-sub">{route.transferStopName}</div>
+              </div>
+            </div>
+            <div className="step-connector">
+              <div className="connector-line" />
+              <div className="connector-label">{route.arriveAt - route.boardAt2} perc</div>
+            </div>
+            <div className="route-step">
+              <div className="step-time">{fmt(route.arriveAt)}</div>
+              <div className="step-icon step-icon-home">📍</div>
+              <div className="step-body">
+                <div className="step-title" style={{ fontWeight: 800 }}>{toStop}</div>
+                <div className="step-sub">Megérkeztél</div>
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── CityApp ──────────────────────────────────────────────────────────
+function CityApp() {
+  const U = window.BUS_UTILS;
+  const [now, setNow] = React.useState(new Date());
+  const [fromStop, setFromStop] = React.useState("");
+  const [toStop, setToStop] = React.useState("");
+  const [timeMode, setTimeMode] = React.useState("now");
+  const [customTime, setCustomTime] = React.useState(() => {
+    const d = new Date();
+    return `${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
+  });
+  const [walkMin, setWalkMin] = React.useState(5);
+  const [results, setResults] = React.useState(null);
+
+  React.useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 15000);
+    return () => clearInterval(id);
+  }, []);
+
+  const nowFmt = U.fmtTime(now.getHours() * 60 + now.getMinutes());
+  const dateFmt = now.toLocaleDateString("hu-HU", { weekday: "long", month: "short", day: "numeric" });
+
+  function plan() {
+    let planTime;
+    if (timeMode === "now") {
+      planTime = new Date();
+    } else {
+      const [h, m] = customTime.split(":").map(Number);
+      planTime = new Date();
+      planTime.setHours(h, m, 0, 0);
+    }
+    const r = window.planCityRoutes({
+      now: planTime,
+      fromStop,
+      toStop,
+      walkMin,
+      minTransfer: 2,
+      maxResults: 6,
+    });
+    setResults(r);
+  }
+
+  function swap() {
+    const tmp = fromStop;
+    setFromStop(toStop);
+    setToStop(tmp);
+    setResults(null);
+  }
+
+  const canPlan = fromStop && toStop && fromStop !== toStop;
+
+  return (
+    <div className="v1">
+      {/* Header */}
+      <div className="v1-header">
+        <div>
+          <div className="v1-title">VeszprémBusz 🚌</div>
+          <div className="v1-subtitle">Veszprém helyi járatok — útvonaltervező</div>
+        </div>
+        <div className="v1-clock">
+          <div className="v1-clock-label">Mostanra</div>
+          <div className="v1-clock-time">{nowFmt}</div>
+          <div className="v1-clock-date">{dateFmt}</div>
+        </div>
+      </div>
+
+      {/* Planner form */}
+      <div style={{
+        background: "white", borderRadius: "var(--radius)",
+        padding: "20px 24px", boxShadow: "var(--shadow)", marginBottom: 20
+      }}>
+        {/* FROM / TO row */}
+        <div className="city-form-row">
+          <div className="city-stop-wrapper">
+            <div className="city-stop-label">Honnan</div>
+            <StopSearch
+              id="from-stop"
+              value={fromStop}
+              onChange={v => { setFromStop(v); setResults(null); }}
+              placeholder="Megálló neve..."
+            />
+          </div>
+          <button className="city-swap-btn" onClick={swap} title="Megállók cseréje">⇄</button>
+          <div className="city-stop-wrapper">
+            <div className="city-stop-label">Hova</div>
+            <StopSearch
+              id="to-stop"
+              value={toStop}
+              onChange={v => { setToStop(v); setResults(null); }}
+              placeholder="Megálló neve..."
+            />
+          </div>
+        </div>
+
+        {/* Time + walk + plan row */}
+        <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+          <button
+            className={`v1-btn ${timeMode === "now" ? "active" : ""}`}
+            onClick={() => setTimeMode("now")}
+          >
+            🕐 Most
+          </button>
+          <button
+            className={`v1-btn ${timeMode === "custom" ? "active" : ""}`}
+            onClick={() => setTimeMode("custom")}
+          >
+            ⏰ Egyéni idő
+          </button>
+          {timeMode === "custom" && (
+            <input
+              type="time"
+              value={customTime}
+              className="v1-time-input"
+              onChange={e => setCustomTime(e.target.value)}
+            />
+          )}
+
+          <div style={{ display: "flex", alignItems: "center", gap: 6, marginLeft: 8 }}>
+            <span style={{ fontWeight: 700, fontSize: 14 }}>🚶</span>
+            <button
+              className="v1-btn"
+              style={{ padding: "8px 12px", fontWeight: 900 }}
+              onClick={() => setWalkMin(m => Math.max(0, m - 1))}
+            >−</button>
+            <span style={{ fontWeight: 800, minWidth: 36, textAlign: "center", fontSize: 15 }}>
+              {walkMin} p
+            </span>
+            <button
+              className="v1-btn"
+              style={{ padding: "8px 12px", fontWeight: 900 }}
+              onClick={() => setWalkMin(m => Math.min(30, m + 1))}
+            >+</button>
+          </div>
+
+          <button
+            className="v1-btn primary"
+            style={{ marginLeft: "auto", opacity: canPlan ? 1 : 0.4, cursor: canPlan ? "pointer" : "not-allowed" }}
+            onClick={canPlan ? plan : undefined}
+          >
+            🔍 Útvonal keresése
+          </button>
+        </div>
+      </div>
+
+      {/* Results */}
+      {results === null ? (
+        <div className="v1-empty">
+          <div className="v1-empty-emoji">🗺️</div>
+          <div className="v1-empty-title">Válassz megállókat</div>
+          <div className="v1-empty-hint">
+            Írd be a kiindulási és célmegállót, majd kattints a keresésre.
+          </div>
+        </div>
+      ) : results.length === 0 ? (
+        <div className="v1-empty">
+          <div className="v1-empty-emoji">😔</div>
+          <div className="v1-empty-title">Nincs elérhető járat</div>
+          <div className="v1-empty-hint">
+            Ezen a napon és időpontban nem találtunk útvonalat{" "}
+            <strong>{fromStop}</strong> → <strong>{toStop}</strong> között.
+          </div>
+        </div>
+      ) : (
+        <>
+          {/* Hero banner — best result */}
+          <div className="city-hero-banner">
+            <div>
+              <div style={{ fontSize: 12, opacity: 0.85, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 4 }}>
+                Legjobb útvonal
+              </div>
+              <div style={{ fontSize: 52, fontWeight: 900, lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>
+                {U.fmtTime(results[0].arriveAt)}
+              </div>
+              <div style={{ fontSize: 15, opacity: 0.9, marginTop: 4 }}>
+                {toStop} · {results[0].totalDuration} perc
+              </div>
+            </div>
+            <div style={{ textAlign: "right" }}>
+              <div style={{ fontSize: 14, opacity: 0.85 }}>{results.length} útvonal</div>
+              <div style={{ fontSize: 36, fontWeight: 900, lineHeight: 1, marginTop: 4 }}>
+                {results[0].type === "direct" ? "Közvetlen" : "1 átszállás"}
+              </div>
+              <div style={{ fontSize: 13, opacity: 0.8, marginTop: 4 }}>
+                {fromStop.length > 20 ? fromStop.slice(0, 20) + "…" : fromStop} →
+              </div>
+            </div>
+          </div>
+
+          <div className="city-results-grid">
+            {results.map((r, i) => (
+              <CityRouteCard
+                key={i}
+                route={r}
+                index={i + 1}
+                isPrimary={i === 0}
+                fromStop={fromStop}
+                toStop={toStop}
+                walkMin={walkMin}
+              />
+            ))}
+          </div>
+        </>
+      )}
+
+      {/* Navigation */}
+      <div style={{ position: "fixed", bottom: 14, left: 14, zIndex: 9998 }}>
+        <a href="index.html" style={{
+          background: "#0E1524", color: "#FFC93C", textDecoration: "none",
+          padding: "10px 14px", borderRadius: 10, fontWeight: 800, fontSize: 13,
+          fontFamily: "Nunito,sans-serif", boxShadow: "0 8px 24px rgba(0,0,0,0.2)"
+        }}>
+          ← HazaÚt
+        </a>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<CityApp />);
+</script>
+</body>
+</html>

@@ -69,14 +69,21 @@ window.planCityRoutes = function planCityRoutes({
 
     // collect stops reachable after fromStop on bus1
     const forwardStops = bus1.stops.filter(s => s.offset > fromOff1);
+    const toOff1 = U.stopOffset(bus1, toStop);
 
     for (const ts of forwardStops) {
       for (const bus2 of buses) {
+        if (bus2.id === bus1.id && bus2.direction === bus1.direction) continue;
         if (!U.busVisits(bus2, ts.name)) continue;
         if (!U.busVisits(bus2, toStop)) continue;
         const tsOff2  = U.stopOffset(bus2, ts.name);
         const toOff2  = U.stopOffset(bus2, toStop);
         if (toOff2 <= tsOff2) continue;
+
+        // Skip if bus2 serves fromStop anywhere before toStop
+        // (boarding bus2 at fromStop directly would give the same or better result)
+        const fromOff2 = U.stopOffset(bus2, fromStop);
+        if (fromOff2 !== null && fromOff2 < toOff2) continue;
 
         const deps2 = U.getDepartures(bus2, dayType);
         if (deps2.length === 0) continue;
@@ -91,6 +98,9 @@ window.planCityRoutes = function planCityRoutes({
             if (boardAt2 < arriveAtTs + minTransfer) continue;
 
             const arriveAt = dep2 + toOff2;
+
+            // Skip if staying on bus1 would reach toStop at least as early
+            if (toOff1 !== null && dep1 + toOff1 <= arriveAt) continue;
 
             const key = `T|${bus1.id}|${bus1.direction}|${dep1}|${bus2.id}|${bus2.direction}|${dep2}`;
             if (seen.has(key)) continue;

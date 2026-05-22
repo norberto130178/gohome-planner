@@ -302,10 +302,12 @@ function CityRouteCard({ route, index, isPrimary, fromStop, toStop, walkMin }) {
 function CityApp() {
   const U = window.BUS_UTILS;
   const [now, setNow] = React.useState(new Date());
-  const [fromStop, setFromStop] = React.useState("");
-  const [toStop, setToStop] = React.useState("");
-  const [timeMode, setTimeMode] = React.useState("now");
+  const [fromStop, setFromStop] = React.useState(() => localStorage.getItem("city_from") || "");
+  const [toStop, setToStop] = React.useState(() => localStorage.getItem("city_to") || "");
+  const [timeMode, setTimeMode] = React.useState(() => localStorage.getItem("city_timeMode") || "now");
   const [customTime, setCustomTime] = React.useState(() => {
+    const saved = localStorage.getItem("city_customTime");
+    if (saved) return saved;
     const d = new Date();
     return `${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
   });
@@ -342,8 +344,8 @@ function CityApp() {
 
   function swap() {
     const tmp = fromStop;
-    setFromStop(toStop);
-    setToStop(tmp);
+    setFromStop(toStop); localStorage.setItem("city_from", toStop);
+    setToStop(tmp);      localStorage.setItem("city_to", tmp);
     setResults(null);
   }
 
@@ -376,7 +378,7 @@ function CityApp() {
             <StopSearch
               id="from-stop"
               value={fromStop}
-              onChange={v => { setFromStop(v); setResults(null); }}
+              onChange={v => { setFromStop(v); localStorage.setItem("city_from", v); setResults(null); }}
               placeholder="Megálló neve..."
             />
           </div>
@@ -386,7 +388,7 @@ function CityApp() {
             <StopSearch
               id="to-stop"
               value={toStop}
-              onChange={v => { setToStop(v); setResults(null); }}
+              onChange={v => { setToStop(v); localStorage.setItem("city_to", v); setResults(null); }}
               placeholder="Megálló neve..."
             />
           </div>
@@ -396,13 +398,13 @@ function CityApp() {
         <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
           <button
             className={`v1-btn ${timeMode === "now" ? "active" : ""}`}
-            onClick={() => setTimeMode("now")}
+            onClick={() => { setTimeMode("now"); localStorage.setItem("city_timeMode", "now"); }}
           >
             🕐 Most
           </button>
           <button
             className={`v1-btn ${timeMode === "custom" ? "active" : ""}`}
-            onClick={() => setTimeMode("custom")}
+            onClick={() => { setTimeMode("custom"); localStorage.setItem("city_timeMode", "custom"); }}
           >
             ⏰ Egyéni idő
           </button>
@@ -411,7 +413,7 @@ function CityApp() {
               type="time"
               value={customTime}
               className="v1-time-input"
-              onChange={e => setCustomTime(e.target.value)}
+              onChange={e => { setCustomTime(e.target.value); localStorage.setItem("city_customTime", e.target.value); }}
             />
           )}
 

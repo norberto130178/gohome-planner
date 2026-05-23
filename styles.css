@@ -21,6 +21,9 @@
   --radius-sm: 12px;
 }
 
+html {
+  scrollbar-gutter: stable;
+}
 html, body {
   background: var(--bg);
   color: var(--ink);
@@ -124,12 +127,13 @@ button { font-family: inherit; cursor: pointer; border: none; }
 .v1-hero-banner {
   background: linear-gradient(135deg, var(--accent) 0%, #5E35B1 100%);
   color: white;
-  padding: 20px 26px;
+  padding: 10px 20px;
   border-radius: var(--radius);
   margin-bottom: 18px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 12px;
   box-shadow: var(--shadow);
   position: relative;
   overflow: hidden;
@@ -143,12 +147,12 @@ button { font-family: inherit; cursor: pointer; border: none; }
   border-radius: 50%;
 }
 .v1-hero-left { position: relative; z-index: 1; }
-.v1-hero-label { font-size: 13px; opacity: 0.8; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 700; }
-.v1-hero-time { font-size: 56px; font-weight: 900; line-height: 1; margin: 6px 0 4px; font-variant-numeric: tabular-nums; }
-.v1-hero-sub { font-size: 16px; opacity: 0.9; }
-.v1-hero-right { text-align: right; position: relative; z-index: 1; }
-.v1-hero-countdown { font-size: 15px; opacity: 0.9; }
-.v1-hero-count { font-size: 48px; font-weight: 900; font-variant-numeric: tabular-nums; line-height: 1; }
+.v1-hero-label { font-size: 11px; opacity: 0.8; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 700; }
+.v1-hero-time { font-size: 40px; font-weight: 900; line-height: 1; margin: 2px 0 2px; font-variant-numeric: tabular-nums; }
+.v1-hero-sub { font-size: 13px; opacity: 0.9; }
+.v1-hero-right { position: relative; z-index: 1; }
+.v1-hero-countdown { font-size: 13px; opacity: 0.9; }
+.v1-hero-count { font-size: 34px; font-weight: 900; font-variant-numeric: tabular-nums; line-height: 1; }
 
 .v1-routes {
   display: grid;
@@ -536,6 +540,34 @@ button { font-family: inherit; cursor: pointer; border: none; }
 .tweaks-pill.active { background: var(--ink); color: white; }
 
 /* ============================================================
+   Tooltips — data-tooltip hover
+   ============================================================ */
+[data-tooltip] { position: relative; }
+[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  top: calc(100% + 7px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--accent);
+  color: white;
+  padding: 5px 10px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: Nunito, sans-serif;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 99999;
+  opacity: 0;
+  transition: opacity 0.12s 0.35s;
+}
+[data-tooltip]:hover::after { opacity: 1; }
+[data-tooltip][data-tooltip-dir="up"]::after { top: auto; bottom: calc(100% + 7px); }
+[data-tooltip][data-tooltip-dir="left"]::after { top: 50%; bottom: auto; left: auto; right: calc(100% + 7px); transform: translateY(-50%); }
+[data-tooltip][data-tooltip-color="warn"]::after { background: #C0392B; }
+
+/* ============================================================
    Accessibility — focus-visible
    ============================================================ */
 /* ============================================================
@@ -555,21 +587,23 @@ button { font-family: inherit; cursor: pointer; border: none; }
   align-items: center;
   gap: 8px;
   min-width: 220px;
+  flex-shrink: 0;
 }
 .stop-picker-input {
   font-family: inherit;
   font-weight: 600;
   font-size: 13px;
-  padding: 6px 12px;
-  border: 2px solid var(--line);
+  padding: 5px 10px;
+  border: none;
   border-radius: var(--radius-sm);
+  box-shadow: 0 0 0 2px var(--line);
   background: var(--bg-panel);
   color: var(--ink);
   outline: none;
-  width: 220px;
+  width: 200px;
 }
 .stop-picker-input:focus {
-  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent);
 }
 .stop-picker-default {
   font-size: 11px;

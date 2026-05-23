@@ -51,6 +51,7 @@ function useAppState(options = {}) {
   }
 
   const [lang, setLang] = useState("hu");
+  const [compactMode, setCompactMode] = useState(() => localStorage.getItem("hazaut.compact") === "1");
   const [mode, setMode] = useState(initMode);
   const [customTime, setCustomTime] = useState(initCustomTime);
   const [dayOffset, setDayOffset] = useState(initDayOffset);
@@ -77,6 +78,7 @@ function useAppState(options = {}) {
 
   // --- localStorage save ---
   useEffect(() => { localStorage.setItem("hazaut.lang", lang); }, [lang]);
+  useEffect(() => { localStorage.setItem("hazaut.compact", compactMode ? "1" : "0"); }, [compactMode]);
   useEffect(() => { localStorage.setItem("hazaut.transfers", JSON.stringify(allowedTransfers)); }, [allowedTransfers]);
   useEffect(() => { localStorage.setItem("hazaut.transfersSchool", JSON.stringify(allowedTransfersSchool)); }, [allowedTransfersSchool]);
   useEffect(() => { localStorage.setItem("hazaut.direction", direction); }, [direction]);
@@ -129,7 +131,9 @@ function useAppState(options = {}) {
   };
 
   // --- State object & dispatcher ---
-  const state = { now, mode, customTime, missed, lang, routes, dayOffset, direction, schoolFilter, homeStop };
+  const state = { now, mode, customTime, missed, lang, routes, dayOffset, direction, schoolFilter, homeStop, compactMode };
+  const toggleCompact = () => setCompactMode(c => !c);
+  state.toggleCompact = toggleCompact;
 
   const setState = (s) => {
     if (s.mode !== undefined && s.mode !== mode) {
@@ -210,8 +214,21 @@ function useAppState(options = {}) {
   // --- Shared sub-components ---
   state.TransferPicker = (props) => {
     const labelColor = (props && props.labelColor) || '#6A5F7C';
+    const wrapRef = React.useRef(null);
+    React.useEffect(() => {
+      const handler = (e) => {
+        if (wrapRef.current && !wrapRef.current.contains(e.target)) setStopPickerOpen(false);
+      };
+      document.addEventListener("mousedown", handler);
+      return () => document.removeEventListener("mousedown", handler);
+    }, []);
+    const normalize = (s) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+    const filtered = stopPickerQuery
+      ? stopPickerAllStops.filter(s => normalize(s).includes(normalize(stopPickerQuery)))
+      : stopPickerAllStops;
     return (
-      <div style={{display:'flex',gap:6,flexWrap:'wrap',marginBottom:12,alignItems:'center'}}>
+      <div ref={wrapRef} style={{display:'flex',gap:16,alignItems:'center',marginBottom:12}}>
+        <div style={{display:'flex',gap:6,flexWrap:'wrap',alignItems:'center',flex:1,minWidth:0}}>
         <span style={{fontSize:12,fontWeight:800,color:labelColor,letterSpacing:'0.1em',textTransform:'uppercase',marginRight:4}}>
           🔄 {lang==="hu"?"\u00c1tsz\u00e1ll\u00e1s":"Transfer"}:
         </span>
@@ -220,11 +237,72 @@ function useAppState(options = {}) {
             className={`tweaks-pill ${activeTransfers.includes(id)?'active':''}`}
             aria-pressed={activeTransfers.includes(id)}
             aria-label={`${lang==="hu"?"Átszállás":"Transfer"}: ${transferLabels[id]}`}
+            data-tooltip={activeTransfers.includes(id) ? (lang==="hu" ? "Kattints: kizár" : "Click: exclude") : (lang==="hu" ? "Kattints: bekapcsol" : "Click: enable")}
             {...(props && props.pillStyle && !activeTransfers.includes(id) ? {style: props.pillStyle} : {})}
             {...(props && props.pillActiveStyle && activeTransfers.includes(id) ? {style: props.pillActiveStyle} : {})}>
             {transferLabels[id]}
           </button>
         ))}
+        {direction === "school" && (
+          <div
+            style={{display:"flex",alignItems:"center",gap:8,cursor:"pointer",marginLeft:4}}
+            onClick={() => setSchoolFilter(f => !f)}
+            data-tooltip={lang==="hu" ? "Csak 10:00 előtt érkező járatok" : "Only buses arriving before 10:00"}
+          >
+            <span style={{fontSize:13,fontWeight:700,userSelect:"none"}}>
+              🎒 {lang==="hu" ? "Reggeli szűrő" : "Morning filter"}
+            </span>
+            <div style={{
+              width:42, height:24, borderRadius:12, flexShrink:0,
+              background: schoolFilter ? "var(--accent)" : "var(--line)",
+              position:"relative", transition:"background 0.2s",
+            }}>
+              <div style={{
+                position:"absolute",
+                top:3, left: schoolFilter ? 21 : 3,
+                width:18, height:18, borderRadius:"50%",
+                background:"white",
+                boxShadow:"0 1px 4px rgba(0,0,0,0.25)",
+                transition:"left 0.2s",
+              }} />
+            </div>
+          </div>
+        )}
+        </div>
+        {direction === "home" && (
+          <div style={{display:"flex",alignItems:"center",gap:8,flexShrink:0}}>
+            <span style={{fontSize:12,fontWeight:800,color:labelColor,letterSpacing:'0.1em',textTransform:'uppercase',marginRight:4}}>
+              🏠 {lang==="hu"?"Célállomás":"Destination"}:
+            </span>
+            <div className="stop-picker-input-wrap">
+              {homeStop ? (
+                <button className="stop-picker-active-pill" onClick={() => setHomeStop(null)}
+                  style={{cursor:'pointer',fontSize:13,fontWeight:800,background:'#FF6E9C',color:'#fff',padding:'5px 14px',borderRadius:10,border:'none',fontFamily:'inherit',whiteSpace:'nowrap'}}>
+                  📍 {homeStop} ✕
+                </button>
+              ) : (
+                <>
+                  <input type="text" className="stop-picker-input"
+                    placeholder={lang==="hu"?"Megálló keresése...":"Search stop..."}
+                    value={stopPickerQuery}
+                    onChange={(e) => { setStopPickerQuery(e.target.value); setStopPickerOpen(true); }}
+                    onFocus={() => setStopPickerOpen(true)}
+                  />
+                </>
+              )}
+              {stopPickerOpen && !homeStop && filtered.length > 0 && (
+                <div className="stop-picker-dropdown" onMouseDown={(e) => e.preventDefault()}>
+                  {filtered.map(stop => (
+                    <div key={stop} className="stop-picker-option"
+                      onClick={() => { setHomeStop(stop); setStopPickerQuery(""); setStopPickerOpen(false); }}>
+                      {stop}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     );
   };
@@ -240,6 +318,7 @@ function useAppState(options = {}) {
           className={`tweaks-pill ${direction==="school"?'active':''}`}
           aria-pressed={direction==="school"}
           aria-label={t.directionSchool}
+          data-tooltip={lang==="hu" ? "Iskolába menetel" : "Going to school"}
           {...(props && props.pillStyle && direction!=="school" ? {style: props.pillStyle} : {})}
           {...(props && props.pillActiveStyle && direction==="school" ? {style: props.pillActiveStyle} : {})}>
           {t.directionSchool}
@@ -248,6 +327,7 @@ function useAppState(options = {}) {
           className={`tweaks-pill ${direction==="home"?'active':''}`}
           aria-pressed={direction==="home"}
           aria-label={t.directionHome}
+          data-tooltip={lang==="hu" ? "Hazafelé menetel" : "Going home"}
           {...(props && props.pillStyle && direction!=="home" ? {style: props.pillStyle} : {})}
           {...(props && props.pillActiveStyle && direction==="home" ? {style: props.pillActiveStyle} : {})}>
           {t.directionHome}
@@ -258,6 +338,27 @@ function useAppState(options = {}) {
 
   state.DayPicker = (props) => {
     const labelColor = (props && props.labelColor) || '#6A5F7C';
+    if (compactMode) {
+      return (
+        <div style={{display:'flex',gap:6,alignItems:'center',marginBottom:12}}>
+          <span style={{fontSize:12,fontWeight:800,color:labelColor,letterSpacing:'0.1em',textTransform:'uppercase',marginRight:4}}>
+            📅 {lang==="hu"?"Nap":"Day"}:
+          </span>
+          <select
+            value={activeDayOffset}
+            onChange={e => setState({ ...state, dayOffset: Number(e.target.value) })}
+            data-tooltip={lang==="hu" ? "Nap kiválasztása" : "Select day"}
+            style={{fontFamily:'inherit',fontSize:12,fontWeight:700,padding:'6px 10px',borderRadius:10,border:'none',background:'var(--line)',color:'var(--ink)',cursor:'pointer',appearance:'none',WebkitAppearance:'none',MozAppearance:'none'}}
+          >
+            {dayPickerOptions.map(o => (
+              <option key={o.offset} value={o.offset}>
+                {o.label} — {o.date.toLocaleDateString(lang==="hu"?"hu-HU":"en-US")}
+              </option>
+            ))}
+          </select>
+        </div>
+      );
+    }
     return (
       <div style={{display:'flex',gap:6,flexWrap:'wrap',marginBottom:12,alignItems:'center'}}>
         <span style={{fontSize:12,fontWeight:800,color:labelColor,letterSpacing:'0.1em',textTransform:'uppercase',marginRight:4}}>
@@ -268,9 +369,10 @@ function useAppState(options = {}) {
             className={`tweaks-pill ${activeDayOffset===o.offset?'active':''}`}
             aria-current={activeDayOffset===o.offset ? "date" : undefined}
             aria-label={`${o.label} — ${o.date.toLocaleDateString(lang==="hu"?"hu-HU":"en-US")}`}
+            data-tooltip={o.date.toLocaleDateString(lang==="hu"?"hu-HU":"en-US")}
             {...(props && props.pillStyle && activeDayOffset!==o.offset ? {style: props.pillStyle} : {})}
             {...(props && props.pillActiveStyle && activeDayOffset===o.offset ? {style: props.pillActiveStyle} : {})}
-            title={o.date.toLocaleDateString(lang==="hu"?"hu-HU":"en-US")}>{o.label}</button>
+            >{o.label}</button>
         ))}
       </div>
     );
@@ -364,6 +466,8 @@ function useAppState(options = {}) {
       </div>
     );
   };
+
+  state.StopPicker = () => null;
 
   return { state, setState, t, setLang };
 }

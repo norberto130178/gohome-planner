@@ -24,6 +24,9 @@ function V1Variation({ state, setState, t, langSwitcher, navLinks }) {
     heroInfo = { minsToLeave, stateText };
   }
 
+  const [clockHovered, setClockHovered] = React.useState(false);
+  const isNowMode = state.mode === "now";
+
   const isSchool = state.direction === "school";
   const subtitle = isSchool
     ? (state.lang === "hu" ? "Hogy jutsz el az iskolába? 🏫" : "How to get to school? 🏫")
@@ -33,70 +36,64 @@ function V1Variation({ state, setState, t, langSwitcher, navLinks }) {
     <div className="v1">
       <div className="v1-header">
         <div>
-          <div className="v1-title">{t.appTitle} ✨</div>
-          <div className="v1-subtitle">{subtitle}</div>
+          <div style={{display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
+            <div className="v1-title">{t.appTitle} ✨</div>
+            <div style={{fontSize:11,fontWeight:700,background:"linear-gradient(135deg,#7C3AED,#C026D3)",color:"white",padding:"2px 8px",borderRadius:6}}>v{window.APP_VERSION}</div>
+            {langSwitcher}
+          </div>
+          <div style={{display:"flex",alignItems:"center",gap:10,marginTop:6}}>
+            <div className="v1-subtitle">{subtitle}</div>
+          </div>
         </div>
-        <div style={{display:"flex",alignItems:"flex-end",gap:12}}>
-          {langSwitcher}
-          <div className="v1-clock">
-            <div className="v1-clock-label">{t.now_is}</div>
+        <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:8}}>
+          <div
+            className="v1-clock"
+            data-tooltip={isNowMode ? (state.lang==="hu" ? "Kattints: saját idő beállítása" : "Click: set custom time") : (state.lang==="hu" ? "Kattints: vissza a mosthoz" : "Click: back to now")}
+            data-tooltip-dir="left"
+            onClick={() => setState({ ...state, mode: isNowMode ? "custom" : "now" })}
+            onMouseEnter={() => setClockHovered(true)}
+            onMouseLeave={() => setClockHovered(false)}
+            style={{
+              cursor: "pointer",
+              transform: clockHovered ? "translateY(-3px)" : "translateY(0)",
+              transition: "transform 0.15s, box-shadow 0.15s, background 0.2s, outline 0.2s",
+              boxShadow: clockHovered
+                ? "0 10px 0 0 rgba(43,30,63,0.12), 0 24px 40px -12px rgba(43,30,63,0.3)"
+                : undefined,
+              background: isNowMode ? undefined : "var(--accent)",
+              color: isNowMode ? undefined : "white",
+              outline: isNowMode ? "3px solid var(--sun)" : "3px solid var(--accent)",
+              outlineOffset: 2,
+            }}
+          >
+            <div className="v1-clock-label">{isNowMode ? t.now_is : (state.lang === "hu" ? "SAJÁT IDŐ" : "CUSTOM")}</div>
             <div className="v1-clock-time">{nowFmt}</div>
             <div className="v1-clock-date">{dateFmt}</div>
           </div>
-          <div style={{fontSize:11,opacity:0.7,textAlign:"right",background:"rgba(0,0,0,0.08)",padding:"2px 6px",borderRadius:6}}>v{window.APP_VERSION}</div>
+          <div
+            data-tooltip={state.lang==="hu" ? (state.compactMode ? "Teljes nézetre váltás" : "Kompakt nézetre váltás") : (state.compactMode ? "Switch to full view" : "Switch to compact view")}
+            data-tooltip-dir="left"
+            style={{display:"flex",alignItems:"center",gap:7,cursor:"pointer",userSelect:"none"}}
+            onClick={state.toggleCompact}
+          >
+            <span style={{fontSize:13,fontWeight:700,opacity:0.55}}>{state.lang==="hu"?"Kompakt":"Compact"}</span>
+            <div style={{width:36,height:20,borderRadius:10,background:state.compactMode?"var(--accent)":"var(--line)",position:"relative",transition:"background 0.2s",flexShrink:0}}>
+              <div style={{position:"absolute",top:2,left:state.compactMode?18:2,width:16,height:16,borderRadius:"50%",background:"white",transition:"left 0.2s",boxShadow:"0 1px 3px rgba(0,0,0,0.2)"}} />
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="v1-toolbar">
-        {state.DirectionPicker && <state.DirectionPicker />}
-        {state.DayPicker && <state.DayPicker />}
-        {state.TransferPicker && <state.TransferPicker />}
-        {state.StopPicker && <state.StopPicker />}
+      <div className="v1-toolbar" style={{alignItems:"flex-start"}}>
+        <div style={{display:"flex",flexDirection:"column"}}>
+          <div style={{display:"flex",alignItems:"flex-start",gap:12,flexWrap:"wrap"}}>
+            {state.DirectionPicker && <state.DirectionPicker />}
+            {state.DayPicker && <state.DayPicker />}
+          </div>
+          {state.TransferPicker && <state.TransferPicker />}
+          {state.StopPicker && <state.StopPicker />}
+        </div>
         <div style={{display:'flex',gap:6,flexWrap:'wrap',alignItems:'center'}}>
-          <button
-            className={`v1-btn ${state.mode === "now" ? "active" : ""}`}
-            onClick={() => setState({ ...state, mode: "now" })}
-            aria-pressed={state.mode === "now"}
-          >
-            🕐 {t.now}
-          </button>
-          <button
-            className={`v1-btn ${state.mode === "custom" ? "active" : ""}`}
-            onClick={() => setState({ ...state, mode: "custom" })}
-            aria-pressed={state.mode === "custom"}
-          >
-            ⏰ {t.customTime}
-          </button>
-          {state.mode === "custom" && (
-            <>
-              <input
-                type="time"
-                value={state.customTime}
-                className="v1-time-input"
-                onChange={(e) => setState({ ...state, customTime: e.target.value })}
-              />
-              {(state.direction === "school" ? ["06:00","06:30","07:00","07:30","08:00","08:30"] : ["14:00","14:30","15:00","15:30","16:00","16:30"]).map((time) => (
-                <button key={time} className={`v1-btn${state.customTime===time?" active":""}`}
-                  onClick={() => setState({ ...state, customTime: time })}
-                  style={{padding:'4px 10px',fontSize:13}}>
-                  {time}
-                </button>
-              ))}
-            </>
-          )}
-          <button className="v1-btn warn" onClick={() => setState({ ...state, missed: (state.missed || 0) + 1 })} aria-label={t.missedButton}>
-            😬 {t.missedButton}
-          </button>
-          {state.direction === "school" && (
-            <button
-              className={`v1-btn${state.schoolFilter ? " active" : ""}`}
-              onClick={() => setState({ ...state, schoolFilter: !state.schoolFilter })}
-              aria-pressed={state.schoolFilter}
-              title={state.lang === "hu" ? "Csak 10:00 előtt érkező járatok" : "Only buses arriving before 10:00"}
-            >
-              🎒 {state.lang === "hu" ? "Reggeli szűrő" : "Morning filter"}
-            </button>
-          )}
         </div>
         {navLinks}
       </div>
@@ -108,14 +105,45 @@ function V1Variation({ state, setState, t, langSwitcher, navLinks }) {
             <div className="v1-hero-time">{U.fmtTime(hero.departLeaveHome)}</div>
             <div className="v1-hero-sub">{heroInfo.stateText}</div>
           </div>
-          <div className="v1-hero-right">
-            <div className="v1-hero-countdown">{t.countdownToLeave}</div>
-            <div className="v1-hero-count">
-              {heroInfo.minsToLeave > 0 ? `${heroInfo.minsToLeave} ${t.min}` : "— "}
+          {state.mode === "custom" && (
+            <div style={{position:"absolute",left:"50%",top:"50%",transform:"translate(-50%,-50%)",display:"flex",gap:6,flexWrap:"wrap",alignItems:"center",zIndex:2}}>
+              <input
+                type="time"
+                value={state.customTime}
+                className="v1-time-input"
+                onChange={(e) => setState({ ...state, customTime: e.target.value })}
+              />
+              {(state.direction === "school" ? ["06:00","06:30","07:00","07:30","08:00","08:30"] : ["14:00","14:30","15:00","15:30","16:00","16:30"]).map((time) => (
+                <button key={time} className={`v1-btn${state.customTime===time?" active":""}`}
+                  onClick={() => setState({ ...state, customTime: time })}
+                  data-tooltip={state.lang==="hu" ? `${time} beállítása` : `Set time to ${time}`}
+                  style={{padding:'4px 10px',fontSize:13}}>
+                  {time}
+                </button>
+              ))}
+            </div>
+          )}
+          <div className="v1-hero-right" style={{display:"flex",alignItems:"center",gap:12,position:"relative",zIndex:1,flexShrink:0}}>
+            <button
+              className="v1-btn warn"
+              onClick={() => setState({ ...state, missed: (state.missed || 0) + 1 })}
+              aria-label={t.missedButton}
+              data-tooltip={state.lang==="hu" ? "Lekéstem — következő járatra vált" : "Missed — switches to next departure"}
+              data-tooltip-color="warn" data-tooltip-dir="up"
+              style={{fontSize:12,padding:"4px 10px",whiteSpace:"nowrap"}}
+            >
+              😬 {t.missedButton}
+            </button>
+            <div style={{textAlign:"right",minWidth:"5ch"}}>
+              <div className="v1-hero-countdown">{t.countdownToLeave}</div>
+              <div className="v1-hero-count">
+                {heroInfo.minsToLeave > 0 ? `${heroInfo.minsToLeave} ${t.min}` : "— "}
+              </div>
             </div>
           </div>
         </div>
       )}
+
 
       {routes.length > 0 ? (
         <div className="v1-routes" aria-live="polite" role="region" aria-label={state.lang==="hu"?"Útvonaltervek":"Route options"}>

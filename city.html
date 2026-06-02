@@ -135,8 +135,19 @@ function StopSearch({ value, onChange, placeholder, id }) {
         placeholder={placeholder}
         autoComplete="off"
         className="v1-time-input"
-        style={{ width: "100%", fontSize: 14 }}
+        style={{ width: "100%", fontSize: 14, paddingRight: query ? 32 : undefined }}
       />
+      {query && (
+        <button
+          onMouseDown={e => e.preventDefault()}
+          onClick={() => { setQuery(""); onChange(""); setOpen(true); }}
+          style={{
+            position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)",
+            background: "none", border: "none", cursor: "pointer",
+            fontSize: 18, color: "var(--ink-soft)", padding: "2px 4px", lineHeight: 1,
+          }}
+        >×</button>
+      )}
       {open && filtered.length > 0 && (
         <div style={{
           position: "absolute", top: "calc(100% + 4px)", left: 0, right: 0,
@@ -312,6 +323,7 @@ function CityApp() {
     return `${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
   });
   const [walkMin, setWalkMin] = React.useState(5);
+  const [dayOffset, setDayOffset] = React.useState(0);
   const [results, setResults] = React.useState(null);
 
   React.useEffect(() => {
@@ -329,6 +341,7 @@ function CityApp() {
     } else {
       const [h, m] = customTime.split(":").map(Number);
       planTime = new Date();
+      planTime.setDate(planTime.getDate() + dayOffset);
       planTime.setHours(h, m, 0, 0);
     }
     const r = window.planCityRoutes({
@@ -359,10 +372,44 @@ function CityApp() {
           <div className="v1-title">VeszprémBusz 🚌</div>
           <div className="v1-subtitle">Veszprém helyi járatok — útvonaltervező</div>
         </div>
-        <div className="v1-clock">
-          <div className="v1-clock-label">Mostanra</div>
-          <div className="v1-clock-time">{nowFmt}</div>
-          <div className="v1-clock-date">{dateFmt}</div>
+        <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:8}}>
+          <div
+            className="v1-clock"
+            onClick={() => { setTimeMode(m => m === "now" ? "custom" : "now"); setResults(null); }}
+            style={{
+              cursor:"pointer",
+              background: timeMode !== "now" ? "var(--accent)" : undefined,
+              color: timeMode !== "now" ? "white" : undefined,
+              outline: timeMode === "now" ? "3px solid var(--sun)" : "3px solid var(--accent)",
+              outlineOffset: 2,
+              transition: "background 0.2s, outline 0.2s",
+            }}
+          >
+            <div className="v1-clock-label">{timeMode === "now" ? "MOSTANRA" : "SAJÁT IDŐ"}</div>
+            <div className="v1-clock-time">{timeMode === "now" ? nowFmt : customTime}</div>
+            <div className="v1-clock-date">{dateFmt}</div>
+          </div>
+          {timeMode === "custom" && (
+            <div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap",justifyContent:"flex-end"}}>
+              <input
+                type="time"
+                value={customTime}
+                className="v1-time-input"
+                onChange={e => { setCustomTime(e.target.value); localStorage.setItem("city_customTime", e.target.value); setResults(null); }}
+              />
+              <select
+                value={dayOffset}
+                onChange={e => { setDayOffset(Number(e.target.value)); setResults(null); }}
+                style={{fontFamily:"inherit",fontSize:13,fontWeight:700,padding:"8px 12px",borderRadius:10,border:"2px solid var(--line)",background:"white",color:"var(--ink)",cursor:"pointer"}}
+              >
+                {Array.from({length:7},(_,i) => {
+                  const d = new Date(); d.setDate(d.getDate()+i);
+                  const label = i===0 ? "Ma" : i===1 ? "Holnap" : d.toLocaleDateString("hu-HU",{weekday:"short"});
+                  return <option key={i} value={i}>{label} — {d.toLocaleDateString("hu-HU")}</option>;
+                })}
+              </select>
+            </div>
+          )}
         </div>
       </div>
 
@@ -394,30 +441,9 @@ function CityApp() {
           </div>
         </div>
 
-        {/* Time + walk + plan row */}
+        {/* Walk + plan row */}
         <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
-          <button
-            className={`v1-btn ${timeMode === "now" ? "active" : ""}`}
-            onClick={() => { setTimeMode("now"); localStorage.setItem("city_timeMode", "now"); }}
-          >
-            🕐 Most
-          </button>
-          <button
-            className={`v1-btn ${timeMode === "custom" ? "active" : ""}`}
-            onClick={() => { setTimeMode("custom"); localStorage.setItem("city_timeMode", "custom"); }}
-          >
-            ⏰ Egyéni idő
-          </button>
-          {timeMode === "custom" && (
-            <input
-              type="time"
-              value={customTime}
-              className="v1-time-input"
-              onChange={e => { setCustomTime(e.target.value); localStorage.setItem("city_customTime", e.target.value); }}
-            />
-          )}
-
-          <div style={{ display: "flex", alignItems: "center", gap: 6, marginLeft: 8 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
             <span style={{ fontWeight: 700, fontSize: 14 }}>🚶</span>
             <button
               className="v1-btn"

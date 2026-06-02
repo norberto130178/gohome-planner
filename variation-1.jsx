@@ -47,46 +47,47 @@ function V1Variation({ state, setState, t, langSwitcher, navLinks }) {
           </div>
         </div>
         {isMobile && langSwitcher}
-        {!isMobile && (
-          <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:8}}>
-            <div
-              className="v1-clock"
-              data-tooltip={isNowMode ? (state.lang==="hu" ? "Kattints: saját idő beállítása" : "Click: set custom time") : (state.lang==="hu" ? "Kattints: vissza a mosthoz" : "Click: back to now")}
-              data-tooltip-dir="left"
-              onClick={() => setState({ ...state, mode: isNowMode ? "custom" : "now" })}
-              onMouseEnter={() => setClockHovered(true)}
-              onMouseLeave={() => setClockHovered(false)}
-              style={{
-                cursor: "pointer",
-                transform: clockHovered ? "translateY(-3px)" : "translateY(0)",
-                transition: "transform 0.15s, box-shadow 0.15s, background 0.2s, outline 0.2s",
-                boxShadow: clockHovered
-                  ? "0 10px 0 0 rgba(43,30,63,0.12), 0 24px 40px -12px rgba(43,30,63,0.3)"
-                  : undefined,
-                background: isNowMode ? undefined : "var(--accent)",
-                color: isNowMode ? undefined : "white",
-                outline: isNowMode ? "3px solid var(--sun)" : "3px solid var(--accent)",
-                outlineOffset: 2,
-              }}
-            >
-              <div className="v1-clock-label">{isNowMode ? t.now_is : (state.lang === "hu" ? "SAJÁT IDŐ" : "CUSTOM")}</div>
-              <div className="v1-clock-time">{nowFmt}</div>
-              <div className="v1-clock-date">{dateFmt}</div>
-            </div>
-            <div
-              data-tooltip={state.lang==="hu" ? (state.compactMode ? "Teljes nézetre váltás" : "Kompakt nézetre váltás") : (state.compactMode ? "Switch to full view" : "Switch to compact view")}
-              data-tooltip-dir="left"
-              style={{display:"flex",alignItems:"center",gap:7,cursor:"pointer",userSelect:"none"}}
-              onClick={state.toggleCompact}
-            >
-              <span style={{fontSize:13,fontWeight:700,opacity:0.55}}>{state.lang==="hu"?"Kompakt":"Compact"}</span>
-              <div style={{width:36,height:20,borderRadius:10,background:state.compactMode?"var(--accent)":"var(--line)",position:"relative",transition:"background 0.2s",flexShrink:0}}>
-                <div style={{position:"absolute",top:2,left:state.compactMode?18:2,width:16,height:16,borderRadius:"50%",background:"white",transition:"left 0.2s",boxShadow:"0 1px 3px rgba(0,0,0,0.2)"}} />
-              </div>
+      </div>
+
+      {!isMobile && (
+        <div style={{position:"absolute",right:32,top:24,display:"flex",flexDirection:"column",alignItems:"flex-end",gap:8}}>
+          <div
+            className="v1-clock"
+            data-tooltip={isNowMode ? (state.lang==="hu" ? "Kattints: saját idő beállítása" : "Click: set custom time") : (state.lang==="hu" ? "Kattints: vissza a mosthoz" : "Click: back to now")}
+            data-tooltip-dir="left"
+            onClick={() => setState({ ...state, mode: isNowMode ? "custom" : "now" })}
+            onMouseEnter={() => setClockHovered(true)}
+            onMouseLeave={() => setClockHovered(false)}
+            style={{
+              cursor: "pointer",
+              transform: clockHovered ? "translateY(-3px)" : "translateY(0)",
+              transition: "transform 0.15s, box-shadow 0.15s, background 0.2s, outline 0.2s",
+              boxShadow: clockHovered
+                ? "0 10px 0 0 rgba(43,30,63,0.12), 0 24px 40px -12px rgba(43,30,63,0.3)"
+                : undefined,
+              background: isNowMode ? undefined : "var(--accent)",
+              color: isNowMode ? undefined : "white",
+              outline: isNowMode ? "3px solid var(--sun)" : "3px solid var(--accent)",
+              outlineOffset: 2,
+            }}
+          >
+            <div className="v1-clock-label">{isNowMode ? t.now_is : (state.lang === "hu" ? "SAJÁT IDŐ" : "CUSTOM")}</div>
+            <div className="v1-clock-time">{nowFmt}</div>
+            <div className="v1-clock-date">{dateFmt}</div>
+          </div>
+          <div
+            data-tooltip={state.lang==="hu" ? (state.compactMode ? "Teljes nézetre váltás" : "Kompakt nézetre váltás") : (state.compactMode ? "Switch to full view" : "Switch to compact view")}
+            data-tooltip-dir="left"
+            style={{display:"flex",alignItems:"center",gap:7,cursor:"pointer",userSelect:"none"}}
+            onClick={state.toggleCompact}
+          >
+            <span style={{fontSize:13,fontWeight:700,opacity:0.55}}>{state.lang==="hu"?"Kompakt":"Compact"}</span>
+            <div style={{width:36,height:20,borderRadius:10,background:state.compactMode?"var(--accent)":"var(--line)",position:"relative",transition:"background 0.2s",flexShrink:0}}>
+              <div style={{position:"absolute",top:2,left:state.compactMode?18:2,width:16,height:16,borderRadius:"50%",background:"white",transition:"left 0.2s",boxShadow:"0 1px 3px rgba(0,0,0,0.2)"}} />
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {isMobile && (
         <div style={{display:"flex",flexDirection:"column",gap:8,marginBottom:12,alignItems:"flex-start"}}>
@@ -150,11 +151,13 @@ function V1Variation({ state, setState, t, langSwitcher, navLinks }) {
             {state.DayPicker && <state.DayPicker />}
           </div>
           {state.TransferPicker && <state.TransferPicker />}
-          {state.StopPicker && <state.StopPicker />}
         </div>
-        <div style={{display:'flex',gap:6,flexWrap:'wrap',alignItems:'center'}}>
-        </div>
-        {navLinks}
+        {!isMobile && (
+          <div style={{display:'flex',gap:8,alignItems:'center',alignSelf:'flex-end',marginLeft:'auto'}}>
+            <a href="city.html" style={{fontSize:13,fontWeight:800,fontFamily:"Nunito,sans-serif",textDecoration:"none",background:"#00796B",color:"white",padding:"10px 14px",borderRadius:10,whiteSpace:"nowrap",boxShadow:"0 8px 24px rgba(0,0,0,0.2)"}}>🚌 VeszprémBusz →</a>
+            <a href="mission.html" style={{fontSize:13,fontWeight:800,fontFamily:"Nunito,sans-serif",textDecoration:"none",background:"#0E1524",color:"#FFC93C",padding:"10px 14px",borderRadius:10,whiteSpace:"nowrap",boxShadow:"0 8px 24px rgba(0,0,0,0.2)"}}>🎮 Mission Board →</a>
+          </div>
+        )}
       </div>
 
       {hero && heroInfo && (

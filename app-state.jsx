@@ -5,6 +5,67 @@
 
 const { useState, useEffect, useMemo } = React;
 
+// ── DestinationPickerWidget — önálló, stabil komponens ──────────────
+// Azért van a hook-on kívül definiálva, hogy ne mountolódjon újra
+// minden hook re-rendernél (ami az input fókuszt elvesztette volna).
+function DestinationPickerWidget({ stops, linesMap, value, onSelect, onClear, lang, isMobile }) {
+  const [query, setQuery] = React.useState("");
+  const [open, setOpen] = React.useState(false);
+  const wrapRef = React.useRef(null);
+  const labelColor = '#6A5F7C';
+
+  React.useEffect(() => {
+    const handler = (e) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const normalize = (s) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+  const filtered = query ? stops.filter(s => normalize(s).includes(normalize(query))) : stops;
+
+  return (
+    <div ref={wrapRef} style={{display:"flex",alignItems:"center",gap:8}}>
+      <span style={{fontSize:isMobile?10:12,fontWeight:800,color:labelColor,letterSpacing:'0.1em',textTransform:'uppercase',marginRight:4}}>
+        🏠{!isMobile && <> {lang==="hu"?"Célállomás":"Destination"}:</>}
+      </span>
+      <div className="stop-picker-input-wrap">
+        {value ? (
+          <button onClick={onClear}
+            style={{cursor:'pointer',fontSize:13,fontWeight:800,background:'#FF6E9C',color:'#fff',padding:'5px 14px',borderRadius:10,border:'none',fontFamily:'inherit',whiteSpace:'nowrap'}}>
+            📍 {value} ✕
+          </button>
+        ) : (
+          <input type="text" className="stop-picker-input"
+            placeholder={lang==="hu"?"Megálló keresése...":"Search stop..."}
+            value={query}
+            onChange={(e) => { setQuery(e.target.value); setOpen(true); }}
+            onFocus={() => setOpen(true)}
+          />
+        )}
+        {open && !value && filtered.length > 0 && (
+          <div className="stop-picker-dropdown" onMouseDown={(e) => e.preventDefault()}>
+            {filtered.map(stop => (
+              <div key={stop} className="stop-picker-option"
+                onClick={() => { onSelect(stop); setQuery(""); setOpen(false); }}
+                style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:8}}>
+                <span style={{flex:1}}>{stop}</span>
+                <span style={{display:"flex",gap:3,flexWrap:"wrap",justifyContent:"flex-end"}}>
+                  {(linesMap[stop]||[]).slice(0,5).map(b => (
+                    <span key={b.id} style={{background:b.color,color:"white",borderRadius:6,padding:"1px 6px",fontSize:11,fontWeight:800,lineHeight:"16px"}}>{b.id}</span>
+                  ))}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+window.DestinationPickerWidget = DestinationPickerWidget;
+
 function useAppState(options = {}) {
   // --- Smart defaults az aktuális idő alapján ---
   const initNow = new Date();
@@ -60,10 +121,8 @@ function useAppState(options = {}) {
   const [direction, setDirection] = useState(initDirection);
   const [allowedTransfers, setAllowedTransfers] = useState(["komakut","szinhaz","buszall"]);
   const [allowedTransfersSchool, setAllowedTransfersSchool] = useState(["komakut","buszall","szinhaz_walk"]);
-  const [schoolFilter, setSchoolFilter] = useState(true);  // true = csak 10:00 előtt érkező járatok
-  const [homeStop, setHomeStop] = useState(null);          // custom leszállási megálló (null = Csererdő)
-  const [stopPickerOpen, setStopPickerOpen] = useState(false);
-  const [stopPickerQuery, setStopPickerQuery] = useState("");
+  const [schoolFilter, setSchoolFilter] = useState(true);
+  const [homeStop, setHomeStop] = useState(null);
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 640);
 
   // --- localStorage load ---
@@ -74,7 +133,6 @@ function useAppState(options = {}) {
     if (savedT) { try { const p = JSON.parse(savedT); if (Array.isArray(p) && p.length) setAllowedTransfers(p); } catch(e){} }
     const savedTS = localStorage.getItem("hazaut.transfersSchool");
     if (savedTS) { try { const p = JSON.parse(savedTS); if (Array.isArray(p) && p.length) setAllowedTransfersSchool(p); } catch(e){} }
-    // direction nem töltődik localStorage-ból — a smart default mindig az aktuális napszak alapján áll be
   }, []);
 
   // --- localStorage save ---
@@ -112,7 +170,6 @@ function useAppState(options = {}) {
   }, [mode, customTime, missed, tick, dayOffset]);
 
   // --- Route planning ---
-  // walkMin: délután 10 perc (suliból a megállóig), reggel 0 (Csererdő megálló közel)
   const routes = useMemo(() => {
     if (direction === "school") {
       return window.planSchoolRoutes({
@@ -141,6 +198,7 @@ function useAppState(options = {}) {
   const state = { now, mode, customTime, missed, lang, routes, dayOffset, direction, schoolFilter, homeStop, compactMode, isMobile };
   const toggleCompact = () => setCompactMode(c => !c);
   state.toggleCompact = toggleCompact;
+  state.setHomeStop = setHomeStop;
 
   const setState = (s) => {
     if (s.mode !== undefined && s.mode !== mode) {
@@ -159,7 +217,6 @@ function useAppState(options = {}) {
     if (s.missed !== undefined && s.missed !== missed) { setMissed(s.missed); return; }
     if (s.direction !== undefined && s.direction !== direction) {
       setDirection(s.direction);
-      // Irányváltáskor a saját idő alapértéke is változik
       if (s.direction === "school") setCustomTime("06:30");
       else setCustomTime("13:30");
       return;
@@ -218,23 +275,45 @@ function useAppState(options = {}) {
   const transferLabels = direction === "school" ? TRANSFER_LABELS_SCHOOL : TRANSFER_LABELS_HOME;
   const activeTransfers = direction === "school" ? allowedTransfersSchool : allowedTransfers;
 
+  // --- Stop data for DestinationPickerWidget ---
+  const stopPickerAllStops = useMemo(() => {
+    const buses = window.CITY_BUSES || [];
+    const transferNames = new Set([
+      "Komakút tér / Pannon Egyetem",
+      "Petőfi Színház",
+      "Veszprém, autóbusz-állomás",
+    ]);
+    const validSet = new Set();
+    for (const bus of buses) {
+      let afterTransfer = false;
+      for (const stop of bus.stops) {
+        if (transferNames.has(stop.name)) { afterTransfer = true; continue; }
+        if (afterTransfer) validSet.add(stop.name);
+      }
+    }
+    return Array.from(validSet).sort((a, b) => a.localeCompare(b, 'hu'));
+  }, []);
+
+  const stopLinesMap = useMemo(() => {
+    const map = {};
+    for (const bus of window.CITY_BUSES || []) {
+      for (const s of bus.stops) {
+        if (!map[s.name]) map[s.name] = [];
+        if (!map[s.name].some(b => b.id === bus.id))
+          map[s.name].push({ id: bus.id, color: bus.color });
+      }
+    }
+    return map;
+  }, []);
+
+  state.stopPickerAllStops = stopPickerAllStops;
+  state.stopLinesMap = stopLinesMap;
+
   // --- Shared sub-components ---
   state.TransferPicker = (props) => {
     const labelColor = (props && props.labelColor) || '#6A5F7C';
-    const wrapRef = React.useRef(null);
-    React.useEffect(() => {
-      const handler = (e) => {
-        if (wrapRef.current && !wrapRef.current.contains(e.target)) setStopPickerOpen(false);
-      };
-      document.addEventListener("mousedown", handler);
-      return () => document.removeEventListener("mousedown", handler);
-    }, []);
-    const normalize = (s) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
-    const filtered = stopPickerQuery
-      ? stopPickerAllStops.filter(s => normalize(s).includes(normalize(stopPickerQuery)))
-      : stopPickerAllStops;
     return (
-      <div ref={wrapRef} style={{display:'flex',flexDirection:isMobile?'column':'row',gap:isMobile?8:16,alignItems:isMobile?'flex-start':'center',marginBottom:isMobile?0:12}}>
+      <div style={{display:'flex',flexDirection:isMobile?'column':'row',gap:isMobile?8:16,alignItems:isMobile?'flex-start':'center',marginBottom:isMobile?0:12}}>
         <div style={{display:'flex',gap:6,flexWrap:'wrap',alignItems:'center',flex:isMobile?undefined:1,minWidth:isMobile?undefined:0}}>
         <span style={{fontSize:isMobile?10:12,fontWeight:800,color:labelColor,letterSpacing:'0.1em',textTransform:'uppercase',marginRight:4}}>
           🔄{!isMobile && <> {lang==="hu"?"Átszállás":"Transfer"}:</>}
@@ -250,7 +329,6 @@ function useAppState(options = {}) {
             {transferLabels[id]}
           </button>
         ))}
-        </div>
         {direction === "school" && (
           <div
             style={{display:"flex",alignItems:"center",gap:8,cursor:"pointer"}}
@@ -277,39 +355,17 @@ function useAppState(options = {}) {
           </div>
         )}
         {direction === "home" && (
-          <div style={{display:"flex",alignItems:"center",gap:8,flexShrink:0}}>
-            <span style={{fontSize:isMobile?10:12,fontWeight:800,color:labelColor,letterSpacing:'0.1em',textTransform:'uppercase',marginRight:4}}>
-              🏠{!isMobile && <> {lang==="hu"?"Célallomás":"Destination"}:</>}
-            </span>
-            <div className="stop-picker-input-wrap">
-              {homeStop ? (
-                <button className="stop-picker-active-pill" onClick={() => setHomeStop(null)}
-                  style={{cursor:'pointer',fontSize:13,fontWeight:800,background:'#FF6E9C',color:'#fff',padding:'5px 14px',borderRadius:10,border:'none',fontFamily:'inherit',whiteSpace:'nowrap'}}>
-                  📍 {homeStop} ✕
-                </button>
-              ) : (
-                <>
-                  <input type="text" className="stop-picker-input"
-                    placeholder={lang==="hu"?"Megálló keresése...":"Search stop..."}
-                    value={stopPickerQuery}
-                    onChange={(e) => { setStopPickerQuery(e.target.value); setStopPickerOpen(true); }}
-                    onFocus={() => setStopPickerOpen(true)}
-                  />
-                </>
-              )}
-              {stopPickerOpen && !homeStop && filtered.length > 0 && (
-                <div className="stop-picker-dropdown" onMouseDown={(e) => e.preventDefault()}>
-                  {filtered.map(stop => (
-                    <div key={stop} className="stop-picker-option"
-                      onClick={() => { setHomeStop(stop); setStopPickerQuery(""); setStopPickerOpen(false); }}>
-                      {stop}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
+          <window.DestinationPickerWidget
+            stops={stopPickerAllStops}
+            linesMap={stopLinesMap}
+            value={homeStop}
+            onSelect={setHomeStop}
+            onClear={() => setHomeStop(null)}
+            lang={lang}
+            isMobile={isMobile}
+          />
         )}
+        </div>
       </div>
     );
   };
@@ -381,95 +437,6 @@ function useAppState(options = {}) {
             {...(props && props.pillActiveStyle && activeDayOffset===o.offset ? {style: props.pillActiveStyle} : {})}
             >{o.label}</button>
         ))}
-      </div>
-    );
-  };
-
-  // --- StopPicker (custom leszállási megálló) ---
-  // FONTOS: open/query state a hook szintjén van (stopPickerOpen, stopPickerQuery)
-  // hogy a 15s tick timer újrarenderelése ne resetje őket.
-  const stopPickerAllStops = useMemo(() => {
-    const buses = window.CITY_BUSES || [];
-    const transferNames = new Set([
-      "Komakút tér / Pannon Egyetem",
-      "Petőfi Színház",
-      "Veszprém, autóbusz-állomás",
-    ]);
-    const validSet = new Set();
-    for (const bus of buses) {
-      let afterTransfer = false;
-      for (const stop of bus.stops) {
-        if (transferNames.has(stop.name)) { afterTransfer = true; continue; }
-        if (afterTransfer) validSet.add(stop.name);
-      }
-    }
-    return Array.from(validSet).sort((a, b) => a.localeCompare(b, 'hu'));
-  }, []);
-
-  state.StopPicker = (props) => {
-    const wrapRef = React.useRef(null);
-
-    React.useEffect(() => {
-      const handler = (e) => {
-        if (wrapRef.current && !wrapRef.current.contains(e.target)) setStopPickerOpen(false);
-      };
-      document.addEventListener("mousedown", handler);
-      return () => document.removeEventListener("mousedown", handler);
-    }, []);
-
-    if (direction !== "home") return null;
-
-    const normalize = (s) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
-    const filtered = stopPickerQuery
-      ? stopPickerAllStops.filter(s => normalize(s).includes(normalize(stopPickerQuery)))
-      : stopPickerAllStops;
-
-    const labelColor = (props && props.labelColor) || '#6A5F7C';
-
-    return (
-      <div ref={wrapRef} className="stop-picker" style={{marginBottom:isMobile?0:12}}>
-        <span style={{fontSize:isMobile?10:12,fontWeight:800,color:labelColor,letterSpacing:'0.1em',textTransform:'uppercase',marginRight:4}}>
-          🏠{!isMobile && <> {lang==="hu"?"Leszállás":"Get off at"}:</>}
-        </span>
-        <div className="stop-picker-input-wrap">
-          {homeStop ? (
-            <button className="stop-picker-active-pill" onClick={() => setHomeStop(null)}
-              style={{
-                cursor:'pointer', fontSize: 13, fontWeight: 800,
-                background: '#FF6E9C', color: '#fff',
-                padding: '6px 14px', borderRadius: 10, border: 'none',
-                fontFamily: 'inherit',
-                ...(props && props.pillActiveStyle ? props.pillActiveStyle : {}),
-              }}>
-              📍 {homeStop} ✕
-            </button>
-          ) : (
-            <>
-              <input
-                type="text"
-                className="stop-picker-input"
-                placeholder={lang==="hu"?"Megálló keresése...":"Search stop..."}
-                value={stopPickerQuery}
-                onChange={(e) => { setStopPickerQuery(e.target.value); setStopPickerOpen(true); }}
-                onFocus={() => setStopPickerOpen(true)}
-              />
-              <span className="stop-picker-default">
-                {lang==="hu"?"Csererdő (alap)":"Csererdő (default)"}
-              </span>
-            </>
-          )}
-          {stopPickerOpen && !homeStop && filtered.length > 0 && (
-            <div className="stop-picker-dropdown"
-              onMouseDown={(e) => e.preventDefault()}>
-              {filtered.map(stop => (
-                <div key={stop} className="stop-picker-option"
-                  onClick={() => { setHomeStop(stop); setStopPickerQuery(""); setStopPickerOpen(false); }}>
-                  {stop}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
       </div>
     );
   };

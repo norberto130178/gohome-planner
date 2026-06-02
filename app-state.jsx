@@ -64,6 +64,7 @@ function useAppState(options = {}) {
   const [homeStop, setHomeStop] = useState(null);          // custom leszállási megálló (null = Csererdő)
   const [stopPickerOpen, setStopPickerOpen] = useState(false);
   const [stopPickerQuery, setStopPickerQuery] = useState("");
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 640);
 
   // --- localStorage load ---
   useEffect(() => {
@@ -82,6 +83,12 @@ function useAppState(options = {}) {
   useEffect(() => { localStorage.setItem("hazaut.transfers", JSON.stringify(allowedTransfers)); }, [allowedTransfers]);
   useEffect(() => { localStorage.setItem("hazaut.transfersSchool", JSON.stringify(allowedTransfersSchool)); }, [allowedTransfersSchool]);
   useEffect(() => { localStorage.setItem("hazaut.direction", direction); }, [direction]);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 640px)");
+    const handler = (e) => setIsMobile(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
 
   // --- Dynamic <html lang> ---
   useEffect(() => { document.documentElement.lang = lang; }, [lang]);
@@ -131,7 +138,7 @@ function useAppState(options = {}) {
   };
 
   // --- State object & dispatcher ---
-  const state = { now, mode, customTime, missed, lang, routes, dayOffset, direction, schoolFilter, homeStop, compactMode };
+  const state = { now, mode, customTime, missed, lang, routes, dayOffset, direction, schoolFilter, homeStop, compactMode, isMobile };
   const toggleCompact = () => setCompactMode(c => !c);
   state.toggleCompact = toggleCompact;
 
@@ -196,13 +203,13 @@ function useAppState(options = {}) {
 
   // --- Transfer labels ---
   const TRANSFER_LABELS_HOME = {
-    komakut: lang==="hu"?"Komak\u00fat t\u00e9r":"Komak\u00fat sq.",
-    szinhaz: lang==="hu"?"Sz\u00ednh\u00e1z":"Theatre",
-    buszall: lang==="hu"?"Aut\u00f3busz-\u00e1ll.":"Bus stn.",
+    komakut: lang==="hu"?"Komakút tér":"Komakút sq.",
+    szinhaz: lang==="hu"?"Színház":"Theatre",
+    buszall: lang==="hu"?"Autóbusz-áll.":"Bus stn.",
   };
   const TRANSFER_LABELS_SCHOOL = {
-    komakut: lang==="hu"?"Komak\u00fat t\u00e9r":"Komak\u00fat sq.",
-    buszall: lang==="hu"?"Aut\u00f3busz-\u00e1ll.":"Bus stn.",
+    komakut: lang==="hu"?"Komakút tér":"Komakút sq.",
+    buszall: lang==="hu"?"Autóbusz-áll.":"Bus stn.",
     szinhaz_walk: t.transferShinhaz,
   };
   const transferIds = direction === "school"
@@ -227,10 +234,10 @@ function useAppState(options = {}) {
       ? stopPickerAllStops.filter(s => normalize(s).includes(normalize(stopPickerQuery)))
       : stopPickerAllStops;
     return (
-      <div ref={wrapRef} style={{display:'flex',gap:16,alignItems:'center',marginBottom:12}}>
-        <div style={{display:'flex',gap:6,flexWrap:'wrap',alignItems:'center',flex:1,minWidth:0}}>
-        <span style={{fontSize:12,fontWeight:800,color:labelColor,letterSpacing:'0.1em',textTransform:'uppercase',marginRight:4}}>
-          🔄 {lang==="hu"?"\u00c1tsz\u00e1ll\u00e1s":"Transfer"}:
+      <div ref={wrapRef} style={{display:'flex',flexDirection:isMobile?'column':'row',gap:isMobile?8:16,alignItems:isMobile?'flex-start':'center',marginBottom:isMobile?0:12}}>
+        <div style={{display:'flex',gap:6,flexWrap:'wrap',alignItems:'center',flex:isMobile?undefined:1,minWidth:isMobile?undefined:0}}>
+        <span style={{fontSize:isMobile?10:12,fontWeight:800,color:labelColor,letterSpacing:'0.1em',textTransform:'uppercase',marginRight:4}}>
+          🔄{!isMobile && <> {lang==="hu"?"Átszállás":"Transfer"}:</>}
         </span>
         {transferIds.map((id) => (
           <button key={id} onClick={() => toggleTransfer(id)}
@@ -243,9 +250,10 @@ function useAppState(options = {}) {
             {transferLabels[id]}
           </button>
         ))}
+        </div>
         {direction === "school" && (
           <div
-            style={{display:"flex",alignItems:"center",gap:8,cursor:"pointer",marginLeft:4}}
+            style={{display:"flex",alignItems:"center",gap:8,cursor:"pointer"}}
             onClick={() => setSchoolFilter(f => !f)}
             data-tooltip={lang==="hu" ? "Csak 10:00 előtt érkező járatok" : "Only buses arriving before 10:00"}
           >
@@ -268,11 +276,10 @@ function useAppState(options = {}) {
             </div>
           </div>
         )}
-        </div>
         {direction === "home" && (
           <div style={{display:"flex",alignItems:"center",gap:8,flexShrink:0}}>
-            <span style={{fontSize:12,fontWeight:800,color:labelColor,letterSpacing:'0.1em',textTransform:'uppercase',marginRight:4}}>
-              🏠 {lang==="hu"?"Célállomás":"Destination"}:
+            <span style={{fontSize:isMobile?10:12,fontWeight:800,color:labelColor,letterSpacing:'0.1em',textTransform:'uppercase',marginRight:4}}>
+              🏠{!isMobile && <> {lang==="hu"?"Célallomás":"Destination"}:</>}
             </span>
             <div className="stop-picker-input-wrap">
               {homeStop ? (
@@ -310,9 +317,9 @@ function useAppState(options = {}) {
   state.DirectionPicker = (props) => {
     const labelColor = (props && props.labelColor) || '#6A5F7C';
     return (
-      <div style={{display:'flex',gap:6,flexWrap:'wrap',marginBottom:12,alignItems:'center'}}>
-        <span style={{fontSize:12,fontWeight:800,color:labelColor,letterSpacing:'0.1em',textTransform:'uppercase',marginRight:4}}>
-          🧭 {lang==="hu"?"Ir\u00e1ny":"Direction"}:
+      <div style={{display:'flex',gap:6,flexWrap:'wrap',marginBottom:isMobile?0:12,alignItems:'center'}}>
+        <span style={{fontSize:isMobile?10:12,fontWeight:800,color:labelColor,letterSpacing:'0.1em',textTransform:'uppercase',marginRight:4}}>
+          🧭{!isMobile && <> {lang==="hu"?"Irány":"Direction"}:</>}
         </span>
         <button onClick={() => setState({ ...state, direction: "school" })}
           className={`tweaks-pill ${direction==="school"?'active':''}`}
@@ -338,11 +345,11 @@ function useAppState(options = {}) {
 
   state.DayPicker = (props) => {
     const labelColor = (props && props.labelColor) || '#6A5F7C';
-    if (compactMode) {
+    if (compactMode || isMobile) {
       return (
-        <div style={{display:'flex',gap:6,alignItems:'center',marginBottom:12}}>
-          <span style={{fontSize:12,fontWeight:800,color:labelColor,letterSpacing:'0.1em',textTransform:'uppercase',marginRight:4}}>
-            📅 {lang==="hu"?"Nap":"Day"}:
+        <div style={{display:'flex',gap:6,alignItems:'center',marginBottom:isMobile?0:12}}>
+          <span style={{fontSize:10,fontWeight:800,color:labelColor,letterSpacing:'0.1em',textTransform:'uppercase',marginRight:4}}>
+            📅{!isMobile && <> {lang==="hu"?"Nap":"Day"}:</>}
           </span>
           <select
             value={activeDayOffset}
@@ -360,9 +367,9 @@ function useAppState(options = {}) {
       );
     }
     return (
-      <div style={{display:'flex',gap:6,flexWrap:'wrap',marginBottom:12,alignItems:'center'}}>
-        <span style={{fontSize:12,fontWeight:800,color:labelColor,letterSpacing:'0.1em',textTransform:'uppercase',marginRight:4}}>
-          📅 {lang==="hu"?"Nap":"Day"}:
+      <div style={{display:'flex',gap:6,flexWrap:'wrap',marginBottom:isMobile?0:12,alignItems:'center'}}>
+        <span style={{fontSize:isMobile?10:12,fontWeight:800,color:labelColor,letterSpacing:'0.1em',textTransform:'uppercase',marginRight:4}}>
+          📅{!isMobile && <> {lang==="hu"?"Nap":"Day"}:</>}
         </span>
         {dayPickerOptions.map((o) => (
           <button key={o.offset} onClick={() => setState({ ...state, dayOffset: o.offset })}
@@ -412,7 +419,7 @@ function useAppState(options = {}) {
 
     if (direction !== "home") return null;
 
-    const normalize = (s) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    const normalize = (s) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
     const filtered = stopPickerQuery
       ? stopPickerAllStops.filter(s => normalize(s).includes(normalize(stopPickerQuery)))
       : stopPickerAllStops;
@@ -420,9 +427,9 @@ function useAppState(options = {}) {
     const labelColor = (props && props.labelColor) || '#6A5F7C';
 
     return (
-      <div ref={wrapRef} className="stop-picker" style={{marginBottom:12}}>
-        <span style={{fontSize:12,fontWeight:800,color:labelColor,letterSpacing:'0.1em',textTransform:'uppercase',marginRight:4}}>
-          🏠 {lang==="hu"?"Leszállás":"Get off at"}:
+      <div ref={wrapRef} className="stop-picker" style={{marginBottom:isMobile?0:12}}>
+        <span style={{fontSize:isMobile?10:12,fontWeight:800,color:labelColor,letterSpacing:'0.1em',textTransform:'uppercase',marginRight:4}}>
+          🏠{!isMobile && <> {lang==="hu"?"Leszállás":"Get off at"}:</>}
         </span>
         <div className="stop-picker-input-wrap">
           {homeStop ? (

@@ -6,6 +6,7 @@
 function V1Variation({ state, setState, t, langSwitcher, navLinks }) {
   const routes = state.routes;
   const now = state.now;
+  const isMobile = state.isMobile;
   const U = window.BUS_UTILS;
 
   const nowFmt = U.fmtTime(now.getHours() * 60 + now.getMinutes());
@@ -34,27 +35,72 @@ function V1Variation({ state, setState, t, langSwitcher, navLinks }) {
 
   return (
     <div className="v1">
-      <div className="v1-header">
+      <div className="v1-header" style={isMobile ? {flexDirection:"row",alignItems:"flex-start",justifyContent:"space-between",gap:8} : {}}>
         <div>
-          <div style={{display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
+          <div style={{display:"flex",alignItems:"center",gap:10,flexWrap:isMobile?undefined:"wrap"}}>
             <div className="v1-title">{t.appTitle} ✨</div>
             <div style={{fontSize:11,fontWeight:700,background:"linear-gradient(135deg,#7C3AED,#C026D3)",color:"white",padding:"2px 8px",borderRadius:6}}>v{window.APP_VERSION}</div>
-            {langSwitcher}
+            {!isMobile && langSwitcher}
           </div>
           <div style={{display:"flex",alignItems:"center",gap:10,marginTop:6}}>
             <div className="v1-subtitle">{subtitle}</div>
           </div>
         </div>
-        <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:8}}>
+        {isMobile && langSwitcher}
+        {!isMobile && (
+          <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:8}}>
+            <div
+              className="v1-clock"
+              data-tooltip={isNowMode ? (state.lang==="hu" ? "Kattints: saját idő beállítása" : "Click: set custom time") : (state.lang==="hu" ? "Kattints: vissza a mosthoz" : "Click: back to now")}
+              data-tooltip-dir="left"
+              onClick={() => setState({ ...state, mode: isNowMode ? "custom" : "now" })}
+              onMouseEnter={() => setClockHovered(true)}
+              onMouseLeave={() => setClockHovered(false)}
+              style={{
+                cursor: "pointer",
+                transform: clockHovered ? "translateY(-3px)" : "translateY(0)",
+                transition: "transform 0.15s, box-shadow 0.15s, background 0.2s, outline 0.2s",
+                boxShadow: clockHovered
+                  ? "0 10px 0 0 rgba(43,30,63,0.12), 0 24px 40px -12px rgba(43,30,63,0.3)"
+                  : undefined,
+                background: isNowMode ? undefined : "var(--accent)",
+                color: isNowMode ? undefined : "white",
+                outline: isNowMode ? "3px solid var(--sun)" : "3px solid var(--accent)",
+                outlineOffset: 2,
+              }}
+            >
+              <div className="v1-clock-label">{isNowMode ? t.now_is : (state.lang === "hu" ? "SAJÁT IDŐ" : "CUSTOM")}</div>
+              <div className="v1-clock-time">{nowFmt}</div>
+              <div className="v1-clock-date">{dateFmt}</div>
+            </div>
+            <div
+              data-tooltip={state.lang==="hu" ? (state.compactMode ? "Teljes nézetre váltás" : "Kompakt nézetre váltás") : (state.compactMode ? "Switch to full view" : "Switch to compact view")}
+              data-tooltip-dir="left"
+              style={{display:"flex",alignItems:"center",gap:7,cursor:"pointer",userSelect:"none"}}
+              onClick={state.toggleCompact}
+            >
+              <span style={{fontSize:13,fontWeight:700,opacity:0.55}}>{state.lang==="hu"?"Kompakt":"Compact"}</span>
+              <div style={{width:36,height:20,borderRadius:10,background:state.compactMode?"var(--accent)":"var(--line)",position:"relative",transition:"background 0.2s",flexShrink:0}}>
+                <div style={{position:"absolute",top:2,left:state.compactMode?18:2,width:16,height:16,borderRadius:"50%",background:"white",transition:"left 0.2s",boxShadow:"0 1px 3px rgba(0,0,0,0.2)"}} />
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {isMobile && (
+        <div style={{display:"flex",flexDirection:"column",gap:8,marginBottom:12,alignItems:"flex-start"}}>
+          <div style={{display:"flex",gap:10,alignItems:"stretch",width:"100%"}}>
           <div
             className="v1-clock"
             data-tooltip={isNowMode ? (state.lang==="hu" ? "Kattints: saját idő beállítása" : "Click: set custom time") : (state.lang==="hu" ? "Kattints: vissza a mosthoz" : "Click: back to now")}
-            data-tooltip-dir="left"
+            data-tooltip-dir="down"
             onClick={() => setState({ ...state, mode: isNowMode ? "custom" : "now" })}
             onMouseEnter={() => setClockHovered(true)}
             onMouseLeave={() => setClockHovered(false)}
             style={{
               cursor: "pointer",
+              flex: 1,
               transform: clockHovered ? "translateY(-3px)" : "translateY(0)",
               transition: "transform 0.15s, box-shadow 0.15s, background 0.2s, outline 0.2s",
               boxShadow: clockHovered
@@ -70,23 +116,36 @@ function V1Variation({ state, setState, t, langSwitcher, navLinks }) {
             <div className="v1-clock-time">{nowFmt}</div>
             <div className="v1-clock-date">{dateFmt}</div>
           </div>
-          <div
-            data-tooltip={state.lang==="hu" ? (state.compactMode ? "Teljes nézetre váltás" : "Kompakt nézetre váltás") : (state.compactMode ? "Switch to full view" : "Switch to compact view")}
-            data-tooltip-dir="left"
-            style={{display:"flex",alignItems:"center",gap:7,cursor:"pointer",userSelect:"none"}}
-            onClick={state.toggleCompact}
-          >
-            <span style={{fontSize:13,fontWeight:700,opacity:0.55}}>{state.lang==="hu"?"Kompakt":"Compact"}</span>
-            <div style={{width:36,height:20,borderRadius:10,background:state.compactMode?"var(--accent)":"var(--line)",position:"relative",transition:"background 0.2s",flexShrink:0}}>
-              <div style={{position:"absolute",top:2,left:state.compactMode?18:2,width:16,height:16,borderRadius:"50%",background:"white",transition:"left 0.2s",boxShadow:"0 1px 3px rgba(0,0,0,0.2)"}} />
+          {!isNowMode && (
+            <div style={{display:'flex',flexDirection:'column',gap:6,background:'var(--accent)',borderRadius:12,padding:'8px 10px',flex:1}}>
+              <input
+                type="time"
+                value={state.customTime}
+                className="v1-time-input"
+                style={{fontSize:13,padding:'6px 10px'}}
+                onChange={(e) => setState({ ...state, customTime: e.target.value })}
+              />
+              <div style={{position:'relative',display:'inline-flex',alignItems:'center'}}>
+                <select
+                  value={state.customTime}
+                  onChange={(e) => setState({ ...state, customTime: e.target.value })}
+                  style={{fontFamily:'inherit',fontSize:12,fontWeight:700,padding:'6px 24px 6px 8px',borderRadius:10,border:'none',background:'rgba(255,255,255,0.2)',color:'white',cursor:'pointer',appearance:'none',WebkitAppearance:'none',width:'100%'}}
+                >
+                  {(state.direction === "school" ? ["06:00","06:30","07:00","07:30","08:00","08:30"] : ["14:00","14:30","15:00","15:30","16:00","16:30"]).map(time => (
+                    <option key={time} value={time} style={{background:'#5B2D8E',color:'white'}}>{time}</option>
+                  ))}
+                </select>
+                <span style={{position:'absolute',right:6,pointerEvents:'none',color:'white',fontSize:11}}>▾</span>
+              </div>
             </div>
+          )}
           </div>
         </div>
-      </div>
+      )}
 
       <div className="v1-toolbar" style={{alignItems:"flex-start"}}>
-        <div style={{display:"flex",flexDirection:"column"}}>
-          <div style={{display:"flex",alignItems:"flex-start",gap:12,flexWrap:"wrap"}}>
+        <div style={{display:"flex",flexDirection:"column",gap:isMobile?8:0,width:isMobile?"100%":undefined}}>
+          <div style={{display:"flex",flexDirection:isMobile?"column":"row",alignItems:"flex-start",gap:isMobile?8:12,flexWrap:isMobile?undefined:"wrap"}}>
             {state.DirectionPicker && <state.DirectionPicker />}
             {state.DayPicker && <state.DayPicker />}
           </div>
@@ -105,7 +164,7 @@ function V1Variation({ state, setState, t, langSwitcher, navLinks }) {
             <div className="v1-hero-time">{U.fmtTime(hero.departLeaveHome)}</div>
             <div className="v1-hero-sub">{heroInfo.stateText}</div>
           </div>
-          {state.mode === "custom" && (
+          {state.mode === "custom" && !isMobile && (
             <div style={{position:"absolute",left:"50%",top:"50%",transform:"translate(-50%,-50%)",display:"flex",gap:6,flexWrap:"wrap",alignItems:"center",zIndex:2}}>
               <input
                 type="time"

@@ -38,12 +38,12 @@ function App() {
   return (
     <>
       <window.V1Variation state={state} setState={setState} t={t} langSwitcher={
-        <div style={{display:"flex",gap:4}}>
+        <div style={{display:"flex",gap:4,alignItems:"center"}}>
           <button className="tweaks-pill" data-tooltip="Magyar" style={lang==="hu"?{background:"var(--accent)",color:"white"}:{}} onClick={() => setLang("hu")}>HU</button>
           <button className="tweaks-pill" data-tooltip="English" style={lang==="en"?{background:"var(--accent)",color:"white"}:{}} onClick={() => setLang("en")}>EN</button>
         </div>
       } />
-      <div style={{position:"fixed",bottom:14,left:14,zIndex:9998,display:"flex",flexDirection:"column",gap:8}}>
+      <div className="nav-bottom">
         <a href="city.html" data-tooltip="Veszprém városi buszok menetrendje" data-tooltip-dir="up" style={{background:"#00796B",color:"white",textDecoration:"none",padding:"10px 14px",borderRadius:10,fontWeight:800,fontSize:13,fontFamily:"Nunito,sans-serif",boxShadow:"0 8px 24px rgba(0,0,0,0.2)"}}>🚌 VeszprémBusz →</a>
         <a href="mission.html" data-tooltip="Napi célok és küldetések" data-tooltip-dir="up" style={{background:"#0E1524",color:"#FFC93C",textDecoration:"none",padding:"10px 14px",borderRadius:10,fontWeight:800,fontSize:13,fontFamily:"Nunito,sans-serif",boxShadow:"0 8px 24px rgba(0,0,0,0.2)"}}>🎮 Mission Board →</a>
       </div>

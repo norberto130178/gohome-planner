@@ -667,6 +667,89 @@ button { font-family: inherit; cursor: pointer; border: none; }
   color: #0E1524;
 }
 
+.nav-bottom {
+  position: fixed;
+  bottom: 14px;
+  left: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 9998;
+}
+
+/* ============================================================
+   Mobile — max-width: 640px
+   ============================================================ */
+@media (max-width: 640px) {
+  .v1 {
+    padding: 12px 10px;
+    padding-bottom: 80px;
+  }
+  .v1-header {
+    gap: 10px;
+    align-items: flex-start;
+    margin-bottom: 12px;
+  }
+  .v1-title {
+    font-size: 26px;
+  }
+  .v1-subtitle {
+    font-size: 12px;
+  }
+  .v1-clock {
+    padding: 10px 16px;
+    min-width: auto;
+  }
+  .v1-clock-label {
+    font-size: 10px;
+  }
+  .v1-clock-time {
+    font-size: 28px;
+  }
+  .v1-clock-date {
+    font-size: 11px;
+  }
+  .v1-toolbar {
+    gap: 4px;
+    margin-bottom: 10px;
+  }
+  .tweaks-pill {
+    font-size: 11px;
+    padding: 5px 8px;
+  }
+  .v1-hero-banner {
+    padding: 8px 12px;
+    gap: 6px;
+  }
+  .v1-hero-label,
+  .v1-hero-countdown {
+    font-size: 10px;
+  }
+  .v1-hero-time {
+    font-size: 26px;
+    margin: 1px 0;
+  }
+  .v1-hero-sub {
+    font-size: 11px;
+  }
+  .v1-hero-count {
+    font-size: 24px;
+  }
+  [data-tooltip]::after { display: none; }
+  .nav-bottom {
+    bottom: 0;
+    left: 0;
+    right: 0;
+    flex-direction: row;
+    justify-content: center;
+    gap: 12px;
+    background: var(--ink);
+    padding: 10px 16px;
+    border-radius: 0;
+    border-top: 2px solid rgba(255,255,255,0.1);
+  }
+}
+
 /* ============================================================
    Accessibility — focus-visible
    ============================================================ */

@@ -20,6 +20,7 @@
 <script src="data.js"></script>
 <script src="city-data.js"></script>
 <script src="city-planner.js"></script>
+<script type="text/babel" src="timetable-modal.jsx"></script>
 
 <style>
 .stop-option:hover { background: var(--bg); }
@@ -77,6 +78,59 @@ const STOP_LINES = (() => {
 })();
 
 const ALL_STOPS = window.getCityStops();
+
+// ── TimetableDropdown ────────────────────────────────────────────────
+function TimetableDropdown({ onSelect }) {
+  const [open, setOpen] = React.useState(false);
+  const ref = React.useRef(null);
+  const buses = [...new Map((window.CITY_BUSES_FULL||[]).map(b=>[b.id,b])).values()];
+
+  React.useEffect(() => {
+    if (!open) return;
+    function outside(e) { if (ref.current && !ref.current.contains(e.target)) setOpen(false); }
+    document.addEventListener("mousedown", outside);
+    return () => document.removeEventListener("mousedown", outside);
+  }, [open]);
+
+  return (
+    <div ref={ref} style={{ position:"relative", display:"inline-block", marginTop:10 }}>
+      <button
+        onClick={() => setOpen(o => !o)}
+        style={{
+          display:"inline-flex", alignItems:"center", gap:6,
+          background:"var(--line)", color:"var(--ink)", border:"none",
+          borderRadius:10, padding:"7px 14px", cursor:"pointer",
+          fontFamily:"Nunito,sans-serif", fontSize:13, fontWeight:800,
+        }}
+      >
+        🗓 Menetrendek {open ? "▲" : "▼"}
+      </button>
+      {open && (
+        <div style={{
+          position:"absolute", top:"calc(100% + 6px)", left:0,
+          background:"white", borderRadius:14, padding:"12px 14px",
+          boxShadow:"0 8px 28px rgba(0,0,0,0.15)", border:"2px solid var(--line)",
+          display:"flex", gap:8, flexWrap:"wrap", zIndex:500, minWidth:220,
+        }}>
+          {buses.map(b => (
+            <button key={b.id}
+              title={b.label}
+              onClick={() => { onSelect(b.id); setOpen(false); }}
+              style={{
+                width:40, height:40, borderRadius:"50%",
+                background:b.color, color:"white", border:"none",
+                cursor:"pointer", fontFamily:"Nunito,sans-serif",
+                fontSize:14, fontWeight:900,
+                display:"flex", alignItems:"center", justifyContent:"center",
+                boxShadow:"0 2px 6px rgba(0,0,0,0.15)",
+              }}
+            >{b.id}</button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 // ── StopSearch ───────────────────────────────────────────────────────
 function StopSearch({ value, onChange, placeholder, id }) {
@@ -187,22 +241,31 @@ function StopSearch({ value, onChange, placeholder, id }) {
 }
 
 // ── CityRouteCard ────────────────────────────────────────────────────
-function CityRouteCard({ route, index, isPrimary, fromStop, toStop, walkMin }) {
+function CityRouteCard({ route, index, isPrimary, fromStop, toStop, walkMin, isWeekend, nowMins }) {
   const U = window.BUS_UTILS;
   const fmt = m => U.fmtTime(m);
+  const [timetableBusId, setTimetableBusId] = React.useState(null);
   const totalMin = route.totalDuration;
   const totalStr = totalMin >= 60
     ? `${Math.floor(totalMin / 60)}ó ${totalMin % 60}p`
     : `${totalMin} perc`;
 
   const BusIcon = ({ bus }) => (
-    <div className="city-bus-badge" style={{ background: bus.color }}>
+    <div
+      className="city-bus-badge"
+      style={{ background: bus.color, cursor: 'pointer' }}
+      title="Menetrend megtekintése"
+      onClick={() => setTimetableBusId(bus.id)}
+    >
       {bus.id}
     </div>
   );
 
   return (
     <div className={`route-card ${isPrimary ? "primary" : ""}`}>
+      {timetableBusId && (
+        <window.BusTimetableModal busId={timetableBusId} onClose={() => setTimetableBusId(null)} isWeekend={isWeekend} nowMins={nowMins} />
+      )}
       <div className="route-card-header">
         <span className="route-card-badge">
           {isPrimary ? "⭐ Legjobb" : `${index}. alternatíva`}
@@ -322,9 +385,12 @@ function CityApp() {
     const d = new Date();
     return `${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
   });
-  const [walkMin, setWalkMin] = React.useState(5);
+  const walkMin = 0;
   const [dayOffset, setDayOffset] = React.useState(0);
   const [results, setResults] = React.useState(null);
+  const [timetableBusId, setTimetableBusId] = React.useState(null);
+  const [planIsWeekend, setPlanIsWeekend] = React.useState(() => { const d = new Date(); return d.getDay() === 0 || d.getDay() === 6; });
+  const [planNowMins, setPlanNowMins] = React.useState(() => { const d = new Date(); return d.getHours() * 60 + d.getMinutes(); });
 
   React.useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 15000);
@@ -334,14 +400,17 @@ function CityApp() {
   const nowFmt = U.fmtTime(now.getHours() * 60 + now.getMinutes());
   const dateFmt = now.toLocaleDateString("hu-HU", { weekday: "long", month: "short", day: "numeric" });
 
-  function plan() {
+  function plan(overrides = {}) {
+    const effectiveMode = overrides.timeMode ?? timeMode;
+    const effectiveTime = overrides.customTime ?? customTime;
+    const effectiveOffset = overrides.dayOffset ?? dayOffset;
     let planTime;
-    if (timeMode === "now") {
+    if (effectiveMode === "now") {
       planTime = new Date();
     } else {
-      const [h, m] = customTime.split(":").map(Number);
+      const [h, m] = effectiveTime.split(":").map(Number);
       planTime = new Date();
-      planTime.setDate(planTime.getDate() + dayOffset);
+      planTime.setDate(planTime.getDate() + effectiveOffset);
       planTime.setHours(h, m, 0, 0);
     }
     const r = window.planCityRoutes({
@@ -353,6 +422,8 @@ function CityApp() {
       maxResults: 6,
     });
     setResults(r);
+    setPlanIsWeekend(planTime.getDay() === 0 || planTime.getDay() === 6);
+    setPlanNowMins(planTime.getHours() * 60 + planTime.getMinutes());
   }
 
   function swap() {
@@ -366,52 +437,85 @@ function CityApp() {
 
   return (
     <div className="v1">
+      {timetableBusId && (
+        <window.BusTimetableModal busId={timetableBusId} onClose={() => setTimetableBusId(null)} isWeekend={planIsWeekend} nowMins={planNowMins} />
+      )}
+
       {/* Header */}
       <div className="v1-header">
         <div>
           <div className="v1-title">VeszprémBusz 🚌</div>
           <div className="v1-subtitle">Veszprém helyi járatok — útvonaltervező</div>
+          <TimetableDropdown onSelect={id => setTimetableBusId(id)} />
         </div>
-        <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:8}}>
-          <div
-            className="v1-clock"
-            onClick={() => { setTimeMode(m => m === "now" ? "custom" : "now"); setResults(null); }}
-            style={{
-              cursor:"pointer",
-              background: timeMode !== "now" ? "var(--accent)" : undefined,
-              color: timeMode !== "now" ? "white" : undefined,
-              outline: timeMode === "now" ? "3px solid var(--sun)" : "3px solid var(--accent)",
-              outlineOffset: 2,
-              transition: "background 0.2s, outline 0.2s",
-            }}
-          >
-            <div className="v1-clock-label">{timeMode === "now" ? "MOSTANRA" : "SAJÁT IDŐ"}</div>
-            <div className="v1-clock-time">{timeMode === "now" ? nowFmt : customTime}</div>
-            <div className="v1-clock-date">{dateFmt}</div>
-          </div>
-          {timeMode === "custom" && (
-            <div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap",justifyContent:"flex-end"}}>
-              <input
-                type="time"
-                value={customTime}
-                className="v1-time-input"
-                onChange={e => { setCustomTime(e.target.value); localStorage.setItem("city_customTime", e.target.value); setResults(null); }}
-              />
-              <select
-                value={dayOffset}
-                onChange={e => { setDayOffset(Number(e.target.value)); setResults(null); }}
-                style={{fontFamily:"inherit",fontSize:13,fontWeight:700,padding:"8px 12px",borderRadius:10,border:"2px solid var(--line)",background:"white",color:"var(--ink)",cursor:"pointer"}}
-              >
-                {Array.from({length:7},(_,i) => {
-                  const d = new Date(); d.setDate(d.getDate()+i);
-                  const label = i===0 ? "Ma" : i===1 ? "Holnap" : d.toLocaleDateString("hu-HU",{weekday:"short"});
-                  return <option key={i} value={i}>{label} — {d.toLocaleDateString("hu-HU")}</option>;
-                })}
-              </select>
-            </div>
-          )}
+        <div
+          className="v1-clock"
+          onClick={() => { setTimeMode(m => m === "now" ? "custom" : "now"); setResults(null); }}
+          style={{
+            cursor:"pointer",
+            background: timeMode !== "now" ? "var(--accent)" : undefined,
+            color: timeMode !== "now" ? "white" : undefined,
+            outline: timeMode === "now" ? "3px solid var(--sun)" : "3px solid var(--accent)",
+            outlineOffset: 2,
+            transition: "background 0.2s, outline 0.2s",
+          }}
+        >
+          <div className="v1-clock-label">{timeMode === "now" ? "MOSTANRA" : "SAJÁT IDŐ"}</div>
+          <div className="v1-clock-time">{timeMode === "now" ? nowFmt : customTime}</div>
+          <div className="v1-clock-date">{dateFmt}</div>
         </div>
       </div>
+
+      {/* Custom time strip */}
+      {timeMode === "custom" && (
+        <div style={{
+          background:"var(--accent)", borderRadius:"var(--radius)",
+          padding:"14px 20px", marginBottom:16,
+          display:"flex", gap:8, alignItems:"center", flexWrap:"wrap",
+        }}>
+          <input
+            type="time"
+            value={customTime}
+            className="v1-time-input"
+            onChange={e => { const t = e.target.value; setCustomTime(t); localStorage.setItem("city_customTime", t); if (canPlan) plan({ customTime: t }); }}
+            style={{fontSize:15,fontWeight:800,minWidth:100}}
+          />
+          <div style={{width:1,height:28,background:"rgba(255,255,255,0.25)",flexShrink:0}} />
+          {Array.from({length:5},(_,i) => {
+            const d = new Date(); d.setDate(d.getDate()+i);
+            const label = i===0?"Ma":i===1?"Holnap":d.toLocaleDateString("hu-HU",{weekday:"short"});
+            const isSelected = dayOffset === i;
+            return (
+              <button key={i}
+                onClick={() => { setDayOffset(i); if (canPlan) plan({ dayOffset: i }); }}
+                style={{
+                  padding:"6px 12px", borderRadius:10, border:"none",
+                  fontFamily:"inherit", fontSize:13, fontWeight:800, cursor:"pointer",
+                  background: isSelected ? "white" : "rgba(255,255,255,0.18)",
+                  color: isSelected ? "var(--accent)" : "white",
+                  transition:"background 0.15s",
+                }}
+              >{label}</button>
+            );
+          })}
+          <div style={{width:1,height:28,background:"rgba(255,255,255,0.25)",flexShrink:0}} />
+          {["06:00","08:00","10:00","12:00","14:00","16:00","18:00","20:00"].map(t => {
+            const isSelected = customTime === t;
+            return (
+              <button key={t}
+                onClick={() => { setCustomTime(t); localStorage.setItem("city_customTime", t); if (canPlan) plan({ customTime: t }); }}
+                style={{
+                  padding:"6px 10px", borderRadius:10, border:"none",
+                  fontFamily:"inherit", fontSize:13, fontWeight:800, cursor:"pointer",
+                  background: isSelected ? "white" : "rgba(255,255,255,0.18)",
+                  color: isSelected ? "var(--accent)" : "white",
+                  transition:"background 0.15s",
+                }}
+              >{t}</button>
+            );
+          })}
+        </div>
+      )}
 
       {/* Planner form */}
       <div style={{
@@ -441,25 +545,8 @@ function CityApp() {
           </div>
         </div>
 
-        {/* Walk + plan row */}
+        {/* Plan row */}
         <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <span style={{ fontWeight: 700, fontSize: 14 }}>🚶</span>
-            <button
-              className="v1-btn"
-              style={{ padding: "8px 12px", fontWeight: 900 }}
-              onClick={() => setWalkMin(m => Math.max(0, m - 1))}
-            >−</button>
-            <span style={{ fontWeight: 800, minWidth: 36, textAlign: "center", fontSize: 15 }}>
-              {walkMin} p
-            </span>
-            <button
-              className="v1-btn"
-              style={{ padding: "8px 12px", fontWeight: 900 }}
-              onClick={() => setWalkMin(m => Math.min(30, m + 1))}
-            >+</button>
-          </div>
-
           <button
             className="v1-btn primary"
             style={{ marginLeft: "auto", opacity: canPlan ? 1 : 0.4, cursor: canPlan ? "pointer" : "not-allowed" }}
@@ -524,6 +611,8 @@ function CityApp() {
                 fromStop={fromStop}
                 toStop={toStop}
                 walkMin={walkMin}
+                isWeekend={planIsWeekend}
+                nowMins={planNowMins}
               />
             ))}
           </div>

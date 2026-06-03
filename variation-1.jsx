@@ -217,6 +217,8 @@ function V1Variation({ state, setState, t, langSwitcher, navLinks }) {
                 index={i}
                 isPrimary={i === 0}
                 t={t}
+                isWeekend={now.getDay() === 0 || now.getDay() === 6}
+                nowMins={now.getHours() * 60 + now.getMinutes()}
               />
             ) : (
               <window.RouteCard
@@ -226,6 +228,8 @@ function V1Variation({ state, setState, t, langSwitcher, navLinks }) {
                 isPrimary={i === 0}
                 t={t}
                 style=""
+                isWeekend={now.getDay() === 0 || now.getDay() === 6}
+                nowMins={now.getHours() * 60 + now.getMinutes()}
               />
             )
           ))}

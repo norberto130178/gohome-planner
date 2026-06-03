@@ -2,8 +2,9 @@
 // Route Card — egy útvonal-javaslat megjelenítése
 // ============================================================
 
-function RouteCard({ route, index, isPrimary, t, style }) {
+function RouteCard({ route, index, isPrimary, t, style, isWeekend, nowMins }) {
   const [expanded, setExpanded] = React.useState(isPrimary);
+  const [timetableInfo, setTimetableInfo] = React.useState(null);
   const U = window.BUS_UTILS;
 
   const fmt = (m) => U.fmtTime(m);
@@ -16,6 +17,10 @@ function RouteCard({ route, index, isPrimary, t, style }) {
 
   return (
     <div className={`route-card ${style} ${isPrimary ? "primary" : ""}`}>
+      {timetableInfo && (
+        <window.BusTimetableModal busId={timetableInfo.busId} fromStop={timetableInfo.fromStop} onClose={() => setTimetableInfo(null)} isWeekend={isWeekend} nowMins={nowMins} />
+      )}
+
       <div className="route-card-header">
         <span className="route-card-badge">
           {isPrimary ? `⭐ ${t.best}` : `${t.alternative} ${index}`}
@@ -83,7 +88,9 @@ function RouteCard({ route, index, isPrimary, t, style }) {
           <div className="step-time">{fmt(route.localBoardAt)}</div>
           <div
             className="step-icon bus-icon-local"
-            style={{ background: busColor }}
+            style={{ background: busColor, cursor: 'pointer' }}
+            title="Menetrend megtekintése"
+            onClick={() => setTimetableInfo({ busId: route.localBus.id, fromStop: route.localBus.stops[0].name })}
           >
             {route.localBus.id}
           </div>
@@ -160,8 +167,9 @@ window.RouteCard = RouteCard;
 // School Route Card — reggeli útvonal (Csererdő → Nemesvámos)
 // ============================================================
 
-function SchoolRouteCard({ route, index, isPrimary, t }) {
+function SchoolRouteCard({ route, index, isPrimary, t, isWeekend, nowMins }) {
   const U = window.BUS_UTILS;
+  const [timetableInfo, setTimetableInfo] = React.useState(null);
   const fmt = (m) => U.fmtTime(m);
   const totalMin = route.totalDuration;
   const totalH = Math.floor(totalMin / 60);
@@ -172,6 +180,10 @@ function SchoolRouteCard({ route, index, isPrimary, t }) {
 
   return (
     <div className={`route-card ${isPrimary ? "primary" : ""}`}>
+      {timetableInfo && (
+        <window.BusTimetableModal busId={timetableInfo.busId} fromStop={timetableInfo.fromStop} onClose={() => setTimetableInfo(null)} isWeekend={isWeekend} nowMins={nowMins} />
+      )}
+
       <div className="route-card-header">
         <span className="route-card-badge">
           {isPrimary ? `⭐ ${t.best}` : `${t.alternative} ${index}`}
@@ -187,7 +199,9 @@ function SchoolRouteCard({ route, index, isPrimary, t }) {
           <div className="step-time">{fmt(route.localBoardAt)}</div>
           <div
             className="step-icon bus-icon-local"
-            style={{ background: busColor }}
+            style={{ background: busColor, cursor: 'pointer' }}
+            title="Menetrend megtekintése"
+            onClick={() => setTimetableInfo({ busId: route.localBus.id, fromStop: route.localBus.stops[0].name })}
           >
             {route.localBus.id}
           </div>
@@ -209,7 +223,6 @@ function SchoolRouteCard({ route, index, isPrimary, t }) {
           </div>
         </div>
 
-        {/* Step 3a: Ha Színháznál szállt le → 5 perc gyaloglás */}
         {hasWalk && (
           <>
             <div className="route-step step-transfer">
@@ -227,7 +240,6 @@ function SchoolRouteCard({ route, index, isPrimary, t }) {
           </>
         )}
 
-        {/* Step 3: Átszállás / várakozás */}
         <div className="route-step step-transfer">
           <div className="step-time">{fmt(route.transferReadyAt)}</div>
           <div className="step-icon">🔄</div>
@@ -244,7 +256,6 @@ function SchoolRouteCard({ route, index, isPrimary, t }) {
           <div className="connector-line" />
         </div>
 
-        {/* Step 4: Helyközi busz */}
         <div className="route-step step-bus-1">
           <div className="step-time">{fmt(route.helykoziDep)}</div>
           <div className="step-icon bus-icon-regional">🚌</div>
@@ -265,7 +276,6 @@ function SchoolRouteCard({ route, index, isPrimary, t }) {
           </div>
         </div>
 
-        {/* Step 5: Leszállás Nemesvámoson */}
         <div className="route-step step-transfer">
           <div className="step-time">{fmt(route.helykoziArrive)}</div>
           <div className="step-icon">🚏</div>
@@ -280,7 +290,6 @@ function SchoolRouteCard({ route, index, isPrimary, t }) {
           <div className="connector-label">{route.walkToSchool} {t.min} {t.walkLabel || "gyalog"}</div>
         </div>
 
-        {/* Step 6: Iskola */}
         <div className="route-step step-home">
           <div className="step-time">{fmt(route.arriveSchool)}</div>
           <div className="step-icon step-icon-home">🏫</div>

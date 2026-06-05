@@ -13,10 +13,26 @@ function BusTimetableModal({ busId, onClose, fromStop, isWeekend: isWeekendProp,
   const nowMins = nowMinsProp !== undefined ? nowMinsProp : _now.getHours() * 60 + _now.getMinutes();
   const isWeekend = isWeekendProp !== undefined ? isWeekendProp : (_now.getDay() === 0 || _now.getDay() === 6);
 
-  const allDirs = (window.CITY_BUSES_FULL || []).filter(b => b.id === busId);
+  const [currentBusId, setCurrentBusId] = React.useState(busId);
+
+  // Összes vonal ID-ja rendezve (navigációhoz)
+  const allBusIds = React.useMemo(() => {
+    const ids = [...new Set((window.CITY_BUSES_FULL || []).map(b => b.id))];
+    return ids.sort((a, b) => {
+      const na = parseFloat(a), nb = parseFloat(b);
+      if (na !== nb) return na - nb;
+      return a.localeCompare(b);
+    });
+  }, []);
+
+  const currentIdx = allBusIds.indexOf(currentBusId);
+  function goNext() { setCurrentBusId(allBusIds[(currentIdx + 1) % allBusIds.length]); }
+  function goPrev() { setCurrentBusId(allBusIds[(currentIdx - 1 + allBusIds.length) % allBusIds.length]); }
+
+  const allDirs = (window.CITY_BUSES_FULL || []).filter(b => b.id === currentBusId);
 
   function getDeps(bus) {
-    const sched = isWeekend ? bus.departures.weekend : bus.departures.workday;
+    const sched = (isWeekend ? bus.departures.weekend : bus.departures.workday) || {};
     const deps = [];
     Object.entries(sched)
       .sort((a, b) => Number(a[0]) - Number(b[0]))
@@ -38,6 +54,13 @@ function BusTimetableModal({ busId, onClose, fromStop, isWeekend: isWeekendProp,
     return { dirIdx, depIdx: dirData[dirIdx]?.nextIdx ?? 0 };
   });
   const [stopsOpen, setStopsOpen] = React.useState(false);
+  const [mapOpen, setMapOpen] = React.useState(false);
+
+  // Vonalváltáskor reset
+  React.useEffect(() => {
+    setSelected({ dirIdx: 0, depIdx: dirData[0]?.nextIdx ?? 0 });
+    setStopsOpen(false);
+  }, [currentBusId]);
 
   React.useEffect(() => {
     _modalOpenCount++;
@@ -89,6 +112,11 @@ function BusTimetableModal({ busId, onClose, fromStop, isWeekend: isWeekendProp,
           gap: 12, flexShrink: 0,
           borderRadius: isDesktop ? '20px 20px 0 0' : '20px 20px 0 0',
         }}>
+          <button onClick={goPrev} style={{
+            background: 'rgba(255,255,255,0.2)', border: 'none', borderRadius: '50%',
+            width: 32, height: 32, cursor: 'pointer', color: 'white', fontSize: 16,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+          }}>◀</button>
           <div style={{
             width: 44, height: 44, borderRadius: '50%',
             background: 'rgba(255,255,255,0.25)',
@@ -101,6 +129,21 @@ function BusTimetableModal({ busId, onClose, fromStop, isWeekend: isWeekendProp,
               {isWeekend ? 'Hétvégi' : 'Hétköznapi'} menetrend
             </div>
           </div>
+          <button onClick={goNext} style={{
+            background: 'rgba(255,255,255,0.2)', border: 'none', borderRadius: '50%',
+            width: 32, height: 32, cursor: 'pointer', color: 'white', fontSize: 16,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+          }}>▶</button>
+          <button
+            onClick={() => setMapOpen(o => !o)}
+            title="Útvonal a térképen"
+            style={{
+              background: mapOpen ? 'rgba(255,255,255,0.45)' : 'rgba(255,255,255,0.25)', border: 'none',
+              borderRadius: '50%', width: 36, height: 36,
+              cursor: 'pointer', color: 'white', fontSize: 18,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+            }}
+          >🗺</button>
           <button
             onClick={onClose}
             style={{
@@ -177,6 +220,13 @@ function BusTimetableModal({ busId, onClose, fromStop, isWeekend: isWeekendProp,
                 <StopTimeline bus={selBus} selectedDep={selDep} nowMins={nowMins} fmt={fmt} />
               </div>
             )}
+          </div>
+        )}
+
+        {/* Térkép szekció */}
+        {mapOpen && (
+          <div style={{ flexShrink: 0, borderTop: '2px solid var(--line)' }}>
+            <BusRouteMap bus={selBus} color={bus0.color} selectedDep={selDep} nowMins={nowMins} fmt={fmt} />
           </div>
         )}
       </div>
@@ -267,6 +317,52 @@ function StopTimeline({ bus, selectedDep, nowMins, fmt }) {
 
       <StopRow stop={last} prominent isLast />
     </div>
+  );
+}
+
+function BusRouteMap({ bus, color, selectedDep, nowMins, fmt }) {
+  const mapRef = React.useRef(null);
+  const instanceRef = React.useRef(null);
+
+  React.useEffect(() => {
+    if (!mapRef.current || instanceRef.current) return;
+
+    const stops = bus.stops.filter(s => s.lat && s.lon);
+    if (stops.length < 2) return;
+
+    const map = L.map(mapRef.current, { zoomControl: true });
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap',
+    }).addTo(map);
+
+    // Útvonal vonal
+    const coords = stops.map(s => [s.lat, s.lon]);
+    L.polyline(coords, { color, weight: 5, opacity: 0.85 }).addTo(map);
+
+    // Megálló jelölők
+    stops.forEach((stop, i) => {
+      const isTerminal = i === 0 || i === stops.length - 1;
+      const time = selectedDep !== undefined ? selectedDep + stop.offset : null;
+      const isPast = time !== null && time < nowMins;
+      const label = time !== null ? `${stop.name}\n${fmt(time)}` : stop.name;
+
+      L.circleMarker([stop.lat, stop.lon], {
+        radius: isTerminal ? 9 : 6,
+        color: 'white',
+        weight: 2,
+        fillColor: isPast ? '#bbb' : color,
+        fillOpacity: 0.95,
+      }).addTo(map).bindPopup(`<b>${stop.name}</b>${time !== null ? `<br>${fmt(time)}` : ''}`);
+    });
+
+    map.fitBounds(coords, { padding: [16, 16] });
+    instanceRef.current = map;
+
+    return () => { map.remove(); instanceRef.current = null; };
+  }, [bus, selectedDep]);
+
+  return (
+    <div ref={mapRef} style={{ height: 380, width: '100%' }} />
   );
 }
 

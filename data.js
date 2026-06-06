@@ -5,7 +5,7 @@
 // Ez a fájl csak az útvonaltervező logikát tartalmazza.
 // ============================================================
 
-window.APP_VERSION = "2.2";
+window.APP_VERSION = "2.3";
 
 // ============================================================
 // Segédfüggvények

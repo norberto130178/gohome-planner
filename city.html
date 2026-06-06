@@ -243,10 +243,76 @@ function StopSearch({ value, onChange, placeholder, id }) {
 }
 
 // ── CityRouteCard ────────────────────────────────────────────────────
+// Megállók szeletelése egy buszon: fromName-től toName-ig
+function getStopSlice(bus, fromName, toName) {
+  const stops = bus.stops;
+  const fi = stops.findIndex(s => s.name === fromName);
+  const ti = stops.findIndex(s => s.name === toName);
+  if (fi < 0 || ti < 0 || ti <= fi) return [];
+  return stops.slice(fi, ti + 1).filter(s => s.lat && s.lon);
+}
+
+function CityRouteMap({ route, fromStop, toStop }) {
+  const mapRef = React.useRef(null);
+  const instanceRef = React.useRef(null);
+
+  React.useEffect(() => {
+    if (!mapRef.current) return;
+    if (instanceRef.current) { instanceRef.current.remove(); instanceRef.current = null; }
+
+    const map = L.map(mapRef.current, { zoomControl: true });
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap'
+    }).addTo(map);
+
+    const allCoords = [];
+
+    function drawLeg(stops, color) {
+      if (stops.length < 2) return;
+      const coords = stops.map(s => [s.lat, s.lon]);
+      L.polyline(coords, { color, weight: 5, opacity: 0.85 }).addTo(map);
+      allCoords.push(...coords);
+    }
+
+    function addMarker(stop, label, color, isKey) {
+      if (!stop?.lat) return;
+      L.circleMarker([stop.lat, stop.lon], {
+        radius: isKey ? 10 : 6,
+        color: 'white', weight: 2,
+        fillColor: color, fillOpacity: 0.95,
+      }).addTo(map).bindPopup(`<b>${label}</b><br>${stop.name}`);
+    }
+
+    if (route.type === 'direct') {
+      const leg = getStopSlice(route.bus1, fromStop, toStop);
+      drawLeg(leg, route.bus1.color);
+      addMarker(leg[0], 'Felszállás', route.bus1.color, true);
+      addMarker(leg[leg.length - 1], 'Célállomás', '#444', true);
+    } else {
+      const leg1 = getStopSlice(route.bus1, fromStop, route.transferStopName);
+      const leg2 = getStopSlice(route.bus2, route.transferStopName, toStop);
+      drawLeg(leg1, route.bus1.color);
+      drawLeg(leg2, route.bus2.color);
+      addMarker(leg1[0], 'Felszállás', route.bus1.color, true);
+      addMarker(leg1[leg1.length - 1], 'Átszállás', '#FF9800', true);
+      addMarker(leg2[leg2.length - 1], 'Célállomás', '#444', true);
+    }
+
+    if (allCoords.length >= 2) map.fitBounds(allCoords, { padding: [16, 16] });
+    else if (allCoords.length === 1) map.setView(allCoords[0], 15);
+
+    instanceRef.current = map;
+    return () => { map.remove(); instanceRef.current = null; };
+  }, [route, fromStop, toStop]);
+
+  return <div ref={mapRef} style={{ height: 260, width: '100%', borderTop: '2px solid var(--line)' }} />;
+}
+
 function CityRouteCard({ route, index, isPrimary, fromStop, toStop, walkMin, isWeekend, nowMins }) {
   const U = window.BUS_UTILS;
   const fmt = m => U.fmtTime(m);
   const [timetableBusId, setTimetableBusId] = React.useState(null);
+  const [mapOpen, setMapOpen] = React.useState(false);
   const totalMin = route.totalDuration;
   const totalStr = totalMin >= 60
     ? `${Math.floor(totalMin / 60)}ó ${totalMin % 60}p`
@@ -274,6 +340,16 @@ function CityRouteCard({ route, index, isPrimary, fromStop, toStop, walkMin, isW
         </span>
         <span className="route-card-total">
           📍 {fmt(route.arriveAt)} · {totalStr}
+          <button
+            onClick={() => setMapOpen(o => !o)}
+            title="Útvonal a térképen"
+            style={{
+              marginLeft: 8, background: mapOpen ? 'var(--accent)' : 'var(--line)',
+              border: 'none', borderRadius: 8, padding: '2px 8px',
+              cursor: 'pointer', fontSize: 14, color: mapOpen ? 'white' : 'var(--ink)',
+              fontFamily: 'inherit', fontWeight: 800, verticalAlign: 'middle',
+            }}
+          >🗺</button>
         </span>
       </div>
 
@@ -370,6 +446,7 @@ function CityRouteCard({ route, index, isPrimary, fromStop, toStop, walkMin, isW
           </>
         )}
       </div>
+      {mapOpen && <CityRouteMap route={route} fromStop={fromStop} toStop={toStop} />}
     </div>
   );
 }

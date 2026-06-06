@@ -55,6 +55,14 @@ function BusTimetableModal({ busId, onClose, fromStop, isWeekend: isWeekendProp,
   });
   const [stopsOpen, setStopsOpen] = React.useState(false);
   const [mapOpen, setMapOpen] = React.useState(false);
+  const [isFullscreen, setIsFullscreen] = React.useState(false);
+  const modalRef = React.useRef(null);
+
+  React.useEffect(() => {
+    const handler = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener('fullscreenchange', handler);
+    return () => document.removeEventListener('fullscreenchange', handler);
+  }, []);
 
   // Vonalváltáskor reset
   React.useEffect(() => {
@@ -94,14 +102,15 @@ function BusTimetableModal({ busId, onClose, fromStop, isWeekend: isWeekendProp,
         justifyContent: 'center',
       }}
     >
-      <div style={{
+      <div ref={modalRef} style={{
         background: 'white',
         borderRadius: isDesktop ? 20 : '20px 20px 0 0',
         width: '100%',
-        maxWidth: isDesktop ? 560 : 680,
-        maxHeight: isDesktop ? '80vh' : '90vh',
+        maxWidth: isFullscreen ? '100%' : (isDesktop ? 560 : 680),
+        maxHeight: isFullscreen ? '100%' : (isDesktop ? '80vh' : '90vh'),
+        height: isFullscreen ? '100%' : undefined,
         overflow: 'hidden', display: 'flex', flexDirection: 'column',
-        boxShadow: '0 8px 40px rgba(0,0,0,0.35)',
+        boxShadow: isFullscreen ? 'none' : '0 8px 40px rgba(0,0,0,0.35)',
         fontFamily: 'Nunito, sans-serif',
       }}>
 
@@ -156,7 +165,7 @@ function BusTimetableModal({ busId, onClose, fromStop, isWeekend: isWeekendProp,
         </div>
 
         {/* Two-column timetable */}
-        <div style={{ display: 'flex', flex: 1, minHeight: 0, overflow: 'hidden' }}>
+        <div style={{ display: 'flex', flexShrink: 0, maxHeight: '40vh', overflow: 'hidden' }}>
           {dirData.map(({ bus, deps, nextIdx }, dirIdx) => (
             <div key={dirIdx} style={{
               flex: 1,
@@ -225,8 +234,9 @@ function BusTimetableModal({ busId, onClose, fromStop, isWeekend: isWeekendProp,
 
         {/* Térkép szekció */}
         {mapOpen && (
-          <div style={{ flexShrink: 0, borderTop: '2px solid var(--line)' }}>
-            <BusRouteMap bus={selBus} color={bus0.color} selectedDep={selDep} nowMins={nowMins} fmt={fmt} />
+          <div style={{ flex: 1, minHeight: 320, borderTop: '2px solid var(--line)', display: 'flex', flexDirection: 'column' }}>
+            <BusRouteMap bus={selBus} color={bus0.color} selectedDep={selDep} nowMins={nowMins} fmt={fmt}
+              modalRef={modalRef} />
           </div>
         )}
       </div>
@@ -320,9 +330,15 @@ function StopTimeline({ bus, selectedDep, nowMins, fmt }) {
   );
 }
 
-function BusRouteMap({ bus, color, selectedDep, nowMins, fmt }) {
+function BusRouteMap({ bus, color, selectedDep, nowMins, fmt, modalRef }) {
   const mapRef = React.useRef(null);
   const instanceRef = React.useRef(null);
+
+  React.useEffect(() => {
+    const handler = () => setTimeout(() => instanceRef.current?.invalidateSize(), 100);
+    document.addEventListener('fullscreenchange', handler);
+    return () => document.removeEventListener('fullscreenchange', handler);
+  }, []);
 
   React.useEffect(() => {
     if (!mapRef.current || instanceRef.current) return;
@@ -335,16 +351,29 @@ function BusRouteMap({ bus, color, selectedDep, nowMins, fmt }) {
       attribution: '© OpenStreetMap',
     }).addTo(map);
 
-    // Útvonal vonal
-    const coords = stops.map(s => [s.lat, s.lon]);
-    L.polyline(coords, { color, weight: 5, opacity: 0.85 }).addTo(map);
+    // Útvonal vonal — GTFS shape ha elérhető, fallback: légvonal
+    const allStopCoords = stops.map(s => [s.lat, s.lon]);
+    const shapes = (window.CITY_SHAPES || {})[bus.id];
+    let routeCoords = null;
 
-    // Megálló jelölők
+    if (shapes && window.nearestShapeIdx) {
+      const first = stops[0], last = stops[stops.length - 1];
+      let best = null, bestScore = -Infinity;
+      for (const dir of shapes) {
+        const fi = window.nearestShapeIdx(dir, first.lat, first.lon);
+        const ti = window.nearestShapeIdx(dir, last.lat, last.lon);
+        if (ti > fi && ti - fi > bestScore) { bestScore = ti - fi; best = { coords: dir, fi, ti }; }
+      }
+      if (best && bestScore >= 5) routeCoords = best.coords;
+    }
+
+    L.polyline(routeCoords || allStopCoords, { color, weight: 5, opacity: 0.85 }).addTo(map);
+
+    // Megálló jelölők (minden megállón)
     stops.forEach((stop, i) => {
       const isTerminal = i === 0 || i === stops.length - 1;
       const time = selectedDep !== undefined ? selectedDep + stop.offset : null;
       const isPast = time !== null && time < nowMins;
-      const label = time !== null ? `${stop.name}\n${fmt(time)}` : stop.name;
 
       L.circleMarker([stop.lat, stop.lon], {
         radius: isTerminal ? 9 : 6,
@@ -355,14 +384,39 @@ function BusRouteMap({ bus, color, selectedDep, nowMins, fmt }) {
       }).addTo(map).bindPopup(`<b>${stop.name}</b>${time !== null ? `<br>${fmt(time)}` : ''}`);
     });
 
-    map.fitBounds(coords, { padding: [16, 16] });
     instanceRef.current = map;
+    setTimeout(() => {
+      map.invalidateSize();
+      map.fitBounds(allStopCoords, { padding: [30, 30] });
+    }, 50);
 
     return () => { map.remove(); instanceRef.current = null; };
   }, [bus, selectedDep]);
 
+  function toggleFullscreen() {
+    const el = modalRef?.current;
+    if (!el) return;
+    if (!document.fullscreenElement) {
+      el.requestFullscreen();
+    } else {
+      document.exitFullscreen();
+    }
+  }
+
   return (
-    <div ref={mapRef} style={{ height: 380, width: '100%' }} />
+    <div style={{ position: 'relative', flex: 1, display: 'flex', flexDirection: 'column' }}>
+      <div ref={mapRef} style={{ flex: 1, width: '100%' }} />
+      <button
+        onClick={toggleFullscreen}
+        title="Teljes képernyő"
+        style={{
+          position: 'absolute', bottom: 10, right: 10, zIndex: 1000,
+          background: 'white', border: '2px solid #ccc',
+          borderRadius: 8, padding: '4px 8px', cursor: 'pointer',
+          fontSize: 16, lineHeight: 1, boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
+        }}
+      >⛶</button>
+    </div>
   );
 }
 

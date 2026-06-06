@@ -20,6 +20,7 @@
 <script src="data.js"></script>
 <script src="city-data.js"></script>
 <script src="city-planner.js"></script>
+<script src="city-shapes.js"></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script type="text/babel" src="timetable-modal.jsx"></script>
@@ -243,13 +244,47 @@ function StopSearch({ value, onChange, placeholder, id }) {
 }
 
 // ── CityRouteCard ────────────────────────────────────────────────────
-// Megállók szeletelése egy buszon: fromName-től toName-ig
-function getStopSlice(bus, fromName, toName) {
-  const stops = bus.stops;
-  const fi = stops.findIndex(s => s.name === fromName);
-  const ti = stops.findIndex(s => s.name === toName);
-  if (fi < 0 || ti < 0 || ti <= fi) return [];
-  return stops.slice(fi, ti + 1).filter(s => s.lat && s.lon);
+// Legközelebbi shape pont indexe egy koordinátához
+function nearestShapeIdx(shape, lat, lon) {
+  let best = 0, bestD = Infinity;
+  for (let i = 0; i < shape.length; i++) {
+    const dlat = shape[i][0] - lat, dlon = shape[i][1] - lon;
+    const d = dlat * dlat + dlon * dlon;
+    if (d < bestD) { bestD = d; best = i; }
+  }
+  return best;
+}
+window.nearestShapeIdx = nearestShapeIdx;
+
+// Kiválasztja a helyes GTFS shape-et és kiszeli a fromStop–toStop szakaszt
+// A szelet elejére/végére a tényleges megálló koordinátát illeszti (nincs túllövés)
+function getShapeSegment(bus, fromStopName, toStopName) {
+  const shapes = (window.CITY_SHAPES || {})[bus.id];
+  if (!shapes) return null;
+
+  const fromStop = bus.stops.find(s => s.name === fromStopName);
+  const toStop   = bus.stops.find(s => s.name === toStopName);
+  if (!fromStop?.lat || !toStop?.lat) return null;
+
+  let best = null, bestScore = -Infinity;
+  for (const dir of shapes) {
+    const coords = dir;
+    const fi = nearestShapeIdx(coords, fromStop.lat, fromStop.lon);
+    const ti = nearestShapeIdx(coords, toStop.lat, toStop.lon);
+    if (ti > fi) {
+      const score = ti - fi;
+      if (score > bestScore) { bestScore = score; best = { coords, fi, ti }; }
+    }
+  }
+  if (!best) return null;
+
+  // Szelet: megálló koordináta + belső pontok + megálló koordináta
+  const inner = best.coords.slice(best.fi + 1, best.ti);
+  return [
+    [fromStop.lat, fromStop.lon],
+    ...inner,
+    [toStop.lat, toStop.lon],
+  ];
 }
 
 function CityRouteMap({ route, fromStop, toStop }) {
@@ -267,35 +302,45 @@ function CityRouteMap({ route, fromStop, toStop }) {
 
     const allCoords = [];
 
-    function drawLeg(stops, color) {
-      if (stops.length < 2) return;
-      const coords = stops.map(s => [s.lat, s.lon]);
-      L.polyline(coords, { color, weight: 5, opacity: 0.85 }).addTo(map);
-      allCoords.push(...coords);
+    function drawSegment(bus, from, to, color) {
+      const seg = getShapeSegment(bus, from, to);
+      if (seg && seg.length >= 2) {
+        L.polyline(seg, { color, weight: 5, opacity: 0.9 }).addTo(map);
+        allCoords.push(...seg);
+        return { first: seg[0], last: seg[seg.length - 1] };
+      } else {
+        const stops = bus.stops;
+        const fi = stops.findIndex(s => s.name === from);
+        const ti = stops.findIndex(s => s.name === to);
+        if (fi >= 0 && ti > fi) {
+          const coords = stops.slice(fi, ti + 1).filter(s => s.lat).map(s => [s.lat, s.lon]);
+          L.polyline(coords, { color, weight: 4, opacity: 0.7, dashArray: '6,4' }).addTo(map);
+          allCoords.push(...coords);
+          return coords.length >= 2 ? { first: coords[0], last: coords[coords.length - 1] } : null;
+        }
+        return null;
+      }
     }
 
-    function addMarker(stop, label, color, isKey) {
-      if (!stop?.lat) return;
-      L.circleMarker([stop.lat, stop.lon], {
-        radius: isKey ? 10 : 6,
-        color: 'white', weight: 2,
-        fillColor: color, fillOpacity: 0.95,
-      }).addTo(map).bindPopup(`<b>${label}</b><br>${stop.name}`);
+    function addMarker(pos, name, label, color) {
+      if (!pos) return;
+      L.circleMarker(pos, {
+        radius: 8, color: 'white', weight: 2.5,
+        fillColor: color, fillOpacity: 1,
+      }).addTo(map).bindPopup(`<b>${label}</b><br>${name}`);
     }
 
     if (route.type === 'direct') {
-      const leg = getStopSlice(route.bus1, fromStop, toStop);
-      drawLeg(leg, route.bus1.color);
-      addMarker(leg[0], 'Felszállás', route.bus1.color, true);
-      addMarker(leg[leg.length - 1], 'Célállomás', '#444', true);
+      const seg = drawSegment(route.bus1, fromStop, toStop, route.bus1.color);
+      addMarker(seg?.first, fromStop, 'Felszállás', route.bus1.color);
+      addMarker(seg?.last,  toStop,   'Célállomás', route.bus1.color);
     } else {
-      const leg1 = getStopSlice(route.bus1, fromStop, route.transferStopName);
-      const leg2 = getStopSlice(route.bus2, route.transferStopName, toStop);
-      drawLeg(leg1, route.bus1.color);
-      drawLeg(leg2, route.bus2.color);
-      addMarker(leg1[0], 'Felszállás', route.bus1.color, true);
-      addMarker(leg1[leg1.length - 1], 'Átszállás', '#FF9800', true);
-      addMarker(leg2[leg2.length - 1], 'Célállomás', '#444', true);
+      const seg1 = drawSegment(route.bus1, fromStop, route.transferStopName, route.bus1.color);
+      const seg2 = drawSegment(route.bus2, route.transferStopName, toStop,   route.bus2.color);
+      addMarker(seg1?.first, fromStop,               'Felszállás', route.bus1.color);
+      addMarker(seg1?.last,  route.transferStopName, 'Átszállás',  route.bus1.color);
+      addMarker(seg2?.first, route.transferStopName, 'Átszállás',  route.bus2.color);
+      addMarker(seg2?.last,  toStop,                 'Célállomás', route.bus2.color);
     }
 
     if (allCoords.length >= 2) map.fitBounds(allCoords, { padding: [16, 16] });
@@ -305,7 +350,29 @@ function CityRouteMap({ route, fromStop, toStop }) {
     return () => { map.remove(); instanceRef.current = null; };
   }, [route, fromStop, toStop]);
 
-  return <div ref={mapRef} style={{ height: 260, width: '100%', borderTop: '2px solid var(--line)' }} />;
+  function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+      mapRef.current?.requestFullscreen();
+    } else {
+      document.exitFullscreen();
+    }
+  }
+
+  return (
+    <div style={{ position: 'relative', borderTop: '2px solid var(--line)' }}>
+      <div ref={mapRef} style={{ height: 280, width: '100%' }} />
+      <button
+        onClick={toggleFullscreen}
+        title="Teljes képernyő"
+        style={{
+          position: 'absolute', bottom: 10, right: 10, zIndex: 1000,
+          background: 'white', border: '2px solid var(--line)',
+          borderRadius: 8, padding: '4px 8px', cursor: 'pointer',
+          fontSize: 16, lineHeight: 1, boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
+        }}
+      >⛶</button>
+    </div>
+  );
 }
 
 function CityRouteCard({ route, index, isPrimary, fromStop, toStop, walkMin, isWeekend, nowMins }) {

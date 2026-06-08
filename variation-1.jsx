@@ -218,6 +218,7 @@ function V1Variation({ state, setState, t, langSwitcher, navLinks }) {
                 isPrimary={i === 0}
                 t={t}
                 isWeekend={now.getDay() === 0 || now.getDay() === 6}
+                dayType={window.BUS_UTILS.dayType(now, state.schoolHoliday)}
                 nowMins={now.getHours() * 60 + now.getMinutes()}
               />
             ) : (
@@ -229,6 +230,7 @@ function V1Variation({ state, setState, t, langSwitcher, navLinks }) {
                 t={t}
                 style=""
                 isWeekend={now.getDay() === 0 || now.getDay() === 6}
+                dayType={window.BUS_UTILS.dayType(now, state.schoolHoliday)}
                 nowMins={now.getHours() * 60 + now.getMinutes()}
               />
             )

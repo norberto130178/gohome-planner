@@ -5,7 +5,7 @@
 // Ez a fájl csak az útvonaltervező logikát tartalmazza.
 // ============================================================
 
-window.APP_VERSION = "2.4";
+window.APP_VERSION = "v2.5";
 
 // Helyi buszok amik Csererdőt érintik (hazaút + iskolába tervező)
 const HOME_BUS_IDS = ["3", "8", "8Y", "28"];
@@ -51,20 +51,26 @@ window.BUS_UTILS = {
     return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
   },
 
-  // Nap típusa a dátumból
-  dayType(date) {
+  // Nap típusa a dátumból; schoolHoliday=true esetén tanszüneti menetrend munkanapokon
+  dayType(date, schoolHoliday = false) {
     const d = date.getDay(); // 0=vas, 6=szo
     if (d === 0 || d === 6) return "weekend";
+    if (schoolHoliday) return "schoolholiday";
     return "workday";
   },
 
   // Egy busz departures objektumából → abszolút indulási idők [minutes[]]
+  // schoolholiday fallback: ha nincs schoolholiday adat, workday-t használ
   getDepartures(bus, dayType) {
-    const dep = bus.departures[dayType] || {};
+    let dep = bus.departures[dayType];
+    if (!dep || !Object.keys(dep).length) {
+      dep = dayType === "schoolholiday" ? (bus.departures.workday || {}) : {};
+    }
     const out = [];
     for (const hStr of Object.keys(dep)) {
       const h = Number(hStr);
-      for (const m of dep[hStr]) {
+      for (const rawM of dep[hStr]) {
+        const m = typeof rawM === "object" ? rawM.t : rawM;
         out.push(h * 60 + m);
       }
     }
@@ -100,9 +106,10 @@ window.planRoutes = function planRoutes({
   now, walkMin, minTransfer, maxResults,
   allowedTransfers,  // opcionális: string[] az átszálláspont id-kból; ha nincs, mindet figyeli
   homeStop,           // opcionális: custom leszállási megálló; ha null/undefined → "Csererdő"
+  schoolHoliday,      // opcionális: true → tanszüneti menetrend munkanapokon
 }) {
   const U = window.BUS_UTILS;
-  const dayType = U.dayType(now);  // "workday" | "weekend"
+  const dayType = U.dayType(now, schoolHoliday);  // "workday" | "schoolholiday" | "weekend"
   const nowMins = now.getHours() * 60 + now.getMinutes();
   const earliestBoard = nowMins + walkMin;
 
@@ -122,7 +129,8 @@ window.planRoutes = function planRoutes({
   for (const dest of destinations) {
     const trips = dest.trips.filter((tr) => {
       if (tr.days === "both") return true;
-      if (tr.days === "school") return dayType === "workday"; // tanítási nap ≈ munkanap
+      if (tr.days === "school") return dayType === "workday" || dayType === "schoolholiday";
+      if (tr.days === "workday") return dayType === "workday" || dayType === "schoolholiday";
       return tr.days === dayType;
     });
 
@@ -223,9 +231,10 @@ window.planRoutes = function planRoutes({
 window.planSchoolRoutes = function planSchoolRoutes({
   now, walkMin, minTransfer, maxResults, schoolStartMin,
   allowedTransfers,  // opcionális: melyik átszállópontokat használja (komakut, buszall, szinhaz_walk)
+  schoolHoliday,
 }) {
   const U = window.BUS_UTILS;
-  const dayType = U.dayType(now);
+  const dayType = U.dayType(now, schoolHoliday);
   const nowMins = now.getHours() * 60 + now.getMinutes();
   const earliestBoard = nowMins + walkMin;  // mikor tud a gyerek Csererdő-megállónál lenni
 
@@ -278,7 +287,8 @@ window.planSchoolRoutes = function planSchoolRoutes({
     const helykoziTrips = origin.trips
       .filter((tr) => {
         if (tr.days === "both") return true;
-        if (tr.days === "school") return dayType === "workday";
+        if (tr.days === "school") return dayType === "workday" || dayType === "schoolholiday";
+        if (tr.days === "workday") return dayType === "workday" || dayType === "schoolholiday";
         return tr.days === dayType;
       })
       .map((tr) => ({

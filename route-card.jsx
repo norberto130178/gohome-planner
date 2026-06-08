@@ -2,7 +2,7 @@
 // Route Card — egy útvonal-javaslat megjelenítése
 // ============================================================
 
-function RouteCard({ route, index, isPrimary, t, style, isWeekend, nowMins }) {
+function RouteCard({ route, index, isPrimary, t, style, isWeekend, dayType, nowMins }) {
   const [expanded, setExpanded] = React.useState(isPrimary);
   const [timetableInfo, setTimetableInfo] = React.useState(null);
   const [mapOpen, setMapOpen] = React.useState(false);
@@ -19,7 +19,7 @@ function RouteCard({ route, index, isPrimary, t, style, isWeekend, nowMins }) {
   return (
     <div className={`route-card ${style} ${isPrimary ? "primary" : ""}`}>
       {timetableInfo && (
-        <window.BusTimetableModal busId={timetableInfo.busId} fromStop={timetableInfo.fromStop} onClose={() => setTimetableInfo(null)} isWeekend={isWeekend} nowMins={nowMins} />
+        <window.BusTimetableModal busId={timetableInfo.busId} fromStop={timetableInfo.fromStop} onClose={() => setTimetableInfo(null)} isWeekend={isWeekend} dayType={dayType} nowMins={nowMins} />
       )}
 
       <div className="route-card-header">
@@ -270,7 +270,7 @@ window.RouteCard = RouteCard;
 // School Route Card — reggeli útvonal (Csererdő → Nemesvámos)
 // ============================================================
 
-function SchoolRouteCard({ route, index, isPrimary, t, isWeekend, nowMins }) {
+function SchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, nowMins }) {
   const U = window.BUS_UTILS;
   const [timetableInfo, setTimetableInfo] = React.useState(null);
   const [mapOpen, setMapOpen] = React.useState(false);
@@ -285,7 +285,7 @@ function SchoolRouteCard({ route, index, isPrimary, t, isWeekend, nowMins }) {
   return (
     <div className={`route-card ${isPrimary ? "primary" : ""}`}>
       {timetableInfo && (
-        <window.BusTimetableModal busId={timetableInfo.busId} fromStop={timetableInfo.fromStop} onClose={() => setTimetableInfo(null)} isWeekend={isWeekend} nowMins={nowMins} />
+        <window.BusTimetableModal busId={timetableInfo.busId} fromStop={timetableInfo.fromStop} onClose={() => setTimetableInfo(null)} isWeekend={isWeekend} dayType={dayType} nowMins={nowMins} />
       )}
 
       <div className="route-card-header">

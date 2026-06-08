@@ -5,13 +5,17 @@
 // Counter to safely manage body scroll lock with multiple potential modals
 let _modalOpenCount = 0;
 
-function BusTimetableModal({ busId, onClose, fromStop, isWeekend: isWeekendProp, nowMins: nowMinsProp }) {
+// dayType: "workday" | "schoolholiday" | "weekend"  (isWeekend kept for backward compat)
+function BusTimetableModal({ busId, onClose, fromStop, isWeekend: isWeekendProp, dayType: dayTypeProp, nowMins: nowMinsProp }) {
   const U = window.BUS_UTILS;
   const fmt = (m) => U.fmtTime(m);
 
   const _now = new Date();
   const nowMins = nowMinsProp !== undefined ? nowMinsProp : _now.getHours() * 60 + _now.getMinutes();
   const isWeekend = isWeekendProp !== undefined ? isWeekendProp : (_now.getDay() === 0 || _now.getDay() === 6);
+  const dayType = dayTypeProp || (isWeekend ? "weekend" : "workday");
+
+  const [activeDayType, setActiveDayType] = React.useState(dayType);
 
   const [currentBusId, setCurrentBusId] = React.useState(busId);
 
@@ -32,17 +36,24 @@ function BusTimetableModal({ busId, onClose, fromStop, isWeekend: isWeekendProp,
   const allDirs = (window.CITY_BUSES_FULL || []).filter(b => b.id === currentBusId);
 
   function getDeps(bus) {
-    const sched = (isWeekend ? bus.departures.weekend : bus.departures.workday) || {};
+    let sched = bus.departures[activeDayType];
+    if (!sched || !Object.keys(sched).length) {
+      sched = activeDayType === "schoolholiday" ? (bus.departures.workday || {}) : {};
+    }
     const deps = [];
     Object.entries(sched)
       .sort((a, b) => Number(a[0]) - Number(b[0]))
-      .forEach(([h, mins]) => mins.forEach(m => deps.push(Number(h) * 60 + m)));
+      .forEach(([h, rawMins]) => rawMins.forEach(raw => {
+        const m = typeof raw === "object" ? raw.t : raw;
+        const note = typeof raw === "object" ? raw.n : null;
+        deps.push({ mins: Number(h) * 60 + m, note });
+      }));
     return deps;
   }
 
   const dirData = allDirs.map(bus => {
     const deps = getDeps(bus);
-    const nextIdx = deps.findIndex(d => d >= nowMins);
+    const nextIdx = deps.findIndex(d => d.mins >= nowMins);
     return { bus, deps, nextIdx: nextIdx >= 0 ? nextIdx : 0 };
   });
 
@@ -87,7 +98,8 @@ function BusTimetableModal({ busId, onClose, fromStop, isWeekend: isWeekendProp,
 
   const bus0 = allDirs[0];
   const selBus = allDirs[selected.dirIdx];
-  const selDep = dirData[selected.dirIdx]?.deps[selected.depIdx];
+  const selDepObj = dirData[selected.dirIdx]?.deps[selected.depIdx];
+  const selDep = selDepObj?.mins;
   const middleCount = selBus.stops.length - 2;
   const isDesktop = window.innerWidth >= 640;
 
@@ -134,8 +146,22 @@ function BusTimetableModal({ busId, onClose, fromStop, isWeekend: isWeekendProp,
           }}>{bus0.id}</div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: 17, fontWeight: 900 }}>{bus0.label}</div>
-            <div style={{ fontSize: 11, opacity: 0.8 }}>
-              {isWeekend ? 'Hétvégi' : 'Hétköznapi'} menetrend
+            <div style={{ fontSize: 11, opacity: 0.8, display:'flex', gap:6, flexWrap:'wrap', alignItems:'center' }}>
+              {(['workday','schoolholiday','weekend']).map(dt => {
+                const label = dt === 'workday' ? 'Hétköznap' : dt === 'schoolholiday' ? 'Tanszünet' : 'Hétvége';
+                const hasData = allDirs.some(b => b.departures[dt] && Object.keys(b.departures[dt]).length > 0);
+                if (!hasData && dt !== activeDayType) return null;
+                return (
+                  <button key={dt} onClick={() => setActiveDayType(dt)} style={{
+                    background: activeDayType === dt ? 'rgba(255,255,255,0.35)' : 'rgba(255,255,255,0.12)',
+                    border: 'none', borderRadius: 6, padding:'2px 7px',
+                    color:'white', fontSize:10, fontWeight:700, cursor:'pointer',
+                    opacity: hasData ? 1 : 0.5,
+                  }}>{label}</button>
+                );
+              })}
+              {/* hidden placeholder to keep original text for compat */}
+              <span style={{display:'none'}}>{isWeekend ? 'Hétvégi' : 'Hétköznapi'} menetrend</span>
             </div>
           </div>
           <button onClick={goNext} style={{
@@ -182,7 +208,7 @@ function BusTimetableModal({ busId, onClose, fromStop, isWeekend: isWeekendProp,
               </div>
               <div style={{ overflowY: 'auto', flex: 1, padding: '8px' }}>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
-                  {deps.map((dep, i) => {
+                  {deps.map(({ mins: dep, note }, i) => {
                     const isPast = dep < nowMins;
                     const isNext = i === nextIdx && selected.dirIdx === dirIdx;
                     const isSel = selected.dirIdx === dirIdx && selected.depIdx === i;
@@ -199,8 +225,12 @@ function BusTimetableModal({ busId, onClose, fromStop, isWeekend: isWeekendProp,
                           outline: isNext && !isSel ? `2px solid ${bus.color}` : 'none',
                           outlineOffset: 1,
                           transition: 'background 0.15s',
+                          position: 'relative',
                         }}
-                      >{fmt(dep)}</button>
+                      >
+                        {fmt(dep)}
+                        {note && <sup style={{fontSize:9,fontWeight:900,marginLeft:1,verticalAlign:'super'}}>{note}</sup>}
+                      </button>
                     );
                   })}
                 </div>
@@ -229,6 +259,19 @@ function BusTimetableModal({ busId, onClose, fromStop, isWeekend: isWeekendProp,
                 <StopTimeline bus={selBus} selectedDep={selDep} nowMins={nowMins} fmt={fmt} />
               </div>
             )}
+          </div>
+        )}
+
+        {/* Footnotes legend */}
+        {allDirs.some(b => b.footnotes && Object.keys(b.footnotes).length > 0) && (
+          <div style={{ flexShrink:0, borderTop:'1px solid var(--line)', padding:'8px 14px', background:'#fafafa' }}>
+            {allDirs.filter(b => b.footnotes).map((b, di) => (
+              Object.entries(b.footnotes).map(([k, v]) => (
+                <div key={`${di}-${k}`} style={{ fontSize:11, color:'var(--ink-soft)', lineHeight:1.5 }}>
+                  <sup style={{fontWeight:900}}>{k}</sup> {v}
+                </div>
+              ))
+            ))}
           </div>
         )}
 

@@ -122,6 +122,7 @@ function useAppState(options = {}) {
   const [allowedTransfers, setAllowedTransfers] = useState(["komakut","szinhaz","buszall"]);
   const [allowedTransfersSchool, setAllowedTransfersSchool] = useState(["komakut","buszall","szinhaz_walk"]);
   const [schoolFilter, setSchoolFilter] = useState(true);
+  const [schoolHoliday, setSchoolHoliday] = useState(() => localStorage.getItem("hazaut.schoolholiday") === "1");
   const [homeStop, setHomeStop] = useState(null);
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 640);
 
@@ -141,6 +142,7 @@ function useAppState(options = {}) {
   useEffect(() => { localStorage.setItem("hazaut.transfers", JSON.stringify(allowedTransfers)); }, [allowedTransfers]);
   useEffect(() => { localStorage.setItem("hazaut.transfersSchool", JSON.stringify(allowedTransfersSchool)); }, [allowedTransfersSchool]);
   useEffect(() => { localStorage.setItem("hazaut.direction", direction); }, [direction]);
+  useEffect(() => { localStorage.setItem("hazaut.schoolholiday", schoolHoliday ? "1" : "0"); }, [schoolHoliday]);
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 640px)");
     const handler = (e) => setIsMobile(e.matches);
@@ -176,12 +178,13 @@ function useAppState(options = {}) {
         now, walkMin: 0, minTransfer: 3, maxResults: 6,
         allowedTransfers: allowedTransfersSchool,
         schoolStartMin: schoolFilter ? 10 * 60 : null,
+        schoolHoliday,
       });
     }
     return window.planRoutes({
-      now, walkMin: 10, minTransfer: 5, maxResults: 6, allowedTransfers, homeStop,
+      now, walkMin: 10, minTransfer: 5, maxResults: 6, allowedTransfers, homeStop, schoolHoliday,
     });
-  }, [now, allowedTransfers, allowedTransfersSchool, direction, schoolFilter, homeStop]);
+  }, [now, allowedTransfers, allowedTransfersSchool, direction, schoolFilter, homeStop, schoolHoliday]);
 
   const t = window.I18N[lang];
 
@@ -195,9 +198,11 @@ function useAppState(options = {}) {
   };
 
   // --- State object & dispatcher ---
-  const state = { now, mode, customTime, missed, lang, routes, dayOffset, direction, schoolFilter, homeStop, compactMode, isMobile };
+  const state = { now, mode, customTime, missed, lang, routes, dayOffset, direction, schoolFilter, schoolHoliday, homeStop, compactMode, isMobile };
   const toggleCompact = () => setCompactMode(c => !c);
+  const toggleSchoolHoliday = () => setSchoolHoliday(v => !v);
   state.toggleCompact = toggleCompact;
+  state.toggleSchoolHoliday = toggleSchoolHoliday;
   state.setHomeStop = setHomeStop;
 
   const setState = (s) => {
@@ -365,6 +370,29 @@ function useAppState(options = {}) {
             isMobile={isMobile}
           />
         )}
+        <div
+            style={{display:"flex",alignItems:"center",gap:8,cursor:"pointer"}}
+            onClick={toggleSchoolHoliday}
+            data-tooltip={lang==="hu" ? "Tanszüneti menetrend (nyár, szünetek)" : "School holiday timetable (summer, breaks)"}
+          >
+            <span style={{fontSize:13,fontWeight:700,userSelect:"none"}}>
+              {lang==="hu" ? "🏖️ Tanszünet" : "🏖️ School holiday"}
+            </span>
+            <div style={{
+              width:42, height:24, borderRadius:12, flexShrink:0,
+              background: schoolHoliday ? "var(--accent)" : "var(--line)",
+              position:"relative", transition:"background 0.2s",
+            }}>
+              <div style={{
+                position:"absolute",
+                top:3, left: schoolHoliday ? 21 : 3,
+                width:18, height:18, borderRadius:"50%",
+                background:"white",
+                boxShadow:"0 1px 4px rgba(0,0,0,0.25)",
+                transition:"left 0.2s",
+              }} />
+            </div>
+          </div>
         </div>
       </div>
     );

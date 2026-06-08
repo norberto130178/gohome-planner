@@ -42,6 +42,13 @@ A menetrendben egyes indulási időknél betűjelölések vannak (pl. `A`, `N`, 
 - Szükséges: a betűjelölések tárolása az adatstruktúrában és megjelenítése az időpontoknál (pl. tooltip vagy kis badge)
 - Lásd még: Adatstruktúra / Útvonal-változat jelzők fejezet
 
+### Compound annotációk kezelése a UI-ban
+Egyes indulási időknél több betűjelölés is érvényes egyszerre — pl. `Hv` = "csak Hotelig" + "csak vasárnap". Ezek `n: 'Hv'` alakban vannak tárolva a `city-data.js`-ben, a `footnotes` objektumban viszont `H` és `V` külön-külön szerepelnek.
+- A `timetable-modal.jsx` jelenleg `footnotes[n]`-t keres — `'Hv'` esetén nem talál semmit
+- **Megoldás:** az annotáció kiírásánál az `n` értéket karakterenként split-elni, és mindegyikhez külön `footnotes[char]` lookup-ot végezni
+- Ugyanez vonatkozik a tooltip/badge megjelenítésre is: mindkét annotációt külön sorban vagy vesszővel elválasztva felsorolni
+- Érintett vonal jelenleg: **13-as busz** hétvégi indulásai (`Hv`)
+
 ### Shape–indulás összerendelés (térképnézet pontosítása)
 A 7-es, 10-es, 13-as buszoknál több GTFS shape létezik (különböző route variánsok), a térkép jelenleg heurisztikával választ közülük — ez nem mindig tökéletes.
 - **Gyökér ok:** egy buszhoz minden megálló szerepel a `city-data.js`-ben (összes variáns), de egy adott indulás csak az egyik variáns shape-jéhez tartozik
@@ -94,6 +101,22 @@ A 11A busznak van menetrendje a city-data.js-ben, de a VeszprémGO OTP rendszerb
 ## Menetrend frissítés (új VeszprémBusz menetrend esetén)
 
 Ha új menetrend lép érvénybe, a `city-data.js` teljes újraépítése szükséges:
+
+### ⚠️ PDF parser csere — pdfplumber alapú megoldás (magas prioritás)
+
+A jelenlegi `parse-menetrend.js` szöveg-alapú kinyerése (`pdftotext`-féle) megbízhatatlan:
+a három oszlopot nem tudja tisztán szétválasztani, főleg sűrűbb soroknál (pl. 13-17h).
+A 2026-os menetrend-ellenőrzés során **szinte minden járatnál** kellett kézi javítás.
+
+**Megoldás:** új parser `pdfplumber` alapon (Python), amely:
+- x-koordináta alapján választja szét a három oszlopot (Munkanap / Tanszünet / Hétvége)
+- superscript betűket méret alapján ismeri fel (pl. font size < 10 = annotáció)
+- automatikusan kezeli a két vonal egy oldalon problémát `busId` + irány alapján
+
+**Várható eredmény:** ~95% automatikus pontosság. A maradék ~5% (két járat egy oldalon)
+mindig manuális ellenőrzést igényel — ott a PDF sem jelöli melyik adat melyik járathoz tartozik.
+
+**Fájlok:** `_tmp_geocoding/parse-menetrend.js` lecserélendő, `update-from-pdf.py` bővítendő.
 - Megálló-sorrend forrása: nyomtatott/PDF menetrend (a VGO OTP scraper csak 1-2 megállót ad vissza járatonként, nem alkalmas erre)
 - SP platformok + koordináták: `stop-editor2.html` + `_tmp_geocoding/` eszközök újrafuttathatók
 - Néhány járatnál (pl. 18-as, 28-as) a Continental megálló kimaradt az eredeti adatból — új menetrendnél ellenőrizni, hogy minden megálló szerepel-e
@@ -108,12 +131,6 @@ A city.html útvonaltervező jelenleg csak a GoHome tervező 12 vonalát tartalm
 - Érdemes megnézni van-e trip/timetable endpoint az OTP-ban amit Playwright-on keresztül el lehet érni
 
 ## Térképes nézet
-
-### 47-es busz — farmuci járat, külön vizsgálat kell
-A 47-es egy szokatlan szerkezetű járat: a `city-data.js`-ben Hotel az első megálló, de a GTFS shape autóbusz-állomástól indul, és Hotel csak a shape közepén (index 274/331) jelenik meg. Emiatt a térképen a vonal az autóbusz-állomástól indul, nem Hoteltől.
-- Meg kell nézni az eredeti menetrend PDF-ben: tényleg Hoteltől indul-e, vagy adatbeviteli hiba
-- Ha valóban Hotel-induló speciális variáns, saját shape kell hozzá (jelenleg nincs a GTFS-ben)
-- Ha hiba a city-data.js-ben, javítani a megállósorrendet
 
 ### ✅ KÉSZ — Buszútvonalak megjelenítése térképen
 - GPS koordináták + SP platform ID-k bekerültek a `city-data.js`-be (stop-editor2.html + manuális validálás)

@@ -5,7 +5,7 @@
 // Ez a fájl csak az útvonaltervező logikát tartalmazza.
 // ============================================================
 
-window.APP_VERSION = "2.3";
+window.APP_VERSION = "2.4";
 
 // Helyi buszok amik Csererdőt érintik (hazaút + iskolába tervező)
 const HOME_BUS_IDS = ["3", "8", "8Y", "28"];

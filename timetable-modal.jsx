@@ -333,6 +333,7 @@ function StopTimeline({ bus, selectedDep, nowMins, fmt }) {
 function BusRouteMap({ bus, color, selectedDep, nowMins, fmt, modalRef }) {
   const mapRef = React.useRef(null);
   const instanceRef = React.useRef(null);
+  const busKey = `${bus.id}-${bus.direction}-${selectedDep ?? 'none'}`;
 
   React.useEffect(() => {
     const handler = () => setTimeout(() => instanceRef.current?.invalidateSize(), 100);
@@ -356,15 +357,97 @@ function BusRouteMap({ bus, color, selectedDep, nowMins, fmt, modalRef }) {
     const shapes = (window.CITY_SHAPES || {})[bus.id];
     let routeCoords = null;
 
-    if (shapes && window.nearestShapeIdx) {
+    if (shapes && shapes.length && window.nearestShapeIdx) {
       const first = stops[0], last = stops[stops.length - 1];
-      let best = null, bestScore = -Infinity;
-      for (const dir of shapes) {
-        const fi = window.nearestShapeIdx(dir, first.lat, first.lon);
-        const ti = window.nearestShapeIdx(dir, last.lat, last.lon);
-        if (ti > fi && ti - fi > bestScore) { bestScore = ti - fi; best = { coords: dir, fi, ti }; }
+      const isCircular = first.name === last.name;
+
+      if (isCircular) {
+        const best = shapes.reduce((a, b) => b.coords.length > a.coords.length ? b : a, shapes[0]);
+        routeCoords = best.coords;
+      } else {
+        // Shape kiválasztás: mindkét orientációt értékeljük endpoint távolság + lefedettség alapján
+        const norm = s => s.toLowerCase().replace(/[.,]/g, '').trim();
+        const lastN = norm(last.name);
+        const END_THR = 0.0045; // ~500m
+
+        // Mindkét orientáció: végpontok közel + legtöbb lefedett megálló
+        let chosenCoords = null;
+        {
+          let bestScore = -1;
+          for (const s of shapes) {
+            for (const coords of [s.coords, [...s.coords].reverse()]) {
+              const fi = window.nearestShapeIdx(coords, first.lat, first.lon);
+              const ti = window.nearestShapeIdx(coords, last.lat, last.lon);
+              if (fi >= ti) continue;
+              const dF = Math.hypot(coords[fi][0]-first.lat, coords[fi][1]-first.lon);
+              const dL = Math.hypot(coords[ti][0]-last.lat, coords[ti][1]-last.lon);
+              if (dF > END_THR || dL > END_THR) continue;
+              const covered = stops.filter(st => {
+                const idx = window.nearestShapeIdx(coords, st.lat, st.lon);
+                const p = coords[idx];
+                return Math.hypot(p[0]-st.lat, p[1]-st.lon) < 0.00045;
+              }).length;
+              if (covered > bestScore) { bestScore = covered; chosenCoords = coords; }
+            }
+          }
+        }
+
+        // 3. Fallback: végpontkorlát nélkül, legtöbb lefedett
+        if (!chosenCoords) {
+          let bestScore = -1;
+          for (const s of shapes) {
+            for (const coords of [s.coords, [...s.coords].reverse()]) {
+              const fi = window.nearestShapeIdx(coords, first.lat, first.lon);
+              const ti = window.nearestShapeIdx(coords, last.lat, last.lon);
+              if (fi >= ti) continue;
+              const covered = stops.filter(st => {
+                const idx = window.nearestShapeIdx(coords, st.lat, st.lon);
+                const p = coords[idx];
+                return Math.hypot(p[0]-st.lat, p[1]-st.lon) < 0.00045;
+              }).length;
+              if (covered > bestScore) { bestScore = covered; chosenCoords = coords; }
+            }
+          }
+        }
+
+        if (chosenCoords && chosenCoords.length >= 2) {
+          const f = window.nearestShapeIdx(chosenCoords, first.lat, first.lon);
+          const t = window.nearestShapeIdx(chosenCoords, last.lat, last.lon);
+
+          // Wraparound: ha a megállók indexei visszaugranak (pl. 47-es busz),
+          // min/max alapján vágjuk a shape-et
+          const covIdxs = stops.map(s => window.nearestShapeIdx(chosenCoords, s.lat, s.lon))
+            .filter((idx, i) => Math.hypot(chosenCoords[idx][0]-stops[i].lat, chosenCoords[idx][1]-stops[i].lon) < 0.00045);
+          let isWraparound = false;
+          for (let i = 1; i < covIdxs.length; i++) {
+            if (covIdxs[i] < covIdxs[i-1] - 50) { isWraparound = true; break; }
+          }
+          const [sf, st] = isWraparound
+            ? [Math.min(...covIdxs), Math.max(...covIdxs)]
+            : [f, t];
+          const seg = chosenCoords.slice(sf, st + 1);
+          if (isWraparound) {
+            const dFirst = Math.hypot(seg[0][0]-first.lat, seg[0][1]-first.lon) * 111000;
+            if (dFirst > 50) {
+              // Keresünk másik shape-t ami az első megállótól a shape kezdetéig vezet
+              let prefix = null;
+              for (const s of shapes) {
+                const si = window.nearestShapeIdx(s.coords, first.lat, first.lon);
+                const ti = window.nearestShapeIdx(s.coords, seg[0][0], seg[0][1]);
+                if (si >= ti) continue;
+                const dS = Math.hypot(s.coords[si][0]-first.lat, s.coords[si][1]-first.lon) * 111000;
+                const dT = Math.hypot(s.coords[ti][0]-seg[0][0], s.coords[ti][1]-seg[0][1]) * 111000;
+                if (dS < 100 && dT < 100) { prefix = s.coords.slice(si, ti + 1); break; }
+              }
+              routeCoords = prefix ? [...prefix, ...seg.slice(1)] : [[first.lat, first.lon], ...seg];
+            } else {
+              routeCoords = seg;
+            }
+          } else {
+            routeCoords = seg;
+          }
+        }
       }
-      if (best && bestScore >= 5) routeCoords = best.coords;
     }
 
     L.polyline(routeCoords || allStopCoords, { color, weight: 5, opacity: 0.85 }).addTo(map);
@@ -391,7 +474,7 @@ function BusRouteMap({ bus, color, selectedDep, nowMins, fmt, modalRef }) {
     }, 50);
 
     return () => { map.remove(); instanceRef.current = null; };
-  }, [bus, selectedDep]);
+  }, [busKey]);
 
   function toggleFullscreen() {
     const el = modalRef?.current;

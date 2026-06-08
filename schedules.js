@@ -25,8 +25,7 @@ window.SCHEDULES = {
       {
         id: "komakut",
         label: "Komakút tér / Pannon Egyetem",
-        short: "Komakút tér",
-        localStopName: "Komakút tér / Pannon Egyetem",
+        lat: 47.089704, lon: 17.907205, spId: "VOLAN_558516",
         trips: [
           { dep: "05:27", arr: "05:39", days: "workday", line: "7370" },
           { dep: "05:29", arr: "05:42", days: "school", line: "7361" },
@@ -88,7 +87,8 @@ window.SCHEDULES = {
         id: "buszall",
         label: "Veszprém, autóbusz-állomás",
         short: "Autóbusz-áll.",
-        localStopName: "Veszprém, autóbusz-állomás",
+        localStopName: "Veszprém autóbusz-állomás",
+        lat: 47.09558253762741, lon: 17.913935607419273, spId: "VOLAN_PALYADVAR",
         trips: [
           { dep: "05:25", arr: "05:42", days: "school", line: "7361" },
           { dep: "05:25", arr: "05:39", days: "workday", line: "7370" },
@@ -151,7 +151,7 @@ window.SCHEDULES = {
 
   helykozi: {
     name: "Helyközi busz",
-    from: "Nemesvámos, autóbusz-váróterem",
+    from: "Nemesvámos, autóbusz-váróterem", fromLat: 47.05611, fromLon: 17.870028, fromSpId: "VOLAN_557858",
     // Három úti cél (átszálláspont Veszprémben):
     destinations: [
       {
@@ -160,6 +160,7 @@ window.SCHEDULES = {
         short: "Komakút tér",
         // Név ahogy a helyi buszok stops-jában szerepel:
         localStopName: "Komakút tér / Pannon Egyetem",
+        lat: 47.089308, lon: 17.907608, spId: "VOLAN_558516",
         trips: [
           { dep: "04:52", arr: "05:05", days: "workday", line: "7361" },
           { dep: "05:00", arr: "05:13", days: "workday", line: "7361" },
@@ -226,6 +227,7 @@ window.SCHEDULES = {
         label: "Veszprém, Petőfi Színház",
         short: "Színház",
         localStopName: "Petőfi Színház",
+        lat: 47.091798, lon: 17.906025, spId: "VOLAN_SP1670",
         trips: [
           { dep: "04:52", arr: "05:07", days: "workday", line: "7361" },
           { dep: "05:00", arr: "05:15", days: "workday", line: "7361" },
@@ -292,7 +294,8 @@ window.SCHEDULES = {
         id: "buszall",
         label: "Veszprém, autóbusz-állomás",
         short: "Autóbusz-áll.",
-        localStopName: "Veszprém, autóbusz-állomás",
+        localStopName: "Veszprém autóbusz-állomás",
+        lat: 47.094848, lon: 17.913643, spId: "VBUSZ_SP1693",
         trips: [
           { dep: "04:52", arr: "05:09", days: "workday", line: "7361" },
           { dep: "05:00", arr: "05:17", days: "workday", line: "7361" },
@@ -358,283 +361,4 @@ window.SCHEDULES = {
     ],
   },
 };
-
-// ============================================================
-// Helyi járatok Veszprémben — Csererdő felé
-// Forrás: PDF (VeszprémGO menetrend 2026. március 1-től)
-// ============================================================
-
-window.LOCAL_BUSES = [
-  // 3-as busz: Haszkovó forduló → Csererdő
-  // FONTOS: Komakút teret NEM érinti, de Veszprém autóbusz-állomást IGEN.
-  {
-    id: "3",
-    color: "#EC407A",
-    label: "3-as busz",
-    direction: "Haszkovó forduló → Csererdő",
-    stops: [
-      { name: "Haszkovó forduló", offset: 0 },
-      { name: "Petőfi Sándor utca", offset: 4 },
-      { name: "Veszprém, autóbusz-állomás", offset: 5 },
-      { name: "Hotel", offset: 6 },
-      { name: "Petőfi Színház", offset: 8 },
-      { name: "Harmat utca", offset: 9 },
-      { name: "Völgyhíd tér", offset: 10 },
-      { name: "Pápai út 25.", offset: 11 },
-      { name: "Tizenháromváros tér", offset: 12 },
-      { name: "Dózsa György tér", offset: 13 },
-      { name: "Vértanú utca", offset: 15 },
-      { name: "Avar utca", offset: 16 },
-      { name: "Ipar utca", offset: 17 },
-      { name: "Fórum", offset: 19 },
-      { name: "Házgyár", offset: 20 },
-      { name: "Bakony Művek", offset: 21 },
-      { name: "Csererdő", offset: 22 },
-    ],
-    departures: {
-      workday: {
-        4: [55], 5: [8, 18, 28, 48], 6: [8, 26, 44], 7: [0, 16, 33, 53],
-        8: [13, 43], 9: [13, 43], 10: [13, 43], 11: [13, 43], 12: [13, 43],
-        13: [3, 13, 33, 53], 14: [13, 33, 53], 15: [13, 33, 53], 16: [13, 33, 53],
-        17: [13, 43], 18: [13, 43], 19: [13, 43], 20: [13], 21: [17], 22: [15],
-      },
-      weekend: {
-        5: [18], 6: [18], 7: [18], 8: [18], 9: [18], 10: [18], 11: [18], 12: [18],
-        13: [23], 14: [18], 15: [18], 16: [18], 17: [18], 18: [18], 19: [18],
-        20: [18], 21: [23], 22: [15],
-      },
-    },
-  },
-
-  // 8-as busz: Haszkovó forduló → Csererdő
-  // Komakút teret ÉRINTI (jelölt betűk: A = csak Iskola utcáig, V = Valeo nélkül)
-  {
-    id: "8",
-    color: "#42A5F5",
-    label: "8-as busz",
-    direction: "Haszkovó forduló → Csererdő",
-    stops: [
-      { name: "Haszkovó forduló", offset: 0 },
-      { name: "Komakút tér / Pannon Egyetem", offset: 13 },
-      { name: "Iskola utca", offset: 14 },
-      { name: "Harmat utca", offset: 15 },
-      { name: "Völgyhíd tér", offset: 16 },
-      { name: "Pápai út 25.", offset: 17 },
-      { name: "BALLUFF / JOST", offset: 20 },
-      { name: "Valeo", offset: 21 },
-      { name: "Valeo, főporta", offset: 22 },
-      { name: "Bakony Művek", offset: 25 },
-      { name: "Csererdő", offset: 26 },
-    ],
-    // Csak az OLYAN indulásokat vesszük be, amelyek Csererdőig mennek.
-    // "A" jelöltek csak Iskola utcáig mennek → kizárva.
-    // "V" jelöltek Valeo nélkül, de Csererdőig igen → benne marad.
-    departures: {
-      workday: {
-        5: [7, 22, 51], 6: [21, 51], 7: [11, 21, 55], 8: [25],
-        12: [51], 13: [16, 26, 55], 14: [25, 55], 15: [25, 55],
-        16: [25, 59], 21: [15],
-      },
-      weekend: {
-        5: [21], 13: [9], 17: [9], 21: [15],
-      },
-    },
-  },
-
-  // 28-as busz: Vámosi úti forduló → Csererdő (Komakút téren át)
-  {
-    id: "28",
-    color: "#FFA726",
-    label: "28-as busz",
-    direction: "Vámosi úti forduló → Csererdő",
-    stops: [
-      { name: "Vámosi úti forduló", offset: 0 },
-      { name: "Stadion", offset: 7 },
-      { name: "Komakút tér / Pannon Egyetem", offset: 10 },
-      { name: "Iskola utca", offset: 11 },
-      { name: "Harmat utca", offset: 13 },
-      { name: "Völgyhíd tér", offset: 14 },
-      { name: "Pápai út 25.", offset: 15 },
-      { name: "BALLUFF / JOST", offset: 18 },
-      { name: "Valeo, főporta", offset: 20 },
-      { name: "Bakony Művek", offset: 23 },
-      { name: "Csererdő", offset: 24 },
-    ],
-    departures: {
-      workday: { 5: [16], 13: [13], 21: [18] },
-      weekend: {},
-    },
-  },
-
-  // ================================================================
-  // REGGELI IRÁNY — Csererdőről VISSZA a városba (iskolába menet)
-  // Külön busz-objektumok, hogy a délutáni planner ne használja őket.
-  // ================================================================
-
-  // 3-as REGGEL: Csererdő → Haszkovó (Színházon + Autóbusz-állomáson át)
-  {
-    id: "3",
-    color: "#EC407A",
-    label: "3-as busz",
-    direction: "Csererdő → Haszkovó forduló",
-    morning: true,
-    stops: [
-      { name: "Csererdő", offset: 0 },
-      { name: "Bakony Művek", offset: 0 },
-      { name: "Házgyár", offset: 1 },
-      { name: "Fórum", offset: 2 },
-      { name: "Pápai út 25.", offset: 8 },
-      { name: "Völgyhíd tér", offset: 9 },
-      { name: "Harmat utca", offset: 10 },
-      { name: "Petőfi Színház", offset: 11 },
-      { name: "Hotel", offset: 13 },
-      { name: "Veszprém, autóbusz-állomás", offset: 15 },
-      { name: "Haszkovó utca", offset: 20 },
-      { name: "Haszkovó forduló", offset: 21 },
-    ],
-    departures: {
-      // Csererdőből indulás percei, óránként
-      workday: {
-        5: [0, 20, 40],
-        6: [0, 17, 34, 52],
-        7: [12, 32, 52],
-        8: [13, 43],
-        9: [13, 43],
-        10: [13, 43],
-        11: [13, 43],
-        12: [13, 43],
-        13: [13, 43],
-        14: [0, 10, 22, 42],
-        15: [2, 22, 42],
-        16: [2, 12, 22, 42],
-        17: [11, 41],
-        18: [11, 41],
-        19: [6, 41],
-        20: [11],
-        21: [11],
-        22: [10],
-      },
-      weekend: {
-        5: [25],
-        6: [10, 45],
-        7: [45],
-        8: [45],
-        9: [45],
-        10: [45],
-        11: [45],
-        12: [45],
-        14: [5, 45],
-        15: [45],
-        16: [45],
-        17: [45],
-        18: [45],
-        19: [45],
-        20: [45],
-        22: [10],
-      },
-    },
-  },
-
-  // 8-as REGGEL: Csererdő → Haszkovó (Színházon + Komakút téren át)
-  {
-    id: "8",
-    color: "#42A5F5",
-    label: "8-as busz",
-    direction: "Csererdő → Haszkovó forduló",
-    morning: true,
-    stops: [
-      { name: "Csererdő", offset: 0 },
-      { name: "Bakony Művek", offset: 0 },
-      { name: "Pápai út 25.", offset: 8 },
-      { name: "Völgyhíd tér", offset: 9 },
-      { name: "Harmat utca", offset: 10 },
-      { name: "Petőfi Színház", offset: 11 },
-      { name: "Megyeház tér", offset: 12 },
-      { name: "Komakút tér / Pannon Egyetem", offset: 13 },
-      { name: "Haszkovó forduló", offset: 29 },
-    ],
-    departures: {
-      workday: {
-        5: [41],
-        6: [7, 37],
-        7: [34],
-        8: [3, 33],
-        13: [35],
-        14: [7, 35],
-        15: [4, 34],
-        16: [4, 34],
-        17: [11],
-        18: [8],
-        22: [10],
-      },
-      weekend: {
-        6: [7],
-        14: [7],
-        18: [8],
-        22: [10],
-      },
-    },
-  },
-
-  // 8Y-as REGGEL: Csererdő → Haszkovó (Színházon + Komakút téren át)
-  {
-    id: "8Y",
-    color: "#8142f5",
-    label: "8Y-as busz",
-    direction: "Csererdő → Haszkovó forduló",
-    morning: true,
-    stops: [
-      { name: "Csererdő", offset: 0 },
-      { name: "Bakony Művek", offset: 1 },
-      { name: "Házgyár", offset: 2 },
-      { name: "Fórum", offset: 3 },
-      { name: "Ipar utca", offset: 4 },
-      { name: "Avar utca", offset: 6 },
-      { name: "Vértanu utca", offset: 7 },
-      { name: "Dózsa György tér", offset: 8 },
-      { name: "Tizenháromváros tér", offset: 10 },
-      { name: "Pápai út 25.", offset: 11 },
-      { name: "Völgyhíd tér", offset: 12 },
-      { name: "Harmat utca", offset: 13 },
-      { name: "Petőfi Színház", offset: 14 },
-      { name: "Megyeház tér", offset: 15 },
-      { name: "Komakút tér / Pannon Egyetem", offset: 16 },
-      { name: "Haszkovó forduló", offset: 41 },
-    ],
-    departures: {
-      workday: {
-        7: [4],
-      },
-      weekend: {},
-    },
-  },
-
-  // 28-as REGGEL: Csererdő → Vámosi (Színházon + Komakút téren át)
-  {
-    id: "28",
-    color: "#FFA726",
-    label: "28-as busz",
-    direction: "Csererdő → Vámosi úti forduló",
-    morning: true,
-    stops: [
-      { name: "Csererdő", offset: 0 },
-      { name: "Bakony Művek", offset: 1 },
-      { name: "Pápai út 25.", offset: 10 },
-      { name: "Völgyhíd tér", offset: 11 },
-      { name: "Harmat utca", offset: 12 },
-      { name: "Petőfi Színház", offset: 13 },
-      { name: "Megyeház tér", offset: 14 },
-      { name: "Komakút tér / Pannon Egyetem", offset: 15 },
-      { name: "Vámosi úti forduló", offset: 26 },
-    ],
-    departures: {
-      workday: {
-        6: [6],
-        14: [6],
-        22: [9],
-      },
-      weekend: {},
-    },
-  },
-];
 

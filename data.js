@@ -1,17 +1,43 @@
 // ============================================================
 // GoHome Planner — Algoritmusok & segédfüggvények
 // ============================================================
-// A menetrendi adatok (SCHEDULES, LOCAL_BUSES) a schedules.js-ben vannak.
+// A menetrendi adatok (SCHEDULES) a schedules.js-ben vannak.
 // Ez a fájl csak az útvonaltervező logikát tartalmazza.
 // ============================================================
 
 window.APP_VERSION = "2.3";
 
+// Helyi buszok amik Csererdőt érintik (hazaút + iskolába tervező)
+const HOME_BUS_IDS = ["3", "8", "8Y", "28"];
+
+// GTFS shape segédfüggvény — mindkét nézetben elérhető (index.html + city.html)
+window.nearestShapeIdx = function(shape, lat, lon) {
+  let best = 0, bestD = Infinity;
+  for (let i = 0; i < shape.length; i++) {
+    const d = (shape[i][0]-lat)**2 + (shape[i][1]-lon)**2;
+    if (d < bestD) { bestD = d; best = i; }
+  }
+  return best;
+};
+
 // ============================================================
 // Segédfüggvények
 // ============================================================
 
+// Legjobb GTFS shape kiválasztása két koordináta között (ti-fi span alapján)
+// Kezeli az új { coords, headsign, dir } formátumot és a régi [[lat,lon]] formátumot is
 window.BUS_UTILS = {
+  bestShape(shapes, fromLat, fromLon, toLat, toLon) {
+    let best = null, bestScore = -Infinity;
+    for (const entry of shapes) {
+      const s = entry.coords || entry;
+      const fi = window.nearestShapeIdx(s, fromLat, fromLon);
+      const ti = window.nearestShapeIdx(s, toLat, toLon);
+      if (ti > fi && ti - fi > bestScore) { bestScore = ti - fi; best = { s, fi, ti }; }
+    }
+    return best;
+  },
+
   // Óra:perc → percek hajnaltól
   toMinutes(hm) {
     const [h, m] = hm.split(":").map(Number);
@@ -85,9 +111,10 @@ window.planRoutes = function planRoutes({
     !allowedTransfers || allowedTransfers.length === 0 || allowedTransfers.includes(d.id)
   );
 
-  // Ha homeStop be van állítva → CITY_BUSES-ból keresünk, különben LOCAL_BUSES
   const targetStop = homeStop || "Csererdő";
-  const busPool = homeStop ? (window.CITY_BUSES || []) : window.LOCAL_BUSES;
+  const busPool = (window.CITY_BUSES_FULL || []).filter(bus =>
+    (homeStop || HOME_BUS_IDS.includes(bus.id)) && U.busVisits(bus, targetStop)
+  );
 
   const routes = [];
   const seen = new Set();
@@ -113,7 +140,7 @@ window.planRoutes = function planRoutes({
       const mustBoardBy = arrivalAtTransfer + minTransfer;
 
       for (const bus of busPool) {
-        if (bus.morning) continue; // csak délutáni buszok
+        if (bus.stops[0]?.name === "Csererdő") continue; // csak délutáni buszok
         if (!U.busVisits(bus, dest.localStopName)) continue;
         if (!U.busVisits(bus, targetStop)) continue;
         const transferOffset = U.stopOffset(bus, dest.localStopName);
@@ -138,6 +165,8 @@ window.planRoutes = function planRoutes({
             transferStop: dest.label,
             transferStopShort: dest.short,
             transferStopId: dest.id,
+            transferLat: dest.lat,
+            transferLon: dest.lon,
             waitAtTransfer: localAtTransfer - arrivalAtTransfer,
             localBus: bus,
             localBoardAt: localAtTransfer,
@@ -170,7 +199,7 @@ window.planRoutes = function planRoutes({
   if (homeStop && result.length === 0) {
     const otherDay = dayType === "workday" ? "weekend" : "workday";
     const hasOtherDay = busPool.some(bus => {
-      if (bus.morning) return false;
+      if (bus.stops[0]?.name === "Csererdő") return false;
       if (!U.busVisits(bus, targetStop)) return false;
       const deps = U.getDepartures(bus, otherDay);
       return deps.length > 0;
@@ -219,7 +248,7 @@ window.planSchoolRoutes = function planSchoolRoutes({
       label: "Veszprém, autóbusz-állomás",
       short: "Autóbusz-áll.",
       originId: "buszall",
-      localStopName: "Veszprém, autóbusz-állomás",
+      localStopName: "Veszprém autóbusz-állomás",
       walkAfterBus: 0,
       minTransfer: 3,
     },
@@ -260,8 +289,10 @@ window.planSchoolRoutes = function planSchoolRoutes({
       .sort((a, b) => a.depMins - b.depMins);
 
     // Helyi buszok amik Csererdőről → tp.localStopName-re mennek
-    for (const bus of window.LOCAL_BUSES) {
-      if (!bus.morning) continue; // csak reggeli fordított-irányú buszok
+    const schoolBuses = (window.CITY_BUSES_FULL || []).filter(bus =>
+      HOME_BUS_IDS.includes(bus.id) && bus.stops[0]?.name === "Csererdő"
+    );
+    for (const bus of schoolBuses) {
       if (!U.busVisits(bus, "Csererdő")) continue;
       if (!U.busVisits(bus, tp.localStopName)) continue;
       const csererdoOffset = U.stopOffset(bus, "Csererdő");
@@ -312,6 +343,8 @@ window.planSchoolRoutes = function planSchoolRoutes({
           transferStop: tp.label,
           transferStopShort: tp.short,
           transferStopId: tp.id,
+          transferLat: origin.lat,
+          transferLon: origin.lon,
           walkToSchool: 10,
           arriveSchool: hk.arrMins + 10,
           totalDuration: (hk.arrMins + 10) - (localDep - walkMin),

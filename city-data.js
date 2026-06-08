@@ -85,11 +85,6 @@ window.CITY_BUSES_FULL = [
     { name: "Hotel", offset: 10, lat: 47.092217, lon: 17.912391, spId: "VBUSZ_SP1660" },
     { name: "Petőfi Színház", offset: 12, lat: 47.091736, lon: 17.905477, spId: "VBUSZ_SP1630" },
     { name: "Harmat utca", offset: 13, lat: 47.094611, lon: 17.899776, spId: "VBUSZ_SP1736" },
-    { name: "Endrődi Sándor lakótelep", offset: 14, lat: 47.094675, lon: 17.896843, spId: "VBUSZ_SP1751" },
-    { name: "Endrődi Sándor utca", offset: 15, lat: 47.091179, lon: 17.897966, spId: "VBUSZ_SP1752" },
-    { name: "Kiskőrösi utca", offset: 16, lat: 47.089955, lon: 17.900659, spId: "VBUSZ_SP1753" },
-    { name: "Pázmándi utca", offset: 16, lat: 47.089529, lon: 17.904269, spId: "VBUSZ_SP1754" },
-    { name: "Komakút tér / Pannon Egyetem", offset: 17, lat: 47.089308, lon: 17.907608, spId: "VBUSZ_SP1668" }
   ],
   departures: {
     workday: { 5: [32], 6: [7, 47], 7: [20], 8: [0, 40], 9: [20], 10: [0, 40], 11: [20], 12: [0, 40], 13: [10, 40], 14: [10, 40], 15: [10, 40], 16: [10, 40], 17: [10, 40], 18: [20], 19: [0, 40], 20: [40], 21: [40] },
@@ -100,9 +95,10 @@ window.CITY_BUSES_FULL = [
   id: "2",
   color: "#1565C0",
   label: "2-es busz",
-  direction: "Endrődi Sándor lakótelep ▸ Veszprém vasútállomás felé",
+  direction: "Harmat utca ▸ Veszprém vasútállomás felé",
   stops: [
-    { name: "Endrődi Sándor lakótelep", offset: 0, lat: 47.094675, lon: 17.896843, spId: "VBUSZ_SP1751" },
+    { name: "Harmat utca", offset: 0, lat: 47.094611, lon: 17.899776, spId: "VBUSZ_SP1736" },
+    { name: "Endrődi Sándor lakótelep", offset: 1, lat: 47.094675, lon: 17.896843, spId: "VBUSZ_SP1751" },
     { name: "Endrődi Sándor utca", offset: 0, lat: 47.091179, lon: 17.897966, spId: "VBUSZ_SP1752" },
     { name: "Kiskőrösi utca", offset: 1, lat: 47.089955, lon: 17.900659, spId: "VBUSZ_SP1753" },
     { name: "Pázmándi utca", offset: 2, lat: 47.089529, lon: 17.904269, spId: "VBUSZ_SP1754" },
@@ -424,16 +420,10 @@ window.CITY_BUSES_FULL = [
     { name: "Veszprém autóbusz-állomás", offset: 5, lat: 47.094518, lon: 17.912781, spId: "VBUSZ_SP1826" },
     { name: "Hotel", offset: 6, lat: 47.092217, lon: 17.912391, spId: "VBUSZ_SP1660" },
     { name: "Kórház", offset: 7, lat: 47.090195, lon: 17.911534, spId: "VBUSZ_SP1629" },
-    { name: "Füredi utca", offset: 9, lat: 47.083266, lon: 17.911901, spId: "VBUSZ_SP1814" },
+    { name: "Füredi utca", offset: 9, lat: 47.083393, lon: 17.91416, spId: "VBUSZ_SP1815" },
     { name: "Mester utca", offset: 10, lat: 47.083305, lon: 17.918013, spId: "VBUSZ_SP1813" },
     { name: "Almádi út", offset: 11, lat: 47.085791, lon: 17.920721, spId: "VBUSZ_SP1827" },
     { name: "Cholnoky lakótelep", offset: 13, lat: 47.091192, lon: 17.924467, spId: "VBUSZ_SP1797" },
-    { name: "Ady Endre utca / Cholnoky Jenő utca", offset: 14, lat: 47.093215, lon: 17.927278, spId: "VBUSZ_SP1810" },
-    { name: "Vilonyai utca", offset: 15, lat: 47.097479, lon: 17.92786, spId: "VBUSZ_SP1825" },
-    { name: "Csillag utca", offset: 16, lat: 47.095663, lon: 17.929186, spId: "VBUSZ_SP1791" },
-    { name: "Lóczy Lajos utca", offset: 17, lat: 47.092087, lon: 17.928942, spId: "VBUSZ_SP1793" },
-    { name: "Hérics utca", offset: 17, lat: 47.090167, lon: 17.927967, spId: "VBUSZ_SP1796" },
-    { name: "Cholnoky forduló", offset: 18, lat: 47.087278, lon: 17.924425, spId: "VBUSZ_SP1861" }
   ],
   departures: {
     workday: { 6: [24, 52], 7: [19, 49], 8: [55], 9: [55], 10: [55], 11: [55], 12: [56], 13: [57], 14: [47], 15: [17, 47], 16: [17, 48], 17: [55], 18: [55], 19: [55] },
@@ -695,10 +685,6 @@ window.CITY_BUSES_FULL = [
     { name: "Vértanú utca", offset: 13, lat: 47.103641, lon: 17.896975, spId: "VBUSZ_SP1639" },
     { name: "Avar utca", offset: 14, lat: 47.105783, lon: 17.895796, spId: "VBUSZ_SP1723" },
     { name: "Juhar utca", offset: 15, lat: 47.105956, lon: 17.887673, spId: "VBUSZ_SP1892" },
-    { name: "Dózsavárosi temető", offset: 16, lat: 47.102935, lon: 17.892195, spId: "VBUSZ_SP1784" },
-    { name: "Tizenháromváros tér", offset: 17, lat: 47.100708, lon: 17.892015, spId: "VBUSZ_SP1729" },
-    { name: "Pápai út 25.", offset: 18, lat: 47.099956, lon: 17.891438, spId: "VBUSZ_SP1650" },
-    { name: "Völgyhíd tér", offset: 19, lat: 47.098782, lon: 17.894926, spId: "VBUSZ_SP1735" }
   ],
   departures: {
     workday: { 9: [0, 40], 10: [20], 11: [0, 40], 12: [20, 55], 17: [25], 18: [0, 40], 19: [20], 20: [20] },
@@ -841,10 +827,6 @@ window.CITY_BUSES_FULL = [
     { name: "Vértanú utca", offset: 16, lat: 47.103641, lon: 17.896975, spId: "VBUSZ_SP1639" },
     { name: "Avar utca", offset: 17, lat: 47.105783, lon: 17.895796, spId: "VBUSZ_SP1723" },
     { name: "Juhar utca", offset: 18, lat: 47.105956, lon: 17.887673, spId: "VBUSZ_SP1892" },
-    { name: "Dózsavárosi temető", offset: 19, lat: 47.102935, lon: 17.892195, spId: "VBUSZ_SP1784" },
-    { name: "Tizenháromváros tér", offset: 20, lat: 47.100708, lon: 17.892015, spId: "VBUSZ_SP1729" },
-    { name: "Pápai út 25.", offset: 21, lat: 47.099956, lon: 17.891438, spId: "VBUSZ_SP1650" },
-    { name: "Völgyhíd tér", offset: 22, lat: 47.098782, lon: 17.894926, spId: "VBUSZ_SP1735" }
   ],
   departures: {
     workday: { 5: [4, 40], 6: [9, 34, 54], 7: [24, 54], 8: [24], 13: [23, 53], 14: [23, 53], 15: [21, 51], 16: [21, 51] },

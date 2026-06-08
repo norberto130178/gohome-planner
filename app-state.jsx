@@ -277,7 +277,7 @@ function useAppState(options = {}) {
 
   // --- Stop data for DestinationPickerWidget ---
   const stopPickerAllStops = useMemo(() => {
-    const buses = window.CITY_BUSES || [];
+    const buses = window.CITY_BUSES_FULL || [];
     const transferNames = new Set([
       "Komakút tér / Pannon Egyetem",
       "Petőfi Színház",
@@ -296,7 +296,7 @@ function useAppState(options = {}) {
 
   const stopLinesMap = useMemo(() => {
     const map = {};
-    for (const bus of window.CITY_BUSES || []) {
+    for (const bus of window.CITY_BUSES_FULL || []) {
       for (const s of bus.stops) {
         if (!map[s.name]) map[s.name] = [];
         if (!map[s.name].some(b => b.id === bus.id))

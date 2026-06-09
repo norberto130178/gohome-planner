@@ -1491,13 +1491,9 @@ window.CITY_BUSES_FULL = [
     { name: "Gyulafirátót, forduló", offset: 23, lat: 47.149679, lon: 17.946284, spId: "VBUSZ_SP1662" },
   ],
   departures: {
-    workday: { 5: [0, { t: 34, n: 'U' }], 6: [{ t: 35, n: 'U' }], 7: [0, 20], 8: [5, { t: 32, n: 'U' }], 9: [35], 10: [{ t: 32, n: 'U' }], 11: [35], 12: [{ t: 33, n: 'H' }], 13: [{ t: 2, n: 'U' }, { t: 33, n: 'H' }], 14: [5, { t: 32, n: 'U' }, { t: 37, n: 'H' }], 15: [5, { t: 32, n: 'U' }], 16: [{ t: 3, n: 'H' }, { t: 32, n: 'U' }, { t: 55, n: 'H' }], 17: [15, { t: 32, n: 'U' }], 18: [{ t: 3, n: 'H' }, { t: 32, n: 'U' }], 19: [5, { t: 35, n: 'H' }], 20: [5, 35], 21: [{ t: 5, n: 'H' }, 35], 22: [{ t: 35, n: 'H' }] },
-    schoolholiday: { 5: [0, { t: 34, n: 'U' }], 6: [{ t: 35, n: 'U' }], 7: [0, 25], 8: [5, { t: 32, n: 'U' }], 9: [35], 10: [{ t: 32, n: 'U' }], 11: [35], 12: [{ t: 33, n: 'H' }], 13: [{ t: 2, n: 'U' }, { t: 33, n: 'H' }], 14: [{ t: 2, n: 'U' }, { t: 33, n: 'H' }], 15: [5, { t: 32, n: 'U' }], 16: [{ t: 3, n: 'H' }, { t: 32, n: 'U' }], 17: [{ t: 3, n: 'H' }, { t: 32, n: 'U' }], 18: [{ t: 3, n: 'H' }, { t: 32, n: 'U' }], 19: [5, { t: 35, n: 'H' }], 20: [5, 35], 21: [{ t: 5, n: 'H' }, 35], 22: [{ t: 35, n: 'H' }] },
-    weekend: { 5: [{ t: 34, n: 'U' }], 6: [{ t: 35, n: 'U' }], 7: [{ t: 33, n: 'H' }], 8: [{ t: 32, n: 'U' }], 9: [35], 10: [{ t: 32, n: 'U' }], 11: [{ t: 33, n: 'H' }], 12: [{ t: 32, n: 'U' }], 13: [{ t: 33, n: 'H' }], 14: [{ t: 32, n: 'U' }], 15: [{ t: 33, n: 'H' }], 16: [{ t: 32, n: 'U' }], 17: [{ t: 33, n: 'H' }], 18: [{ t: 32, n: 'U' }], 19: [{ t: 35, n: 'H' }], 20: [35], 21: [35], 22: [{ t: 35, n: 'H' }] }
-  },
-  footnotes: {
-    "H": "24-es jelzéssel Gyulafirátót, Hajmáskéri út betéréssel közlekedik / Route 24 is calling at",
-    "U": "23U jelzéssel Veszprémi Sportuszoda betéréssel közlekedik / Route 23U is calling at"
+    workday: { 5: [0], 7: [0, 20], 8: [5], 9: [35], 11: [35], 14: [5], 15: [5], 17: [15], 19: [5], 20: [5, 35], 21: [35] },
+    schoolholiday: { 5: [0], 7: [0, 25], 8: [5], 9: [35], 11: [35], 15: [5], 19: [5], 20: [5, 35], 21: [35] },
+    weekend: { 9: [35], 20: [35], 21: [35] }
   },
 },
 
@@ -1523,13 +1519,125 @@ window.CITY_BUSES_FULL = [
     { name: "Veszprém autóbusz-állomás", offset: 22, lat: 47.09482, lon: 17.913708, spId: "VBUSZ_SP1858" },
   ],
   departures: {
-    workday: { 4: [35, { t: 57, n: 'H' }], 5: [30, { t: 57, n: 'H' }], 6: [15, 30, 45, 55], 7: [25, { t: 52, n: 'H' }], 8: [{ t: 30, n: 'U' }], 9: [0], 10: [{ t: 0, n: 'U' }], 11: [{ t: 0, n: 'H' }], 12: [{ t: 0, n: 'U' }], 13: [0, { t: 30, n: 'U' }], 14: [0, 30], 15: [{ t: 0, n: 'U' }, 30], 16: [{ t: 0, n: 'U' }, 30], 17: [{ t: 0, n: 'U' }, 30], 18: [{ t: 0, n: 'U' }, 30], 19: [{ t: 0, n: 'U' }, 30], 20: [{ t: 0, n: 'U' }, { t: 57, n: 'H' }], 21: [40] },
-    schoolholiday: { 4: [35, { t: 57, n: 'H' }], 5: [30, { t: 57, n: 'H' }], 6: [15, 35, 52], 7: [{ t: 5, n: 'H' }, 25, { t: 52, n: 'H' }], 8: [{ t: 30, n: 'U' }], 9: [0], 10: [{ t: 0, n: 'U' }], 11: [{ t: 0, n: 'H' }], 12: [{ t: 0, n: 'U' }], 13: [0, { t: 30, n: 'U' }], 14: [0, 30], 15: [{ t: 0, n: 'U' }, 30], 16: [{ t: 0, n: 'U' }, 30], 17: [{ t: 0, n: 'U' }, 30], 18: [{ t: 0, n: 'U' }, 30], 19: [{ t: 0, n: 'U' }, 30], 20: [{ t: 0, n: 'U' }, { t: 57, n: 'H' }], 21: [40] },
-    weekend: { 4: [{ t: 57, n: 'H' }], 5: [{ t: 57, n: 'H' }], 7: [0], 8: [{ t: 0, n: 'U' }], 9: [{ t: 0, n: 'H' }], 10: [{ t: 0, n: 'U' }], 11: [{ t: 0, n: 'H' }], 12: [{ t: 0, n: 'U' }], 13: [{ t: 0, n: 'H' }], 14: [{ t: 0, n: 'U' }], 15: [{ t: 0, n: 'H' }], 16: [{ t: 0, n: 'U' }], 17: [0], 18: [{ t: 0, n: 'U' }], 19: [0], 20: [{ t: 0, n: 'U' }], 21: [{ t: 5, n: 'H' }] }
+    workday: { 4: [35], 5: [30], 6: [15, 30, 45, 55], 7: [25], 9: [0], 13: [0], 14: [0, 30], 15: [30], 16: [30], 17: [30], 18: [30], 19: [30], 21: [40] },
+    schoolholiday: { 4: [35], 5: [30], 6: [15, 35, 52], 7: [25], 9: [0], 13: [0], 14: [0, 30], 15: [30], 16: [30], 17: [30], 18: [30], 19: [30], 21: [40] },
+    weekend: { 7: [0], 17: [0], 19: [0] }
   },
-  footnotes: {
-    "H": "24-es jelzéssel Gyulafirátót, Hajmáskéri út betéréssel közlekedik / Route 24 is calling at",
-    "U": "23U jelzéssel Veszprémi Sportuszoda betéréssel közlekedik / Route 23U is calling at"
+},
+
+{
+  id: "23U",
+  color: "#6A1B9A",
+  label: "23U busz",
+  direction: "Veszprém autóbusz-állomás ▸ Gyulafirátót, forduló felé (Sportuszodán át)",
+  stops: [
+    { name: "Veszprém autóbusz-állomás", offset: 0, lat: 47.095645, lon: 17.914133, spId: "VBUSZ_SP1683" },
+    { name: "Rózsa utca", offset: 2, lat: 47.094121, lon: 17.916446, spId: "VBUSZ_SP1730" },
+    { name: "Viola utca", offset: 3, lat: 47.097028, lon: 17.921802, spId: "VBUSZ_SP1625" },
+    { name: "82-es út, bevásárlóközpont", offset: 7, lat: 47.103257, lon: 17.931115, spId: "VBUSZ_SP1638" },
+    { name: "Veszprémi Sportuszoda", offset: 10, lat: 47.102131, lon: 17.936996, spId: "VBUSZ_SP1885" },
+    { name: "Büntetés-végrehajtási Intézet", offset: 12, lat: 47.111416, lon: 17.938078, spId: "VBUSZ_SP1640" },
+    { name: "Kádárta, bejárati út", offset: 14, lat: 47.115665, lon: 17.942054, spId: "VBUSZ_SP1846" },
+    { name: "Kádárta, felső", offset: 15, lat: 47.119395, lon: 17.946569, spId: "VBUSZ_SP1848" },
+    { name: "Kádárta, bolt", offset: 16, lat: 47.120738, lon: 17.950094, spId: "VBUSZ_SP1850" },
+    { name: "Kádárta, Vasút utca", offset: 18, lat: 47.122433, lon: 17.954738, spId: "VBUSZ_SP1834" },
+    { name: "Kádárta, vasúti megállóhely", offset: 19, lat: 47.125378, lon: 17.953428, spId: "VBUSZ_SP1852" },
+    { name: "Gyulafirátót, Posta utca", offset: 21, lat: 47.138206, lon: 17.947441, spId: "VBUSZ_SP1732" },
+    { name: "Gyulafirátót, Vizi utca", offset: 22, lat: 47.142453, lon: 17.947812, spId: "VBUSZ_SP1748" },
+    { name: "Gyulafirátót, felső", offset: 24, lat: 47.146824, lon: 17.94801, spId: "VBUSZ_SP1837" },
+    { name: "Gyulafirátót, forduló", offset: 25, lat: 47.149679, lon: 17.946284, spId: "VBUSZ_SP1662" },
+  ],
+  departures: {
+    workday: { 5: [34], 6: [35], 8: [32], 10: [32], 13: [2], 14: [32], 15: [32], 16: [32], 17: [32], 18: [32] },
+    schoolholiday: { 5: [34], 6: [35], 8: [32], 10: [32], 13: [2], 14: [2], 15: [32], 16: [32], 17: [32], 18: [32] },
+    weekend: { 5: [34], 6: [35], 8: [32], 10: [32], 12: [32], 14: [32], 16: [32], 18: [32] }
+  },
+},
+
+{
+  id: "23U",
+  color: "#6A1B9A",
+  label: "23U busz",
+  direction: "Gyulafirátót, forduló ▸ Veszprém autóbusz-állomás felé (Sportuszodán át)",
+  stops: [
+    { name: "Gyulafirátót, forduló", offset: 0, lat: 47.149679, lon: 17.946284, spId: "VBUSZ_SP1662" },
+    { name: "Gyulafirátót, felső", offset: 0, lat: 47.147211, lon: 17.947595, spId: "VBUSZ_SP1853" },
+    { name: "Gyulafirátót, Vizi utca", offset: 1, lat: 47.142244, lon: 17.947243, spId: "VBUSZ_SP1749" },
+    { name: "Gyulafirátót, Posta utca", offset: 2, lat: 47.137267, lon: 17.947344, spId: "VBUSZ_SP1733" },
+    { name: "Kádárta, vasúti megállóhely", offset: 4, lat: 47.125217, lon: 17.953352, spId: "VBUSZ_SP1835" },
+    { name: "Kádárta, Vasút utca", offset: 5, lat: 47.122085, lon: 17.954775, spId: "VBUSZ_SP1833" },
+    { name: "Kádárta, bolt", offset: 6, lat: 47.12076, lon: 17.949745, spId: "VBUSZ_SP1851" },
+    { name: "Kádárta, felső", offset: 7, lat: 47.11938, lon: 17.946162, spId: "VBUSZ_SP1849" },
+    { name: "Kádárta, bejárati út", offset: 9, lat: 47.116002, lon: 17.942097, spId: "VBUSZ_SP1847" },
+    { name: "Büntetés-végrehajtási Intézet", offset: 11, lat: 47.111703, lon: 17.937927, spId: "VBUSZ_SP1641" },
+    { name: "Veszprémi Sportuszoda", offset: 15, lat: 47.102131, lon: 17.936996, spId: "VBUSZ_SP1885" },
+    { name: "82-es út, bevásárlóközpont", offset: 18, lat: 47.103212, lon: 17.930818, spId: "VBUSZ_SP1647" },
+    { name: "Viola utca", offset: 22, lat: 47.096806, lon: 17.921019, spId: "VBUSZ_SP1649" },
+    { name: "Rózsa utca", offset: 23, lat: 47.094829, lon: 17.917398, spId: "VBUSZ_SP1731" },
+    { name: "Veszprém autóbusz-állomás", offset: 25, lat: 47.09482, lon: 17.913708, spId: "VBUSZ_SP1858" },
+  ],
+  departures: {
+    workday: { 8: [30], 10: [0], 12: [0], 13: [30], 15: [0], 16: [0], 17: [0], 18: [0], 19: [0], 20: [0] },
+    schoolholiday: { 8: [30], 10: [0], 12: [0], 13: [30], 15: [0], 16: [0], 17: [0], 18: [0], 19: [0], 20: [0] },
+    weekend: { 8: [0], 10: [0], 12: [0], 14: [0], 16: [0], 18: [0], 20: [0] }
+  },
+},
+
+{
+  id: "24",
+  color: "#6A1B9A",
+  label: "24-es busz",
+  direction: "Veszprém autóbusz-állomás ▸ Gyulafirátót, forduló felé (Hajmáskéri úton át)",
+  stops: [
+    { name: "Veszprém autóbusz-állomás", offset: 0, lat: 47.095645, lon: 17.914133, spId: "VBUSZ_SP1683" },
+    { name: "Rózsa utca", offset: 2, lat: 47.094121, lon: 17.916446, spId: "VBUSZ_SP1730" },
+    { name: "Viola utca", offset: 3, lat: 47.097028, lon: 17.921802, spId: "VBUSZ_SP1625" },
+    { name: "82-es út, bevásárlóközpont", offset: 7, lat: 47.103257, lon: 17.931115, spId: "VBUSZ_SP1638" },
+    { name: "Büntetés-végrehajtási Intézet", offset: 9, lat: 47.111416, lon: 17.938078, spId: "VBUSZ_SP1640" },
+    { name: "Kádárta, bejárati út", offset: 11, lat: 47.115665, lon: 17.942054, spId: "VBUSZ_SP1846" },
+    { name: "Kádárta, felső", offset: 12, lat: 47.119395, lon: 17.946569, spId: "VBUSZ_SP1848" },
+    { name: "Kádárta, bolt", offset: 13, lat: 47.120738, lon: 17.950094, spId: "VBUSZ_SP1850" },
+    { name: "Kádárta, Vasút utca", offset: 14, lat: 47.122433, lon: 17.954738, spId: "VBUSZ_SP1834" },
+    { name: "Kádárta, vasúti megállóhely", offset: 15, lat: 47.125378, lon: 17.953428, spId: "VBUSZ_SP1852" },
+    { name: "Gyulafirátót, Posta utca", offset: 17, lat: 47.138206, lon: 17.947441, spId: "VBUSZ_SP1732" },
+    { name: "Gyulafirátót, Vizi utca", offset: 18, lat: 47.142453, lon: 17.947812, spId: "VBUSZ_SP1748" },
+    { name: "Gyulafirátót, Hajmáskéri út", offset: 21, lat: 47.143412, lon: 17.956254, spId: "VBUSZ_SP1896" },
+    { name: "Gyulafirátót, felső", offset: 23, lat: 47.146824, lon: 17.94801, spId: "VBUSZ_SP1837" },
+    { name: "Gyulafirátót, forduló", offset: 24, lat: 47.149679, lon: 17.946284, spId: "VBUSZ_SP1662" },
+  ],
+  departures: {
+    workday: { 12: [33], 13: [33], 14: [37], 16: [3, 55], 18: [3], 19: [35], 21: [5], 22: [35] },
+    schoolholiday: { 12: [33], 13: [33], 14: [33], 16: [3], 17: [3], 18: [3], 19: [35], 21: [5], 22: [35] },
+    weekend: { 7: [33], 11: [33], 13: [33], 15: [33], 17: [33], 19: [35], 22: [35] }
+  },
+},
+
+{
+  id: "24",
+  color: "#6A1B9A",
+  label: "24-es busz",
+  direction: "Gyulafirátót, forduló ▸ Veszprém autóbusz-állomás felé (Hajmáskéri úton át)",
+  stops: [
+    { name: "Gyulafirátót, forduló", offset: 0, lat: 47.149679, lon: 17.946284, spId: "VBUSZ_SP1662" },
+    { name: "Gyulafirátót, felső", offset: 0, lat: 47.147211, lon: 17.947595, spId: "VBUSZ_SP1853" },
+    { name: "Gyulafirátót, Hajmáskéri út", offset: 2, lat: 47.143412, lon: 17.956254, spId: "VBUSZ_SP1896" },
+    { name: "Gyulafirátót, Vizi utca", offset: 4, lat: 47.142244, lon: 17.947243, spId: "VBUSZ_SP1749" },
+    { name: "Gyulafirátót, Posta utca", offset: 5, lat: 47.137267, lon: 17.947344, spId: "VBUSZ_SP1733" },
+    { name: "Kádárta, vasúti megállóhely", offset: 7, lat: 47.125217, lon: 17.953352, spId: "VBUSZ_SP1835" },
+    { name: "Kádárta, Vasút utca", offset: 8, lat: 47.122085, lon: 17.954775, spId: "VBUSZ_SP1833" },
+    { name: "Kádárta, bolt", offset: 9, lat: 47.12076, lon: 17.949745, spId: "VBUSZ_SP1851" },
+    { name: "Kádárta, felső", offset: 10, lat: 47.11938, lon: 17.946162, spId: "VBUSZ_SP1849" },
+    { name: "Kádárta, bejárati út", offset: 11, lat: 47.116002, lon: 17.942097, spId: "VBUSZ_SP1847" },
+    { name: "Büntetés-végrehajtási Intézet", offset: 13, lat: 47.111703, lon: 17.937927, spId: "VBUSZ_SP1641" },
+    { name: "82-es út, bevásárlóközpont", offset: 16, lat: 47.103212, lon: 17.930818, spId: "VBUSZ_SP1647" },
+    { name: "Viola utca", offset: 20, lat: 47.096806, lon: 17.921019, spId: "VBUSZ_SP1649" },
+    { name: "Rózsa utca", offset: 21, lat: 47.094829, lon: 17.917398, spId: "VBUSZ_SP1731" },
+    { name: "Veszprém autóbusz-állomás", offset: 23, lat: 47.09482, lon: 17.913708, spId: "VBUSZ_SP1858" },
+  ],
+  departures: {
+    workday: { 4: [57], 5: [57], 7: [52], 11: [0], 20: [57] },
+    schoolholiday: { 4: [57], 5: [57], 7: [5, 52], 11: [0], 20: [57] },
+    weekend: { 4: [57], 5: [57], 9: [0], 11: [0], 13: [0], 15: [0], 21: [5] }
   },
 },
 

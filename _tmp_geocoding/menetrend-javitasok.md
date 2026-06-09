@@ -304,3 +304,49 @@ Ellenőrzés dátuma: 2026-06-08
 | 42 | ✅ | — (körjárat) |
 | 43 | ✅ | — |
 | 47 | ✅ | — |
+
+---
+
+## Záró ellenőrzés eredménye (2026-06-09)
+
+33 javított értéket ellenőriztem automatikusan a city-data.js jelenlegi állapota ellen — **mind helyes**.
+
+### ✅ PDF alapján ellenőrizhető és helyes
+
+| Vonal | Oldalak | Státusz |
+|---|---|---|
+| 1 | page 2–3 | ✅ |
+| 3 | page 6–7 | ✅ |
+| 5 | page 11–12 | ✅ |
+| 6 | page 13–14 | ✅ (V szétválasztás logikai következtetés, helyes) |
+| 7 | page 15–16 | ✅ |
+| 7A | page 17–18 | ✅ |
+| 8 visszafelé | page 20 | ✅ |
+| 8A visszafelé | page 21 | ✅ |
+| 8Y | page 22 | ✅ |
+| 10 | page 23–24 | ✅ |
+| 11 | page 25–26 | ✅ |
+| 12 | page 27 | ✅ |
+| 13 | page 28–29 | ✅ |
+| 15 | page 30–31 | ✅ |
+| 15A | page 32–33 | ✅ |
+| 16 | page 34–35 | ✅ |
+| 18 | page 36–37 | ✅ |
+| 20 | page 38–39 | ✅ |
+| 21 | page 40–41 | ✅ |
+| 22 | page 42–43 | ✅ |
+| 25 | page 46 | ✅ |
+| 28 | page 47–48 | ✅ |
+| 42 | page 49 | ✅ |
+| 43 | page 50 | ✅ |
+| 47 | page 51 | ✅ |
+
+### ⚠️ PDF alapján NEM ellenőrizhető (valóban csak 3 eset)
+
+| Vonal | Ok |
+|---|---|
+| **2 körjárat vágási pont** | A PDF nem jelöli hol kell elvágni — felhasználó tudta hogy Endrődi Sándor lakótelepnél. Az indulási idők és az 5h `[4, 47]` szétválasztás PDF-ből ellenőrizve. |
+| **4A tanszünet + hétvége** | Egyszerűen nincs benne ebben a PDF-ben. Más forrás szükséges. ⚠️ |
+| **23U / 24 megállósorendek** | A PDF csak az indulási időket tartalmazza annotációkkal — a megállósorrendeket felhasználó adta meg. Az indulások szeparációja annotáció alapján PDF-ből ellenőrizve. |
+
+> Megjegyzés: a többi "összevont oldalas" szétbontás (4/4A, 6/16, 8/8A, 23/23U/24 indulások) mind ellenőrizhető volt PDF-ből, az annotációk egyértelműen jelölik a szeparációt.

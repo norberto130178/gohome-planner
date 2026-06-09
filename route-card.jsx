@@ -3,7 +3,7 @@
 // ============================================================
 
 function RouteCard({ route, index, isPrimary, t, style, isWeekend, dayType, nowMins }) {
-  const [expanded, setExpanded] = React.useState(isPrimary);
+  const [expanded, setExpanded] = React.useState(false);
   const [timetableInfo, setTimetableInfo] = React.useState(null);
   const [mapOpen, setMapOpen] = React.useState(false);
   const U = window.BUS_UTILS;
@@ -180,6 +180,7 @@ function normStop(name) {
 
 function HomeRouteMap({ route }) {
   const mapRef = React.useRef(null);
+  const containerRef = React.useRef(null);
   const instanceRef = React.useRef(null);
   const routeKey = `${route.helykoziLine}-${route.helykoziDep}-${route.transferStop}`;
 
@@ -192,36 +193,43 @@ function HomeRouteMap({ route }) {
     }).addTo(map);
 
     const allCoords = [];
-
-    function addMarker(lat, lon, color, label) {
-      L.circleMarker([lat, lon], {
-        radius: 8, color: 'white', weight: 2.5,
-        fillColor: color, fillOpacity: 1,
-      }).addTo(map).bindPopup(label);
-    }
+    const fmt = m => window.BUS_UTILS.fmtTime(m);
 
     // 1. Helyközi szakasz: Nemesvámos → transferStop
     const nemoLat = 47.056110, nemoLon = 17.870028;
     const homeShapes = (window.HOME_SHAPES || {})[route.helykoziLine] || [];
     const volanLat = route.transferLat, volanLon = route.transferLon;
+    const hkColor = '#2B1E3F';
 
     if (volanLat && homeShapes.length) {
       const b = window.BUS_UTILS.bestShape(homeShapes, nemoLat, nemoLon, volanLat, volanLon);
       if (b) {
         const seg = [[nemoLat, nemoLon], ...b.s.slice(b.fi + 1, b.ti), [volanLat, volanLon]];
-        L.polyline(seg, { color: '#2B1E3F', weight: 5, opacity: 0.85 }).addTo(map);
+        L.polyline(seg, { color: hkColor, weight: 5, opacity: 0.85 }).addTo(map);
         allCoords.push(...seg);
-        addMarker(nemoLat, nemoLon, '#2B1E3F', 'Nemesvámos, autóbusz-váróterem');
-        addMarker(volanLat, volanLon, '#2B1E3F', route.transferStop);
       }
     }
+    // Helyközi terminál jelölők időcímkével
+    [[nemoLat, nemoLon, 'Nemesvámos, autóbusz-váróterem', route.helykoziDep],
+     [volanLat, volanLon, route.transferStop, route.helykoziArrive]].forEach(([lat, lon, name, time]) => {
+      if (!lat || !lon) return;
+      L.circleMarker([lat, lon], { radius: 9, color: 'white', weight: 2, fillColor: hkColor, fillOpacity: 0.95 })
+        .addTo(map).bindPopup(`<b>${name}</b>${time != null ? `<br>${fmt(time)}` : ''}`);
+      if (time != null) {
+        const labelHtml = `<div style="position:absolute;left:14px;top:-10px;background:white;border:1.5px solid ${hkColor};border-radius:4px;padding:1px 6px;font-size:11px;font-weight:700;color:#222;white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,0.15);">${fmt(time)}</div>`;
+        L.marker([lat, lon], { icon: L.divIcon({ className: '', html: labelHtml, iconSize: [0, 0], iconAnchor: [0, 0] }), interactive: false, zIndexOffset: 200 }).addTo(map);
+      }
+    });
 
-    // 2. Helyi busz szakasz: transferStop → homeStop (koordináták route.localBus.stops-ból)
+    // 2. Helyi busz szakasz: transferStop → homeStop
     const localBus = route.localBus;
     const cityShapes = (window.CITY_SHAPES || {})[localBus.id] || [];
     const homeStopName = route.homeStop || 'Csererdő';
-    const boardStop = localBus.stops.find(s => normStop(s.name) === normStop(route.transferStop) || route.transferStop?.includes(s.name.split(' /')[0]));
-    const homeStop  = localBus.stops.find(s => s.name === homeStopName);
+    const boardStopIdx = localBus.stops.findIndex(s => normStop(s.name) === normStop(route.transferStop) || route.transferStop?.includes(s.name.split(' /')[0]));
+    const homeStopIdx  = localBus.stops.findIndex(s => s.name === homeStopName);
+    const boardStop = localBus.stops[boardStopIdx];
+    const homeStop  = localBus.stops[homeStopIdx];
+    const localDep  = boardStop ? route.localBoardAt - boardStop.offset : null;
 
     if (boardStop?.lat && homeStop?.lat && cityShapes.length) {
       const b = window.BUS_UTILS.bestShape(cityShapes, boardStop.lat, boardStop.lon, homeStop.lat, homeStop.lon);
@@ -229,9 +237,37 @@ function HomeRouteMap({ route }) {
         const seg = [[boardStop.lat, boardStop.lon], ...b.s.slice(b.fi + 1, b.ti), [homeStop.lat, homeStop.lon]];
         L.polyline(seg, { color: localBus.color, weight: 5, opacity: 0.85 }).addTo(map);
         allCoords.push(...seg);
-        addMarker(boardStop.lat, boardStop.lon, localBus.color, route.transferStop);
-        addMarker(homeStop.lat, homeStop.lon, localBus.color, homeStopName);
       }
+    }
+    // Helyi busz megállók karikákkal, nyilakkal, időcímkékkel
+    if (boardStopIdx >= 0 && homeStopIdx >= 0) {
+      const segStops = localBus.stops.slice(boardStopIdx, homeStopIdx + 1).filter(s => s.lat && s.lon);
+      segStops.forEach((stop, i) => {
+        const isTerminal = i === 0 || i === segStops.length - 1;
+        const r = isTerminal ? 9 : 6;
+        const time = localDep !== null ? localDep + stop.offset : null;
+        L.circleMarker([stop.lat, stop.lon], {
+          radius: r, color: 'white', weight: 2,
+          fillColor: localBus.color, fillOpacity: 0.95,
+        }).addTo(map).bindPopup(`<b>${stop.name}</b>${time !== null ? `<br>${fmt(time)}` : ''}`);
+        if (time !== null) {
+          const labelHtml = `<div style="position:absolute;left:${r + 5}px;top:-10px;background:white;border:1.5px solid ${localBus.color};border-radius:4px;padding:1px 6px;font-size:11px;font-weight:700;color:#222;white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,0.15);">${fmt(time)}</div>`;
+          L.marker([stop.lat, stop.lon], {
+            icon: L.divIcon({ className: '', html: labelHtml, iconSize: [0, 0], iconAnchor: [0, 0] }),
+            interactive: false, zIndexOffset: 200,
+          }).addTo(map);
+        }
+        if (!isTerminal && i > 0) {
+          const prev = segStops[i - 1], next = segStops[i + 1] || stop;
+          const dy = next.lat - prev.lat, dx = next.lon - prev.lon;
+          const angle = Math.atan2(dx, dy) * 180 / Math.PI;
+          const svg = `<svg xmlns="http://www.w3.org/2000/svg" style="position:absolute;left:-12px;top:-32px;transform-origin:12px 32px;transform:rotate(${angle}deg)" width="24" height="40"><polygon points="12,6 19,26 12,19 5,26" fill="black" stroke="white" stroke-width="2" stroke-linejoin="round"/></svg>`;
+          L.marker([stop.lat, stop.lon], {
+            icon: L.divIcon({ className: '', html: svg, iconSize: [0, 0], iconAnchor: [0, 0] }),
+            interactive: false, zIndexOffset: 100,
+          }).addTo(map);
+        }
+      });
     }
 
     instanceRef.current = map;
@@ -244,22 +280,34 @@ function HomeRouteMap({ route }) {
     return () => { map.remove(); instanceRef.current = null; };
   }, [routeKey]);
 
+  const [fsState, setFsState] = React.useState(false);
+  React.useEffect(() => {
+    const h = () => { setFsState(!!document.fullscreenElement); setTimeout(() => instanceRef.current?.invalidateSize(), 100); };
+    document.addEventListener('fullscreenchange', h);
+    return () => document.removeEventListener('fullscreenchange', h);
+  }, []);
+  React.useEffect(() => {
+    const h = (e) => { if (e.key === 'Escape' && document.fullscreenElement) document.exitFullscreen(); };
+    document.addEventListener('keydown', h);
+    return () => document.removeEventListener('keydown', h);
+  }, []);
+
   function toggleFullscreen() {
-    const el = mapRef.current;
-    if (!el) return;
-    if (!document.fullscreenElement) el.requestFullscreen();
+    if (!document.fullscreenElement) containerRef.current?.requestFullscreen();
     else document.exitFullscreen();
   }
 
   return (
-    <div style={{ borderTop: '2px solid var(--line)', position: 'relative' }}>
-      <div ref={mapRef} style={{ height: 300, width: '100%' }} />
-      <button onClick={toggleFullscreen} title="Teljes képernyő" style={{
-        position: 'absolute', bottom: 10, right: 10, zIndex: 1000,
-        background: 'white', border: '2px solid #ccc',
+    <div ref={containerRef} style={{ borderTop: '2px solid var(--line)', position: 'relative' }}>
+      <div ref={mapRef} style={{ height: fsState ? '100%' : 300, width: '100%' }} />
+      <button onClick={toggleFullscreen} title={fsState ? 'Kilépés' : 'Teljes képernyő'} style={{
+        position: 'absolute', top: fsState ? 28 : 10, right: fsState ? 28 : 10, zIndex: 1000,
+        background: '#1a73e8',
+        border: '2px solid #1a73e8',
         borderRadius: 8, padding: '4px 8px', cursor: 'pointer',
-        fontSize: 16, lineHeight: 1, boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
-      }}>⛶</button>
+        fontSize: 16, lineHeight: 1, boxShadow: '0 2px 6px rgba(0,0,0,0.25)',
+        color: 'white',
+      }}>{fsState ? '✕' : '⛶'}</button>
     </div>
   );
 }
@@ -422,6 +470,7 @@ function SchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, nowMi
 
 function SchoolRouteMap({ route }) {
   const mapRef = React.useRef(null);
+  const containerRef = React.useRef(null);
   const instanceRef = React.useRef(null);
   const routeKey = `${route.helykoziLine}-${route.helykoziDep}-${route.transferStop}`;
 
@@ -434,22 +483,19 @@ function SchoolRouteMap({ route }) {
     }).addTo(map);
 
     const allCoords = [];
-
-
-
-    function addMarker(coord, color, label) {
-      L.circleMarker(coord, { radius: 8, color: 'white', weight: 2.5, fillColor: color, fillOpacity: 1 })
-        .addTo(map).bindPopup(label);
-    }
+    const fmt = m => window.BUS_UTILS.fmtTime(m);
 
     const nemoLat = 47.056110, nemoLon = 17.870028;
     const volanLat = route.transferLat, volanLon = route.transferLon;
+    const hkColor = '#2B1E3F';
 
-    // 1. Helyi busz: Csererdő → transferStop (koordináták LOCAL_BUSES stops-ból)
+    // 1. Helyi busz: startStop → transferStop
     const localBus = route.localBus;
     const cityShapes = (window.CITY_SHAPES || {})[localBus.id] || [];
-    const startStop    = localBus.stops[0];
-    const transferStop = localBus.stops.find(s => normStop(s.name) === normStop(route.transferStop) || route.transferStop?.includes(s.name.split(' /')[0]));
+    const startStop = localBus.stops[0];
+    const transferStopIdx = localBus.stops.findIndex(s => normStop(s.name) === normStop(route.transferStop) || route.transferStop?.includes(s.name.split(' /')[0]));
+    const transferStop = localBus.stops[transferStopIdx];
+    const localDep = startStop ? route.localBoardAt - startStop.offset : null;
 
     if (startStop?.lat && transferStop?.lat && cityShapes.length) {
       const b = window.BUS_UTILS.bestShape(cityShapes, startStop.lat, startStop.lon, transferStop.lat, transferStop.lon);
@@ -457,23 +503,50 @@ function SchoolRouteMap({ route }) {
         const seg = [[startStop.lat, startStop.lon], ...b.s.slice(b.fi + 1, b.ti), [transferStop.lat, transferStop.lon]];
         L.polyline(seg, { color: localBus.color, weight: 5, opacity: 0.85 }).addTo(map);
         allCoords.push(...seg);
-        addMarker([startStop.lat, startStop.lon], localBus.color, startStop.name);
-        addMarker([transferStop.lat, transferStop.lon], localBus.color, route.transferStop);
       }
     }
+    if (transferStopIdx >= 0) {
+      const segStops = localBus.stops.slice(0, transferStopIdx + 1).filter(s => s.lat && s.lon);
+      segStops.forEach((stop, i) => {
+        const isTerminal = i === 0 || i === segStops.length - 1;
+        const r = isTerminal ? 9 : 6;
+        const time = localDep !== null ? localDep + stop.offset : null;
+        L.circleMarker([stop.lat, stop.lon], { radius: r, color: 'white', weight: 2, fillColor: localBus.color, fillOpacity: 0.95 })
+          .addTo(map).bindPopup(`<b>${stop.name}</b>${time !== null ? `<br>${fmt(time)}` : ''}`);
+        if (time !== null) {
+          const labelHtml = `<div style="position:absolute;left:${r + 5}px;top:-10px;background:white;border:1.5px solid ${localBus.color};border-radius:4px;padding:1px 6px;font-size:11px;font-weight:700;color:#222;white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,0.15);">${fmt(time)}</div>`;
+          L.marker([stop.lat, stop.lon], { icon: L.divIcon({ className: '', html: labelHtml, iconSize: [0, 0], iconAnchor: [0, 0] }), interactive: false, zIndexOffset: 200 }).addTo(map);
+        }
+        if (!isTerminal && i > 0) {
+          const prev = segStops[i - 1], next = segStops[i + 1] || stop;
+          const dy = next.lat - prev.lat, dx = next.lon - prev.lon;
+          const angle = Math.atan2(dx, dy) * 180 / Math.PI;
+          const svg = `<svg xmlns="http://www.w3.org/2000/svg" style="position:absolute;left:-12px;top:-32px;transform-origin:12px 32px;transform:rotate(${angle}deg)" width="24" height="40"><polygon points="12,6 19,26 12,19 5,26" fill="black" stroke="white" stroke-width="2" stroke-linejoin="round"/></svg>`;
+          L.marker([stop.lat, stop.lon], { icon: L.divIcon({ className: '', html: svg, iconSize: [0, 0], iconAnchor: [0, 0] }), interactive: false, zIndexOffset: 100 }).addTo(map);
+        }
+      });
+    }
 
-    // 2. Helyközi: transferStop → Nemesvámos (Volánbusz koordináta a route-ból)
+    // 2. Helyközi: transferStop → Nemesvámos
     const homeShapes = (window.HOME_SHAPES || {})[route.helykoziLine] || [];
     if (volanLat && homeShapes.length) {
       const b = window.BUS_UTILS.bestShape(homeShapes, volanLat, volanLon, nemoLat, nemoLon);
       if (b) {
         const seg = [[volanLat, volanLon], ...b.s.slice(b.fi + 1, b.ti), [nemoLat, nemoLon]];
-        L.polyline(seg, { color: '#2B1E3F', weight: 5, opacity: 0.85 }).addTo(map);
+        L.polyline(seg, { color: hkColor, weight: 5, opacity: 0.85 }).addTo(map);
         allCoords.push(...seg);
-        addMarker([volanLat, volanLon], '#2B1E3F', route.transferStop);
-        addMarker([nemoLat, nemoLon], '#2B1E3F', 'Nemesvámos, autóbusz-váróterem');
       }
     }
+    [[volanLat, volanLon, route.transferStop, route.helykoziDep],
+     [nemoLat, nemoLon, 'Nemesvámos, autóbusz-váróterem', route.helykoziArrive]].forEach(([lat, lon, name, time]) => {
+      if (!lat || !lon) return;
+      L.circleMarker([lat, lon], { radius: 9, color: 'white', weight: 2, fillColor: hkColor, fillOpacity: 0.95 })
+        .addTo(map).bindPopup(`<b>${name}</b>${time != null ? `<br>${fmt(time)}` : ''}`);
+      if (time != null) {
+        const labelHtml = `<div style="position:absolute;left:14px;top:-10px;background:white;border:1.5px solid ${hkColor};border-radius:4px;padding:1px 6px;font-size:11px;font-weight:700;color:#222;white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,0.15);">${fmt(time)}</div>`;
+        L.marker([lat, lon], { icon: L.divIcon({ className: '', html: labelHtml, iconSize: [0, 0], iconAnchor: [0, 0] }), interactive: false, zIndexOffset: 200 }).addTo(map);
+      }
+    });
 
     instanceRef.current = map;
     setTimeout(() => {
@@ -485,22 +558,34 @@ function SchoolRouteMap({ route }) {
     return () => { map.remove(); instanceRef.current = null; };
   }, [routeKey]);
 
+  const [fsState, setFsState] = React.useState(false);
+  React.useEffect(() => {
+    const h = () => { setFsState(!!document.fullscreenElement); setTimeout(() => instanceRef.current?.invalidateSize(), 100); };
+    document.addEventListener('fullscreenchange', h);
+    return () => document.removeEventListener('fullscreenchange', h);
+  }, []);
+  React.useEffect(() => {
+    const h = (e) => { if (e.key === 'Escape' && document.fullscreenElement) document.exitFullscreen(); };
+    document.addEventListener('keydown', h);
+    return () => document.removeEventListener('keydown', h);
+  }, []);
+
   function toggleFullscreen() {
-    const el = mapRef.current;
-    if (!el) return;
-    if (!document.fullscreenElement) el.requestFullscreen();
+    if (!document.fullscreenElement) containerRef.current?.requestFullscreen();
     else document.exitFullscreen();
   }
 
   return (
-    <div style={{ borderTop: '2px solid var(--line)', position: 'relative' }}>
-      <div ref={mapRef} style={{ height: 300, width: '100%' }} />
-      <button onClick={toggleFullscreen} title="Teljes képernyő" style={{
-        position: 'absolute', bottom: 10, right: 10, zIndex: 1000,
-        background: 'white', border: '2px solid #ccc',
+    <div ref={containerRef} style={{ borderTop: '2px solid var(--line)', position: 'relative' }}>
+      <div ref={mapRef} style={{ height: fsState ? '100%' : 300, width: '100%' }} />
+      <button onClick={toggleFullscreen} title={fsState ? 'Kilépés' : 'Teljes képernyő'} style={{
+        position: 'absolute', top: fsState ? 28 : 10, right: fsState ? 28 : 10, zIndex: 1000,
+        background: '#1a73e8',
+        border: '2px solid #1a73e8',
         borderRadius: 8, padding: '4px 8px', cursor: 'pointer',
-        fontSize: 16, lineHeight: 1, boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
-      }}>⛶</button>
+        fontSize: 16, lineHeight: 1, boxShadow: '0 2px 6px rgba(0,0,0,0.25)',
+        color: 'white',
+      }}>{fsState ? '✕' : '⛶'}</button>
     </div>
   );
 }

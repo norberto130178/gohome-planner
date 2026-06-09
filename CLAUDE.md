@@ -12,3 +12,9 @@ window.APP_VERSION = "v2.4";
 ```
 
 Ha commitot készítesz, ez az egyik első lépés legyen — ne hagyd ki.
+
+## Git — commit és push
+
+**SOHA ne commitolj és ne pusholj a felhasználó explicit kérése nélkül.**
+
+Ez azt jelenti: ha a feladat kész, ne nyúlj a githez. Várj amíg a felhasználó azt mondja: „commitold" vagy „pushold". Addig csak a fájlok módosítása a dolgod.

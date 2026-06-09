@@ -9,7 +9,7 @@ window.CITY_BUSES_FULL = [
 
 {
   id: "1",
-  color: "#26A69A",
+  color: "#50A0C0",
   label: "1-es busz",
   direction: "Veszprém vasútállomás ▸ Aulich Lajos utca - Valeo, főporta felé",
   stops: [
@@ -40,7 +40,7 @@ window.CITY_BUSES_FULL = [
 
 {
   id: "1",
-  color: "#26A69A",
+  color: "#50A0C0",
   label: "1-es busz",
   direction: "Valeo, főporta ▸ Jutasi út / Barátság park - Veszprém vasútállomás felé",
   stops: [
@@ -71,7 +71,7 @@ window.CITY_BUSES_FULL = [
 
 {
   id: "2",
-  color: "#1565C0",
+  color: "#F06020",
   label: "2-es busz",
   direction: "Veszprém vasútállomás ▸ Komakút tér / Pannon Egyetem felé",
   stops: [
@@ -100,7 +100,7 @@ window.CITY_BUSES_FULL = [
 
 {
   id: "2",
-  color: "#1565C0",
+  color: "#F06020",
   label: "2-es busz",
   direction: "Endrődi Sándor lakótelep ▸ Veszprém vasútállomás felé",
   stops: [
@@ -131,7 +131,7 @@ window.CITY_BUSES_FULL = [
 
 {
   id: "3",
-  color: "#EC407A",
+  color: "#C0A080",
   label: "3-as busz",
   direction: "Haszkovó forduló ▸ Csererdő felé",
   stops: [
@@ -165,7 +165,7 @@ window.CITY_BUSES_FULL = [
 
 {
   id: "3",
-  color: "#EC407A",
+  color: "#C0A080",
   label: "3-as busz",
   direction: "Csererdő ▸ Haszkovó forduló felé",
   stops: [
@@ -200,7 +200,7 @@ window.CITY_BUSES_FULL = [
 
 {
   id: "4",
-  color: "#66BB6A",
+  color: "#70B060",
   label: "4-es busz",
   direction: "Jutaspuszta ▸ Vámosi úti forduló felé",
   stops: [
@@ -234,7 +234,7 @@ window.CITY_BUSES_FULL = [
 
 {
   id: "4",
-  color: "#43A047",
+  color: "#70B060",
   label: "4-es busz",
   direction: "Vámosi úti forduló ▸ Jutaspuszta felé",
   stops: [
@@ -267,7 +267,7 @@ window.CITY_BUSES_FULL = [
 
 {
   id: "4A",
-  color: "#66BB6A",
+  color: "#70B060",
   label: "4A-s busz",
   direction: "Veszprém vasútállomás ▸ Vámosi úti forduló felé",
   stops: [
@@ -298,7 +298,7 @@ window.CITY_BUSES_FULL = [
 
 {
   id: "4A",
-  color: "#66BB6A",
+  color: "#70B060",
   label: "4A-s busz",
   direction: "Vámosi úti forduló ▸ Jutaspuszta felé",
   stops: [
@@ -330,7 +330,7 @@ window.CITY_BUSES_FULL = [
 
 {
   id: "5",
-  color: "#AB47BC",
+  color: "#702070",
   label: "5-ös busz",
   direction: "Veszprém vasútállomás ▸ Kádártai úti forduló felé",
   stops: [
@@ -367,7 +367,7 @@ window.CITY_BUSES_FULL = [
 
 {
   id: "5",
-  color: "#AB47BC",
+  color: "#702070",
   label: "5-ös busz",
   direction: "Kádártai úti forduló ▸ Veszprém vasútállomás felé",
   stops: [
@@ -408,7 +408,7 @@ window.CITY_BUSES_FULL = [
 
 {
   id: "6",
-  color: "#FDD835",
+  color: "#D00010",
   label: "6-os busz",
   direction: "Haszkovó forduló ▸ Vámosi úti forduló felé",
   stops: [
@@ -443,7 +443,7 @@ window.CITY_BUSES_FULL = [
 
 {
   id: "6",
-  color: "#FDD835",
+  color: "#D00010",
   label: "6-os busz",
   direction: "Vámosi úti forduló ▸ Haszkovó forduló felé",
   stops: [
@@ -477,7 +477,7 @@ window.CITY_BUSES_FULL = [
 
 {
   id: "7",
-  color: "#5C6BC0",
+  color: "#FFB000",
   label: "7-es busz",
   direction: "Haszkovó forduló ▸ Cholnoky forduló felé",
   stops: [
@@ -502,7 +502,7 @@ window.CITY_BUSES_FULL = [
 
 {
   id: "7",
-  color: "#5C6BC0",
+  color: "#FFB000",
   label: "7-es busz",
   direction: "Cholnoky lakótelep ▸ Haszkovó forduló felé",
   stops: [
@@ -533,7 +533,7 @@ window.CITY_BUSES_FULL = [
 
 {
   id: "7A",
-  color: "#5C6BC0",
+  color: "#FFB000",
   label: "7A-s busz",
   direction: "Haszkovó forduló ▸ Ady E. utca / Cholnoky J. utca felé",
   stops: [
@@ -560,7 +560,7 @@ window.CITY_BUSES_FULL = [
 
 {
   id: "7A",
-  color: "#5C6BC0",
+  color: "#FFB000",
   label: "7A-s busz",
   direction: "Ady Endre utca / Cholnoky Jenő utca ▸ Haszkovó forduló felé",
   stops: [
@@ -587,7 +587,7 @@ window.CITY_BUSES_FULL = [
 
 {
   id: "8",
-  color: "#42A5F5",
+  color: "#001060",
   label: "8-as busz",
   direction: "Haszkovó forduló ▸ Csererdő felé",
   stops: [
@@ -632,7 +632,7 @@ window.CITY_BUSES_FULL = [
 
 {
   id: "8",
-  color: "#42A5F5",
+  color: "#001060",
   label: "8-as busz",
   direction: "Csererdő ▸ Haszkovó forduló felé",
   stops: [
@@ -677,7 +677,7 @@ window.CITY_BUSES_FULL = [
 
 {
   id: "8A",
-  color: "#42A5F5",
+  color: "#001060",
   label: "8A-s busz",
   direction: "Haszkovó forduló ▸ Iskola utca felé",
   stops: [
@@ -708,7 +708,7 @@ window.CITY_BUSES_FULL = [
 
 {
   id: "8A",
-  color: "#42A5F5",
+  color: "#001060",
   label: "8A-s busz",
   direction: "Iskola utca ▸ Haszkovó forduló felé",
   stops: [
@@ -740,7 +740,7 @@ window.CITY_BUSES_FULL = [
 
 {
   id: "8Y",
-  color: "#42A5F5",
+  color: "#001060",
   label: "8Y-s busz",
   direction: "Csererdő ▸ Haszkovó forduló felé",
   stops: [
@@ -786,7 +786,7 @@ window.CITY_BUSES_FULL = [
 
 {
   id: "10",
-  color: "#FF7043",
+  color: "#50A0C0",
   label: "10-es busz",
   direction: "Veszprém vasútállomás ▸ Völgyhíd tér felé",
   stops: [
@@ -816,7 +816,7 @@ window.CITY_BUSES_FULL = [
 
 {
   id: "10",
-  color: "#FF7043",
+  color: "#50A0C0",
   label: "10-es busz",
   direction: "Juhar utca ▸ Veszprém vasútállomás felé",
   stops: [
@@ -846,7 +846,7 @@ window.CITY_BUSES_FULL = [
 
 {
   id: "11",
-  color: "#00BCD4",
+  color: "#308010",
   label: "11-es busz",
   direction: "Veszprém vasútállomás ▸ Vámosi úti forduló felé",
   stops: [
@@ -879,7 +879,7 @@ window.CITY_BUSES_FULL = [
 
 {
   id: "11",
-  color: "#00BCD4",
+  color: "#308010",
   label: "11-es busz",
   direction: "Vámosi úti forduló ▸ Veszprém vasútállomás felé",
   stops: [
@@ -912,7 +912,7 @@ window.CITY_BUSES_FULL = [
 
 {
   id: "12",
-  color: "#78909C",
+  color: "#F0A0C0",
   label: "12-es busz",
   direction: "Veszprém autóbusz-állomás ▸ körjárat",
   stops: [
@@ -938,7 +938,7 @@ window.CITY_BUSES_FULL = [
 
 {
   id: "13",
-  color: "#C6A700",
+  color: "#0080D0",
   label: "13-as busz",
   direction: "Kádártai úti forduló ▸ Völgyhíd tér felé",
   stops: [
@@ -972,7 +972,7 @@ window.CITY_BUSES_FULL = [
 
 {
   id: "13",
-  color: "#C6A700",
+  color: "#0080D0",
   label: "13-as busz",
   direction: "Juhar utca ▸ Kádártai úti forduló felé",
   stops: [
@@ -1001,7 +1001,7 @@ window.CITY_BUSES_FULL = [
 
 {
   id: "15",
-  color: "#E65100",
+  color: "#A04090",
   label: "15-ös busz",
   direction: "Kádártai úti forduló ▸ Haszkovó forduló felé",
   stops: [
@@ -1040,7 +1040,7 @@ window.CITY_BUSES_FULL = [
 
 {
   id: "15",
-  color: "#E65100",
+  color: "#A04090",
   label: "15-ös busz",
   direction: "Haszkovó forduló ▸ Kádártai úti forduló felé",
   stops: [
@@ -1079,7 +1079,7 @@ window.CITY_BUSES_FULL = [
 
 {
   id: "15A",
-  color: "#BF360C",
+  color: "#A04090",
   label: "15A busz",
   direction: "Kádártai úti forduló ▸ Haszkovó forduló felé (15A)",
   stops: [
@@ -1122,7 +1122,7 @@ window.CITY_BUSES_FULL = [
 
 {
   id: "15A",
-  color: "#BF360C",
+  color: "#A04090",
   label: "15A busz",
   direction: "Haszkovó forduló ▸ Kádártai úti forduló felé (15A)",
   stops: [
@@ -1164,7 +1164,7 @@ window.CITY_BUSES_FULL = [
 
 {
   id: "16",
-  color: "#009688",
+  color: "#D00010",
   label: "16-os busz",
   direction: "Vámosi úti forduló ▸ Bakony Művek felé",
   stops: [
@@ -1203,7 +1203,7 @@ window.CITY_BUSES_FULL = [
 
 {
   id: "16",
-  color: "#009688",
+  color: "#D00010",
   label: "16-os busz",
   direction: "Bakony Művek ▸ Vámosi úti forduló felé",
   stops: [
@@ -1243,7 +1243,7 @@ window.CITY_BUSES_FULL = [
 
 {
   id: "18",
-  color: "#795548",
+  color: "#809000",
   label: "18-as busz",
   direction: "Veszprém autóbusz-állomás ▸ Csatárhegy, Kilátó út felé",
   stops: [
@@ -1272,7 +1272,7 @@ window.CITY_BUSES_FULL = [
 
 {
   id: "18",
-  color: "#795548",
+  color: "#809000",
   label: "18-as busz",
   direction: "Csatárhegy, Kilátó út ▸ Veszprém autóbusz-állomás felé",
   stops: [
@@ -1306,7 +1306,7 @@ window.CITY_BUSES_FULL = [
 
 {
   id: "20",
-  color: "#1A237E",
+  color: "#F06060",
   label: "20-as busz",
   direction: "Veszprém autóbusz-állomás ▸ Szabadságpuszta, Laci-major felé",
   stops: [
@@ -1328,7 +1328,7 @@ window.CITY_BUSES_FULL = [
 
 {
   id: "20",
-  color: "#1A237E",
+  color: "#F06060",
   label: "20-as busz",
   direction: "Szabadságpuszta, Laci-major ▸ Veszprém autóbusz-állomás felé",
   stops: [
@@ -1352,7 +1352,7 @@ window.CITY_BUSES_FULL = [
 
 {
   id: "21",
-  color: "#558B2F",
+  color: "#40A0C0",
   label: "21-es busz",
   direction: "Kádártai úti forduló ▸ Pápai úti forduló felé",
   stops: [
@@ -1391,7 +1391,7 @@ window.CITY_BUSES_FULL = [
 
 {
   id: "21",
-  color: "#558B2F",
+  color: "#40A0C0",
   label: "21-es busz",
   direction: "Pápai úti forduló ▸ Kádártai úti forduló felé",
   stops: [
@@ -1430,7 +1430,7 @@ window.CITY_BUSES_FULL = [
 
 {
   id: "22",
-  color: "#B71C1C",
+  color: "#FF3030",
   label: "22-es busz",
   direction: "Veszprém autóbusz-állomás ▸ Szabadságpuszta, Laci-major felé (22)",
   stops: [
@@ -1450,7 +1450,7 @@ window.CITY_BUSES_FULL = [
 
 {
   id: "22",
-  color: "#B71C1C",
+  color: "#FF3030",
   label: "22-es busz",
   direction: "Szabadságpuszta, Laci-major ▸ Veszprém autóbusz-állomás felé (22)",
   stops: [
@@ -1471,7 +1471,7 @@ window.CITY_BUSES_FULL = [
 
 {
   id: "23",
-  color: "#6A1B9A",
+  color: "#90C040",
   label: "23/24-es busz",
   direction: "Veszprém autóbusz-állomás ▸ Gyulafirátót, forduló felé",
   stops: [
@@ -1499,7 +1499,7 @@ window.CITY_BUSES_FULL = [
 
 {
   id: "23",
-  color: "#6A1B9A",
+  color: "#90C040",
   label: "23/24-es busz",
   direction: "Gyulafirátót, forduló ▸ Veszprém autóbusz-állomás felé",
   stops: [
@@ -1527,7 +1527,7 @@ window.CITY_BUSES_FULL = [
 
 {
   id: "23U",
-  color: "#6A1B9A",
+  color: "#90C040",
   label: "23U busz",
   direction: "Veszprém autóbusz-állomás ▸ Gyulafirátót, forduló felé (Sportuszodán át)",
   stops: [
@@ -1556,7 +1556,7 @@ window.CITY_BUSES_FULL = [
 
 {
   id: "23U",
-  color: "#6A1B9A",
+  color: "#90C040",
   label: "23U busz",
   direction: "Gyulafirátót, forduló ▸ Veszprém autóbusz-állomás felé (Sportuszodán át)",
   stops: [
@@ -1585,7 +1585,7 @@ window.CITY_BUSES_FULL = [
 
 {
   id: "24",
-  color: "#6A1B9A",
+  color: "#90C040",
   label: "24-es busz",
   direction: "Veszprém autóbusz-állomás ▸ Gyulafirátót, forduló felé (Hajmáskéri úton át)",
   stops: [
@@ -1614,7 +1614,7 @@ window.CITY_BUSES_FULL = [
 
 {
   id: "24",
-  color: "#6A1B9A",
+  color: "#90C040",
   label: "24-es busz",
   direction: "Gyulafirátót, forduló ▸ Veszprém autóbusz-állomás felé (Hajmáskéri úton át)",
   stops: [
@@ -1643,7 +1643,7 @@ window.CITY_BUSES_FULL = [
 
 {
   id: "25",
-  color: "#37474F",
+  color: "#707070",
   label: "25-ös busz",
   direction: "Gyulafirátót, forduló ▸ Papvásár utca felé",
   stops: [
@@ -1679,7 +1679,7 @@ window.CITY_BUSES_FULL = [
 
 {
   id: "28",
-  color: "#F57F17",
+  color: "#307090",
   label: "28-as busz",
   direction: "Vámosi úti forduló ▸ Csererdő felé",
   stops: [
@@ -1709,7 +1709,7 @@ window.CITY_BUSES_FULL = [
 
 {
   id: "28",
-  color: "#F57F17",
+  color: "#307090",
   label: "28-as busz",
   direction: "Csererdő ▸ Vámosi úti forduló felé",
   stops: [
@@ -1746,7 +1746,7 @@ window.CITY_BUSES_FULL = [
 
 {
   id: "42",
-  color: "#880E4F",
+  color: "#1A1A1A",
   label: "42-es busz",
   direction: "Hotel ▸ körjárat (egyetem negyeden át)",
   stops: [
@@ -1785,7 +1785,7 @@ window.CITY_BUSES_FULL = [
 
 {
   id: "43",
-  color: "#01579B",
+  color: "#1A1A1A",
   label: "43-as busz",
   direction: "Veszprém autóbusz-állomás ▸ Juhar utca felé",
   stops: [
@@ -1821,7 +1821,7 @@ window.CITY_BUSES_FULL = [
 
 {
   id: "47",
-  color: "#33691E",
+  color: "#1A1A1A",
   label: "47-es busz",
   direction: "Hotel ▸ Pápai út 25. felé",
   stops: [

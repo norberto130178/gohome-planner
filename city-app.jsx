@@ -198,6 +198,7 @@ function getShapeSegment(bus, fromStopName, toStopName) {
 
 function CityRouteMap({ route, fromStop, toStop }) {
   const mapRef = React.useRef(null);
+  const containerRef = React.useRef(null);
   const instanceRef = React.useRef(null);
   const routeKey = `${route.type}-${route.bus1?.id}-${route.boardAt}-${fromStop}-${toStop}`;
 
@@ -211,13 +212,13 @@ function CityRouteMap({ route, fromStop, toStop }) {
     }).addTo(map);
 
     const allCoords = [];
+    const fmt = m => window.BUS_UTILS.fmtTime(m);
 
     function drawSegment(bus, from, to, color) {
       const seg = getShapeSegment(bus, from, to);
       if (seg && seg.length >= 2) {
         L.polyline(seg, { color, weight: 5, opacity: 0.9 }).addTo(map);
         allCoords.push(...seg);
-        return { first: seg[0], last: seg[seg.length - 1] };
       } else {
         const stops = bus.stops;
         const fi = stops.findIndex(s => s.name === from);
@@ -226,31 +227,55 @@ function CityRouteMap({ route, fromStop, toStop }) {
           const coords = stops.slice(fi, ti + 1).filter(s => s.lat).map(s => [s.lat, s.lon]);
           L.polyline(coords, { color, weight: 4, opacity: 0.7, dashArray: '6,4' }).addTo(map);
           allCoords.push(...coords);
-          return coords.length >= 2 ? { first: coords[0], last: coords[coords.length - 1] } : null;
         }
-        return null;
       }
     }
 
-    function addMarker(pos, name, label, color) {
-      if (!pos) return;
-      L.circleMarker(pos, {
-        radius: 8, color: 'white', weight: 2.5,
-        fillColor: color, fillOpacity: 1,
-      }).addTo(map).bindPopup(`<b>${label}</b><br>${name}`);
+    function drawStops(bus, from, to, color, dep) {
+      const stops = bus.stops;
+      const fi = stops.findIndex(s => s.name === from);
+      const ti = stops.findIndex(s => s.name === to);
+      if (fi < 0 || ti < 0) return;
+      const seg = stops.slice(fi, ti + 1).filter(s => s.lat && s.lon);
+      seg.forEach((stop, i) => {
+        const isTerminal = i === 0 || i === seg.length - 1;
+        const r = isTerminal ? 9 : 6;
+        const time = dep !== null ? dep + stop.offset : null;
+        L.circleMarker([stop.lat, stop.lon], {
+          radius: r, color: 'white', weight: 2,
+          fillColor: color, fillOpacity: 0.95,
+        }).addTo(map).bindPopup(`<b>${stop.name}</b>${time !== null ? `<br>${fmt(time)}` : ''}`);
+        if (time !== null) {
+          const labelHtml = `<div style="position:absolute;left:${r + 5}px;top:-10px;background:white;border:1.5px solid ${color};border-radius:4px;padding:1px 6px;font-size:11px;font-weight:700;color:#222;white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,0.15);">${fmt(time)}</div>`;
+          L.marker([stop.lat, stop.lon], {
+            icon: L.divIcon({ className: '', html: labelHtml, iconSize: [0, 0], iconAnchor: [0, 0] }),
+            interactive: false, zIndexOffset: 200,
+          }).addTo(map);
+        }
+        if (!isTerminal && i > 0) {
+          const prev = seg[i - 1], next = seg[i + 1] || stop;
+          const dy = next.lat - prev.lat, dx = next.lon - prev.lon;
+          const angle = Math.atan2(dx, dy) * 180 / Math.PI;
+          const svg = `<svg xmlns="http://www.w3.org/2000/svg" style="position:absolute;left:-12px;top:-32px;transform-origin:12px 32px;transform:rotate(${angle}deg)" width="24" height="40"><polygon points="12,6 19,26 12,19 5,26" fill="black" stroke="white" stroke-width="2" stroke-linejoin="round"/></svg>`;
+          L.marker([stop.lat, stop.lon], {
+            icon: L.divIcon({ className: '', html: svg, iconSize: [0, 0], iconAnchor: [0, 0] }),
+            interactive: false, zIndexOffset: 100,
+          }).addTo(map);
+        }
+      });
     }
 
     if (route.type === 'direct') {
-      const seg = drawSegment(route.bus1, fromStop, toStop, route.bus1.color);
-      addMarker(seg?.first, fromStop, 'Felszállás', route.bus1.color);
-      addMarker(seg?.last,  toStop,   'Célállomás', route.bus1.color);
+      drawSegment(route.bus1, fromStop, toStop, route.bus1.color);
+      const fromOff = route.bus1.stops.find(s => s.name === fromStop)?.offset ?? 0;
+      drawStops(route.bus1, fromStop, toStop, route.bus1.color, route.boardAt - fromOff);
     } else {
-      const seg1 = drawSegment(route.bus1, fromStop, route.transferStopName, route.bus1.color);
-      const seg2 = drawSegment(route.bus2, route.transferStopName, toStop,   route.bus2.color);
-      addMarker(seg1?.first, fromStop,               'Felszállás', route.bus1.color);
-      addMarker(seg1?.last,  route.transferStopName, 'Átszállás',  route.bus1.color);
-      addMarker(seg2?.first, route.transferStopName, 'Átszállás',  route.bus2.color);
-      addMarker(seg2?.last,  toStop,                 'Célállomás', route.bus2.color);
+      drawSegment(route.bus1, fromStop, route.transferStopName, route.bus1.color);
+      drawSegment(route.bus2, route.transferStopName, toStop, route.bus2.color);
+      const fromOff1 = route.bus1.stops.find(s => s.name === fromStop)?.offset ?? 0;
+      drawStops(route.bus1, fromStop, route.transferStopName, route.bus1.color, route.boardAt - fromOff1);
+      const fromOff2 = route.bus2.stops.find(s => s.name === route.transferStopName)?.offset ?? 0;
+      drawStops(route.bus2, route.transferStopName, toStop, route.bus2.color, route.boardAt2 - fromOff2);
     }
 
     if (allCoords.length >= 2) map.fitBounds(allCoords, { padding: [16, 16] });
@@ -260,27 +285,34 @@ function CityRouteMap({ route, fromStop, toStop }) {
     return () => { map.remove(); instanceRef.current = null; };
   }, [routeKey]);
 
+  const [fsState, setFsState] = React.useState(false);
+  React.useEffect(() => {
+    const h = () => { setFsState(!!document.fullscreenElement); setTimeout(() => instanceRef.current?.invalidateSize(), 100); };
+    document.addEventListener('fullscreenchange', h);
+    return () => document.removeEventListener('fullscreenchange', h);
+  }, []);
+  React.useEffect(() => {
+    const h = (e) => { if (e.key === 'Escape' && document.fullscreenElement) document.exitFullscreen(); };
+    document.addEventListener('keydown', h);
+    return () => document.removeEventListener('keydown', h);
+  }, []);
+
   function toggleFullscreen() {
-    if (!document.fullscreenElement) {
-      mapRef.current?.requestFullscreen();
-    } else {
-      document.exitFullscreen();
-    }
+    if (!document.fullscreenElement) containerRef.current?.requestFullscreen();
+    else document.exitFullscreen();
   }
 
   return (
-    <div style={{ position: 'relative', borderTop: '2px solid var(--line)' }}>
-      <div ref={mapRef} style={{ height: 280, width: '100%' }} />
-      <button
-        onClick={toggleFullscreen}
-        title="Teljes képernyő"
-        style={{
-          position: 'absolute', bottom: 10, right: 10, zIndex: 1000,
-          background: 'white', border: '2px solid var(--line)',
-          borderRadius: 8, padding: '4px 8px', cursor: 'pointer',
-          fontSize: 16, lineHeight: 1, boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
-        }}
-      >⛶</button>
+    <div ref={containerRef} style={{ position: 'relative', borderTop: '2px solid var(--line)' }}>
+      <div ref={mapRef} style={{ height: fsState ? '100%' : 280, width: '100%' }} />
+      <button onClick={toggleFullscreen} title={fsState ? 'Kilépés' : 'Teljes képernyő'} style={{
+        position: 'absolute', top: fsState ? 28 : 10, right: fsState ? 28 : 10, zIndex: 1000,
+        background: '#1a73e8',
+        border: '2px solid #1a73e8',
+        borderRadius: 8, padding: '4px 8px', cursor: 'pointer',
+        fontSize: 16, lineHeight: 1, boxShadow: '0 2px 6px rgba(0,0,0,0.25)',
+        color: 'white',
+      }}>{fsState ? '✕' : '⛶'}</button>
     </div>
   );
 }

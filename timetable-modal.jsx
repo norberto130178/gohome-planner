@@ -503,21 +503,50 @@ function BusRouteMap({ bus, color, selectedDep, nowMins, fmt, modalRef }) {
       }
     }
 
-    L.polyline(routeCoords || allStopCoords, { color, weight: 5, opacity: 0.85 }).addTo(map);
+    // Endpoints snappelése a pontos megálló-koordinátákra (shape nearest-point eltérés kiküszöbölése)
+    const rawCoords = routeCoords || allStopCoords;
+    const finalCoords = rawCoords.length >= 2 && routeCoords
+      ? [[stops[0].lat, stops[0].lon], ...rawCoords.slice(1, -1), [stops[stops.length - 1].lat, stops[stops.length - 1].lon]]
+      : rawCoords;
+    L.polyline(finalCoords, { color, weight: 5, opacity: 0.85 }).addTo(map);
 
-    // Megálló jelölők (minden megállón)
+    // Megálló jelölők + iránnyilak a közbülsőkön
     stops.forEach((stop, i) => {
       const isTerminal = i === 0 || i === stops.length - 1;
       const time = selectedDep !== undefined ? selectedDep + stop.offset : null;
       const isPast = time !== null && time < nowMins;
+      const r = isTerminal ? 9 : 6;
 
       L.circleMarker([stop.lat, stop.lon], {
-        radius: isTerminal ? 9 : 6,
-        color: 'white',
-        weight: 2,
-        fillColor: isPast ? '#bbb' : color,
-        fillOpacity: 0.95,
+        radius: r, color: 'white', weight: 2,
+        fillColor: isPast ? '#bbb' : color, fillOpacity: 0.95,
       }).addTo(map).bindPopup(`<b>${stop.name}</b>${time !== null ? `<br>${fmt(time)}` : ''}`);
+
+      if (time !== null) {
+        const borderColor = isPast ? '#bbb' : color;
+        const textColor = isPast ? '#aaa' : '#222';
+        const labelHtml = `<div style="position:absolute;left:${r + 5}px;top:-10px;background:white;border:1.5px solid ${borderColor};border-radius:4px;padding:1px 6px;font-size:11px;font-weight:700;color:${textColor};white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,0.15);">${fmt(time)}</div>`;
+        L.marker([stop.lat, stop.lon], {
+          icon: L.divIcon({ className: '', html: labelHtml, iconSize: [0, 0], iconAnchor: [0, 0] }),
+          interactive: false, zIndexOffset: 200,
+        }).addTo(map);
+      }
+
+      // Irányjel a közbülső megállókon
+      if (!isTerminal && i > 0) {
+        const prev = stops[i - 1], next = stops[i + 1] || stop;
+        const dy = next.lat - prev.lat, dx = next.lon - prev.lon;
+        const angle = Math.atan2(dx, dy) * 180 / Math.PI;
+        const svg = `<svg xmlns="http://www.w3.org/2000/svg"
+          style="position:absolute;left:-12px;top:-32px;transform-origin:12px 32px;transform:rotate(${angle}deg)"
+          width="24" height="40">
+          <polygon points="12,6 19,26 12,19 5,26" fill="black" stroke="white" stroke-width="2" stroke-linejoin="round"/>
+        </svg>`;
+        L.marker([stop.lat, stop.lon], {
+          icon: L.divIcon({ className: '', html: svg, iconSize: [0, 0], iconAnchor: [0, 0] }),
+          interactive: false, zIndexOffset: 100,
+        }).addTo(map);
+      }
     });
 
     instanceRef.current = map;
@@ -554,18 +583,14 @@ function BusRouteMap({ bus, color, selectedDep, nowMins, fmt, modalRef }) {
   return (
     <div style={{ position: 'relative', flex: 1, display: 'flex', flexDirection: 'column' }}>
       <div ref={mapRef} style={{ flex: 1, width: '100%' }} />
-      <button
-        onClick={toggleFullscreen}
-        title={fsState ? 'Kilépés a teljes képernyőből' : 'Teljes képernyő'}
-        style={{
-          position: 'absolute', top: 10, right: 10, zIndex: 1000,
-          background: fsState ? '#1a73e8' : 'white',
-          border: '2px solid ' + (fsState ? '#1a73e8' : '#ccc'),
-          borderRadius: 8, padding: '4px 8px', cursor: 'pointer',
-          fontSize: 16, lineHeight: 1, boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
-          color: fsState ? 'white' : 'inherit',
-        }}
-      >{fsState ? '✕' : '⛶'}</button>
+      <button onClick={toggleFullscreen} title={fsState ? 'Kilépés' : 'Teljes képernyő'} style={{
+        position: 'absolute', top: fsState ? 28 : 10, right: fsState ? 28 : 10, zIndex: 1000,
+        background: '#1a73e8',
+        border: '2px solid #1a73e8',
+        borderRadius: 8, padding: '4px 8px', cursor: 'pointer',
+        fontSize: 16, lineHeight: 1, boxShadow: '0 2px 6px rgba(0,0,0,0.25)',
+        color: 'white',
+      }}>{fsState ? '✕' : '⛶'}</button>
     </div>
   );
 }

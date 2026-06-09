@@ -39,7 +39,7 @@ function V1Variation({ state, setState, t, langSwitcher, navLinks }) {
         <div>
           <div style={{display:"flex",alignItems:"center",gap:10,flexWrap:isMobile?undefined:"wrap"}}>
             <div className="v1-title">{t.appTitle} ✨</div>
-            <div style={{fontSize:11,fontWeight:700,background:"linear-gradient(135deg,#7C3AED,#C026D3)",color:"white",padding:"2px 8px",borderRadius:6}}>v{window.APP_VERSION}</div>
+            <div style={{fontSize:11,fontWeight:700,background:"linear-gradient(135deg,#7C3AED,#C026D3)",color:"white",padding:"2px 8px",borderRadius:6}}>{window.APP_VERSION}</div>
             {!isMobile && langSwitcher}
           </div>
           <div style={{display:"flex",alignItems:"center",gap:10,marginTop:6}}>

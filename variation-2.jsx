@@ -36,7 +36,7 @@ function V2Variation({ state, setState, t, langSwitcher }) {
             <div className="v2-hud-time">{nowFmt}</div>
             <div style={{fontSize:11,opacity:0.6}}>{dateFmt}</div>
           </div>
-          <div style={{fontSize:11,opacity:0.7,textAlign:"right",background:"rgba(255,255,255,0.1)",padding:"2px 6px",borderRadius:6}}>v{window.APP_VERSION}</div>
+          <div style={{fontSize:11,opacity:0.7,textAlign:"right",background:"rgba(255,255,255,0.1)",padding:"2px 6px",borderRadius:6}}>{window.APP_VERSION}</div>
         </div>
       </div>
 

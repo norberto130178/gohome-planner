@@ -19,7 +19,7 @@ function RouteCard({ route, index, isPrimary, t, style, isWeekend, dayType, nowM
   return (
     <div className={`route-card ${style} ${isPrimary ? "primary" : ""}`}>
       {timetableInfo && (
-        <window.BusTimetableModal busId={timetableInfo.busId} fromStop={timetableInfo.fromStop} onClose={() => setTimetableInfo(null)} isWeekend={isWeekend} dayType={dayType} nowMins={nowMins} />
+        <window.BusTimetableModal busId={timetableInfo.busId} fromStop={timetableInfo.fromStop} initialDep={timetableInfo.initialDep} onClose={() => setTimetableInfo(null)} isWeekend={isWeekend} dayType={dayType} nowMins={nowMins} />
       )}
 
       <div className="route-card-header">
@@ -101,7 +101,7 @@ function RouteCard({ route, index, isPrimary, t, style, isWeekend, dayType, nowM
             className="step-icon bus-icon-local"
             style={{ background: busColor, cursor: 'pointer' }}
             title="Menetrend megtekintése"
-            onClick={() => setTimetableInfo({ busId: route.localBus.id, fromStop: route.localBus.stops[0].name })}
+            onClick={() => setTimetableInfo({ busId: route.localBus.id, fromStop: route.localBus.stops[0].name, initialDep: route.localBoardAt })}
           >
             {route.localBus.id}
           </div>
@@ -333,7 +333,7 @@ function SchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, nowMi
   return (
     <div className={`route-card ${isPrimary ? "primary" : ""}`}>
       {timetableInfo && (
-        <window.BusTimetableModal busId={timetableInfo.busId} fromStop={timetableInfo.fromStop} onClose={() => setTimetableInfo(null)} isWeekend={isWeekend} dayType={dayType} nowMins={nowMins} />
+        <window.BusTimetableModal busId={timetableInfo.busId} fromStop={timetableInfo.fromStop} initialDep={timetableInfo.initialDep} onClose={() => setTimetableInfo(null)} isWeekend={isWeekend} dayType={dayType} nowMins={nowMins} />
       )}
 
       <div className="route-card-header">
@@ -363,7 +363,7 @@ function SchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, nowMi
             className="step-icon bus-icon-local"
             style={{ background: busColor, cursor: 'pointer' }}
             title="Menetrend megtekintése"
-            onClick={() => setTimetableInfo({ busId: route.localBus.id, fromStop: route.localBus.stops[0].name })}
+            onClick={() => setTimetableInfo({ busId: route.localBus.id, fromStop: route.localBus.stops[0].name, initialDep: route.localBoardAt })}
           >
             {route.localBus.id}
           </div>

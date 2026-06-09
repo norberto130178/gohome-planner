@@ -20,9 +20,10 @@ window.planCityRoutes = function planCityRoutes({
   walkMin,      // minutes walk to origin stop
   minTransfer,  // minimum transfer wait minutes
   maxResults,   // max results to return
+  schoolHoliday, // bool
 }) {
   const U = window.BUS_UTILS;
-  const dayType = U.dayType(now);
+  const dayType = U.dayType(now, schoolHoliday);
   const nowMins = now.getHours() * 60 + now.getMinutes();
   const earliestBoard = nowMins + walkMin;
 

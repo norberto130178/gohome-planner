@@ -453,7 +453,7 @@ window.CITY_BUSES_FULL = [
     { name: "Egyetem utca / Stadion utca", offset: 4, lat: 47.082611, lon: 17.909991, spId: "VBUSZ_SP1761" },
     { name: "Egyetem utca / ActiCity", offset: 5, lat: 47.086389, lon: 17.908673, spId: "VBUSZ_SP1758" },
     { name: "Komakút tér / Pannon Egyetem", offset: 6, lat: 47.089308, lon: 17.907608, spId: "VBUSZ_SP1668" },
-    { name: "Petőfi Színház", offset: 7, lat: 47.091736, lon: 17.905477, spId: "VBUSZ_SP1630" },
+    { name: "Petőfi Színház", offset: 7, lat: 47.091798, lon: 17.906025, spId: "VBUSZ_SP1670" },
     { name: "Hotel", offset: 9, lat: 47.092137, lon: 17.912489, spId: "VBUSZ_SP1661" },
     { name: "Rózsa utca", offset: 10, lat: 47.094121, lon: 17.916446, spId: "VBUSZ_SP1730" },
     { name: "Viola utca", offset: 11, lat: 47.097028, lon: 17.921802, spId: "VBUSZ_SP1625" },
@@ -780,7 +780,7 @@ window.CITY_BUSES_FULL = [
     { name: "Haszkovó forduló", offset: 41, lat: 47.109739, lon: 17.915587, spId: "VBUSZ_SP1881" },
   ],
   departures: {
-    workday: { 7: [4] }
+    workday: { 7: [4] },
   },
 },
 

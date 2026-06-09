@@ -320,19 +320,24 @@ function CityRouteMap({ route, fromStop, toStop }) {
 function CityRouteCard({ route, index, isPrimary, fromStop, toStop, walkMin, isWeekend, nowMins }) {
   const U = window.BUS_UTILS;
   const fmt = m => U.fmtTime(m);
-  const [timetableBusId, setTimetableBusId] = React.useState(null);
+  const [timetableInfo, setTimetableInfo] = React.useState(null);
   const [mapOpen, setMapOpen] = React.useState(false);
   const totalMin = route.totalDuration;
   const totalStr = totalMin >= 60
     ? `${Math.floor(totalMin / 60)}ó ${totalMin % 60}p`
     : `${totalMin} perc`;
 
-  const BusIcon = ({ bus }) => (
+  function openTimetable(bus, boardAtMins, boardStopName) {
+    const boardOff = bus.stops.find(s => s.name === boardStopName)?.offset ?? 0;
+    setTimetableInfo({ busId: bus.id, fromStop: bus.stops[0]?.name, initialDep: boardAtMins - boardOff });
+  }
+
+  const BusIcon = ({ bus, boardAt, boardStop }) => (
     <div
       className="city-bus-badge"
       style={{ background: bus.color, cursor: 'pointer' }}
       title="Menetrend megtekintése"
-      onClick={() => setTimetableBusId(bus.id)}
+      onClick={() => openTimetable(bus, boardAt, boardStop)}
     >
       {bus.id}
     </div>
@@ -340,8 +345,8 @@ function CityRouteCard({ route, index, isPrimary, fromStop, toStop, walkMin, isW
 
   return (
     <div className={`route-card ${isPrimary ? "primary" : ""}`}>
-      {timetableBusId && (
-        <window.BusTimetableModal busId={timetableBusId} onClose={() => setTimetableBusId(null)} isWeekend={isWeekend} nowMins={nowMins} />
+      {timetableInfo && (
+        <window.BusTimetableModal busId={timetableInfo.busId} fromStop={timetableInfo.fromStop} initialDep={timetableInfo.initialDep} onClose={() => setTimetableInfo(null)} isWeekend={isWeekend} nowMins={nowMins} />
       )}
       <div className="route-card-header">
         <span className="route-card-badge">
@@ -382,7 +387,7 @@ function CityRouteCard({ route, index, isPrimary, fromStop, toStop, walkMin, isW
         {/* Board bus1 */}
         <div className="route-step">
           <div className="step-time">{fmt(route.boardAt)}</div>
-          <BusIcon bus={route.bus1} />
+          <BusIcon bus={route.bus1} boardAt={route.boardAt} boardStop={fromStop} />
           <div className="step-body">
             <div className="step-title">
               Szállj fel ·{" "}
@@ -429,7 +434,7 @@ function CityRouteCard({ route, index, isPrimary, fromStop, toStop, walkMin, isW
             </div>
             <div className="route-step">
               <div className="step-time">{fmt(route.boardAt2)}</div>
-              <BusIcon bus={route.bus2} />
+              <BusIcon bus={route.bus2} boardAt={route.boardAt2} boardStop={route.transferStopName} />
               <div className="step-body">
                 <div className="step-title">
                   Szállj fel ·{" "}
@@ -475,6 +480,7 @@ function CityApp() {
   });
   const walkMin = 0;
   const [dayOffset, setDayOffset] = React.useState(0);
+  const [schoolHoliday, setSchoolHoliday] = React.useState(() => localStorage.getItem("city.schoolholiday") === "1");
   const [results, setResults] = React.useState(null);
   const [timetableBusId, setTimetableBusId] = React.useState(null);
   const [planIsWeekend, setPlanIsWeekend] = React.useState(() => { const d = new Date(); return d.getDay() === 0 || d.getDay() === 6; });
@@ -508,6 +514,7 @@ function CityApp() {
       walkMin,
       minTransfer: 2,
       maxResults: 6,
+      schoolHoliday: overrides.schoolHoliday ?? schoolHoliday,
     });
     setResults(r);
     setPlanIsWeekend(planTime.getDay() === 0 || planTime.getDay() === 6);
@@ -569,7 +576,7 @@ function CityApp() {
             style={{fontSize:15,fontWeight:800,minWidth:100}}
           />
           <div style={{width:1,height:28,background:"rgba(255,255,255,0.25)",flexShrink:0}} />
-          {Array.from({length:5},(_,i) => {
+          {Array.from({length:7},(_,i) => {
             const d = new Date(); d.setDate(d.getDate()+i);
             const label = i===0?"Ma":i===1?"Holnap":d.toLocaleDateString("hu-HU",{weekday:"short"});
             const isSelected = dayOffset === i;
@@ -586,6 +593,18 @@ function CityApp() {
               >{label}</button>
             );
           })}
+          <div style={{width:1,height:28,background:"rgba(255,255,255,0.25)",flexShrink:0}} />
+          <button onClick={() => { const v = !schoolHoliday; setSchoolHoliday(v); localStorage.setItem("city.schoolholiday", v?"1":"0"); if (canPlan) plan({ schoolHoliday: v }); }} style={{
+            display:"flex", alignItems:"center", gap:6, padding:"4px 10px", borderRadius:20,
+            border:"none", background:"rgba(255,255,255,0.18)", cursor:"pointer", fontFamily:"inherit",
+            fontSize:13, fontWeight:700, color:"white",
+          }}>
+            🏖️ Tanszünet
+            <div style={{width:36,height:20,borderRadius:10,background:schoolHoliday?"white":"rgba(255,255,255,0.3)",position:"relative",transition:"background 0.2s"}}>
+              <div style={{position:"absolute",top:3,left:schoolHoliday?19:3,width:14,height:14,borderRadius:"50%",background:schoolHoliday?"var(--accent)":"white",transition:"left 0.2s"}} />
+            </div>
+          </button>
+
           <div style={{width:1,height:28,background:"rgba(255,255,255,0.25)",flexShrink:0}} />
           {["06:00","08:00","10:00","12:00","14:00","16:00","18:00","20:00"].map(t => {
             const isSelected = customTime === t;

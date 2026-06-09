@@ -6,7 +6,7 @@
 let _modalOpenCount = 0;
 
 // dayType: "workday" | "schoolholiday" | "weekend"  (isWeekend kept for backward compat)
-function BusTimetableModal({ busId, onClose, fromStop, isWeekend: isWeekendProp, dayType: dayTypeProp, nowMins: nowMinsProp }) {
+function BusTimetableModal({ busId, onClose, fromStop, isWeekend: isWeekendProp, dayType: dayTypeProp, nowMins: nowMinsProp, initialDep }) {
   const U = window.BUS_UTILS;
   const fmt = (m) => U.fmtTime(m);
 
@@ -36,10 +36,7 @@ function BusTimetableModal({ busId, onClose, fromStop, isWeekend: isWeekendProp,
   const allDirs = (window.CITY_BUSES_FULL || []).filter(b => b.id === currentBusId);
 
   function getDeps(bus) {
-    let sched = bus.departures[activeDayType];
-    if (!sched || !Object.keys(sched).length) {
-      sched = activeDayType === "schoolholiday" ? (bus.departures.workday || {}) : {};
-    }
+    let sched = bus.departures[activeDayType] || {};
     const deps = [];
     Object.entries(sched)
       .sort((a, b) => Number(a[0]) - Number(b[0]))
@@ -62,12 +59,19 @@ function BusTimetableModal({ busId, onClose, fromStop, isWeekend: isWeekendProp,
     const dirIdx = fromStop
       ? Math.max(0, allDirs.findIndex(b => b.stops[0].name === fromStop))
       : 0;
-    return { dirIdx, depIdx: dirData[dirIdx]?.nextIdx ?? 0 };
+    const data = dirData[dirIdx];
+    let depIdx = data?.nextIdx ?? 0;
+    if (initialDep !== undefined && data?.deps?.length) {
+      const exact = data.deps.findIndex(d => d.mins === initialDep);
+      if (exact >= 0) depIdx = exact;
+    }
+    return { dirIdx, depIdx };
   });
   const [stopsOpen, setStopsOpen] = React.useState(false);
   const [mapOpen, setMapOpen] = React.useState(false);
   const [isFullscreen, setIsFullscreen] = React.useState(false);
   const modalRef = React.useRef(null);
+  const isMountRef = React.useRef(true);
 
   React.useEffect(() => {
     const handler = () => setIsFullscreen(!!document.fullscreenElement);
@@ -75,8 +79,9 @@ function BusTimetableModal({ busId, onClose, fromStop, isWeekend: isWeekendProp,
     return () => document.removeEventListener('fullscreenchange', handler);
   }, []);
 
-  // Vonalváltáskor reset
+  // Vonalváltáskor reset — első mount-on kihagyjuk (az initialDep-et ne írja felül)
   React.useEffect(() => {
+    if (isMountRef.current) { isMountRef.current = false; return; }
     setSelected({ dirIdx: 0, depIdx: dirData[0]?.nextIdx ?? 0 });
     setStopsOpen(false);
   }, [currentBusId]);

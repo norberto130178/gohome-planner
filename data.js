@@ -60,12 +60,8 @@ window.BUS_UTILS = {
   },
 
   // Egy busz departures objektumából → abszolút indulási idők [minutes[]]
-  // schoolholiday fallback: ha nincs schoolholiday adat, workday-t használ
   getDepartures(bus, dayType) {
-    let dep = bus.departures[dayType];
-    if (!dep || !Object.keys(dep).length) {
-      dep = dayType === "schoolholiday" ? (bus.departures.workday || {}) : {};
-    }
+    let dep = bus.departures[dayType] || {};
     const out = [];
     for (const hStr of Object.keys(dep)) {
       const h = Number(hStr);

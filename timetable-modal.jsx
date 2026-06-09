@@ -90,6 +90,12 @@ function BusTimetableModal({ busId, onClose, fromStop, isWeekend: isWeekendProp,
     };
   }, []);
 
+  React.useEffect(() => {
+    const handler = (e) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [onClose]);
+
   if (!allDirs.length) return null;
 
   function shortName(name) {
@@ -153,9 +159,10 @@ function BusTimetableModal({ busId, onClose, fromStop, isWeekend: isWeekendProp,
                 if (!hasData && dt !== activeDayType) return null;
                 return (
                   <button key={dt} onClick={() => setActiveDayType(dt)} style={{
-                    background: activeDayType === dt ? 'rgba(255,255,255,0.35)' : 'rgba(255,255,255,0.12)',
+                    background: activeDayType === dt ? 'white' : 'rgba(255,255,255,0.18)',
                     border: 'none', borderRadius: 6, padding:'2px 7px',
-                    color:'white', fontSize:10, fontWeight:700, cursor:'pointer',
+                    color: activeDayType === dt ? bus0.color : 'white',
+                    fontSize:10, fontWeight:700, cursor:'pointer',
                     opacity: hasData ? 1 : 0.5,
                   }}>{label}</button>
                 );
@@ -173,9 +180,12 @@ function BusTimetableModal({ busId, onClose, fromStop, isWeekend: isWeekendProp,
             onClick={() => setMapOpen(o => !o)}
             title="Útvonal a térképen"
             style={{
-              background: mapOpen ? 'rgba(255,255,255,0.45)' : 'rgba(255,255,255,0.25)', border: 'none',
+              background: mapOpen ? 'white' : 'rgba(255,255,255,0.25)',
+              border: mapOpen ? `2px solid white` : '2px solid transparent',
+              outline: mapOpen ? `2px solid ${bus0.color}` : 'none',
+              outlineOffset: 2,
               borderRadius: '50%', width: 36, height: 36,
-              cursor: 'pointer', color: 'white', fontSize: 18,
+              cursor: 'pointer', color: mapOpen ? bus0.color : 'white', fontSize: 18,
               display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
             }}
           >🗺</button>
@@ -529,19 +539,33 @@ function BusRouteMap({ bus, color, selectedDep, nowMins, fmt, modalRef }) {
     }
   }
 
+  const [fsState, setFsState] = React.useState(!!document.fullscreenElement);
+  React.useEffect(() => {
+    const h = () => setFsState(!!document.fullscreenElement);
+    document.addEventListener('fullscreenchange', h);
+    return () => document.removeEventListener('fullscreenchange', h);
+  }, []);
+  React.useEffect(() => {
+    const h = (e) => { if (e.key === 'Escape' && document.fullscreenElement) document.exitFullscreen(); };
+    document.addEventListener('keydown', h);
+    return () => document.removeEventListener('keydown', h);
+  }, []);
+
   return (
     <div style={{ position: 'relative', flex: 1, display: 'flex', flexDirection: 'column' }}>
       <div ref={mapRef} style={{ flex: 1, width: '100%' }} />
       <button
         onClick={toggleFullscreen}
-        title="Teljes képernyő"
+        title={fsState ? 'Kilépés a teljes képernyőből' : 'Teljes képernyő'}
         style={{
-          position: 'absolute', bottom: 10, right: 10, zIndex: 1000,
-          background: 'white', border: '2px solid #ccc',
+          position: 'absolute', top: 10, right: 10, zIndex: 1000,
+          background: fsState ? '#1a73e8' : 'white',
+          border: '2px solid ' + (fsState ? '#1a73e8' : '#ccc'),
           borderRadius: 8, padding: '4px 8px', cursor: 'pointer',
           fontSize: 16, lineHeight: 1, boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
+          color: fsState ? 'white' : 'inherit',
         }}
-      >⛶</button>
+      >{fsState ? '✕' : '⛶'}</button>
     </div>
   );
 }

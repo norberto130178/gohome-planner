@@ -2,7 +2,7 @@
 window.SCHOOLS = [
   {
     "id": "kossuth",
-    "name": "Kossuth Lajos Általános",
+    "name": "Veszprémi Kossuth Lajos Általános Iskola",
     "type": "altalanos",
     "lat": 47.093048,
     "lon": 17.915566,
@@ -124,7 +124,7 @@ window.SCHOOLS = [
   },
   {
     "id": "bathory",
-    "name": "Báthory István Sportiskolai",
+    "name": "Veszprémi Báthory István Sportiskolai Ált. Isk.",
     "type": "altalanos",
     "lat": 47.104821,
     "lon": 17.917041,
@@ -191,7 +191,7 @@ window.SCHOOLS = [
   },
   {
     "id": "cholnoky",
-    "name": "Cholnoky Jenő Általános",
+    "name": "Veszprémi Cholnoky Jenő Általános Iskola",
     "type": "altalanos",
     "lat": 47.090848463305264,
     "lon": 17.925516725882925,
@@ -265,7 +265,7 @@ window.SCHOOLS = [
   },
   {
     "id": "rozsa",
-    "name": "Rózsa úti Általános",
+    "name": "Rózsa úti Általános Iskola",
     "type": "altalanos",
     "lat": 47.088588,
     "lon": 17.918334,
@@ -300,7 +300,7 @@ window.SCHOOLS = [
   },
   {
     "id": "simonyi",
-    "name": "Simonyi Zsigmond Ének-Zene",
+    "name": "Simonyi Zsigmond Ének-Zenei és Testnevelési Ált. Isk.",
     "type": "altalanos",
     "lat": 47.084916,
     "lon": 17.906488,
@@ -368,7 +368,7 @@ window.SCHOOLS = [
   },
   {
     "id": "deak",
-    "name": "Deák Ferenc Általános",
+    "name": "Deák Ferenc Általános Iskola",
     "type": "altalanos",
     "lat": 47.110072,
     "lon": 17.923505,
@@ -419,7 +419,7 @@ window.SCHOOLS = [
   },
   {
     "id": "botev",
-    "name": "Hriszto Botev Általános",
+    "name": "Hriszto Botev Német Nemzetiségi Nyelvoktató Ált. Isk.",
     "type": "altalanos",
     "lat": 47.079966,
     "lon": 17.907134,
@@ -492,7 +492,7 @@ window.SCHOOLS = [
   },
   {
     "id": "dozsa",
-    "name": "Dózsa György Általános",
+    "name": "Dózsa György Német Nemzetiségi Nyelvoktató Ált. Isk.",
     "type": "altalanos",
     "lat": 47.103114,
     "lon": 17.898169,
@@ -576,7 +576,7 @@ window.SCHOOLS = [
   },
   {
     "id": "gyulaffy",
-    "name": "Gyulaffy László Általános",
+    "name": "Gyulaffy László Német Nemzetiségi Nyelvoktató Ált. Isk.",
     "type": "altalanos",
     "lat": 47.142871,
     "lon": 17.944257,
@@ -597,7 +597,7 @@ window.SCHOOLS = [
   },
   {
     "id": "szilagyi",
-    "name": "Szilágyi Erzsébet Keresztény",
+    "name": "Szilágyi Erzsébet Keresztény Általános és Alapfokú Műv. Isk.",
     "type": "altalanos",
     "lat": 47.091569,
     "lon": 17.904434,
@@ -740,7 +740,7 @@ window.SCHOOLS = [
   },
   {
     "id": "barczi",
-    "name": "Bárczi Gusztáv Speciális",
+    "name": "Bárczi Gusztáv Általános Iskola, Speciális Szakiskola",
     "type": "specialis",
     "lat": 47.102939,
     "lon": 17.925032,
@@ -838,7 +838,7 @@ window.SCHOOLS = [
   },
   {
     "id": "kozmutza",
-    "name": "Kozmutza Flóra Készségfejlesztő",
+    "name": "Kozmutza Flóra Készségfejlesztő Iskola",
     "type": "specialis",
     "lat": 47.108583,
     "lon": 17.901821,
@@ -870,7 +870,7 @@ window.SCHOOLS = [
   },
   {
     "id": "padanyi",
-    "name": "Padányi Katolikus",
+    "name": "Padányi Katolikus Iskola",
     "type": "osszetett",
     "lat": 47.092866,
     "lon": 17.905736,
@@ -1145,7 +1145,7 @@ window.SCHOOLS = [
   },
   {
     "id": "noszlopy",
-    "name": "Noszlopy Gáspár Gimnázium",
+    "name": "Noszlopy Gáspár Gimnázium és Kollégium",
     "type": "gimnazium",
     "lat": 47.107414,
     "lon": 17.902234,
@@ -1204,7 +1204,7 @@ window.SCHOOLS = [
   },
   {
     "id": "bethlen",
-    "name": "VSZC Bethlen István Technikum",
+    "name": "VSZC Bethlen István Közgazd. és Közigazgatási Technikum",
     "type": "technikum",
     "lat": 47.101547,
     "lon": 17.924094,
@@ -1340,7 +1340,7 @@ window.SCHOOLS = [
   },
   {
     "id": "sef",
-    "name": "VSZC SÉF Technikum",
+    "name": "VSZC \"SÉF\" Vendéglátás-Turizmus Technikum",
     "type": "technikum",
     "lat": 47.105344,
     "lon": 17.914418,

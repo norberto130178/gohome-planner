@@ -5,7 +5,7 @@
 // Ez a fájl csak az útvonaltervező logikát tartalmazza.
 // ============================================================
 
-window.APP_VERSION = "v2.75";
+window.APP_VERSION = "v3.0";
 
 // Helyi buszok amik Csererdőt érintik (hazaút + iskolába tervező)
 const HOME_BUS_IDS = ["3", "8", "8Y", "28"];
@@ -228,11 +228,16 @@ window.planSchoolRoutes = function planSchoolRoutes({
   now, walkMin, minTransfer, maxResults, schoolStartMin,
   allowedTransfers,  // opcionális: melyik átszállópontokat használja (komakut, buszall, szinhaz_walk)
   schoolHoliday,
+  fromStop,          // opcionális: indulási megálló neve (alapértelmezett: "Csererdő")
+  walkToSchool,      // opcionális: gyaloglási idő az iskoláig (alapértelmezett: 10)
+  walkToSchoolDist,  // opcionális: távolság méterben (megjelenítéshez)
 }) {
+  fromStop = fromStop || "Csererdő";
+  walkToSchool = walkToSchool != null ? walkToSchool : 10;
   const U = window.BUS_UTILS;
   const dayType = U.dayType(now, schoolHoliday);
   const nowMins = now.getHours() * 60 + now.getMinutes();
-  const earliestBoard = nowMins + walkMin;  // mikor tud a gyerek Csererdő-megállónál lenni
+  const earliestBoard = nowMins + walkMin;  // mikor tud a gyerek az indulási megállónál lenni
 
   const helykozi = window.SCHEDULES.helykozi_iskola;
 
@@ -264,6 +269,7 @@ window.planSchoolRoutes = function planSchoolRoutes({
       originId: "komakut",
       localStopName: "Petőfi Színház",
       walkAfterBus: 5,
+      walkAfterBusDist: 400,
       minTransfer: 0,
     },
   ];
@@ -294,33 +300,28 @@ window.planSchoolRoutes = function planSchoolRoutes({
       }))
       .sort((a, b) => a.depMins - b.depMins);
 
-    // Helyi buszok amik Csererdőről → tp.localStopName-re mennek
+    // Helyi buszok amik fromStop → tp.localStopName-re mennek
     const schoolBuses = (window.CITY_BUSES_FULL || []).filter(bus =>
-      HOME_BUS_IDS.includes(bus.id) && bus.stops[0]?.name === "Csererdő"
+      U.busVisits(bus, fromStop)
     );
     for (const bus of schoolBuses) {
-      if (!U.busVisits(bus, "Csererdő")) continue;
       if (!U.busVisits(bus, tp.localStopName)) continue;
-      const csererdoOffset = U.stopOffset(bus, "Csererdő");
+      const fromOffset = U.stopOffset(bus, fromStop);
       const targetOffset = U.stopOffset(bus, tp.localStopName);
-      if (targetOffset <= csererdoOffset) continue;  // helyes irány
+      if (fromOffset === null || targetOffset === null || targetOffset <= fromOffset) continue;
 
       const localDeps = U.getDepartures(bus, dayType);
       for (const localDep of localDeps) {
-        if (localDep < earliestBoard) continue;  // már nem tudja elérni
-        const localAtTarget = localDep + (targetOffset - csererdoOffset) * 1; // offset diff, a stopOffset már abszolút kezdettől
-        // helyesebb: U.stopOffset-ek különbsége = menetidő
-        const travelMin = targetOffset - csererdoOffset;
-        const arriveAtTransfer = localDep + travelMin;
-        const arriveReadyForHelykozi = arriveAtTransfer + tp.walkAfterBus;  // gyaloglás után
+        const boardAt = localDep + fromOffset;
+        if (boardAt < earliestBoard) continue;
+        const arriveAtTransfer = localDep + targetOffset;
+        const arriveReadyForHelykozi = arriveAtTransfer + tp.walkAfterBus;
         const mustBoardBy = arriveReadyForHelykozi + (tp.minTransfer ?? minTransfer);
 
-        // Első elérhető helyközi
         const hk = helykoziTrips.find((tr) => tr.depMins >= mustBoardBy);
         if (!hk) continue;
-        if (schoolStartMin != null && hk.arrMins > schoolStartMin) continue; // későbbi mint a becsengetés
+        if (schoolStartMin != null && hk.arrMins > schoolStartMin) continue;
 
-        // Autóbusz-pályaudvari indulás keresése (ha nem buszáll. az átszállópont)
         let depBuszallMins = hk.depMins;
         if (tp.originId !== "buszall") {
           const buszallOrigin = helykozi.origins.find(o => o.id === "buszall");
@@ -330,16 +331,18 @@ window.planSchoolRoutes = function planSchoolRoutes({
           }
         }
 
-        const key = `${tp.id}-${bus.id}-${bus.direction}-${localDep}-${hk.depMins}`;
+        const key = `${tp.id}-${bus.id}-${bus.direction}-${boardAt}-${hk.depMins}`;
         if (seen.has(key)) continue;
         seen.add(key);
 
         routes.push({
-          departLeaveHome: localDep - walkMin,
+          departLeaveHome: boardAt - walkMin,
+          boardingStopName: fromStop,
           localBus: bus,
-          localBoardAt: localDep,
+          localBoardAt: boardAt,
           localArriveAtTransfer: arriveAtTransfer,
           walkAfterBus: tp.walkAfterBus,
+          walkAfterBusDist: tp.walkAfterBusDist,
           transferReadyAt: arriveReadyForHelykozi,
           waitAtTransfer: hk.depMins - arriveReadyForHelykozi,
           helykoziDep: hk.depMins,
@@ -351,9 +354,10 @@ window.planSchoolRoutes = function planSchoolRoutes({
           transferStopId: tp.id,
           transferLat: origin.lat,
           transferLon: origin.lon,
-          walkToSchool: 10,
-          arriveSchool: hk.arrMins + 10,
-          totalDuration: (hk.arrMins + 10) - (localDep - walkMin),
+          walkToSchool: walkToSchool,
+          walkToSchoolDist: walkToSchoolDist,
+          arriveSchool: hk.arrMins + walkToSchool,
+          totalDuration: (hk.arrMins + walkToSchool) - (boardAt - walkMin),
         });
       }
     }

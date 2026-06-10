@@ -314,6 +314,311 @@ function HomeRouteMap({ route }) {
 
 window.RouteCard = RouteCard;
 
+function walkArc(lat1, lon1, lat2, lon2, steps = 24) {
+  const dLat = lat2 - lat1, dLon = lon2 - lon1;
+  const len = Math.sqrt(dLat * dLat + dLon * dLon);
+  if (len === 0) return [[lat1, lon1], [lat2, lon2]];
+  const offset = len * 0.35;
+  const ctrlLat = (lat1 + lat2) / 2 - (dLon / len) * offset;
+  const ctrlLon = (lon1 + lon2) / 2 + (dLat / len) * offset;
+  const pts = [];
+  for (let i = 0; i <= steps; i++) {
+    const t = i / steps;
+    pts.push([
+      (1-t)*(1-t)*lat1 + 2*(1-t)*t*ctrlLat + t*t*lat2,
+      (1-t)*(1-t)*lon1 + 2*(1-t)*t*ctrlLon + t*t*lon2,
+    ]);
+  }
+  return pts;
+}
+
+// ── CitySchoolRouteMap — Leaflet térkép a városi iskolás útvonalhoz ──
+function CitySchoolRouteMap({ route, direction, schoolData }) {
+  const mapRef = React.useRef(null);
+  const containerRef = React.useRef(null);
+  const instanceRef = React.useRef(null);
+  const routeKey = `${route.type}-${route.bus1?.id}-${route.boardAt}`;
+
+  React.useEffect(() => {
+    if (!mapRef.current || instanceRef.current) return;
+    const map = L.map(mapRef.current, { zoomControl: true });
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
+    const allCoords = [];
+    const fmt = m => window.BUS_UTILS.fmtTime(m);
+
+    const nearestStopName = route.nearestStopName || schoolData?.nearbyStops?.[0]?.name || '';
+    const homeStopName = route.homeStopName || '';
+    const bus1FromName = direction === "school" ? homeStopName : nearestStopName;
+    const bus1ToName = route.type === "transfer" ? route.transferStopName : (direction === "school" ? nearestStopName : homeStopName);
+    const bus2ToName = direction === "school" ? nearestStopName : homeStopName;
+
+    function drawSeg(bus, fromName, toName, boardTime) {
+      if (!bus || !fromName || !toName) return;
+      const shapes = (window.CITY_SHAPES || {})[bus.id] || [];
+      const fromIdx = bus.stops.findIndex(s => s.name === fromName);
+      const toIdx = bus.stops.findIndex(s => s.name === toName);
+      if (fromIdx < 0 || toIdx < 0 || toIdx <= fromIdx) return;
+      const fromStop = bus.stops[fromIdx];
+      const toStop = bus.stops[toIdx];
+      if (!fromStop.lat || !toStop.lat) return;
+      const busStart = boardTime - fromStop.offset;
+
+      if (shapes.length) {
+        const b = window.BUS_UTILS.bestShape(shapes, fromStop.lat, fromStop.lon, toStop.lat, toStop.lon);
+        if (b) {
+          const seg = [[fromStop.lat, fromStop.lon], ...b.s.slice(b.fi + 1, b.ti), [toStop.lat, toStop.lon]];
+          L.polyline(seg, { color: bus.color, weight: 5, opacity: 0.85 }).addTo(map);
+          allCoords.push(...seg);
+        }
+      }
+
+      const segStops = bus.stops.slice(fromIdx, toIdx + 1).filter(s => s.lat && s.lon);
+      segStops.forEach((stop, i) => {
+        const isTerminal = i === 0 || i === segStops.length - 1;
+        const r = isTerminal ? 9 : 6;
+        const time = busStart + stop.offset;
+        L.circleMarker([stop.lat, stop.lon], { radius: r, color: 'white', weight: 2, fillColor: bus.color, fillOpacity: 0.95 })
+          .addTo(map).bindPopup(`<b>${stop.name}</b><br>${fmt(time)}`);
+        if (isTerminal) {
+          const labelHtml = `<div style="position:absolute;left:${r + 5}px;top:-10px;background:white;border:1.5px solid ${bus.color};border-radius:4px;padding:1px 6px;font-size:11px;font-weight:700;color:#222;white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,0.15);">${fmt(time)}</div>`;
+          L.marker([stop.lat, stop.lon], { icon: L.divIcon({ className: '', html: labelHtml, iconSize: [0, 0], iconAnchor: [0, 0] }), interactive: false, zIndexOffset: 200 }).addTo(map);
+        }
+        if (!isTerminal && i > 0) {
+          const prev = segStops[i - 1], next = segStops[i + 1] || stop;
+          const dy = next.lat - prev.lat, dx = next.lon - prev.lon;
+          const angle = Math.atan2(dx, dy) * 180 / Math.PI;
+          const svg = `<svg xmlns="http://www.w3.org/2000/svg" style="position:absolute;left:-12px;top:-32px;transform-origin:12px 32px;transform:rotate(${angle}deg)" width="24" height="40"><polygon points="12,6 19,26 12,19 5,26" fill="black" stroke="white" stroke-width="2" stroke-linejoin="round"/></svg>`;
+          L.marker([stop.lat, stop.lon], { icon: L.divIcon({ className: '', html: svg, iconSize: [0, 0], iconAnchor: [0, 0] }), interactive: false, zIndexOffset: 100 }).addTo(map);
+        }
+      });
+    }
+
+    drawSeg(route.bus1, bus1FromName, bus1ToName, route.boardAt);
+    if (route.type === "transfer") drawSeg(route.bus2, route.transferStopName, bus2ToName, route.boardAt2);
+
+    if (direction === "school" && schoolData?.lat && schoolData?.lon) {
+      const dropoff = schoolData.nearbyStops?.[0];
+      if (dropoff?.lat && dropoff?.lon) {
+        L.polyline(walkArc(dropoff.lat, dropoff.lon, schoolData.lat, schoolData.lon), {
+          color: '#333', weight: 2.5, opacity: 0.85, dashArray: '6 8',
+        }).addTo(map);
+      }
+      L.marker([schoolData.lat, schoolData.lon], {
+        icon: L.divIcon({ className: '', html: '<div style="font-size:22px;line-height:1;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.35));">🏫</div>', iconSize: [22, 22], iconAnchor: [11, 11] }),
+        zIndexOffset: 500,
+      }).addTo(map).bindPopup(`<b>${schoolData.name}</b>`);
+      if (route.arriveSchool != null) {
+        const tHtml = `<div style="position:absolute;left:14px;top:-10px;background:white;border:1.5px solid #333;border-radius:4px;padding:1px 6px;font-size:11px;font-weight:700;color:#222;white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,0.15);">${fmt(route.arriveSchool)}</div>`;
+        L.marker([schoolData.lat, schoolData.lon], { icon: L.divIcon({ className: '', html: tHtml, iconSize: [0, 0], iconAnchor: [0, 0] }), interactive: false, zIndexOffset: 600 }).addTo(map);
+      }
+      allCoords.push([schoolData.lat, schoolData.lon]);
+    }
+
+    instanceRef.current = map;
+    setTimeout(() => {
+      map.invalidateSize();
+      if (allCoords.length >= 2) map.fitBounds(allCoords, { padding: [24, 24] });
+      else map.setView([47.09, 17.91], 13);
+    }, 200);
+
+    return () => { map.remove(); instanceRef.current = null; };
+  }, [routeKey]);
+
+  const [fsState, setFsState] = React.useState(false);
+  React.useEffect(() => {
+    const h = () => { setFsState(!!document.fullscreenElement); setTimeout(() => instanceRef.current?.invalidateSize(), 100); };
+    document.addEventListener('fullscreenchange', h);
+    return () => document.removeEventListener('fullscreenchange', h);
+  }, []);
+  React.useEffect(() => {
+    const h = e => { if (e.key === 'Escape' && document.fullscreenElement) document.exitFullscreen(); };
+    document.addEventListener('keydown', h);
+    return () => document.removeEventListener('keydown', h);
+  }, []);
+
+  function toggleFullscreen() {
+    if (!document.fullscreenElement) containerRef.current?.requestFullscreen();
+    else document.exitFullscreen();
+  }
+
+  return (
+    <div ref={containerRef} style={{ borderTop: '2px solid var(--line)', position: 'relative' }}>
+      <div ref={mapRef} style={{ height: fsState ? '100%' : 300, width: '100%' }} />
+      <button onClick={toggleFullscreen} title={fsState ? 'Kilépés' : 'Teljes képernyő'} style={{
+        position: 'absolute', top: fsState ? 28 : 10, right: fsState ? 28 : 10, zIndex: 1000,
+        background: '#1a73e8', border: '2px solid #1a73e8',
+        borderRadius: 8, padding: '4px 8px', cursor: 'pointer',
+        fontSize: 16, lineHeight: 1, boxShadow: '0 2px 6px rgba(0,0,0,0.25)', color: 'white',
+      }}>{fsState ? '✕' : '⛶'}</button>
+    </div>
+  );
+}
+
+// ── CitySchoolRouteCard — városi iskola útvonalkártya (planCityRoutes eredményéhez) ──
+function CitySchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, nowMins, direction, schoolData }) {
+  const [mapOpen, setMapOpen] = React.useState(false);
+  const U = window.BUS_UTILS;
+  const fmt = m => U.fmtTime(m);
+
+  const finalArriveAt = direction === "school" ? (route.arriveSchool ?? route.arriveAt) : route.arriveAt;
+  const totalMin = finalArriveAt - route.departLeaveHome;
+  const totalH = Math.floor(totalMin / 60);
+  const totalM = totalMin % 60;
+  const totalStr = totalH > 0 ? `${totalH}${t.hour} ${totalM}${t.min}` : `${totalM} ${t.min}`;
+
+  const walkMin = route.boardAt - route.departLeaveHome;
+  const nearestStop = schoolData?.nearbyStops?.[0];
+  const nearestStopName = route.nearestStopName || nearestStop?.name || "";
+  const homeStopName = route.homeStopName || "";
+
+  const bus2TravelMin = route.type === "transfer"
+    ? route.arriveAt - route.boardAt2
+    : route.arriveAt - route.boardAt;
+  const bus1TravelMin = route.type === "transfer"
+    ? route.arriveAtTransfer - route.boardAt
+    : route.arriveAt - route.boardAt;
+
+  return (
+    <div className={`route-card ${isPrimary ? "primary" : ""}`}>
+      <div className="route-card-header">
+        <span className="route-card-badge">
+          {isPrimary ? `⭐ ${t.best}` : `${t.alternative} ${index}`}
+        </span>
+        <span className="route-card-total">
+          {direction === "school" ? "🏫" : "🏠"} {fmt(finalArriveAt)} · {totalStr}
+          <button
+            onClick={() => setMapOpen(o => !o)}
+            title="Útvonal a térképen"
+            style={{
+              marginLeft: 8, background: mapOpen ? 'var(--accent)' : 'var(--line)',
+              border: 'none', borderRadius: 8, padding: '2px 8px',
+              cursor: 'pointer', fontSize: 14, color: mapOpen ? 'white' : 'var(--ink)',
+              fontFamily: 'inherit', fontWeight: 800, verticalAlign: 'middle',
+            }}
+          >🗺</button>
+        </span>
+      </div>
+
+      <div className="route-steps">
+        {/* Indulás (gyaloglással ha van) */}
+        <div className="route-step step-walk">
+          <div className="step-time">{fmt(route.departLeaveHome)}</div>
+          <div className="step-icon">🚶</div>
+          <div className="step-body">
+            <div className="step-title">{t.leaveAt}</div>
+            <div className="step-sub">{direction === "school" ? homeStopName : nearestStopName}</div>
+          </div>
+        </div>
+
+        <div className="step-connector">
+          <div className="connector-line" />
+          {walkMin > 0 && <div className="connector-label">{walkMin} {t.min} gyalog</div>}
+        </div>
+
+        {/* Busz 1 */}
+        <div className="route-step step-bus-1">
+          <div className="step-time">{fmt(route.boardAt)}</div>
+          <div className="step-icon bus-icon-local" style={{ background: route.bus1.color, cursor: 'default' }}>
+            {route.bus1.id}
+          </div>
+          <div className="step-body">
+            <div className="step-title">
+              {t.takeLocal}{" "}
+              <span style={{ color: route.bus1.color, fontWeight: 800 }}>{route.bus1.label}</span>
+            </div>
+            <div className="step-sub">{route.bus1.direction}</div>
+          </div>
+        </div>
+
+        {route.type === "transfer" ? (
+          <>
+            <div className="step-connector">
+              <div className="connector-line" />
+              <div className="connector-label">{bus1TravelMin} {t.min}</div>
+            </div>
+
+            <div className="route-step step-transfer">
+              <div className="step-time">{fmt(route.arriveAtTransfer)}</div>
+              <div className="step-icon">🔄</div>
+              <div className="step-body">
+                <div className="step-title">{t.transfer}</div>
+                <div className="step-sub">{route.transferStopName}</div>
+                <div className="wait-pill">⏱ {route.waitAtTransfer} {t.min} {t.waitTime}</div>
+              </div>
+            </div>
+
+            <div className="step-connector"><div className="connector-line" /></div>
+
+            <div className="route-step step-bus-2">
+              <div className="step-time">{fmt(route.boardAt2)}</div>
+              <div className="step-icon bus-icon-local" style={{ background: route.bus2.color, cursor: 'default' }}>
+                {route.bus2.id}
+              </div>
+              <div className="step-body">
+                <div className="step-title">
+                  {t.takeLocal}{" "}
+                  <span style={{ color: route.bus2.color, fontWeight: 800 }}>{route.bus2.label}</span>
+                </div>
+                <div className="step-sub">{route.bus2.direction}</div>
+              </div>
+            </div>
+
+            <div className="step-connector">
+              <div className="connector-line" />
+              <div className="connector-label">{bus2TravelMin} {t.min}</div>
+            </div>
+          </>
+        ) : (
+          <div className="step-connector">
+            <div className="connector-line" />
+            <div className="connector-label">{bus1TravelMin} {t.min}</div>
+          </div>
+        )}
+
+        {/* Megérkezés a megállóba */}
+        {direction === "school" ? (
+          <>
+            <div className="route-step">
+              <div className="step-time">{fmt(route.arriveAt)}</div>
+              <div className="step-icon">🚏</div>
+              <div className="step-body">
+                <div className="step-title">{nearestStopName}</div>
+              </div>
+            </div>
+            {route.walkToSchool > 0 && (
+              <>
+                <div className="step-connector">
+                  <div className="connector-line" />
+                  <div className="connector-label">{route.walkToSchool} {t.min} gyalog{route.walkToSchoolDist ? ` (${route.walkToSchoolDist} m)` : ""}</div>
+                </div>
+                <div className="route-step step-home">
+                  <div className="step-time">{fmt(route.arriveSchool)}</div>
+                  <div className="step-icon">🏫</div>
+                  <div className="step-body">
+                    <div className="step-title" style={{ fontWeight: 800 }}>{schoolData?.name}</div>
+                    <div className="step-sub">{t.arriveAt}</div>
+                  </div>
+                </div>
+              </>
+            )}
+          </>
+        ) : (
+          <div className="route-step step-home">
+            <div className="step-time">{fmt(route.arriveAt)}</div>
+            <div className="step-icon step-icon-home">🏡</div>
+            <div className="step-body">
+              <div className="step-title" style={{ fontWeight: 800 }}>{homeStopName || t.home}</div>
+              <div className="step-sub">{t.arriveAt}</div>
+            </div>
+          </div>
+        )}
+      </div>
+      {mapOpen && <CitySchoolRouteMap route={route} direction={direction} schoolData={schoolData} />}
+    </div>
+  );
+}
+window.CitySchoolRouteCard = CitySchoolRouteCard;
+
 // ── SchoolSettingsModal ──────────────────────────────────────────────
 function SchoolSettingsModal({ onClose }) {
   const schools = window.SCHOOLS || [];
@@ -326,8 +631,46 @@ function SchoolSettingsModal({ onClose }) {
   const stopMarkerRef = React.useRef(null);
   const [fsState, setFsState] = React.useState(false);
 
+  const [homeStop, setHomeStop] = React.useState(() => {
+    try { return JSON.parse(localStorage.getItem('homeStop') || 'null'); } catch { return null; }
+  });
+  const [homeQuery, setHomeQuery] = React.useState(() => {
+    try { return JSON.parse(localStorage.getItem('homeStop') || 'null')?.name || ''; } catch { return ''; }
+  });
+  const [homeInputFocused, setHomeInputFocused] = React.useState(false);
+  const [showHomeMap, setShowHomeMap] = React.useState(false);
+  const homeMapRef = React.useRef(null);
+  const homeContainerRef = React.useRef(null);
+  const homeMapInstanceRef = React.useRef(null);
+  const homeMarkersRef = React.useRef({});
+  const [homeFsState, setHomeFsState] = React.useState(false);
+
+  const allStops = React.useMemo(() => {
+    const m = new Map();
+    for (const bus of (window.CITY_BUSES_FULL || [])) {
+      for (const stop of (bus.stops || [])) {
+        if (stop.lat && !m.has(stop.name)) m.set(stop.name, { name: stop.name, lat: stop.lat, lon: stop.lon });
+      }
+    }
+    return [...m.values()].sort((a, b) => a.name.localeCompare(b.name, 'hu'));
+  }, []);
+
+  const filteredStops = homeQuery.length >= 1
+    ? allStops.filter(s => s.name.toLowerCase().includes(homeQuery.toLowerCase()))
+    : allStops;
+
   React.useEffect(() => {
-    const h = () => { setFsState(!!document.fullscreenElement); setTimeout(() => mapInstanceRef.current?.invalidateSize(), 100); };
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = ''; };
+  }, []);
+
+  React.useEffect(() => {
+    const h = () => {
+      const fs = !!document.fullscreenElement;
+      setFsState(fs);
+      setHomeFsState(fs);
+      setTimeout(() => { mapInstanceRef.current?.invalidateSize(); homeMapInstanceRef.current?.invalidateSize(); }, 100);
+    };
     document.addEventListener('fullscreenchange', h);
     return () => document.removeEventListener('fullscreenchange', h);
   }, []);
@@ -441,13 +784,64 @@ function SchoolSettingsModal({ onClose }) {
     }
   }, [selected]);
 
+  React.useEffect(() => {
+    if (!showHomeMap) {
+      if (homeMapInstanceRef.current) { homeMapInstanceRef.current.remove(); homeMapInstanceRef.current = null; }
+      homeMarkersRef.current = {};
+      return;
+    }
+    if (!homeMapRef.current || homeMapInstanceRef.current) return;
+
+    const map = L.map(homeMapRef.current, { zoomControl: true });
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
+
+    for (const stop of allStops) {
+      const isSel = homeStop?.name === stop.name;
+      const marker = L.circleMarker([stop.lat, stop.lon], {
+        radius: isSel ? 11 : 6,
+        color: 'white', weight: 2,
+        fillColor: isSel ? '#1a73e8' : '#78909C',
+        fillOpacity: isSel ? 1 : 0.75,
+      }).addTo(map);
+      marker.bindTooltip(stop.name, { permanent: false, direction: 'top', offset: [0, -8] });
+      marker.on('click', () => { setHomeStop(stop); setHomeQuery(stop.name); });
+      homeMarkersRef.current[stop.name] = marker;
+    }
+
+    homeMapInstanceRef.current = map;
+    setTimeout(() => {
+      map.invalidateSize();
+      if (homeStop?.lat) map.setView([homeStop.lat, homeStop.lon], 15);
+      else map.setView([47.094, 17.912], 13);
+    }, 200);
+
+    return () => { map.remove(); homeMapInstanceRef.current = null; homeMarkersRef.current = {}; };
+  }, [showHomeMap]);
+
+  React.useEffect(() => {
+    if (!homeMapInstanceRef.current) return;
+    for (const [name, marker] of Object.entries(homeMarkersRef.current)) {
+      const isSel = homeStop?.name === name;
+      marker.setRadius(isSel ? 11 : 6);
+      marker.setStyle({ fillColor: isSel ? '#1a73e8' : '#78909C', fillOpacity: isSel ? 1 : 0.75 });
+    }
+    if (homeStop?.lat) homeMapInstanceRef.current.setView([homeStop.lat, homeStop.lon], 15);
+  }, [homeStop]);
+
   function toggleFullscreen() {
     if (!document.fullscreenElement) containerRef.current?.requestFullscreen();
     else document.exitFullscreen();
   }
 
+  function toggleHomeFullscreen() {
+    if (!document.fullscreenElement) homeContainerRef.current?.requestFullscreen();
+    else document.exitFullscreen();
+  }
+
   function save() {
     localStorage.setItem("selectedSchool", selected);
+    if (homeStop) localStorage.setItem('homeStop', JSON.stringify(homeStop));
+    else localStorage.removeItem('homeStop');
     onClose();
   }
 
@@ -520,6 +914,68 @@ function SchoolSettingsModal({ onClose }) {
           )}
         </div>
 
+        <div style={{ marginBottom: 16 }}>
+          <div style={{ fontSize: 12, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--ink-soft)", marginBottom: 8 }}>
+            Hol szállsz fel reggel?
+          </div>
+          <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
+            <div style={{ flex: 1 }}>
+              <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+                <input
+                  type="text"
+                  placeholder="— Keress megálló névre —"
+                  value={homeQuery}
+                  onChange={e => { setHomeQuery(e.target.value); if (homeStop && e.target.value !== homeStop.name) setHomeStop(null); }}
+                  onFocus={() => setHomeInputFocused(true)}
+                  onBlur={() => setTimeout(() => setHomeInputFocused(false), 150)}
+                  style={{ width: "100%", padding: "9px 36px 9px 12px", borderRadius: 10, border: "2px solid var(--line)", fontFamily: "Nunito, sans-serif", fontSize: 14, fontWeight: 700, color: "var(--ink)", background: "white", outline: "none", boxSizing: "border-box" }}
+                />
+                {(homeQuery || homeStop) && (
+                  <button
+                    onClick={() => { setHomeStop(null); setHomeQuery(''); }}
+                    style={{ position: "absolute", right: 8, background: "none", border: "none", cursor: "pointer", fontSize: 16, color: "var(--ink-soft)", lineHeight: 1, padding: "2px 4px" }}
+                  >✕</button>
+                )}
+              </div>
+              {homeInputFocused && (
+                <div style={{ background: "white", border: "2px solid var(--line)", borderTop: "none", borderRadius: "0 0 10px 10px", maxHeight: 280, overflowY: "auto", boxShadow: "0 8px 24px rgba(0,0,0,0.15)" }}>
+                  {filteredStops.length === 0 && (
+                    <div style={{ padding: "10px 12px", fontSize: 13, color: "var(--ink-soft)", fontStyle: "italic" }}>Nincs találat</div>
+                  )}
+                  {filteredStops.map(stop => (
+                    <div
+                      key={stop.name}
+                      onMouseDown={e => { e.preventDefault(); setHomeStop(stop); setHomeQuery(stop.name); setHomeInputFocused(false); }}
+                      style={{ padding: "8px 12px", cursor: "pointer", fontSize: 13, fontWeight: stop.name === homeStop?.name ? 800 : 700, color: stop.name === homeStop?.name ? "var(--accent)" : "var(--ink)", borderBottom: "1px solid var(--line)", background: stop.name === homeStop?.name ? "var(--bg)" : "white" }}
+                      onMouseEnter={e => { if (stop.name !== homeStop?.name) e.currentTarget.style.background = "var(--bg)"; }}
+                      onMouseLeave={e => { if (stop.name !== homeStop?.name) e.currentTarget.style.background = "white"; }}
+                    >
+                      {stop.name}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            <button
+              onClick={() => setShowHomeMap(o => !o)}
+              title="Megállók a térképen"
+              style={{ padding: "9px 14px", borderRadius: 10, border: "none", background: showHomeMap ? "var(--accent)" : "var(--line)", color: showHomeMap ? "white" : "var(--ink)", fontSize: 20, cursor: "pointer", transition: "all 0.15s", flexShrink: 0 }}
+            >🗺</button>
+          </div>
+        </div>
+
+        {showHomeMap && (
+          <div ref={homeContainerRef} style={{ position: "relative", marginBottom: 16, borderRadius: 12, overflow: "hidden", border: "2px solid var(--line)" }}>
+            <div ref={homeMapRef} style={{ height: homeFsState ? "100%" : 300, width: "100%" }} />
+            <button onClick={toggleHomeFullscreen} title={homeFsState ? "Kilépés" : "Teljes képernyő"} style={{
+              position: "absolute", top: homeFsState ? 28 : 10, right: homeFsState ? 28 : 10, zIndex: 1000,
+              background: "#1a73e8", border: "2px solid #1a73e8",
+              borderRadius: 8, padding: "4px 8px", cursor: "pointer",
+              fontSize: 16, lineHeight: 1, boxShadow: "0 2px 6px rgba(0,0,0,0.25)", color: "white",
+            }}>{homeFsState ? "✕" : "⛶"}</button>
+          </div>
+        )}
+
         {showMap && (
           <>
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 8 }}>
@@ -576,10 +1032,11 @@ window.SchoolSettingsModal = SchoolSettingsModal;
 // School Route Card — reggeli útvonal (Csererdő → Nemesvámos)
 // ============================================================
 
-function SchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, nowMins }) {
+function SchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, nowMins, schoolData }) {
   const U = window.BUS_UTILS;
   const [timetableInfo, setTimetableInfo] = React.useState(null);
   const [mapOpen, setMapOpen] = React.useState(false);
+  React.useEffect(() => { setMapOpen(false); }, [schoolData?.id]);
   const fmt = (m) => U.fmtTime(m);
   const totalMin = route.totalDuration;
   const totalH = Math.floor(totalMin / 60);
@@ -632,7 +1089,7 @@ function SchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, nowMi
                 {route.localBus.label}
               </span>
             </div>
-            <div className="step-sub">Csererdő → {route.transferStopShort}</div>
+            <div className="step-sub">{route.boardingStopName || "Csererdő"} → {route.transferStopShort}</div>
           </div>
         </div>
 
@@ -649,7 +1106,7 @@ function SchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, nowMi
               <div className="step-time">{fmt(route.localArriveAtTransfer)}</div>
               <div className="step-icon">🚶</div>
               <div className="step-body">
-                <div className="step-title">{t.walkBetween}</div>
+                <div className="step-title">{route.walkAfterBus} {t.min} gyalog{route.walkAfterBusDist ? ` (${route.walkAfterBusDist} m)` : ""}</div>
                 <div className="step-sub">Petőfi Színház → Komakút tér</div>
               </div>
             </div>
@@ -707,30 +1164,28 @@ function SchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, nowMi
 
         <div className="step-connector">
           <div className="connector-line" />
-          <div className="connector-label">{route.walkToSchool} {t.min} {t.walkLabel || "gyalog"}</div>
+          <div className="connector-label">{route.walkToSchool} {t.min} gyalog{route.walkToSchoolDist ? ` (${route.walkToSchoolDist} m)` : ""}</div>
         </div>
 
         <div className="route-step step-home">
           <div className="step-time">{fmt(route.arriveSchool)}</div>
           <div className="step-icon step-icon-home">🏫</div>
           <div className="step-body">
-            <div className="step-title" style={{ fontWeight: 800 }}>
-              {t.arriveSchool}
-            </div>
-            <div className="step-sub">Nemesvámos, iskola</div>
+            <div className="step-title" style={{ fontWeight: 800 }}>{schoolData?.name || t.arriveSchool}</div>
+            <div className="step-sub">{t.arriveSchool}</div>
           </div>
         </div>
       </div>
-      {mapOpen && <SchoolRouteMap route={route} />}
+      {mapOpen && <SchoolRouteMap route={route} schoolData={schoolData} />}
     </div>
   );
 }
 
-function SchoolRouteMap({ route }) {
+function SchoolRouteMap({ route, schoolData }) {
   const mapRef = React.useRef(null);
   const containerRef = React.useRef(null);
   const instanceRef = React.useRef(null);
-  const routeKey = `${route.helykoziLine}-${route.helykoziDep}-${route.transferStop}`;
+  const routeKey = `${route.helykoziLine}-${route.helykoziDep}-${route.transferStop}-${schoolData?.id}`;
 
   React.useEffect(() => {
     if (!mapRef.current || instanceRef.current) return;
@@ -747,10 +1202,11 @@ function SchoolRouteMap({ route }) {
     const volanLat = route.transferLat, volanLon = route.transferLon;
     const hkColor = '#2B1E3F';
 
-    // 1. Helyi busz: startStop → transferStop
+    // 1. Helyi busz: boardingStop → transferStop
     const localBus = route.localBus;
     const cityShapes = (window.CITY_SHAPES || {})[localBus.id] || [];
-    const startStop = localBus.stops[0];
+    const boardingStopIdx = localBus.stops.findIndex(s => normStop(s.name) === normStop(route.boardingStopName));
+    const startStop = localBus.stops[boardingStopIdx >= 0 ? boardingStopIdx : 0];
     const transferStopIdx = localBus.stops.findIndex(s => normStop(s.name) === normStop(route.transferStop) || route.transferStop?.includes(s.name.split(' /')[0]));
     const transferStop = localBus.stops[transferStopIdx];
     const localDep = startStop ? route.localBoardAt - startStop.offset : null;
@@ -764,7 +1220,8 @@ function SchoolRouteMap({ route }) {
       }
     }
     if (transferStopIdx >= 0) {
-      const segStops = localBus.stops.slice(0, transferStopIdx + 1).filter(s => s.lat && s.lon);
+      const fromIdx = boardingStopIdx >= 0 ? boardingStopIdx : 0;
+      const segStops = localBus.stops.slice(fromIdx, transferStopIdx + 1).filter(s => s.lat && s.lon);
       segStops.forEach((stop, i) => {
         const isTerminal = i === 0 || i === segStops.length - 1;
         const r = isTerminal ? 9 : 6;
@@ -805,6 +1262,21 @@ function SchoolRouteMap({ route }) {
         L.marker([lat, lon], { icon: L.divIcon({ className: '', html: labelHtml, iconSize: [0, 0], iconAnchor: [0, 0] }), interactive: false, zIndexOffset: 200 }).addTo(map);
       }
     });
+
+    if (schoolData?.lat && schoolData?.lon) {
+      L.polyline(walkArc(nemoLat, nemoLon, schoolData.lat, schoolData.lon), {
+        color: '#333', weight: 2.5, opacity: 0.85, dashArray: '6 8',
+      }).addTo(map);
+      L.marker([schoolData.lat, schoolData.lon], {
+        icon: L.divIcon({ className: '', html: '<div style="font-size:22px;line-height:1;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.35));">🏫</div>', iconSize: [22, 22], iconAnchor: [11, 11] }),
+        zIndexOffset: 500,
+      }).addTo(map).bindPopup(`<b>${schoolData.name}</b>`);
+      if (route.arriveSchool != null) {
+        const tHtml = `<div style="position:absolute;left:14px;top:-10px;background:white;border:1.5px solid #555;border-radius:4px;padding:1px 6px;font-size:11px;font-weight:700;color:#222;white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,0.15);">${fmt(route.arriveSchool)}</div>`;
+        L.marker([schoolData.lat, schoolData.lon], { icon: L.divIcon({ className: '', html: tHtml, iconSize: [0, 0], iconAnchor: [0, 0] }), interactive: false, zIndexOffset: 600 }).addTo(map);
+      }
+      allCoords.push([schoolData.lat, schoolData.lon]);
+    }
 
     instanceRef.current = map;
     setTimeout(() => {

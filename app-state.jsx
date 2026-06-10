@@ -124,6 +124,7 @@ function useAppState(options = {}) {
   const [schoolFilter, setSchoolFilter] = useState(true);
   const [schoolHoliday, setSchoolHoliday] = useState(() => localStorage.getItem("hazaut.schoolholiday") === "1");
   const [homeStop, setHomeStop] = useState(null);
+  const [settingsKey, setSettingsKey] = useState(0);
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 640);
 
   // --- localStorage load ---
@@ -171,20 +172,76 @@ function useAppState(options = {}) {
     return base;
   }, [mode, customTime, missed, tick, dayOffset]);
 
+  // --- Settings beolvasása (újraszámítódik ha settingsKey változik) ---
+  const schoolData = useMemo(() => {
+    const id = localStorage.getItem('selectedSchool') || '';
+    return (window.SCHOOLS || []).find(s => s.id === id) || null;
+  }, [settingsKey]);
+
+  const settingsHomeStop = useMemo(() => {
+    try { return JSON.parse(localStorage.getItem('homeStop') || 'null'); } catch { return null; }
+  }, [settingsKey]);
+
   // --- Route planning ---
   const routes = useMemo(() => {
+    if (!settingsHomeStop || !schoolData) {
+      return Object.assign([], { notConfigured: true });
+    }
+
+    const homeStopName = settingsHomeStop.name;
+    const nearestStop = schoolData.nearbyStops?.[0];
+    const schoolWalkMins = nearestStop ? Math.ceil(nearestStop.dist / 80) : 0;
+
     if (direction === "school") {
-      return window.planSchoolRoutes({
+      if (schoolData.helykoziOnly) {
+        return window.planSchoolRoutes({
+          now, walkMin: 0, minTransfer: 3, maxResults: 6,
+          allowedTransfers: allowedTransfersSchool,
+          schoolStartMin: schoolFilter ? 10 * 60 : null,
+          schoolHoliday,
+          fromStop: homeStopName,
+          walkToSchool: schoolWalkMins,
+          walkToSchoolDist: nearestStop?.dist,
+        });
+      }
+      if (!nearestStop) return [];
+      const cityRoutes = window.planCityRoutes({
         now, walkMin: 0, minTransfer: 3, maxResults: 6,
-        allowedTransfers: allowedTransfersSchool,
-        schoolStartMin: schoolFilter ? 10 * 60 : null,
+        fromStop: homeStopName,
+        toStop: nearestStop.name,
         schoolHoliday,
       });
+      cityRoutes.forEach(r => {
+        r.departLeaveHome = r.departLeaveOrigin;
+        r.walkToSchool = schoolWalkMins;
+        r.walkToSchoolDist = nearestStop.dist;
+        r.arriveSchool = r.arriveAt + schoolWalkMins;
+        r.nearestStopName = nearestStop.name;
+        r.homeStopName = homeStopName;
+      });
+      return cityRoutes;
     }
-    return window.planRoutes({
-      now, walkMin: 10, minTransfer: 5, maxResults: 6, allowedTransfers, homeStop, schoolHoliday,
+
+    // home direction
+    if (schoolData.helykoziOnly) {
+      return window.planRoutes({
+        now, walkMin: schoolWalkMins, minTransfer: 5, maxResults: 6,
+        allowedTransfers, homeStop: homeStopName, schoolHoliday,
+      });
+    }
+    if (!nearestStop) return [];
+    const cityRoutes = window.planCityRoutes({
+      now, walkMin: schoolWalkMins, minTransfer: 5, maxResults: 6,
+      fromStop: nearestStop.name,
+      toStop: homeStopName,
+      schoolHoliday,
     });
-  }, [now, allowedTransfers, allowedTransfersSchool, direction, schoolFilter, homeStop, schoolHoliday]);
+    cityRoutes.forEach(r => {
+      r.departLeaveHome = r.departLeaveOrigin;
+      r.homeStopName = homeStopName;
+    });
+    return cityRoutes;
+  }, [now, allowedTransfers, allowedTransfersSchool, direction, schoolFilter, schoolHoliday, settingsKey, settingsHomeStop, schoolData]);
 
   const t = window.I18N[lang];
 
@@ -198,12 +255,13 @@ function useAppState(options = {}) {
   };
 
   // --- State object & dispatcher ---
-  const state = { now, mode, customTime, missed, lang, routes, dayOffset, direction, schoolFilter, schoolHoliday, homeStop, compactMode, isMobile };
+  const state = { now, mode, customTime, missed, lang, routes, dayOffset, direction, schoolFilter, schoolHoliday, homeStop, compactMode, isMobile, schoolData, settingsHomeStop };
   const toggleCompact = () => setCompactMode(c => !c);
   const toggleSchoolHoliday = () => setSchoolHoliday(v => !v);
   state.toggleCompact = toggleCompact;
   state.toggleSchoolHoliday = toggleSchoolHoliday;
   state.setHomeStop = setHomeStop;
+  state.refreshSettings = () => setSettingsKey(k => k + 1);
 
   const setState = (s) => {
     if (s.mode !== undefined && s.mode !== mode) {

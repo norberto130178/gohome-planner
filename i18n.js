@@ -5,7 +5,7 @@
 window.I18N = {
   hu: {
     appTitle: "HazaÚt",
-    appSubtitle: "Hogy érsz haza Csererdőre?",
+    appSubtitle: "Hogy érsz haza?",
     now: "Most",
     customTime: "Saját idő",
     leaveAt: "Indulj el:",
@@ -68,7 +68,7 @@ window.I18N = {
   },
   en: {
     appTitle: "WayHome",
-    appSubtitle: "How will you get home to Csererdő?",
+    appSubtitle: "How will you get home?",
     now: "Now",
     customTime: "Custom time",
     leaveAt: "Leave at:",

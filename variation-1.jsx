@@ -31,12 +31,12 @@ function V1Variation({ state, setState, t, langSwitcher, navLinks }) {
 
   const isSchool = state.direction === "school";
   const subtitle = isSchool
-    ? (state.lang === "hu" ? "Hogy jutsz el az iskolába? 🏫" : "How to get to school? 🏫")
-    : t.appSubtitle;
+    ? (state.schoolData ? `Iskolába: ${state.schoolData.name} 🏫` : (state.lang === "hu" ? "Hogy jutsz el az iskolába? 🏫" : "How to get to school? 🏫"))
+    : (state.settingsHomeStop ? `Hazaút: ${state.settingsHomeStop.name} 🏠` : t.appSubtitle);
 
   return (
     <div className="v1">
-      {settingsOpen && <window.SchoolSettingsModal onClose={() => setSettingsOpen(false)} />}
+      {settingsOpen && <window.SchoolSettingsModal onClose={() => { setSettingsOpen(false); state.refreshSettings?.(); }} />}
       <div className="v1-header" style={isMobile ? {flexDirection:"row",alignItems:"flex-start",justifyContent:"space-between",gap:8} : {}}>
         <div>
           <div style={{display:"flex",alignItems:"center",gap:10,flexWrap:isMobile?undefined:"wrap"}}>
@@ -215,34 +215,29 @@ function V1Variation({ state, setState, t, langSwitcher, navLinks }) {
       )}
 
 
-      {routes.length > 0 ? (
+      {routes.notConfigured ? (
+        <div className="v1-empty">
+          <div className="v1-empty-emoji">⚙️</div>
+          <div className="v1-empty-title">{state.lang === "hu" ? "Nincs beállítva iskola és megálló" : "School and stop not configured"}</div>
+          <div className="v1-empty-hint">{state.lang === "hu" ? "A tervezőhöz add meg a lakóhelyed megállóját és a kiválasztott iskolát a beállításokban." : "Set your home stop and school in settings to enable route planning."}</div>
+          <button
+            onClick={() => setSettingsOpen(true)}
+            style={{marginTop:16,fontSize:14,fontWeight:800,fontFamily:'Nunito,sans-serif',background:'var(--accent)',color:'white',border:'none',padding:'10px 20px',borderRadius:12,cursor:'pointer',boxShadow:'0 4px 16px rgba(0,0,0,0.15)'}}
+          >⚙️ {state.lang === "hu" ? "Beállítások megnyitása" : "Open settings"}</button>
+        </div>
+      ) : routes.length > 0 ? (
         <div className="v1-routes" aria-live="polite" role="region" aria-label={state.lang==="hu"?"Útvonaltervek":"Route options"}>
-          {routes.map((r, i) => (
-            state.direction === "school" ? (
-              <window.SchoolRouteCard
-                key={i}
-                route={r}
-                index={i}
-                isPrimary={i === 0}
-                t={t}
-                isWeekend={now.getDay() === 0 || now.getDay() === 6}
-                dayType={window.BUS_UTILS.dayType(now, state.schoolHoliday)}
-                nowMins={now.getHours() * 60 + now.getMinutes()}
-              />
-            ) : (
-              <window.RouteCard
-                key={i}
-                route={r}
-                index={i}
-                isPrimary={i === 0}
-                t={t}
-                style=""
-                isWeekend={now.getDay() === 0 || now.getDay() === 6}
-                dayType={window.BUS_UTILS.dayType(now, state.schoolHoliday)}
-                nowMins={now.getHours() * 60 + now.getMinutes()}
-              />
-            )
-          ))}
+          {routes.map((r, i) => {
+            const isHely = state.schoolData?.helykoziOnly;
+            const commonProps = { key: i, route: r, index: i, isPrimary: i === 0, t, isWeekend: now.getDay() === 0 || now.getDay() === 6, dayType: window.BUS_UTILS.dayType(now, state.schoolHoliday), nowMins: now.getHours() * 60 + now.getMinutes() };
+            if (state.direction === "school" && isHely) {
+              return <window.SchoolRouteCard {...commonProps} schoolData={state.schoolData} />;
+            }
+            if (state.direction === "home" && isHely) {
+              return <window.RouteCard {...commonProps} style="" />;
+            }
+            return <window.CitySchoolRouteCard {...commonProps} direction={state.direction} schoolData={state.schoolData} />;
+          })}
         </div>
       ) : (
         <div className="v1-empty">

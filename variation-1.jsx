@@ -26,6 +26,7 @@ function V1Variation({ state, setState, t, langSwitcher, navLinks }) {
   }
 
   const [clockHovered, setClockHovered] = React.useState(false);
+  const [settingsOpen, setSettingsOpen] = React.useState(false);
   const isNowMode = state.mode === "now";
 
   const isSchool = state.direction === "school";
@@ -35,6 +36,7 @@ function V1Variation({ state, setState, t, langSwitcher, navLinks }) {
 
   return (
     <div className="v1">
+      {settingsOpen && <window.SchoolSettingsModal onClose={() => setSettingsOpen(false)} />}
       <div className="v1-header" style={isMobile ? {flexDirection:"row",alignItems:"flex-start",justifyContent:"space-between",gap:8} : {}}>
         <div>
           <div style={{display:"flex",alignItems:"center",gap:10,flexWrap:isMobile?undefined:"wrap"}}>
@@ -46,7 +48,12 @@ function V1Variation({ state, setState, t, langSwitcher, navLinks }) {
             <div className="v1-subtitle">{subtitle}</div>
           </div>
         </div>
-        {isMobile && langSwitcher}
+        {isMobile && (
+          <div style={{display:"flex",gap:6,alignItems:"center"}}>
+            {langSwitcher}
+            <button onClick={() => setSettingsOpen(true)} title="Beállítások" style={{background:"var(--line)",border:"none",borderRadius:10,padding:"6px 10px",cursor:"pointer",fontSize:16,lineHeight:1,color:"var(--ink)"}}>⚙️</button>
+          </div>
+        )}
       </div>
 
       {!isMobile && (
@@ -154,6 +161,7 @@ function V1Variation({ state, setState, t, langSwitcher, navLinks }) {
         </div>
         {!isMobile && (
           <div style={{display:'flex',gap:8,alignItems:'center',alignSelf:'flex-end',marginLeft:'auto'}}>
+            <button onClick={() => setSettingsOpen(true)} title="Beállítások" style={{fontSize:13,fontWeight:800,fontFamily:"Nunito,sans-serif",background:"var(--line)",color:"var(--ink)",border:"none",padding:"10px 14px",borderRadius:10,whiteSpace:"nowrap",cursor:"pointer",boxShadow:"0 8px 24px rgba(0,0,0,0.1)"}}>⚙️ Beállítások</button>
             <a href="city.html" style={{fontSize:13,fontWeight:800,fontFamily:"Nunito,sans-serif",textDecoration:"none",background:"#00796B",color:"white",padding:"10px 14px",borderRadius:10,whiteSpace:"nowrap",boxShadow:"0 8px 24px rgba(0,0,0,0.2)"}}>🚌 VeszprémBusz →</a>
             <a href="mission.html" style={{fontSize:13,fontWeight:800,fontFamily:"Nunito,sans-serif",textDecoration:"none",background:"#0E1524",color:"#FFC93C",padding:"10px 14px",borderRadius:10,whiteSpace:"nowrap",boxShadow:"0 8px 24px rgba(0,0,0,0.2)"}}>🎮 Mission Board →</a>
           </div>

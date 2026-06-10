@@ -26,7 +26,7 @@ function TimetableDropdown({ onSelect }) {
   }, [open]);
 
   return (
-    <div ref={ref} style={{ position:"relative", display:"inline-block", marginTop:10 }}>
+    <div ref={ref} style={{ position:"relative", display:"inline-block" }}>
       <button
         onClick={() => setOpen(o => !o)}
         style={{
@@ -465,6 +465,7 @@ function CityRouteCard({ route, index, isPrimary, fromStop, toStop, walkMin, isW
   );
 }
 
+
 // ── CityApp ──────────────────────────────────────────────────────────
 function CityApp() {
   const U = window.BUS_UTILS;
@@ -535,13 +536,14 @@ function CityApp() {
       {timetableBusId && (
         <window.BusTimetableModal busId={timetableBusId} onClose={() => setTimetableBusId(null)} isWeekend={planIsWeekend} nowMins={planNowMins} />
       )}
-
       {/* Header */}
       <div className="v1-header">
         <div>
           <div className="v1-title">VeszprémBusz 🚌</div>
           <div className="v1-subtitle">Veszprém helyi járatok — útvonaltervező</div>
-          <TimetableDropdown onSelect={id => setTimetableBusId(id)} />
+          <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", marginTop: 10 }}>
+            <TimetableDropdown onSelect={id => setTimetableBusId(id)} />
+          </div>
         </div>
         <div
           className="v1-clock"

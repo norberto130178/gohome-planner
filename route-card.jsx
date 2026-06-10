@@ -314,6 +314,264 @@ function HomeRouteMap({ route }) {
 
 window.RouteCard = RouteCard;
 
+// ── SchoolSettingsModal ──────────────────────────────────────────────
+function SchoolSettingsModal({ onClose }) {
+  const schools = window.SCHOOLS || [];
+  const [selected, setSelected] = React.useState(() => localStorage.getItem("selectedSchool") || "");
+  const [showMap, setShowMap] = React.useState(false);
+  const mapRef = React.useRef(null);
+  const containerRef = React.useRef(null);
+  const mapInstanceRef = React.useRef(null);
+  const markersRef = React.useRef({});
+  const stopMarkerRef = React.useRef(null);
+  const [fsState, setFsState] = React.useState(false);
+
+  React.useEffect(() => {
+    const h = () => { setFsState(!!document.fullscreenElement); setTimeout(() => mapInstanceRef.current?.invalidateSize(), 100); };
+    document.addEventListener('fullscreenchange', h);
+    return () => document.removeEventListener('fullscreenchange', h);
+  }, []);
+
+  React.useEffect(() => {
+    const h = (e) => { if (e.key === 'Escape') { if (document.fullscreenElement) document.exitFullscreen(); else onClose(); } };
+    document.addEventListener('keydown', h);
+    return () => document.removeEventListener('keydown', h);
+  }, []);
+
+  React.useEffect(() => {
+    if (!showMap) {
+      if (mapInstanceRef.current) { mapInstanceRef.current.remove(); mapInstanceRef.current = null; }
+      markersRef.current = {};
+      return;
+    }
+    if (!mapRef.current || mapInstanceRef.current) return;
+
+    if (!document.getElementById('school-popup-style')) {
+      const s = document.createElement('style');
+      s.id = 'school-popup-style';
+      s.textContent = '.school-popup .leaflet-popup-content-wrapper{background:rgba(255,255,255,0.6);backdrop-filter:blur(3px);}.school-popup .leaflet-popup-tip{background:rgba(255,255,255,0.6);}';
+      document.head.appendChild(s);
+    }
+
+    const map = L.map(mapRef.current, { zoomControl: true });
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap'
+    }).addTo(map);
+
+    const TYPE_COLOR = {
+      altalanos: '#1565C0',
+      gimnazium: '#6A1B9A',
+      technikum: '#E65100',
+      specialis: '#546E7A',
+      osszetett: '#00695C',
+    };
+
+    const allCoords = [];
+    for (const school of schools) {
+      if (!school.lat || !school.lon) continue;
+      const isSel = school.id === selected;
+      const baseColor = TYPE_COLOR[school.type] || '#1565C0';
+      const marker = L.circleMarker([school.lat, school.lon], {
+        radius: isSel ? 13 : 9,
+        color: 'white', weight: isSel ? 3 : 2,
+        fillColor: isSel ? '#e53935' : baseColor,
+        fillOpacity: 0.95,
+      }).addTo(map);
+      const nearest = school.nearbyStops?.[0];
+      marker.bindPopup(
+        `<b style="font-family:Nunito,sans-serif;font-size:13px">${school.name}</b>` +
+        (nearest ? `<br><span style="font-size:11px;color:#555">${nearest.name} · ${nearest.dist}m · ~${Math.ceil(nearest.dist/80)} perc gyalog</span>` : '') +
+        (school.helykoziOnly ? `<br><span style="font-size:11px;color:#888">Helyközi busz</span>` : ''),
+        { className: 'school-popup' }
+      );
+      const ttOpts = { permanent: false, direction: 'top', offset: [0, -10] };
+      marker.bindTooltip(school.name, ttOpts);
+      marker.on('popupopen', () => marker.unbindTooltip());
+      marker.on('popupclose', () => marker.bindTooltip(school.name, ttOpts));
+      marker.on('click', () => setSelected(school.id));
+      markersRef.current[school.id] = { marker, baseColor };
+      allCoords.push([school.lat, school.lon]);
+    }
+
+    mapInstanceRef.current = map;
+
+    const selSchool0 = schools.find(s => s.id === selected);
+    const nearestStop0 = selSchool0?.nearbyStops?.[0];
+    if (nearestStop0?.lat) {
+      stopMarkerRef.current = L.marker([nearestStop0.lat, nearestStop0.lon], {
+        icon: L.divIcon({
+          className: '',
+          html: '<div style="font-size:22px;line-height:1;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.35));">📍</div>',
+          iconSize: [22, 22], iconAnchor: [6, 22],
+        }),
+        interactive: false, zIndexOffset: 500,
+      }).addTo(map);
+    }
+
+    setTimeout(() => {
+      map.invalidateSize();
+      if (allCoords.length >= 2) map.fitBounds(allCoords, { padding: [24, 24] });
+      else map.setView([47.09, 17.91], 13);
+    }, 200);
+
+    return () => { map.remove(); mapInstanceRef.current = null; markersRef.current = {}; stopMarkerRef.current = null; };
+  }, [showMap]);
+
+  React.useEffect(() => {
+    if (!mapInstanceRef.current) return;
+    for (const [id, { marker, baseColor }] of Object.entries(markersRef.current)) {
+      const isSel = id === selected;
+      marker.setRadius(isSel ? 13 : 9);
+      marker.setStyle({ fillColor: isSel ? '#e53935' : baseColor, weight: isSel ? 3 : 2 });
+    }
+    if (stopMarkerRef.current) { stopMarkerRef.current.remove(); stopMarkerRef.current = null; }
+    const selSchool = schools.find(s => s.id === selected);
+    const nearestStop = selSchool?.nearbyStops?.[0];
+    if (nearestStop?.lat && mapInstanceRef.current) {
+      stopMarkerRef.current = L.marker([nearestStop.lat, nearestStop.lon], {
+        icon: L.divIcon({
+          className: '',
+          html: '<div style="font-size:22px;line-height:1;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.35));">📍</div>',
+          iconSize: [22, 22],
+          iconAnchor: [6, 22],
+        }),
+        interactive: false,
+        zIndexOffset: 500,
+      }).addTo(mapInstanceRef.current);
+    }
+  }, [selected]);
+
+  function toggleFullscreen() {
+    if (!document.fullscreenElement) containerRef.current?.requestFullscreen();
+    else document.exitFullscreen();
+  }
+
+  function save() {
+    localStorage.setItem("selectedSchool", selected);
+    onClose();
+  }
+
+  const selectedSchool = schools.find(s => s.id === selected);
+
+  return (
+    <div
+      style={{
+        position: "fixed", inset: 0, zIndex: 10000,
+        background: "rgba(0,0,0,0.55)", display: "flex",
+        alignItems: "center", justifyContent: "center", padding: 16,
+      }}
+      onClick={e => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div style={{
+        background: "white", borderRadius: 20, padding: "24px 24px 20px",
+        maxWidth: 540, width: "100%", maxHeight: "90vh", overflowY: "auto",
+        boxShadow: "0 16px 48px rgba(0,0,0,0.3)", fontFamily: "Nunito, sans-serif",
+      }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
+          <div style={{ fontSize: 20, fontWeight: 900, color: "var(--ink)" }}>⚙ Beállítások</div>
+          <button onClick={onClose} style={{ background: "none", border: "none", fontSize: 24, cursor: "pointer", color: "var(--ink-soft)", padding: "0 4px", lineHeight: 1 }}>×</button>
+        </div>
+
+        <div style={{ marginBottom: 16 }}>
+          <div style={{ fontSize: 12, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--ink-soft)", marginBottom: 8 }}>
+            Melyik iskolába jársz?
+          </div>
+          <div style={{ display: "flex", gap: 8, alignItems: "stretch" }}>
+            <select
+              value={selected}
+              onChange={e => setSelected(e.target.value)}
+              style={{
+                flex: 1, padding: "9px 12px", borderRadius: 10,
+                border: "2px solid var(--line)", fontFamily: "Nunito, sans-serif",
+                fontSize: 14, fontWeight: 700, color: "var(--ink)",
+                background: "white", cursor: "pointer", outline: "none",
+              }}
+            >
+              <option value="">— Válassz iskolát —</option>
+              {schools.map(s => (
+                <option key={s.id} value={s.id}>{s.name}</option>
+              ))}
+            </select>
+            <button
+              onClick={() => setShowMap(o => !o)}
+              title="Iskolák a térképen"
+              style={{
+                padding: "9px 14px", borderRadius: 10, border: "none",
+                background: showMap ? "var(--accent)" : "var(--line)",
+                color: showMap ? "white" : "var(--ink)",
+                fontSize: 20, cursor: "pointer", transition: "all 0.15s", flexShrink: 0,
+              }}
+            >🗺</button>
+          </div>
+          {selectedSchool && selectedSchool.nearbyStops?.length > 0 && (() => {
+            const stop = selectedSchool.nearbyStops[0];
+            const mins = Math.ceil(stop.dist / 80);
+            return (
+              <div style={{ marginTop: 8, fontSize: 12, color: "var(--ink-soft)", fontWeight: 600 }}>
+                {selectedSchool.helykoziOnly ? "Helyközi busz · legközelebbi megálló: " : "Legközelebbi megálló: "}
+                <b style={{ color: "var(--ink)" }}>{stop.name}</b> ({stop.dist}m · ~{mins} perc gyalog)
+              </div>
+            );
+          })()}
+          {selectedSchool?.helykoziOnly && !selectedSchool.nearbyStops?.length && (
+            <div style={{ marginTop: 8, fontSize: 12, color: "var(--ink-soft)", fontWeight: 600 }}>
+              Helyközi busz szükséges (Nemesvámos)
+            </div>
+          )}
+        </div>
+
+        {showMap && (
+          <>
+            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 8 }}>
+              {[
+                { type: 'altalanos', color: '#1565C0', label: 'Általános' },
+                { type: 'gimnazium', color: '#6A1B9A', label: 'Gimnázium' },
+                { type: 'technikum', color: '#E65100', label: 'Technikum' },
+                { type: 'specialis', color: '#546E7A', label: 'Speciális' },
+                { type: 'osszetett', color: '#00695C', label: 'Összetett' },
+              ].map(({ color, label }) => (
+                <span key={label} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, fontWeight: 700, color: 'var(--ink-soft)' }}>
+                  <span style={{ width: 12, height: 12, borderRadius: '50%', background: color, display: 'inline-block', flexShrink: 0, border: '2px solid white', boxShadow: '0 0 0 1px ' + color }} />
+                  {label}
+                </span>
+              ))}
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, fontWeight: 700, color: 'var(--ink-soft)' }}>
+                <span style={{ width: 12, height: 12, borderRadius: '50%', background: '#e53935', display: 'inline-block', flexShrink: 0, border: '2px solid white', boxShadow: '0 0 0 1px #e53935' }} />
+                Kiválasztott
+              </span>
+            </div>
+            <div ref={containerRef} style={{ borderTop: '2px solid var(--line)', position: 'relative', marginBottom: 16, borderRadius: 12, overflow: 'hidden' }}>
+              <div ref={mapRef} style={{ height: fsState ? '100%' : 340, width: '100%' }} />
+              <button onClick={toggleFullscreen} title={fsState ? 'Kilépés' : 'Teljes képernyő'} style={{
+                position: 'absolute', top: fsState ? 28 : 10, right: fsState ? 28 : 10, zIndex: 1000,
+                background: '#1a73e8', border: '2px solid #1a73e8',
+                borderRadius: 8, padding: '4px 8px', cursor: 'pointer',
+                fontSize: 16, lineHeight: 1, boxShadow: '0 2px 6px rgba(0,0,0,0.25)',
+                color: 'white',
+              }}>{fsState ? '✕' : '⛶'}</button>
+            </div>
+          </>
+        )}
+
+        <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 8 }}>
+          <button onClick={onClose} style={{
+            padding: "9px 18px", borderRadius: 10, border: "2px solid var(--line)",
+            background: "white", fontFamily: "Nunito, sans-serif",
+            fontSize: 14, fontWeight: 800, cursor: "pointer", color: "var(--ink)",
+          }}>Mégse</button>
+          <button onClick={save} style={{
+            padding: "9px 22px", borderRadius: 10, border: "none",
+            background: "var(--accent)", color: "white", fontFamily: "Nunito, sans-serif",
+            fontSize: 14, fontWeight: 800, cursor: "pointer",
+          }}>Mentés</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+window.SchoolSettingsModal = SchoolSettingsModal;
+
 // ============================================================
 // School Route Card — reggeli útvonal (Csererdő → Nemesvámos)
 // ============================================================

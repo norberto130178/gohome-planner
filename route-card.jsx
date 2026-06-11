@@ -473,6 +473,7 @@ function CitySchoolRouteMap({ route, direction, schoolData }) {
 function CitySchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, nowMins, direction, schoolData }) {
   const [mapOpen, setMapOpen] = React.useState(false);
   const [timetableInfo, setTimetableInfo] = React.useState(null);
+  const [expanded, setExpanded] = React.useState(false);
   const cardRef = React.useRef(null);
   React.useEffect(() => {
     if (!mapOpen) return;
@@ -499,6 +500,30 @@ function CitySchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, n
   const bus1TravelMin = route.type === "transfer"
     ? route.arriveAtTransfer - route.boardAt
     : route.arriveAt - route.boardAt;
+
+  const cityFromStop = direction === "school" ? route.homeStopName : route.nearestStopName;
+  const cityToStop   = direction === "school" ? route.nearestStopName : route.homeStopName;
+  const bus1Stops = route.bus1?.stops || [];
+  const bus1FromIdx = bus1Stops.findIndex(s => s.name === cityFromStop);
+  const bus1ToIdx   = route.type === "transfer"
+    ? bus1Stops.findIndex(s => s.name === route.transferStopName)
+    : bus1Stops.findIndex(s => s.name === cityToStop);
+  const bus1FromBoard = route.boardAt - (bus1Stops[bus1FromIdx]?.offset || 0);
+  const bus1Visible = bus1Stops.slice(
+    bus1FromIdx >= 0 ? bus1FromIdx : 0,
+    bus1ToIdx   >= 0 ? bus1ToIdx + 1 : undefined
+  );
+  let bus2Visible = [], bus2FromBoard = 0;
+  if (route.type === "transfer") {
+    const bus2Stops = route.bus2?.stops || [];
+    const bus2FromIdx = bus2Stops.findIndex(s => s.name === route.transferStopName);
+    const bus2ToIdx   = bus2Stops.findIndex(s => s.name === cityToStop);
+    bus2FromBoard = route.boardAt2 - (bus2Stops[bus2FromIdx]?.offset || 0);
+    bus2Visible = bus2Stops.slice(
+      bus2FromIdx >= 0 ? bus2FromIdx : 0,
+      bus2ToIdx   >= 0 ? bus2ToIdx + 1 : undefined
+    );
+  }
 
   return (
     <div ref={cardRef} className={`route-card ${isPrimary ? "primary" : ""}`}>
@@ -648,7 +673,65 @@ function CitySchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, n
           </div>
         )}
       </div>
+
+      <button
+        className="route-expand-btn"
+        onClick={() => setExpanded(!expanded)}
+      >
+        {expanded ? t.hideMoreStops : t.showMoreStops} ▾
+      </button>
+
       {mapOpen && <CitySchoolRouteMap route={route} direction={direction} schoolData={schoolData} />}
+
+      {expanded && (
+        <div className="route-details">
+          {route.type === "transfer" && (
+            <div className="details-title">
+              {t.thisBusPasses}{" "}
+              <span style={{ background: route.bus1.color, color: '#fff', padding: '1px 7px', borderRadius: 7, fontSize: 12, fontWeight: 800 }}>{route.bus1.label}</span>
+            </div>
+          )}
+          {route.type !== "transfer" && (
+            <div className="details-title">{t.thisBusPasses}</div>
+          )}
+          <div className="details-stops">
+            {bus1Visible.map((s, i) => {
+              const isHome = s.name === route.homeStopName;
+              const isTransfer = s.name === route.transferStopName;
+              const absTime = bus1FromBoard + s.offset;
+              return (
+                <div key={i} className={`detail-stop${isHome ? " home" : ""}${isTransfer ? " transfer" : ""}`}>
+                  <span className="detail-stop-time">{fmt(absTime)}</span>
+                  <span className="detail-stop-dot" style={{ background: route.bus1.color }} />
+                  <span className="detail-stop-name">{s.name}</span>
+                </div>
+              );
+            })}
+          </div>
+          {route.type === "transfer" && (
+            <>
+              <div className="details-title" style={{ marginTop: 8 }}>
+                {t.thisBusPasses}{" "}
+                <span style={{ background: route.bus2.color, color: '#fff', padding: '1px 7px', borderRadius: 7, fontSize: 12, fontWeight: 800 }}>{route.bus2.label}</span>
+              </div>
+              <div className="details-stops">
+                {bus2Visible.map((s, i) => {
+                  const isHome = s.name === route.homeStopName;
+                  const isTransfer = i === 0;
+                  const absTime = bus2FromBoard + s.offset;
+                  return (
+                    <div key={i} className={`detail-stop${isHome ? " home" : ""}${isTransfer ? " transfer" : ""}`}>
+                      <span className="detail-stop-time">{fmt(absTime)}</span>
+                      <span className="detail-stop-dot" style={{ background: route.bus2.color }} />
+                      <span className="detail-stop-name">{s.name}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -1071,6 +1154,7 @@ function SchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, nowMi
   const U = window.BUS_UTILS;
   const [timetableInfo, setTimetableInfo] = React.useState(null);
   const [mapOpen, setMapOpen] = React.useState(false);
+  const [expanded, setExpanded] = React.useState(false);
   const cardRef = React.useRef(null);
   React.useEffect(() => { setMapOpen(false); }, [schoolData?.id]);
   React.useEffect(() => {
@@ -1084,6 +1168,13 @@ function SchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, nowMi
   const totalStr = totalH > 0 ? `${totalH}${t.hour} ${totalM}${t.min}` : `${totalM} ${t.min}`;
   const busColor = route.localBus.color;
   const hasWalk = route.walkAfterBus > 0;
+
+  const schoolBoardingStop = route.localBus.stops.find(ss => ss.name === route.boardingStopName);
+  const schoolTransferStop = route.localBus.stops.find(ss => ss.name === route.transferLocalStop);
+  const schoolFromBoard = route.localBoardAt - (schoolBoardingStop?.offset || 0);
+  const schoolBoardingIdx = schoolBoardingStop ? route.localBus.stops.indexOf(schoolBoardingStop) : 0;
+  const schoolTransferIdx = schoolTransferStop ? route.localBus.stops.indexOf(schoolTransferStop) : route.localBus.stops.length - 1;
+  const schoolVisibleStops = route.localBus.stops.slice(schoolBoardingIdx, schoolTransferIdx + 1);
 
   return (
     <div ref={cardRef} className={`route-card ${isPrimary ? "primary" : ""}`}>
@@ -1216,7 +1307,38 @@ function SchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, nowMi
           </div>
         </div>
       </div>
+
+      <button
+        className="route-expand-btn"
+        onClick={() => setExpanded(!expanded)}
+      >
+        {expanded ? t.hideMoreStops : t.showMoreStops} ▾
+      </button>
+
       {mapOpen && <SchoolRouteMap route={route} schoolData={schoolData} />}
+
+      {expanded && (
+        <div className="route-details">
+          <div className="details-title">{t.thisBusPasses}</div>
+          <div className="details-stops">
+            {schoolVisibleStops.map((s, i) => {
+              const isHome = i === 0;
+              const isTransfer = i === schoolVisibleStops.length - 1;
+              const absTime = schoolFromBoard + s.offset;
+              return (
+                <div
+                  key={i}
+                  className={`detail-stop${isHome ? " home" : ""}${isTransfer ? " transfer" : ""}`}
+                >
+                  <span className="detail-stop-time">{fmt(absTime)}</span>
+                  <span className="detail-stop-dot" style={{ background: busColor }} />
+                  <span className="detail-stop-name">{s.name}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

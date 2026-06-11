@@ -412,9 +412,13 @@ function CitySchoolRouteMap({ route, direction, schoolData }) {
     if (route.type === "transfer") drawSeg(route.bus2, route.transferStopName, bus2ToName, route.boardAt2);
 
     if (direction === "school" && schoolData?.lat && schoolData?.lon) {
-      const dropoff = schoolData.nearbyStops?.[0];
-      if (dropoff?.lat && dropoff?.lon) {
-        L.polyline(walkArc(dropoff.lat, dropoff.lon, schoolData.lat, schoolData.lon), {
+      const dropoff = schoolData.nearbyStops?.find(s => s.name === nearestStopName) || schoolData.nearbyStops?.[0];
+      const lastBus = route.type === "transfer" ? route.bus2 : route.bus1;
+      const dropoffBusStop = lastBus?.stops.find(s => s.name === nearestStopName);
+      const dropoffLat = dropoffBusStop?.lat || dropoff?.lat;
+      const dropoffLon = dropoffBusStop?.lon || dropoff?.lon;
+      if (dropoffLat && dropoffLon) {
+        L.polyline(walkArc(dropoffLat, dropoffLon, schoolData.lat, schoolData.lon), {
           color: '#333', weight: 2.5, opacity: 0.85, dashArray: '6 8',
         }).addTo(map);
       }

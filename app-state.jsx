@@ -222,7 +222,28 @@ function useAppState(options = {}) {
         r.nearestStopName = nearestStop.name;
         r.homeStopName = homeStopName;
       });
-      return cityRoutes;
+      // Ha az átszálló megálló már 400m-en belül van az iskolától, a 2. busz felesleges —
+      // egyszerűsítjük 1 buszossá, az átszálló megállónál szállunk le és gyalog megyünk
+      const nearbyMap = new Map((schoolData.nearbyStops || []).map(s => [s.name, s]));
+      const directRoutes = [];
+      const bestConverted = new Map();
+      for (const r of cityRoutes) {
+        if (r.type !== "transfer") { directRoutes.push(r); continue; }
+        const nearbyTs = nearbyMap.get(r.transferStopName);
+        if (!nearbyTs) { directRoutes.push(r); continue; }
+        const walk = Math.ceil(nearbyTs.dist / 80);
+        const key = `${r.bus1.id}|${r.bus1.direction}|${r.boardAt}`;
+        const candidate = { ...r, type: "direct", arriveAt: r.arriveAtTransfer,
+          arriveSchool: r.arriveAtTransfer + walk, walkToSchool: walk,
+          walkToSchoolDist: nearbyTs.dist, nearestStopName: r.transferStopName,
+          totalDuration: r.arriveAtTransfer + walk - r.departLeaveHome };
+        const existing = bestConverted.get(key);
+        if (!existing || candidate.arriveSchool < existing.arriveSchool)
+          bestConverted.set(key, candidate);
+      }
+      const seenDirect = new Set(directRoutes.map(r => `${r.bus1.id}|${r.bus1.direction}|${r.boardAt}`));
+      return [...directRoutes, ...[...bestConverted.values()].filter(r => !seenDirect.has(`${r.bus1.id}|${r.bus1.direction}|${r.boardAt}`))]
+        .sort((a, b) => (a.arriveSchool ?? a.arriveAt) - (b.arriveSchool ?? b.arriveAt));
     }
 
     // home direction

@@ -108,8 +108,9 @@ function BusTimetableModal({ busId, onClose, fromStop, isWeekend: isWeekendProp,
   }
 
   const bus0 = allDirs[0];
-  const selBus = allDirs[selected.dirIdx];
-  const selDepObj = dirData[selected.dirIdx]?.deps[selected.depIdx];
+  const selDirIdx = Math.min(selected.dirIdx, allDirs.length - 1);
+  const selBus = allDirs[selDirIdx];
+  const selDepObj = dirData[selDirIdx]?.deps[selected.depIdx];
   const selDep = selDepObj?.mins;
   const middleCount = selBus.stops.length - 2;
   const isDesktop = window.innerWidth >= 640;

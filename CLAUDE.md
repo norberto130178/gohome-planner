@@ -2,14 +2,16 @@
 
 ## Verziókezelés
 
-**Minden commit előtt frissítsd az APP_VERSION-t a `data.js`-ben.**
+**Minden commit előtt frissítsd az APP_VERSION-t az `index.html`-ben.**
 
 A verzió formátuma: `"v2.X"` — a minor számot növeld eggyel minden commitnál.
 
-```js
-// data.js elején:
-window.APP_VERSION = "v2.4";
+```html
+<!-- index.html elején, az első <script> blokkban: -->
+window.APP_VERSION = "v3.1";
 ```
+
+Ez egyetlen változtatás — a cache buster automatikusan ebből az értékből generálódik az összes JS fájlhoz. A `data.js`-ben nincs APP_VERSION, ne írd oda.
 
 Ha commitot készítesz, ez az egyik első lépés legyen — ne hagyd ki.
 

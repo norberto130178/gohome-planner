@@ -2,10 +2,22 @@
 // Route Card — egy útvonal-javaslat megjelenítése
 // ============================================================
 
-function RouteCard({ route, index, isPrimary, t, style, isWeekend, dayType, nowMins }) {
+function scrollCardBottom(cardEl) {
+  if (!cardEl) return;
+  const rect = cardEl.getBoundingClientRect();
+  const extra = rect.bottom - window.innerHeight + 80;
+  if (extra > 0) window.scrollTo({ top: window.pageYOffset + extra, behavior: 'smooth' });
+}
+
+function RouteCard({ route, index, isPrimary, t, style, isWeekend, dayType, nowMins, schoolData }) {
   const [expanded, setExpanded] = React.useState(false);
   const [timetableInfo, setTimetableInfo] = React.useState(null);
   const [mapOpen, setMapOpen] = React.useState(false);
+  const cardRef = React.useRef(null);
+  React.useEffect(() => {
+    if (!mapOpen) return;
+    setTimeout(() => scrollCardBottom(cardRef.current), 50);
+  }, [mapOpen]);
   const U = window.BUS_UTILS;
 
   const fmt = (m) => U.fmtTime(m);
@@ -17,7 +29,7 @@ function RouteCard({ route, index, isPrimary, t, style, isWeekend, dayType, nowM
   const busColor = route.localBus.color;
 
   return (
-    <div className={`route-card ${style} ${isPrimary ? "primary" : ""}`}>
+    <div ref={cardRef} className={`route-card ${style} ${isPrimary ? "primary" : ""}`}>
       {timetableInfo && (
         <window.BusTimetableModal busId={timetableInfo.busId} fromStop={timetableInfo.fromStop} initialDep={timetableInfo.initialDep} onClose={() => setTimetableInfo(null)} isWeekend={isWeekend} dayType={dayType} nowMins={nowMins} />
       )}
@@ -51,13 +63,13 @@ function RouteCard({ route, index, isPrimary, t, style, isWeekend, dayType, nowM
           <div className="step-icon">🚶</div>
           <div className="step-body">
             <div className="step-title">{t.leaveAt}</div>
-            <div className="step-sub">{t.school}</div>
+            <div className="step-sub">{schoolData?.name || t.school}</div>
           </div>
         </div>
 
         <div className="step-connector">
           <div className="connector-line" />
-          <div className="connector-label">{t.walkTo}</div>
+          <div className="connector-label">{t.walkTo}{route.walkToSchool ? ` · ${route.walkToSchool} ${t.min}${route.walkToSchoolDist ? ` (${route.walkToSchoolDist} m)` : ""}` : ""}</div>
         </div>
 
         {/* Step 2: Helyközi busz */}
@@ -457,10 +469,17 @@ function CitySchoolRouteMap({ route, direction, schoolData }) {
 // ── CitySchoolRouteCard — városi iskola útvonalkártya (planCityRoutes eredményéhez) ──
 function CitySchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, nowMins, direction, schoolData }) {
   const [mapOpen, setMapOpen] = React.useState(false);
+  const [timetableInfo, setTimetableInfo] = React.useState(null);
+  const cardRef = React.useRef(null);
+  React.useEffect(() => {
+    if (!mapOpen) return;
+    setTimeout(() => scrollCardBottom(cardRef.current), 50);
+  }, [mapOpen]);
   const U = window.BUS_UTILS;
   const fmt = m => U.fmtTime(m);
 
-  const finalArriveAt = direction === "school" ? (route.arriveSchool ?? route.arriveAt) : route.arriveAt;
+  const finalArriveAt
+ = direction === "school" ? (route.arriveSchool ?? route.arriveAt) : route.arriveAt;
   const totalMin = finalArriveAt - route.departLeaveHome;
   const totalH = Math.floor(totalMin / 60);
   const totalM = totalMin % 60;
@@ -479,7 +498,10 @@ function CitySchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, n
     : route.arriveAt - route.boardAt;
 
   return (
-    <div className={`route-card ${isPrimary ? "primary" : ""}`}>
+    <div ref={cardRef} className={`route-card ${isPrimary ? "primary" : ""}`}>
+      {timetableInfo && (
+        <window.BusTimetableModal busId={timetableInfo.busId} fromStop={timetableInfo.fromStop} initialDep={timetableInfo.initialDep} onClose={() => setTimetableInfo(null)} isWeekend={isWeekend} dayType={dayType} nowMins={nowMins} />
+      )}
       <div className="route-card-header">
         <span className="route-card-badge">
           {isPrimary ? `⭐ ${t.best}` : `${t.alternative} ${index}`}
@@ -518,7 +540,12 @@ function CitySchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, n
         {/* Busz 1 */}
         <div className="route-step step-bus-1">
           <div className="step-time">{fmt(route.boardAt)}</div>
-          <div className="step-icon bus-icon-local" style={{ background: route.bus1.color, cursor: 'default' }}>
+          <div
+            className="step-icon bus-icon-local"
+            style={{ background: route.bus1.color, cursor: 'pointer' }}
+            title="Menetrend megtekintése"
+            onClick={() => setTimetableInfo({ busId: route.bus1.id, fromStop: route.bus1.stops[0].name, initialDep: route.boardAt })}
+          >
             {route.bus1.id}
           </div>
           <div className="step-body">
@@ -551,7 +578,12 @@ function CitySchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, n
 
             <div className="route-step step-bus-2">
               <div className="step-time">{fmt(route.boardAt2)}</div>
-              <div className="step-icon bus-icon-local" style={{ background: route.bus2.color, cursor: 'default' }}>
+              <div
+                className="step-icon bus-icon-local"
+                style={{ background: route.bus2.color, cursor: 'pointer' }}
+                title="Menetrend megtekintése"
+                onClick={() => setTimetableInfo({ busId: route.bus2.id, fromStop: route.bus2.stops[0].name, initialDep: route.boardAt2 })}
+              >
                 {route.bus2.id}
               </div>
               <div className="step-body">
@@ -1036,7 +1068,12 @@ function SchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, nowMi
   const U = window.BUS_UTILS;
   const [timetableInfo, setTimetableInfo] = React.useState(null);
   const [mapOpen, setMapOpen] = React.useState(false);
+  const cardRef = React.useRef(null);
   React.useEffect(() => { setMapOpen(false); }, [schoolData?.id]);
+  React.useEffect(() => {
+    if (!mapOpen) return;
+    setTimeout(() => scrollCardBottom(cardRef.current), 50);
+  }, [mapOpen]);
   const fmt = (m) => U.fmtTime(m);
   const totalMin = route.totalDuration;
   const totalH = Math.floor(totalMin / 60);
@@ -1046,7 +1083,7 @@ function SchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, nowMi
   const hasWalk = route.walkAfterBus > 0;
 
   return (
-    <div className={`route-card ${isPrimary ? "primary" : ""}`}>
+    <div ref={cardRef} className={`route-card ${isPrimary ? "primary" : ""}`}>
       {timetableInfo && (
         <window.BusTimetableModal busId={timetableInfo.busId} fromStop={timetableInfo.fromStop} initialDep={timetableInfo.initialDep} onClose={() => setTimetableInfo(null)} isWeekend={isWeekend} dayType={dayType} nowMins={nowMins} />
       )}

@@ -154,10 +154,10 @@ function V1Variation({ state, setState, t, langSwitcher, navLinks }) {
       <div className="v1-toolbar" style={{alignItems:"flex-start"}}>
         <div style={{display:"flex",flexDirection:"column",gap:isMobile?8:0,width:isMobile?"100%":undefined}}>
           <div style={{display:"flex",flexDirection:isMobile?"column":"row",alignItems:"flex-start",gap:isMobile?8:12,flexWrap:isMobile?undefined:"wrap"}}>
-            {state.DirectionPicker && <state.DirectionPicker />}
-            {state.DayPicker && <state.DayPicker />}
+            {state.DirectionPicker && state.DirectionPicker({})}
+            {state.DayPicker && state.DayPicker({})}
           </div>
-          {state.TransferPicker && <state.TransferPicker />}
+          {state.TransferPicker && state.TransferPicker({})}
         </div>
         {!isMobile && (
           <div style={{display:'flex',gap:8,alignItems:'center',alignSelf:'flex-end',marginLeft:'auto'}}>
@@ -234,7 +234,7 @@ function V1Variation({ state, setState, t, langSwitcher, navLinks }) {
               return <window.SchoolRouteCard {...commonProps} schoolData={state.schoolData} />;
             }
             if (state.direction === "home" && isHely) {
-              return <window.RouteCard {...commonProps} style="" />;
+              return <window.RouteCard {...commonProps} style="" schoolData={state.schoolData} />;
             }
             return <window.CitySchoolRouteCard {...commonProps} direction={state.direction} schoolData={state.schoolData} />;
           })}

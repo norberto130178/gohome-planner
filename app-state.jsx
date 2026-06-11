@@ -8,8 +8,10 @@ const { useState, useEffect, useMemo } = React;
 // ── DestinationPickerWidget — önálló, stabil komponens ──────────────
 // Azért van a hook-on kívül definiálva, hogy ne mountolódjon újra
 // minden hook re-rendernél (ami az input fókuszt elvesztette volna).
-function DestinationPickerWidget({ stops, linesMap, value, onSelect, onClear, lang, isMobile }) {
-  const [query, setQuery] = React.useState("");
+function DestinationPickerWidget({ stops, linesMap, value, onSelect, onClear, lang, isMobile, query: controlledQuery, onQueryChange }) {
+  const [internalQuery, setInternalQuery] = React.useState("");
+  const query = onQueryChange !== undefined ? controlledQuery : internalQuery;
+  const setQuery = onQueryChange !== undefined ? onQueryChange : setInternalQuery;
   const [open, setOpen] = React.useState(false);
   const wrapRef = React.useRef(null);
   const labelColor = '#6A5F7C';
@@ -124,6 +126,7 @@ function useAppState(options = {}) {
   const [schoolFilter, setSchoolFilter] = useState(true);
   const [schoolHoliday, setSchoolHoliday] = useState(() => localStorage.getItem("hazaut.schoolholiday") === "1");
   const [homeStop, setHomeStop] = useState(null);
+  const [homeStopQuery, setHomeStopQuery] = useState("");
   const [settingsKey, setSettingsKey] = useState(0);
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 640);
 
@@ -224,10 +227,15 @@ function useAppState(options = {}) {
 
     // home direction
     if (schoolData.helykoziOnly) {
-      return window.planRoutes({
+      const homeRoutes = window.planRoutes({
         now, walkMin: schoolWalkMins, minTransfer: 5, maxResults: 6,
         allowedTransfers, homeStop: homeStopName, schoolHoliday,
       });
+      homeRoutes.forEach(r => {
+        r.walkToSchool = schoolWalkMins;
+        r.walkToSchoolDist = nearestStop?.dist;
+      });
+      return homeRoutes;
     }
     if (!nearestStop) return [];
     const cityRoutes = window.planCityRoutes({
@@ -422,8 +430,10 @@ function useAppState(options = {}) {
             stops={stopPickerAllStops}
             linesMap={stopLinesMap}
             value={homeStop}
-            onSelect={setHomeStop}
-            onClear={() => setHomeStop(null)}
+            onSelect={(stop) => { setHomeStop(stop); setHomeStopQuery(""); }}
+            onClear={() => { setHomeStop(null); setHomeStopQuery(""); }}
+            query={homeStopQuery}
+            onQueryChange={setHomeStopQuery}
             lang={lang}
             isMobile={isMobile}
           />

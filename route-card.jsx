@@ -28,6 +28,12 @@ function RouteCard({ route, index, isPrimary, t, style, isWeekend, dayType, nowM
 
   const busColor = route.localBus.color;
 
+  const localTransferStop = route.localBus.stops.find(ss => ss.name === route.transferLocalStop);
+  const fromBoard = route.localBoardAt - (localTransferStop?.offset || 0);
+  const localTransferIdx = localTransferStop ? route.localBus.stops.indexOf(localTransferStop) : 0;
+  const localHomeIdx = route.localBus.stops.findIndex(ss => ss.name === route.homeStop);
+  const visibleStops = route.localBus.stops.slice(localTransferIdx, localHomeIdx >= 0 ? localHomeIdx + 1 : undefined);
+
   return (
     <div ref={cardRef} className={`route-card ${style} ${isPrimary ? "primary" : ""}`}>
       {timetableInfo && (
@@ -161,17 +167,14 @@ function RouteCard({ route, index, isPrimary, t, style, isWeekend, dayType, nowM
         <div className="route-details">
           <div className="details-title">{t.thisBusPasses}</div>
           <div className="details-stops">
-            {route.localBus.stops.map((s, i) => {
-              const isTransfer = s.name === route.transferStop.replace("Veszprém, ", "") ||
-                s.name === "Komakút tér / Pannon Egyetem" && route.transferStop.includes("Komakút");
-              const isHome = s.name === "Csererdő";
-              const transferOffset = U.stopOffset(route.localBus, route.localBus.stops.find(ss => route.transferStop.includes(ss.name.split(" /")[0]))?.name || s.name);
-              const fromBoard = route.localBoardAt - (route.localBus.stops.find(ss => route.transferStop.includes(ss.name.split(" /")[0]))?.offset || 0);
+            {visibleStops.map((s, i) => {
+              const isTransfer = i === 0;
+              const isHome = s.name === route.homeStop;
               const absTime = fromBoard + s.offset;
               return (
                 <div
                   key={i}
-                  className={`detail-stop ${isHome ? "home" : ""}`}
+                  className={`detail-stop${isHome ? " home" : ""}${isTransfer ? " transfer" : ""}`}
                 >
                   <span className="detail-stop-time">{fmt(absTime)}</span>
                   <span className="detail-stop-dot" style={{ background: busColor }} />
@@ -237,7 +240,7 @@ function HomeRouteMap({ route }) {
     const localBus = route.localBus;
     const cityShapes = (window.CITY_SHAPES || {})[localBus.id] || [];
     const homeStopName = route.homeStop || 'Csererdő';
-    const boardStopIdx = localBus.stops.findIndex(s => normStop(s.name) === normStop(route.transferStop) || route.transferStop?.includes(s.name.split(' /')[0]));
+    const boardStopIdx = localBus.stops.findIndex(s => s.name === route.transferLocalStop);
     const homeStopIdx  = localBus.stops.findIndex(s => s.name === homeStopName);
     const boardStop = localBus.stops[boardStopIdx];
     const homeStop  = localBus.stops[homeStopIdx];
@@ -1244,7 +1247,7 @@ function SchoolRouteMap({ route, schoolData }) {
     const cityShapes = (window.CITY_SHAPES || {})[localBus.id] || [];
     const boardingStopIdx = localBus.stops.findIndex(s => normStop(s.name) === normStop(route.boardingStopName));
     const startStop = localBus.stops[boardingStopIdx >= 0 ? boardingStopIdx : 0];
-    const transferStopIdx = localBus.stops.findIndex(s => normStop(s.name) === normStop(route.transferStop) || route.transferStop?.includes(s.name.split(' /')[0]));
+    const transferStopIdx = localBus.stops.findIndex(s => s.name === route.transferLocalStop);
     const transferStop = localBus.stops[transferStopIdx];
     const localDep = startStop ? route.localBoardAt - startStop.offset : null;
 

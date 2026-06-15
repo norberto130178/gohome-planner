@@ -602,3 +602,79 @@ function BusRouteMap({ bus, color, selectedDep, nowMins, fmt, modalRef }) {
 }
 
 window.BusTimetableModal = BusTimetableModal;
+
+// Menetrendek dropdown — közös komponens, főoldalon és city oldalon is elérhető
+function TimetableDropdown({ onSelect, upward, tabStyle, bgColor }) {
+  const [open, setOpen] = React.useState(false);
+  const ref = React.useRef(null);
+  const buses = [...new Map((window.CITY_BUSES_FULL||[]).map(b=>[b.id,b])).values()];
+
+  React.useEffect(() => {
+    if (!open) return;
+    function outside(e) { if (ref.current && !ref.current.contains(e.target)) setOpen(false); }
+    document.addEventListener("mousedown", outside);
+    return () => document.removeEventListener("mousedown", outside);
+  }, [open]);
+
+  const dropPos = upward
+    ? { bottom:"calc(100% + 6px)", left:"50%", transform:"translateX(-50%)" }
+    : { top:"calc(100% + 6px)", left:0 };
+
+  return (
+    <div ref={ref} style={{
+      position:"relative",
+      flex: tabStyle ? 1 : undefined,
+      display: tabStyle ? "flex" : "inline-block",
+      background: bgColor || undefined,
+    }}>
+      <button
+        onClick={() => setOpen(o => !o)}
+        style={tabStyle ? {
+          flex:1, width:"100%", height:"100%", display:"flex", flexDirection:"column",
+          alignItems:"center", justifyContent:"center", gap:2,
+          background:"none", border:"none", cursor:"pointer",
+          borderTop: open ? "2px solid #FFC93C" : "2px solid transparent",
+        } : {
+          display:"inline-flex", alignItems:"center", gap:6,
+          background: bgColor || "var(--line)",
+          color: bgColor ? "white" : "var(--ink)",
+          border:"none", borderRadius:10, padding:"10px 14px", cursor:"pointer",
+          fontFamily:"Nunito,sans-serif", fontSize:13, fontWeight:800,
+          boxShadow: bgColor ? "0 8px 24px rgba(0,0,0,0.2)" : "none",
+        }}
+      >
+        {tabStyle ? (
+          <>
+            <span style={{fontSize:18, lineHeight:1}}>🗓</span>
+            <span style={{fontSize:10, fontWeight:700, fontFamily:"Nunito,sans-serif", color:"rgba(255,255,255,0.9)", letterSpacing:"0.02em"}}>Menetrendek</span>
+          </>
+        ) : (
+          <>🗓 Menetrendek {open ? "▲" : "▼"}</>
+        )}
+      </button>
+      {open && (
+        <div style={{
+          position:"absolute", ...dropPos,
+          background:"white", borderRadius:14, padding:"12px 14px",
+          boxShadow:"0 8px 28px rgba(0,0,0,0.15)", border:"2px solid var(--line)",
+          display:"flex", gap:8, flexWrap:"wrap", zIndex:500, minWidth:220,
+        }}>
+          {buses.map(b => (
+            <button key={b.id} title={b.label}
+              onClick={() => { onSelect(b.id); setOpen(false); }}
+              style={{
+                width:40, height:40, borderRadius:"50%",
+                background:b.color, color:"white", border:"none",
+                cursor:"pointer", fontFamily:"Nunito,sans-serif",
+                fontSize:14, fontWeight:900,
+                display:"flex", alignItems:"center", justifyContent:"center",
+                boxShadow:"0 2px 6px rgba(0,0,0,0.15)",
+              }}
+            >{b.id}</button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+window.TimetableDropdown = TimetableDropdown;

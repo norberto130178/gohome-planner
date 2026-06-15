@@ -12,59 +12,6 @@ const STOP_LINES = (() => {
 
 const ALL_STOPS = window.getCityStops();
 
-// ── TimetableDropdown ────────────────────────────────────────────────
-function TimetableDropdown({ onSelect }) {
-  const [open, setOpen] = React.useState(false);
-  const ref = React.useRef(null);
-  const buses = [...new Map((window.CITY_BUSES_FULL||[]).map(b=>[b.id,b])).values()];
-
-  React.useEffect(() => {
-    if (!open) return;
-    function outside(e) { if (ref.current && !ref.current.contains(e.target)) setOpen(false); }
-    document.addEventListener("mousedown", outside);
-    return () => document.removeEventListener("mousedown", outside);
-  }, [open]);
-
-  return (
-    <div ref={ref} style={{ position:"relative", display:"inline-block" }}>
-      <button
-        onClick={() => setOpen(o => !o)}
-        style={{
-          display:"inline-flex", alignItems:"center", gap:6,
-          background:"var(--line)", color:"var(--ink)", border:"none",
-          borderRadius:10, padding:"7px 14px", cursor:"pointer",
-          fontFamily:"Nunito,sans-serif", fontSize:13, fontWeight:800,
-        }}
-      >
-        🗓 Menetrendek {open ? "▲" : "▼"}
-      </button>
-      {open && (
-        <div style={{
-          position:"absolute", top:"calc(100% + 6px)", left:0,
-          background:"white", borderRadius:14, padding:"12px 14px",
-          boxShadow:"0 8px 28px rgba(0,0,0,0.15)", border:"2px solid var(--line)",
-          display:"flex", gap:8, flexWrap:"wrap", zIndex:500, minWidth:220,
-        }}>
-          {buses.map(b => (
-            <button key={b.id}
-              title={b.label}
-              onClick={() => { onSelect(b.id); setOpen(false); }}
-              style={{
-                width:40, height:40, borderRadius:"50%",
-                background:b.color, color:"white", border:"none",
-                cursor:"pointer", fontFamily:"Nunito,sans-serif",
-                fontSize:14, fontWeight:900,
-                display:"flex", alignItems:"center", justifyContent:"center",
-                boxShadow:"0 2px 6px rgba(0,0,0,0.15)",
-              }}
-            >{b.id}</button>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
 // ── StopSearch ───────────────────────────────────────────────────────
 function StopSearch({ value, onChange, placeholder, id }) {
   const [query, setQuery] = React.useState(value || "");
@@ -621,8 +568,8 @@ function CityApp() {
         <div>
           <div className="v1-title">VeszprémBusz 🚌</div>
           <div className="v1-subtitle">Veszprém helyi járatok — útvonaltervező</div>
-          <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", marginTop: 10 }}>
-            <TimetableDropdown onSelect={id => setTimetableBusId(id)} />
+          <div className="city-header-timetable" style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", marginTop: 10 }}>
+            <window.TimetableDropdown onSelect={id => setTimetableBusId(id)} />
           </div>
         </div>
         <div
@@ -808,8 +755,8 @@ function CityApp() {
         </>
       )}
 
-      {/* Navigation */}
-      <div style={{ position: "fixed", bottom: 14, left: 14, zIndex: 9998 }}>
+      {/* Navigation — desktop */}
+      <div style={{ position: "fixed", bottom: 14, left: 14, zIndex: 9998 }} className="city-header-timetable">
         <a href="index.html" style={{
           background: "#0E1524", color: "#FFC93C", textDecoration: "none",
           padding: "10px 14px", borderRadius: 10, fontWeight: 800, fontSize: 13,
@@ -817,6 +764,22 @@ function CityApp() {
         }}>
           ← HazaÚt
         </a>
+      </div>
+
+      {/* Bottom toolbar — mobile only (nav-bottom class, CSS shows on ≤700px) */}
+      <div className="nav-bottom">
+        <a href="index.html" style={{
+          flex:1, display:"flex", flexDirection:"column", alignItems:"center",
+          justifyContent:"center", gap:3, textDecoration:"none",
+          borderTop:"2px solid transparent", background:"#1e3a5a",
+        }}>
+          <span style={{display:"flex", alignItems:"center", gap:5, lineHeight:1}}>
+            <span style={{fontSize:18, fontWeight:900, color:"white", fontFamily:"Nunito,sans-serif"}}>←</span>
+            <span style={{fontSize:17}}>🏠</span>
+          </span>
+          <span style={{fontSize:10, fontWeight:700, fontFamily:"Nunito,sans-serif", color:"rgba(255,255,255,0.8)", letterSpacing:"0.02em"}}>HazaÚt</span>
+        </a>
+        <window.TimetableDropdown onSelect={id => setTimetableBusId(id)} upward tabStyle bgColor="#00695C" />
       </div>
     </div>
   );

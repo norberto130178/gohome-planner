@@ -276,6 +276,7 @@ function useAppState(options = {}) {
 
   // --- State object & dispatcher ---
   const state = { now, mode, customTime, missed, lang, routes, dayOffset, direction, schoolFilter, schoolHoliday, homeStop, compactMode, isMobile, schoolData, settingsHomeStop };
+  state.setSchoolFilter = setSchoolFilter;
   const toggleCompact = () => setCompactMode(c => !c);
   const toggleSchoolHoliday = () => setSchoolHoliday(v => !v);
   state.toggleCompact = toggleCompact;
@@ -351,6 +352,17 @@ function useAppState(options = {}) {
 
   state.stopPickerAllStops = stopPickerAllStops;
   state.stopLinesMap = stopLinesMap;
+  state.dayPickerOptions = dayPickerOptions;
+  state.activeDayOffset = activeDayOffset;
+  state.homeStopPicker = {
+    stops: stopPickerAllStops,
+    linesMap: stopLinesMap,
+    value: homeStop,
+    onSelect: (stop) => { setHomeStop(stop); setHomeStopQuery(""); },
+    onClear: () => { setHomeStop(null); setHomeStopQuery(""); },
+    query: homeStopQuery,
+    onQueryChange: setHomeStopQuery,
+  };
 
   // --- Shared sub-components ---
   state.TransferPicker = (props) => {

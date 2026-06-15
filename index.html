@@ -11,14 +11,14 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="styles.css">
+<script>window.APP_VERSION = "v3.10";</script>
+<link rel="stylesheet" href="styles.css?v=v3.10">
 
 <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
 
 <script>
-  window.APP_VERSION = "v3.9";
   document.write(
     ["schedules.js","intercity-data.js","city-data.js","city-shapes.js","home-shapes.js",
      "walk-graph.js","data.js","schools.js","city-planner.js","i18n.js"]
@@ -42,6 +42,7 @@
 function App() {
   const { state, setState, t, setLang } = window.useAppState();
   const lang = state.lang;
+  const [timetableBusId, setTimetableBusId] = React.useState(null);
 
   return (
     <>
@@ -51,9 +52,20 @@ function App() {
           <button className="tweaks-pill" data-tooltip="English" style={lang==="en"?{background:"var(--accent)",color:"white"}:{}} onClick={() => setLang("en")}>EN</button>
         </div>
       } />
+      {timetableBusId && <window.BusTimetableModal busId={timetableBusId} onClose={() => setTimetableBusId(null)} />}
       <div className="nav-bottom">
-        <a href="city.html" data-tooltip="Veszprém városi buszok menetrendje" data-tooltip-dir="up" style={{background:"#00796B",color:"white",textDecoration:"none",padding:"10px 14px",borderRadius:10,fontWeight:800,fontSize:13,fontFamily:"Nunito,sans-serif",boxShadow:"0 8px 24px rgba(0,0,0,0.2)"}}>🚌 VeszprémBusz →</a>
-        <a href="mission.html" data-tooltip="Napi célok és küldetések" data-tooltip-dir="up" style={{background:"#0E1524",color:"#FFC93C",textDecoration:"none",padding:"10px 14px",borderRadius:10,fontWeight:800,fontSize:13,fontFamily:"Nunito,sans-serif",boxShadow:"0 8px 24px rgba(0,0,0,0.2)"}}>🎮 Mission Board →</a>
+        <a href="city.html" style={{
+          flex:1, display:"flex", flexDirection:"column", alignItems:"center",
+          justifyContent:"center", gap:3, textDecoration:"none",
+          borderTop:"2px solid transparent", background:"#00695C",
+        }}>
+          <span style={{display:"flex", alignItems:"center", gap:5, lineHeight:1}}>
+            <span style={{fontSize:17}}>🚌</span>
+            <span style={{fontSize:18, fontWeight:900, color:"white", fontFamily:"Nunito,sans-serif"}}>→</span>
+          </span>
+          <span style={{fontSize:10, fontWeight:700, fontFamily:"Nunito,sans-serif", color:"rgba(255,255,255,0.8)", letterSpacing:"0.02em"}}>VeszprémBusz</span>
+        </a>
+        <window.TimetableDropdown onSelect={id => setTimetableBusId(id)} upward tabStyle bgColor="#1e3a5a" />
       </div>
     </>
   );

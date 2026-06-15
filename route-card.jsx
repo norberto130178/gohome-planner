@@ -790,10 +790,6 @@ function SchoolSettingsModal({ onClose }) {
   const stopMarkerRef = React.useRef(null);
   const [fsState, setFsState] = React.useState(false);
 
-  const [preferredTransfers, setPreferredTransfers] = React.useState(() => {
-    try { const p = JSON.parse(localStorage.getItem('hazaut.preferredTransfers') || '[]'); return Array.isArray(p) ? p : []; } catch { return []; }
-  });
-
   const [homeStop, setHomeStop] = React.useState(() => {
     try { return JSON.parse(localStorage.getItem('homeStop') || 'null'); } catch { return null; }
   });
@@ -1005,8 +1001,6 @@ function SchoolSettingsModal({ onClose }) {
     localStorage.setItem("selectedSchool", selected);
     if (homeStop) localStorage.setItem('homeStop', JSON.stringify(homeStop));
     else localStorage.removeItem('homeStop');
-    if (preferredTransfers.length > 0) localStorage.setItem('hazaut.preferredTransfers', JSON.stringify(preferredTransfers));
-    else localStorage.removeItem('hazaut.preferredTransfers');
     onClose();
   }
 
@@ -1173,33 +1167,6 @@ function SchoolSettingsModal({ onClose }) {
             </div>
           </>
         )}
-
-        <div style={{ marginBottom: 16 }}>
-          <div style={{ fontSize: 12, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--ink-soft)", marginBottom: 4 }}>
-            Preferált átszálló
-          </div>
-          <div style={{ fontSize: 12, color: "var(--ink-soft)", marginBottom: 10 }}>
-            Ha üresen hagyod, minden átszállópontot figyelembe vesz a tervező.
-          </div>
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-            {[
-              { id: "komakut", label: "Komakút tér" },
-              { id: "szinhaz", label: "Petőfi Színház" },
-              { id: "buszall", label: "Autóbusz-állomás" },
-            ].map(({ id, label }) => (
-              <button
-                key={id}
-                onClick={() => setPreferredTransfers(prev =>
-                  prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
-                )}
-                className={`tweaks-pill ${preferredTransfers.includes(id) ? 'active' : ''}`}
-                aria-pressed={preferredTransfers.includes(id)}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-        </div>
 
         <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 8 }}>
           <button onClick={onClose} style={{

@@ -177,20 +177,6 @@ function useAppState(options = {}) {
     try { return JSON.parse(localStorage.getItem('homeStop') || 'null'); } catch { return null; }
   }, [settingsKey]);
 
-  const preferredTransfers = useMemo(() => {
-    try { const p = JSON.parse(localStorage.getItem('hazaut.preferredTransfers') || '[]'); return Array.isArray(p) ? p : []; } catch { return []; }
-  }, [settingsKey]);
-
-  const allowedTransfers = useMemo(() =>
-    preferredTransfers.length > 0 ? preferredTransfers : ["komakut","szinhaz","buszall"],
-  [preferredTransfers]);
-
-  const allowedTransfersSchool = useMemo(() =>
-    preferredTransfers.length > 0
-      ? [...new Set(preferredTransfers.map(id => id === "szinhaz" ? "komakut" : id))]
-      : ["komakut","buszall"],
-  [preferredTransfers]);
-
   // --- Route planning ---
   const routes = useMemo(() => {
     if (!settingsHomeStop || !schoolData) {
@@ -205,7 +191,6 @@ function useAppState(options = {}) {
       if (schoolData.helykoziOnly) {
         return window.planSchoolRoutes({
           now, walkMin: 0, maxResults: 6,
-          allowedTransfers: allowedTransfersSchool,
           schoolStartMin: schoolFilter ? 10 * 60 : null,
           schoolHoliday,
           fromStop: homeStopName,
@@ -256,7 +241,7 @@ function useAppState(options = {}) {
     if (schoolData.helykoziOnly) {
       const homeRoutes = window.planRoutes({
         now, walkMin: schoolWalkMins, maxResults: 6,
-        allowedTransfers, homeStop: homeStopName, schoolHoliday,
+        homeStop: homeStopName, schoolHoliday,
       });
       homeRoutes.forEach(r => {
         r.walkToSchool = schoolWalkMins;
@@ -276,7 +261,7 @@ function useAppState(options = {}) {
       r.homeStopName = homeStopName;
     });
     return cityRoutes;
-  }, [now, allowedTransfers, allowedTransfersSchool, direction, schoolFilter, schoolHoliday, settingsKey, settingsHomeStop, schoolData]);
+  }, [now, direction, schoolFilter, schoolHoliday, settingsKey, settingsHomeStop, schoolData]);
 
   const t = window.I18N[lang];
 
@@ -332,8 +317,6 @@ function useAppState(options = {}) {
     dayPickerOptions.push({ offset: i, label, date: d });
   }
   const activeDayOffset = mode === "now" ? 0 : dayOffset;
-
-  state.preferredTransfers = preferredTransfers;
 
   // --- Stop data for DestinationPickerWidget ---
   const stopPickerAllStops = useMemo(() => {

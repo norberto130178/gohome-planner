@@ -114,13 +114,6 @@ const _GTFS_CITY_STOP = {
   "Veszprém, vasútállomás":         "Veszprém vasútállomás",
 };
 
-// GTFS Veszprémi megállónév → átszálló ID (allowedTransfers szűréshez)
-const _GTFS_TRANSFER_ID = {
-  "Veszprém, autóbusz-állomás": "buszall",
-  "Veszprém, Komakút tér":      "komakut",
-  "Veszprém, Színház":          "szinhaz",
-};
-
 // GTFS stop rövid megjelenítési neve (kártyán)
 const _TRANSFER_SHORT = {
   "Veszprém, autóbusz-állomás": "Autóbusz-áll.",
@@ -138,7 +131,6 @@ function _dayTypeCat(dayType) {
 
 window.planRoutes = function planRoutes({
   now, walkMin, maxResults,
-  allowedTransfers,
   homeStop,
   schoolHoliday,
 }) {
@@ -175,8 +167,6 @@ window.planRoutes = function planRoutes({
         if (!icVeszpStop.name.startsWith('Veszprém,')) continue;
         const cityStopName = _GTFS_CITY_STOP[icVeszpStop.name];
         if (!cityStopName) continue;
-        const transferId = _GTFS_TRANSFER_ID[icVeszpStop.name];
-        if (allowedTransfers && allowedTransfers.length > 0 && transferId && !allowedTransfers.includes(transferId)) continue;
 
         const icArriveAtVeszp = trip.deps[vi];
         if (icArriveAtVeszp == null) continue;
@@ -214,7 +204,7 @@ window.planRoutes = function planRoutes({
               helykoziLine: icRoute.id,
               transferStop: cityStopName,
               transferStopShort: _TRANSFER_SHORT[icVeszpStop.name] || icVeszpStop.name.replace('Veszprém, ', ''),
-              transferStopId: transferId || icVeszpStop.name,
+              transferStopId: icVeszpStop.name,
               transferLocalStop: cityStopName,
               transferLat: icVeszpStop.lat,
               transferLon: icVeszpStop.lon,
@@ -267,7 +257,6 @@ window.planRoutes = function planRoutes({
 
 window.planSchoolRoutes = function planSchoolRoutes({
   now, walkMin, maxResults, schoolStartMin,
-  allowedTransfers,
   schoolHoliday,
   fromStop,
   walkToSchool,
@@ -300,8 +289,6 @@ window.planSchoolRoutes = function planSchoolRoutes({
       const icBoardStop = icRoute.stops[boardStopIdx];
       const cityStopName = _GTFS_CITY_STOP[icBoardStop.name];
       if (!cityStopName) continue;
-      const transferId = _GTFS_TRANSFER_ID[icBoardStop.name];
-      if (allowedTransfers && allowedTransfers.length > 0 && transferId && !allowedTransfers.includes(transferId)) continue;
 
       const schoolBuses = (window.CITY_BUSES_FULL || []).filter(bus =>
         U.busVisits(bus, fromStop) && U.busVisits(bus, cityStopName)
@@ -341,7 +328,7 @@ window.planSchoolRoutes = function planSchoolRoutes({
 
           const helykoziDepBuszall = buszallIdx !== -1 ? (matchingTrip.deps[buszallIdx] ?? icDepAtStop) : icDepAtStop;
 
-          const key = `${transferId}-${bus.id}-${bus.direction}-${boardAt}-${icDepAtStop}`;
+          const key = `${icBoardStop.name}-${bus.id}-${bus.direction}-${boardAt}-${icDepAtStop}`;
           if (seen.has(key)) continue;
           seen.add(key);
 
@@ -362,7 +349,7 @@ window.planSchoolRoutes = function planSchoolRoutes({
             helykoziDepBuszall,
             transferStop: cityStopName,
             transferStopShort: _TRANSFER_SHORT[icBoardStop.name] || icBoardStop.name.replace('Veszprém, ', ''),
-            transferStopId: transferId || icBoardStop.name,
+            transferStopId: icBoardStop.name,
             transferLocalStop: cityStopName,
             transferLat: icBoardStop.lat,
             transferLon: icBoardStop.lon,
@@ -393,8 +380,6 @@ window.planSchoolRoutes = function planSchoolRoutes({
         if (!icBoardStop.name.startsWith('Veszprém,')) continue;
         const cityStopName = _GTFS_CITY_STOP[icBoardStop.name];
         if (!cityStopName) continue;
-        const transferId = _GTFS_TRANSFER_ID[icBoardStop.name];
-        if (allowedTransfers && allowedTransfers.length > 0 && transferId && !allowedTransfers.includes(transferId)) continue;
         if (!icBoardStop.citySpId) continue;
 
         const walkMatch = neighbors.find(n => n.spId === icBoardStop.citySpId && n.distM >= 100);
@@ -433,7 +418,7 @@ window.planSchoolRoutes = function planSchoolRoutes({
             if (schoolStartMin != null && icArriveSchool > schoolStartMin) continue;
 
             const helykoziDepBuszall = buszallIdx2 !== -1 ? (matchingTrip2.deps[buszallIdx2] ?? icDepAtStop) : icDepAtStop;
-            const walkKey = `${transferId}-${bus.id}-${bus.direction}-${boardAt}-${icDepAtStop}`;
+            const walkKey = `${icBoardStop.name}-${bus.id}-${bus.direction}-${boardAt}-${icDepAtStop}`;
             const candidate = {
               departLeaveHome: boardAt - walkMin,
               boardingStopName: fromStop,
@@ -450,7 +435,7 @@ window.planSchoolRoutes = function planSchoolRoutes({
               helykoziDepBuszall,
               transferStop: cityStopName,
               transferStopShort: _TRANSFER_SHORT[icBoardStop.name] || icBoardStop.name.replace('Veszprém, ', ''),
-              transferStopId: (transferId || icBoardStop.name) + "_walk",
+              transferStopId: icBoardStop.name + "_walk",
               transferLocalStop: walkFromStop,
               transferLat: icBoardStop.lat,
               transferLon: icBoardStop.lon,

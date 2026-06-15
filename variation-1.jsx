@@ -51,6 +51,9 @@ function V1Variation({ state, setState, t, langSwitcher, navLinks }) {
         {isMobile && (
           <div style={{display:"flex",gap:6,alignItems:"center"}}>
             {langSwitcher}
+            {state.preferredTransfers?.length > 0 && (
+              <button onClick={() => setSettingsOpen(true)} title="Átszálló szűrő aktív" style={{background:"#FFF3E0",border:"2px solid #FFB74D",borderRadius:10,padding:"4px 8px",cursor:"pointer",fontSize:12,fontWeight:700,color:"#E65100",lineHeight:1}}>🔄</button>
+            )}
             <button onClick={() => setSettingsOpen(true)} title="Beállítások" style={{background:"var(--line)",border:"none",borderRadius:10,padding:"6px 10px",cursor:"pointer",fontSize:16,lineHeight:1,color:"var(--ink)"}}>⚙️</button>
           </div>
         )}
@@ -161,6 +164,15 @@ function V1Variation({ state, setState, t, langSwitcher, navLinks }) {
         </div>
         {!isMobile && (
           <div style={{display:'flex',gap:8,alignItems:'center',alignSelf:'flex-end',marginLeft:'auto'}}>
+            {state.preferredTransfers?.length > 0 && (() => {
+              const LABELS = { komakut: "Komakút", szinhaz: "Színház", buszall: "Autóbusz-áll." };
+              const label = state.preferredTransfers.map(id => LABELS[id] || id).join(", ");
+              return (
+                <button onClick={() => setSettingsOpen(true)} title="Átszálló szűrő aktív — kattints a beállításokhoz" style={{fontSize:12,fontWeight:700,fontFamily:"Nunito,sans-serif",background:"#FFF3E0",color:"#E65100",border:"2px solid #FFB74D",padding:"6px 10px",borderRadius:10,whiteSpace:"nowrap",cursor:"pointer"}}>
+                  🔄 {label}
+                </button>
+              );
+            })()}
             <button onClick={() => setSettingsOpen(true)} title="Beállítások" style={{fontSize:13,fontWeight:800,fontFamily:"Nunito,sans-serif",background:"var(--line)",color:"var(--ink)",border:"none",padding:"10px 14px",borderRadius:10,whiteSpace:"nowrap",cursor:"pointer",boxShadow:"0 8px 24px rgba(0,0,0,0.1)"}}>⚙️ Beállítások</button>
             <a href="city.html" style={{fontSize:13,fontWeight:800,fontFamily:"Nunito,sans-serif",textDecoration:"none",background:"#00796B",color:"white",padding:"10px 14px",borderRadius:10,whiteSpace:"nowrap",boxShadow:"0 8px 24px rgba(0,0,0,0.2)"}}>🚌 VeszprémBusz →</a>
             <a href="mission.html" style={{fontSize:13,fontWeight:800,fontFamily:"Nunito,sans-serif",textDecoration:"none",background:"#0E1524",color:"#FFC93C",padding:"10px 14px",borderRadius:10,whiteSpace:"nowrap",boxShadow:"0 8px 24px rgba(0,0,0,0.2)"}}>🎮 Mission Board →</a>

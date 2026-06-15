@@ -17,10 +17,14 @@
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
 
-<script src="data.js"></script>
-<script src="city-data.js"></script>
-<script src="city-planner.js"></script>
-<script src="city-shapes.js"></script>
+<script>
+  window.APP_VERSION = "v3.5";
+  document.write(
+    ["data.js","city-data.js","walk-graph.js","city-planner.js","city-shapes.js"]
+    .map(function(s){ return '<script src="'+s+'?v='+window.APP_VERSION+'"><\/script>'; })
+    .join("")
+  );
+</script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script type="text/babel" src="timetable-modal.jsx"></script>

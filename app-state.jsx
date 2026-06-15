@@ -121,8 +121,6 @@ function useAppState(options = {}) {
   const [missed, setMissed] = useState(0);
   const [tick, setTick] = useState(0);
   const [direction, setDirection] = useState(initDirection);
-  const [allowedTransfers, setAllowedTransfers] = useState(["komakut","szinhaz","buszall"]);
-  const [allowedTransfersSchool, setAllowedTransfersSchool] = useState(["komakut","buszall","szinhaz_walk"]);
   const [schoolFilter, setSchoolFilter] = useState(true);
   const [schoolHoliday, setSchoolHoliday] = useState(() => localStorage.getItem("hazaut.schoolholiday") === "1");
   const [homeStop, setHomeStop] = useState(null);
@@ -134,17 +132,11 @@ function useAppState(options = {}) {
   useEffect(() => {
     const saved = localStorage.getItem("hazaut.lang");
     if (saved) setLang(saved);
-    const savedT = localStorage.getItem("hazaut.transfers");
-    if (savedT) { try { const p = JSON.parse(savedT); if (Array.isArray(p) && p.length) setAllowedTransfers(p); } catch(e){} }
-    const savedTS = localStorage.getItem("hazaut.transfersSchool");
-    if (savedTS) { try { const p = JSON.parse(savedTS); if (Array.isArray(p) && p.length) setAllowedTransfersSchool(p); } catch(e){} }
   }, []);
 
   // --- localStorage save ---
   useEffect(() => { localStorage.setItem("hazaut.lang", lang); }, [lang]);
   useEffect(() => { localStorage.setItem("hazaut.compact", compactMode ? "1" : "0"); }, [compactMode]);
-  useEffect(() => { localStorage.setItem("hazaut.transfers", JSON.stringify(allowedTransfers)); }, [allowedTransfers]);
-  useEffect(() => { localStorage.setItem("hazaut.transfersSchool", JSON.stringify(allowedTransfersSchool)); }, [allowedTransfersSchool]);
   useEffect(() => { localStorage.setItem("hazaut.direction", direction); }, [direction]);
   useEffect(() => { localStorage.setItem("hazaut.schoolholiday", schoolHoliday ? "1" : "0"); }, [schoolHoliday]);
   useEffect(() => {
@@ -185,6 +177,20 @@ function useAppState(options = {}) {
     try { return JSON.parse(localStorage.getItem('homeStop') || 'null'); } catch { return null; }
   }, [settingsKey]);
 
+  const preferredTransfers = useMemo(() => {
+    try { const p = JSON.parse(localStorage.getItem('hazaut.preferredTransfers') || '[]'); return Array.isArray(p) ? p : []; } catch { return []; }
+  }, [settingsKey]);
+
+  const allowedTransfers = useMemo(() =>
+    preferredTransfers.length > 0 ? preferredTransfers : ["komakut","szinhaz","buszall"],
+  [preferredTransfers]);
+
+  const allowedTransfersSchool = useMemo(() =>
+    preferredTransfers.length > 0
+      ? [...new Set(preferredTransfers.map(id => id === "szinhaz" ? "komakut" : id))]
+      : ["komakut","buszall"],
+  [preferredTransfers]);
+
   // --- Route planning ---
   const routes = useMemo(() => {
     if (!settingsHomeStop || !schoolData) {
@@ -198,7 +204,7 @@ function useAppState(options = {}) {
     if (direction === "school") {
       if (schoolData.helykoziOnly) {
         return window.planSchoolRoutes({
-          now, walkMin: 0, minTransfer: 3, maxResults: 6,
+          now, walkMin: 0, maxResults: 6,
           allowedTransfers: allowedTransfersSchool,
           schoolStartMin: schoolFilter ? 10 * 60 : null,
           schoolHoliday,
@@ -209,7 +215,7 @@ function useAppState(options = {}) {
       }
       if (!nearestStop) return [];
       const cityRoutes = window.planCityRoutes({
-        now, walkMin: 0, minTransfer: 3, maxResults: 6,
+        now, walkMin: 0, maxResults: 6,
         fromStop: homeStopName,
         toStop: nearestStop.name,
         schoolHoliday,
@@ -249,7 +255,7 @@ function useAppState(options = {}) {
     // home direction
     if (schoolData.helykoziOnly) {
       const homeRoutes = window.planRoutes({
-        now, walkMin: schoolWalkMins, minTransfer: 5, maxResults: 6,
+        now, walkMin: schoolWalkMins, maxResults: 6,
         allowedTransfers, homeStop: homeStopName, schoolHoliday,
       });
       homeRoutes.forEach(r => {
@@ -260,7 +266,7 @@ function useAppState(options = {}) {
     }
     if (!nearestStop) return [];
     const cityRoutes = window.planCityRoutes({
-      now, walkMin: schoolWalkMins, minTransfer: 5, maxResults: 6,
+      now, walkMin: schoolWalkMins, maxResults: 6,
       fromStop: nearestStop.name,
       toStop: homeStopName,
       schoolHoliday,
@@ -327,45 +333,7 @@ function useAppState(options = {}) {
   }
   const activeDayOffset = mode === "now" ? 0 : dayOffset;
 
-  // --- Transfer toggle (direction-aware) ---
-  const toggleTransfer = (id) => {
-    if (direction === "school") {
-      setAllowedTransfersSchool((prev) => {
-        if (prev.includes(id)) {
-          const next = prev.filter(x => x !== id);
-          return next.length === 0 ? prev : next;
-        }
-        return [...prev, id];
-      });
-    } else {
-      setAllowedTransfers((prev) => {
-        if (prev.includes(id)) {
-          const next = prev.filter(x => x !== id);
-          return next.length === 0 ? prev : next;
-        }
-        return [...prev, id];
-      });
-    }
-  };
-  state.allowedTransfers = direction === "school" ? allowedTransfersSchool : allowedTransfers;
-  state.toggleTransfer = toggleTransfer;
-
-  // --- Transfer labels ---
-  const TRANSFER_LABELS_HOME = {
-    komakut: lang==="hu"?"Komakút tér":"Komakút sq.",
-    szinhaz: lang==="hu"?"Színház":"Theatre",
-    buszall: lang==="hu"?"Autóbusz-áll.":"Bus stn.",
-  };
-  const TRANSFER_LABELS_SCHOOL = {
-    komakut: lang==="hu"?"Komakút tér":"Komakút sq.",
-    buszall: lang==="hu"?"Autóbusz-áll.":"Bus stn.",
-    szinhaz_walk: t.transferShinhaz,
-  };
-  const transferIds = direction === "school"
-    ? ["komakut","buszall","szinhaz_walk"]
-    : ["komakut","szinhaz","buszall"];
-  const transferLabels = direction === "school" ? TRANSFER_LABELS_SCHOOL : TRANSFER_LABELS_HOME;
-  const activeTransfers = direction === "school" ? allowedTransfersSchool : allowedTransfers;
+  state.preferredTransfers = preferredTransfers;
 
   // --- Stop data for DestinationPickerWidget ---
   const stopPickerAllStops = useMemo(() => {
@@ -403,24 +371,9 @@ function useAppState(options = {}) {
 
   // --- Shared sub-components ---
   state.TransferPicker = (props) => {
-    const labelColor = (props && props.labelColor) || '#6A5F7C';
     return (
       <div style={{display:'flex',flexDirection:isMobile?'column':'row',gap:isMobile?8:16,alignItems:isMobile?'flex-start':'center',marginBottom:isMobile?0:12}}>
         <div style={{display:'flex',gap:6,flexWrap:'wrap',alignItems:'center',flex:isMobile?undefined:1,minWidth:isMobile?undefined:0}}>
-        <span style={{fontSize:isMobile?10:12,fontWeight:800,color:labelColor,letterSpacing:'0.1em',textTransform:'uppercase',marginRight:4}}>
-          🔄{!isMobile && <> {lang==="hu"?"Átszállás":"Transfer"}:</>}
-        </span>
-        {transferIds.map((id) => (
-          <button key={id} onClick={() => toggleTransfer(id)}
-            className={`tweaks-pill ${activeTransfers.includes(id)?'active':''}`}
-            aria-pressed={activeTransfers.includes(id)}
-            aria-label={`${lang==="hu"?"Átszállás":"Transfer"}: ${transferLabels[id]}`}
-            data-tooltip={activeTransfers.includes(id) ? (lang==="hu" ? "Kattints: kizár" : "Click: exclude") : (lang==="hu" ? "Kattints: bekapcsol" : "Click: enable")}
-            {...(props && props.pillStyle && !activeTransfers.includes(id) ? {style: props.pillStyle} : {})}
-            {...(props && props.pillActiveStyle && activeTransfers.includes(id) ? {style: props.pillActiveStyle} : {})}>
-            {transferLabels[id]}
-          </button>
-        ))}
         {direction === "school" && (
           <div
             style={{display:"flex",alignItems:"center",gap:8,cursor:"pointer"}}

@@ -10,6 +10,14 @@
 // Helyi buszok amik Csererdőt érintik (hazaút + iskolába tervező)
 const HOME_BUS_IDS = ["3", "8", "8Y", "28"];
 
+function _haversineM(lat1, lon1, lat2, lon2) {
+  const R = 6371000;
+  const φ1 = lat1 * Math.PI / 180, φ2 = lat2 * Math.PI / 180;
+  const Δφ = (lat2 - lat1) * Math.PI / 180, Δλ = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(Δφ/2)**2 + Math.cos(φ1)*Math.cos(φ2)*Math.sin(Δλ/2)**2;
+  return Math.round(R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
+}
+
 // GTFS shape segédfüggvény — mindkét nézetben elérhető (index.html + city.html)
 window.nearestShapeIdx = function(shape, lat, lon) {
   let best = 0, bestD = Infinity;
@@ -99,7 +107,7 @@ window.BUS_UTILS = {
 // ============================================================
 
 window.planRoutes = function planRoutes({
-  now, walkMin, minTransfer, maxResults,
+  now, walkMin, maxResults,
   allowedTransfers,  // opcionális: string[] az átszálláspont id-kból; ha nincs, mindet figyeli
   homeStop,           // opcionális: custom leszállási megálló; ha null/undefined → "Csererdő"
   schoolHoliday,      // opcionális: true → tanszüneti menetrend munkanapokon
@@ -141,7 +149,6 @@ window.planRoutes = function planRoutes({
 
     for (const tr of availableTrips) {
       const arrivalAtTransfer = tr.arrMins;
-      const mustBoardBy = arrivalAtTransfer + minTransfer;
 
       for (const bus of busPool) {
         if (bus.stops[0]?.name === "Csererdő") continue; // csak délutáni buszok
@@ -150,6 +157,14 @@ window.planRoutes = function planRoutes({
         const transferOffset = U.stopOffset(bus, dest.localStopName);
         const targetOffset = U.stopOffset(bus, targetStop);
         if (targetOffset <= transferOffset) continue;
+
+        const busStopAtTransfer = bus.stops.find(s => s.name === dest.localStopName);
+        let walkAtTransfer = null;
+        if (busStopAtTransfer?.lat != null && dest.lat != null) {
+          const distM = _haversineM(dest.lat, dest.lon, busStopAtTransfer.lat, busStopAtTransfer.lon);
+          if (distM >= 10) walkAtTransfer = { distM, walkMin: Math.ceil(distM / 80) };
+        }
+        const mustBoardBy = arrivalAtTransfer + (walkAtTransfer?.walkMin ?? 0);
 
         const localDeps = U.getDepartures(bus, dayType);
         for (const localDep of localDeps) {
@@ -173,6 +188,7 @@ window.planRoutes = function planRoutes({
             transferLat: dest.lat,
             transferLon: dest.lon,
             waitAtTransfer: localAtTransfer - arrivalAtTransfer,
+            ...(walkAtTransfer ? { walkAtTransfer } : {}),
             localBus: bus,
             localBoardAt: localAtTransfer,
             localArriveCsererdo: localAtTarget,
@@ -226,8 +242,8 @@ window.planRoutes = function planRoutes({
 // ============================================================
 
 window.planSchoolRoutes = function planSchoolRoutes({
-  now, walkMin, minTransfer, maxResults, schoolStartMin,
-  allowedTransfers,  // opcionális: melyik átszállópontokat használja (komakut, buszall, szinhaz_walk)
+  now, walkMin, maxResults, schoolStartMin,
+  allowedTransfers,  // opcionális: melyik átszállópontokat használja (komakut, buszall)
   schoolHoliday,
   fromStop,          // opcionális: indulási megálló neve (alapértelmezett: "Csererdő")
   walkToSchool,      // opcionális: gyaloglási idő az iskoláig (alapértelmezett: 10)
@@ -252,7 +268,6 @@ window.planSchoolRoutes = function planSchoolRoutes({
       originId: "komakut",
       localStopName: "Komakút tér / Pannon Egyetem",
       walkAfterBus: 0,
-      minTransfer: 0,
     },
     {
       id: "buszall",
@@ -261,17 +276,6 @@ window.planSchoolRoutes = function planSchoolRoutes({
       originId: "buszall",
       localStopName: "Veszprém autóbusz-állomás",
       walkAfterBus: 0,
-      minTransfer: 3,
-    },
-    {
-      id: "szinhaz_walk",
-      label: "Petőfi Színház → Komakút (5 p gyalog)",
-      short: "Színház→Komakút",
-      originId: "komakut",
-      localStopName: "Petőfi Színház",
-      walkAfterBus: 5,
-      walkAfterBusDist: 400,
-      minTransfer: 0,
     },
   ];
 
@@ -311,13 +315,21 @@ window.planSchoolRoutes = function planSchoolRoutes({
       const targetOffset = U.stopOffset(bus, tp.localStopName);
       if (fromOffset === null || targetOffset === null || targetOffset <= fromOffset) continue;
 
+      const busStopAtTransfer = bus.stops.find(s => s.name === tp.localStopName);
+      let walkAtTransfer = null;
+      if (busStopAtTransfer?.lat != null && origin.lat != null) {
+        const distM = _haversineM(busStopAtTransfer.lat, busStopAtTransfer.lon, origin.lat, origin.lon);
+        if (distM >= 10) walkAtTransfer = { distM, walkMin: Math.ceil(distM / 80) };
+      }
+      const walkAtTransferMin = walkAtTransfer?.walkMin ?? 0;
+
       const localDeps = U.getDepartures(bus, dayType);
       for (const localDep of localDeps) {
         const boardAt = localDep + fromOffset;
         if (boardAt < earliestBoard) continue;
         const arriveAtTransfer = localDep + targetOffset;
         const arriveReadyForHelykozi = arriveAtTransfer + tp.walkAfterBus;
-        const mustBoardBy = arriveReadyForHelykozi + (tp.minTransfer ?? minTransfer);
+        const mustBoardBy = arriveReadyForHelykozi + walkAtTransferMin;
 
         const hk = helykoziTrips.find((tr) => tr.depMins >= mustBoardBy);
         if (!hk) continue;
@@ -346,6 +358,7 @@ window.planSchoolRoutes = function planSchoolRoutes({
           walkAfterBusDist: tp.walkAfterBusDist,
           transferReadyAt: arriveReadyForHelykozi,
           waitAtTransfer: hk.depMins - arriveReadyForHelykozi,
+          ...(walkAtTransfer ? { walkAtTransfer } : {}),
           helykoziDep: hk.depMins,
           helykoziArrive: hk.arrMins,
           helykoziLine: hk.line,
@@ -365,8 +378,107 @@ window.planSchoolRoutes = function planSchoolRoutes({
     }
   }
 
+  // ── WALK-TRANSFER (WALK_GRAPH) ─────────────────────────────
+  // Helyi busz → gyalog → helyközi megálló (pl. Petőfi Színház → Komakút)
+  // Azonos (busz, indulás, helyközi) kombinációnál csak a legrövidebb séta marad.
+  const walkGraph = window.WALK_GRAPH || {};
+  const walkBestMap = new Map();
+  for (const [stopName, neighbors] of Object.entries(walkGraph)) {
+    for (const tp of activePoints) {
+      const walkMatch = neighbors.find(n => n.stop === tp.localStopName && n.distM >= 100);
+      if (!walkMatch) continue;
+
+      const origin = helykozi.origins.find((o) => o.id === tp.originId);
+      if (!origin) continue;
+
+      const helykoziTrips = origin.trips
+        .filter((tr) => {
+          if (tr.days === "both") return true;
+          if (tr.days === "school") return dayType === "workday" || dayType === "schoolholiday";
+          if (tr.days === "workday") return dayType === "workday" || dayType === "schoolholiday";
+          return tr.days === dayType;
+        })
+        .map((tr) => ({ ...tr, depMins: U.toMinutes(tr.dep), arrMins: U.toMinutes(tr.arr) }))
+        .sort((a, b) => a.depMins - b.depMins);
+
+      const wMin = walkMatch.walkMin;
+      const distM = walkMatch.distM;
+      const wMinTotal = wMin;
+      const distMTotal = distM;
+
+
+      const walkBuses = (window.CITY_BUSES_FULL || []).filter(bus => U.busVisits(bus, fromStop));
+      for (const bus of walkBuses) {
+        if (!U.busVisits(bus, stopName)) continue;
+        const fromOffset = U.stopOffset(bus, fromStop);
+        const walkOffset = U.stopOffset(bus, stopName);
+        if (fromOffset === null || walkOffset === null || walkOffset <= fromOffset) continue;
+
+        // Ha a busz amúgy is megáll a tp.localStopName-ben a séta után,
+        // akkor egyenesen odamegy — a sétás változat sosem jobb ennél.
+        const directOffset = U.stopOffset(bus, tp.localStopName);
+        if (directOffset !== null && directOffset > walkOffset) continue;
+
+        const localDeps = U.getDepartures(bus, dayType);
+        for (const localDep of localDeps) {
+          const boardAt = localDep + fromOffset;
+          if (boardAt < earliestBoard) continue;
+          const arriveAtWalkStop = localDep + walkOffset;
+          const arriveReadyForHelykozi = arriveAtWalkStop + wMinTotal;
+          const mustBoardBy = arriveReadyForHelykozi;
+
+          const hk = helykoziTrips.find((tr) => tr.depMins >= mustBoardBy);
+          if (!hk) continue;
+          if (schoolStartMin != null && hk.arrMins > schoolStartMin) continue;
+
+          let depBuszallMins = hk.depMins;
+          if (tp.originId !== "buszall") {
+            const buszallOrigin = helykozi.origins.find(o => o.id === "buszall");
+            if (buszallOrigin) {
+              const buszallMatch = buszallOrigin.trips.find(tr => tr.line === hk.line && tr.arr === hk.arr);
+              if (buszallMatch) depBuszallMins = U.toMinutes(buszallMatch.dep);
+            }
+          }
+
+          const walkKey = `${tp.id}-${bus.id}-${bus.direction}-${boardAt}-${hk.depMins}`;
+          const candidate = {
+            departLeaveHome: boardAt - walkMin,
+            boardingStopName: fromStop,
+            localBus: bus,
+            localBoardAt: boardAt,
+            localArriveAtTransfer: arriveAtWalkStop,
+            walkAfterBus: wMinTotal,
+            walkAfterBusDist: distMTotal,
+            transferReadyAt: arriveReadyForHelykozi,
+            waitAtTransfer: hk.depMins - arriveReadyForHelykozi,
+            helykoziDep: hk.depMins,
+            helykoziArrive: hk.arrMins,
+            helykoziLine: hk.line,
+            helykoziDepBuszall: depBuszallMins,
+            transferStop: tp.label,
+            transferStopShort: tp.short,
+            transferStopId: tp.id + "_walk",
+            transferLocalStop: stopName,
+            transferLat: origin.lat,
+            transferLon: origin.lon,
+            walkToSchool: walkToSchool,
+            walkToSchoolDist: walkToSchoolDist,
+            arriveSchool: hk.arrMins + walkToSchool,
+            totalDuration: (hk.arrMins + walkToSchool) - (boardAt - walkMin),
+          };
+          const prev = walkBestMap.get(walkKey);
+          if (!prev || distMTotal < prev.walkAfterBusDist) {
+            walkBestMap.set(walkKey, candidate);
+          }
+        }
+      }
+    }
+  }
+  for (const r of walkBestMap.values()) routes.push(r);
+
   // Rendezés: legkorábbi iskolába-érkezés szerint
   routes.sort((a, b) => a.arriveSchool - b.arriveSchool);
+
 
   // Dedup: ugyanaz a helyi indulás + helyközi járat
   const filtered = [];

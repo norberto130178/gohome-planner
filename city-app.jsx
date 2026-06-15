@@ -270,12 +270,21 @@ function CityRouteMap({ route, fromStop, toStop }) {
       const fromOff = route.bus1.stops.find(s => s.name === fromStop)?.offset ?? 0;
       drawStops(route.bus1, fromStop, toStop, route.bus1.color, route.boardAt - fromOff);
     } else {
+      const bus2DepStop = route.walkToStop || route.transferStopName;
       drawSegment(route.bus1, fromStop, route.transferStopName, route.bus1.color);
-      drawSegment(route.bus2, route.transferStopName, toStop, route.bus2.color);
+      drawSegment(route.bus2, bus2DepStop, toStop, route.bus2.color);
+      if (route.walkTransfer) {
+        const sA = route.bus1.stops.find(s => s.name === route.transferStopName);
+        const sB = route.bus2.stops.find(s => s.name === bus2DepStop);
+        if (sA?.lat && sB?.lat) {
+          L.polyline([[sA.lat, sA.lon], [sB.lat, sB.lon]], { color: '#555', weight: 3, opacity: 0.7, dashArray: '6,5' }).addTo(map);
+          allCoords.push([sA.lat, sA.lon], [sB.lat, sB.lon]);
+        }
+      }
       const fromOff1 = route.bus1.stops.find(s => s.name === fromStop)?.offset ?? 0;
       drawStops(route.bus1, fromStop, route.transferStopName, route.bus1.color, route.boardAt - fromOff1);
-      const fromOff2 = route.bus2.stops.find(s => s.name === route.transferStopName)?.offset ?? 0;
-      drawStops(route.bus2, route.transferStopName, toStop, route.bus2.color, route.boardAt2 - fromOff2);
+      const fromOff2 = route.bus2.stops.find(s => s.name === bus2DepStop)?.offset ?? 0;
+      drawStops(route.bus2, bus2DepStop, toStop, route.bus2.color, route.boardAt2 - fromOff2);
     }
 
     if (allCoords.length >= 2) map.fitBounds(allCoords, { padding: [16, 16] });
@@ -304,7 +313,7 @@ function CityRouteMap({ route, fromStop, toStop }) {
 
   return (
     <div ref={containerRef} style={{ position: 'relative', borderTop: '2px solid var(--line)' }}>
-      <div ref={mapRef} style={{ height: fsState ? '100%' : 280, width: '100%' }} />
+      <div ref={mapRef} style={{ height: fsState ? '100%' : 300, width: '100%' }} />
       <button onClick={toggleFullscreen} title={fsState ? 'Kilépés' : 'Teljes képernyő'} style={{
         position: 'absolute', top: fsState ? 28 : 10, right: fsState ? 28 : 10, zIndex: 1000,
         background: '#1a73e8',
@@ -322,10 +331,28 @@ function CityRouteCard({ route, index, isPrimary, fromStop, toStop, walkMin, isW
   const fmt = m => U.fmtTime(m);
   const [timetableInfo, setTimetableInfo] = React.useState(null);
   const [mapOpen, setMapOpen] = React.useState(false);
+  const [expanded, setExpanded] = React.useState(false);
   const totalMin = route.totalDuration;
   const totalStr = totalMin >= 60
     ? `${Math.floor(totalMin / 60)}ó ${totalMin % 60}p`
     : `${totalMin} perc`;
+
+  const stops1 = route.bus1.stops;
+  const boardIdx1 = stops1.findIndex(s => s.name === fromStop);
+  const alightName1 = route.type === 'direct' ? toStop : route.transferStopName;
+  const alightIdx1 = stops1.findIndex(s => s.name === alightName1);
+  const fromBoard1 = route.boardAt - (boardIdx1 >= 0 ? stops1[boardIdx1].offset : 0);
+  const visibleStops1 = boardIdx1 >= 0 && alightIdx1 >= 0 ? stops1.slice(boardIdx1, alightIdx1 + 1) : [];
+
+  let visibleStops2 = [], fromBoard2 = 0;
+  if (route.type === 'transfer' && route.bus2) {
+    const stops2 = route.bus2.stops;
+    const boardName2 = route.walkToStop || route.transferStopName;
+    const boardIdx2 = stops2.findIndex(s => s.name === boardName2);
+    const alightIdx2 = stops2.findIndex(s => s.name === toStop);
+    fromBoard2 = route.boardAt2 - (boardIdx2 >= 0 ? stops2[boardIdx2].offset : 0);
+    visibleStops2 = boardIdx2 >= 0 && alightIdx2 >= 0 ? stops2.slice(boardIdx2, alightIdx2 + 1) : [];
+  }
 
   function openTimetable(bus, boardAtMins, boardStopName) {
     const boardOff = bus.stops.find(s => s.name === boardStopName)?.offset ?? 0;
@@ -422,11 +449,23 @@ function CityRouteCard({ route, index, isPrimary, fromStop, toStop, walkMin, isW
             </div>
             <div className="route-step">
               <div className="step-time">{fmt(route.arriveAtTransfer)}</div>
-              <div className="step-icon">🔄</div>
+              <div className="step-icon">{route.walkTransfer ? "🚶" : "🔄"}</div>
               <div className="step-body">
-                <div className="step-title">Átszállás</div>
-                <div className="step-sub">{route.transferStopName}</div>
-                <div className="wait-pill">⏱ {route.waitAtTransfer} perc várakozás</div>
+                {route.walkTransfer ? (
+                  <>
+                    <div className="step-title">{route.transferStopName} → {route.walkToStop}</div>
+                    <div className="step-sub">{route.walkTransfer.walkMin} perc gyalog · {route.walkTransfer.distM} m</div>
+                    {route.waitAtTransfer - route.walkTransfer.walkMin > 0 && (
+                      <div className="wait-pill">⏱ {route.waitAtTransfer - route.walkTransfer.walkMin} perc várakozás</div>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <div className="step-title">Átszállás</div>
+                    <div className="step-sub">{route.transferStopName}</div>
+                    <div className="wait-pill">⏱ {route.waitAtTransfer} perc várakozás</div>
+                  </>
+                )}
               </div>
             </div>
             <div className="step-connector">
@@ -434,7 +473,7 @@ function CityRouteCard({ route, index, isPrimary, fromStop, toStop, walkMin, isW
             </div>
             <div className="route-step">
               <div className="step-time">{fmt(route.boardAt2)}</div>
-              <BusIcon bus={route.bus2} boardAt={route.boardAt2} boardStop={route.transferStopName} />
+              <BusIcon bus={route.bus2} boardAt={route.boardAt2} boardStop={route.walkToStop || route.transferStopName} />
               <div className="step-body">
                 <div className="step-title">
                   Szállj fel ·{" "}
@@ -442,7 +481,7 @@ function CityRouteCard({ route, index, isPrimary, fromStop, toStop, walkMin, isW
                     {route.bus2.label}
                   </span>
                 </div>
-                <div className="step-sub">{route.transferStopName}</div>
+                <div className="step-sub">{route.walkToStop || route.transferStopName}</div>
               </div>
             </div>
             <div className="step-connector">
@@ -460,7 +499,49 @@ function CityRouteCard({ route, index, isPrimary, fromStop, toStop, walkMin, isW
           </>
         )}
       </div>
+      <button
+        className="route-expand-btn"
+        onClick={() => setExpanded(!expanded)}
+      >
+        {expanded ? "Kevesebb" : "További megállók"} ▾
+      </button>
+
       {mapOpen && <CityRouteMap route={route} fromStop={fromStop} toStop={toStop} />}
+
+      {expanded && (
+        <div className="route-details">
+          <div className="details-title">{route.bus1.label} megállói:</div>
+          <div className="details-stops">
+            {visibleStops1.map((s, i) => {
+              const absTime = fromBoard1 + s.offset;
+              return (
+                <div key={i} className={`detail-stop${i === 0 ? " home" : ""}${i === visibleStops1.length - 1 ? " transfer" : ""}`}>
+                  <span className="detail-stop-time">{fmt(absTime)}</span>
+                  <span className="detail-stop-dot" style={{ background: route.bus1.color }} />
+                  <span className="detail-stop-name">{s.name}</span>
+                </div>
+              );
+            })}
+          </div>
+          {visibleStops2.length > 0 && (
+            <>
+              <div className="details-title" style={{ marginTop: 8 }}>{route.bus2.label} megállói:</div>
+              <div className="details-stops">
+                {visibleStops2.map((s, i) => {
+                  const absTime = fromBoard2 + s.offset;
+                  return (
+                    <div key={i} className={`detail-stop${i === 0 ? " home" : ""}${i === visibleStops2.length - 1 ? " transfer" : ""}`}>
+                      <span className="detail-stop-time">{fmt(absTime)}</span>
+                      <span className="detail-stop-dot" style={{ background: route.bus2.color }} />
+                      <span className="detail-stop-name">{s.name}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -513,7 +594,6 @@ function CityApp() {
       fromStop,
       toStop,
       walkMin,
-      minTransfer: 2,
       maxResults: 6,
       schoolHoliday: overrides.schoolHoliday ?? schoolHoliday,
     });

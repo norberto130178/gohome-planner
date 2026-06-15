@@ -98,13 +98,23 @@ function RouteCard({ route, index, isPrimary, t, style, isWeekend, dayType, nowM
         {/* Step 3: Átszállás */}
         <div className="route-step step-transfer">
           <div className="step-time">{fmt(route.helykoziArrive)}</div>
-          <div className="step-icon">🔄</div>
+          <div className="step-icon">{route.walkAtTransfer ? "🚶" : "🔄"}</div>
           <div className="step-body">
-            <div className="step-title">{t.transfer}</div>
-            <div className="step-sub">{route.transferStop}</div>
-            <div className="wait-pill">
-              ⏱ {route.waitAtTransfer} {t.min} {t.waitTime}
-            </div>
+            {route.walkAtTransfer ? (
+              <>
+                <div className="step-title">{route.transferStop} → {route.transferStop}</div>
+                <div className="step-sub">{route.walkAtTransfer.walkMin} {t.min} gyalog · {route.walkAtTransfer.distM} m</div>
+                {route.waitAtTransfer - route.walkAtTransfer.walkMin > 0 && (
+                  <div className="wait-pill">⏱ {route.waitAtTransfer - route.walkAtTransfer.walkMin} {t.min} {t.waitTime}</div>
+                )}
+              </>
+            ) : (
+              <>
+                <div className="step-title">{t.transfer}</div>
+                <div className="step-sub">{route.transferStop}</div>
+                <div className="wait-pill">⏱ {route.waitAtTransfer} {t.min} {t.waitTime}</div>
+              </>
+            )}
           </div>
         </div>
 
@@ -236,6 +246,7 @@ function HomeRouteMap({ route }) {
       }
     });
 
+    // 1b. Gyalogos átszállás: helyközi érkezési pont → helyi busz peronra
     // 2. Helyi busz szakasz: transferStop → homeStop
     const localBus = route.localBus;
     const cityShapes = (window.CITY_SHAPES || {})[localBus.id] || [];
@@ -245,6 +256,13 @@ function HomeRouteMap({ route }) {
     const boardStop = localBus.stops[boardStopIdx];
     const homeStop  = localBus.stops[homeStopIdx];
     const localDep  = boardStop ? route.localBoardAt - boardStop.offset : null;
+
+    if (route.walkAtTransfer && volanLat && boardStop?.lat) {
+      L.polyline([[volanLat, volanLon], [boardStop.lat, boardStop.lon]], {
+        color: '#555', weight: 3, opacity: 0.7, dashArray: '6,5'
+      }).addTo(map);
+      allCoords.push([volanLat, volanLon], [boardStop.lat, boardStop.lon]);
+    }
 
     if (boardStop?.lat && homeStop?.lat && cityShapes.length) {
       const b = window.BUS_UTILS.bestShape(cityShapes, boardStop.lat, boardStop.lon, homeStop.lat, homeStop.lon);
@@ -409,7 +427,20 @@ function CitySchoolRouteMap({ route, direction, schoolData }) {
     }
 
     drawSeg(route.bus1, bus1FromName, bus1ToName, route.boardAt);
-    if (route.type === "transfer") drawSeg(route.bus2, route.transferStopName, bus2ToName, route.boardAt2);
+    if (route.type === "transfer") {
+      const bus2StartName = route.walkToStop || route.transferStopName;
+      drawSeg(route.bus2, bus2StartName, bus2ToName, route.boardAt2);
+      if (route.walkTransfer) {
+        const sA = route.bus1.stops.find(s => s.name === route.transferStopName);
+        const sB = route.bus2.stops.find(s => s.name === bus2StartName);
+        if (sA?.lat && sB?.lat) {
+          L.polyline([[sA.lat, sA.lon], [sB.lat, sB.lon]], {
+            color: '#555', weight: 3, opacity: 0.7, dashArray: '6,5'
+          }).addTo(map);
+          allCoords.push([sA.lat, sA.lon], [sB.lat, sB.lon]);
+        }
+      }
+    }
 
     if (direction === "school" && schoolData?.lat && schoolData?.lon) {
       const dropoff = schoolData.nearbyStops?.find(s => s.name === nearestStopName) || schoolData.nearbyStops?.[0];
@@ -520,7 +551,8 @@ function CitySchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, n
   let bus2Visible = [], bus2FromBoard = 0;
   if (route.type === "transfer") {
     const bus2Stops = route.bus2?.stops || [];
-    const bus2FromIdx = bus2Stops.findIndex(s => s.name === route.transferStopName);
+    const bus2DepName = route.walkToStop || route.transferStopName;
+    const bus2FromIdx = bus2Stops.findIndex(s => s.name === bus2DepName);
     const bus2ToIdx   = bus2Stops.findIndex(s => s.name === cityToStop);
     bus2FromBoard = route.boardAt2 - (bus2Stops[bus2FromIdx]?.offset || 0);
     bus2Visible = bus2Stops.slice(
@@ -598,11 +630,16 @@ function CitySchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, n
 
             <div className="route-step step-transfer">
               <div className="step-time">{fmt(route.arriveAtTransfer)}</div>
-              <div className="step-icon">🔄</div>
+              <div className="step-icon">{route.walkTransfer ? "🚶" : "🔄"}</div>
               <div className="step-body">
-                <div className="step-title">{t.transfer}</div>
-                <div className="step-sub">{route.transferStopName}</div>
-                <div className="wait-pill">⏱ {route.waitAtTransfer} {t.min} {t.waitTime}</div>
+                <div className="step-title">{route.walkTransfer ? `${route.transferStopName} → ${route.walkToStop}` : (t.transfer + ": " + route.transferStopName)}</div>
+                {route.walkTransfer
+                  ? <div className="step-sub">{route.walkTransfer.walkMin} {t.min} gyalog · {route.walkTransfer.distM} m</div>
+                  : <div className="wait-pill">⏱ {route.waitAtTransfer} {t.min} {t.waitTime}</div>
+                }
+                {route.walkTransfer && route.waitAtTransfer - route.walkTransfer.walkMin > 0 && (
+                  <div className="wait-pill">⏱ {route.waitAtTransfer - route.walkTransfer.walkMin} {t.min} {t.waitTime}</div>
+                )}
               </div>
             </div>
 
@@ -752,6 +789,10 @@ function SchoolSettingsModal({ onClose }) {
   const markersRef = React.useRef({});
   const stopMarkerRef = React.useRef(null);
   const [fsState, setFsState] = React.useState(false);
+
+  const [preferredTransfers, setPreferredTransfers] = React.useState(() => {
+    try { const p = JSON.parse(localStorage.getItem('hazaut.preferredTransfers') || '[]'); return Array.isArray(p) ? p : []; } catch { return []; }
+  });
 
   const [homeStop, setHomeStop] = React.useState(() => {
     try { return JSON.parse(localStorage.getItem('homeStop') || 'null'); } catch { return null; }
@@ -964,6 +1005,8 @@ function SchoolSettingsModal({ onClose }) {
     localStorage.setItem("selectedSchool", selected);
     if (homeStop) localStorage.setItem('homeStop', JSON.stringify(homeStop));
     else localStorage.removeItem('homeStop');
+    if (preferredTransfers.length > 0) localStorage.setItem('hazaut.preferredTransfers', JSON.stringify(preferredTransfers));
+    else localStorage.removeItem('hazaut.preferredTransfers');
     onClose();
   }
 
@@ -1131,6 +1174,33 @@ function SchoolSettingsModal({ onClose }) {
           </>
         )}
 
+        <div style={{ marginBottom: 16 }}>
+          <div style={{ fontSize: 12, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--ink-soft)", marginBottom: 4 }}>
+            Preferált átszálló
+          </div>
+          <div style={{ fontSize: 12, color: "var(--ink-soft)", marginBottom: 10 }}>
+            Ha üresen hagyod, minden átszállópontot figyelembe vesz a tervező.
+          </div>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            {[
+              { id: "komakut", label: "Komakút tér" },
+              { id: "szinhaz", label: "Petőfi Színház" },
+              { id: "buszall", label: "Autóbusz-állomás" },
+            ].map(({ id, label }) => (
+              <button
+                key={id}
+                onClick={() => setPreferredTransfers(prev =>
+                  prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+                )}
+                className={`tweaks-pill ${preferredTransfers.includes(id) ? 'active' : ''}`}
+                aria-pressed={preferredTransfers.includes(id)}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+
         <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 8 }}>
           <button onClick={onClose} style={{
             padding: "9px 18px", borderRadius: 10, border: "2px solid var(--line)",
@@ -1224,7 +1294,7 @@ function SchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, nowMi
                 {route.localBus.label}
               </span>
             </div>
-            <div className="step-sub">{route.boardingStopName || "Csererdő"} → {route.transferStopShort}</div>
+            <div className="step-sub">{route.boardingStopName || "Csererdő"} → {hasWalk ? route.transferLocalStop : route.transferStopShort}</div>
           </div>
         </div>
 
@@ -1242,7 +1312,7 @@ function SchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, nowMi
               <div className="step-icon">🚶</div>
               <div className="step-body">
                 <div className="step-title">{route.walkAfterBus} {t.min} gyalog{route.walkAfterBusDist ? ` (${route.walkAfterBusDist} m)` : ""}</div>
-                <div className="step-sub">Petőfi Színház → Komakút tér</div>
+                <div className="step-sub">{route.transferLocalStop} → {route.transferStopShort}</div>
               </div>
             </div>
             <div className="step-connector">
@@ -1254,13 +1324,23 @@ function SchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, nowMi
 
         <div className="route-step step-transfer">
           <div className="step-time">{fmt(route.transferReadyAt)}</div>
-          <div className="step-icon">🔄</div>
+          <div className="step-icon">{route.walkAtTransfer ? "🚶" : "🔄"}</div>
           <div className="step-body">
-            <div className="step-title">{t.transfer}</div>
-            <div className="step-sub">{hasWalk ? "Komakút tér / Pannon Egyetem" : route.transferStop}</div>
-            <div className="wait-pill">
-              ⏱ {route.waitAtTransfer} {t.min} {t.waitTime}
-            </div>
+            {route.walkAtTransfer ? (
+              <>
+                <div className="step-title">{route.transferStop} → {route.transferStop}</div>
+                <div className="step-sub">{route.walkAtTransfer.walkMin} {t.min} gyalog · {route.walkAtTransfer.distM} m</div>
+                {route.waitAtTransfer - route.walkAtTransfer.walkMin > 0 && (
+                  <div className="wait-pill">⏱ {route.waitAtTransfer - route.walkAtTransfer.walkMin} {t.min} {t.waitTime}</div>
+                )}
+              </>
+            ) : (
+              <>
+                <div className="step-title">{t.transfer}</div>
+                <div className="step-sub">{route.transferStop}</div>
+                <div className="wait-pill">⏱ {route.waitAtTransfer} {t.min} {t.waitTime}</div>
+              </>
+            )}
           </div>
         </div>
 
@@ -1277,7 +1357,7 @@ function SchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, nowMi
               {route.helykoziLine && <span style={{background:'#2B1E3F',color:'#FFF7EC',padding:'2px 8px',borderRadius:8,fontSize:12,marginLeft:6}}>#{route.helykoziLine}</span>}
               {route.helykoziDepBuszall != null && <span style={{fontSize:12,marginLeft:6,opacity:0.7}}>({fmt(route.helykoziDepBuszall)})</span>}
             </div>
-            <div className="step-sub">{(hasWalk ? "Komakút tér" : route.transferStopShort)} → Nemesvámos</div>
+            <div className="step-sub">{route.transferStopShort} → Nemesvámos</div>
           </div>
         </div>
 
@@ -1406,6 +1486,14 @@ function SchoolRouteMap({ route, schoolData }) {
           L.marker([stop.lat, stop.lon], { icon: L.divIcon({ className: '', html: svg, iconSize: [0, 0], iconAnchor: [0, 0] }), interactive: false, zIndexOffset: 100 }).addTo(map);
         }
       });
+    }
+
+    // 1b. Gyalogos átszállás: helyi busz megálló → helyközi felszállóhely
+    if ((route.walkAfterBus > 0 || route.walkAtTransfer) && transferStop?.lat && volanLat) {
+      L.polyline([[transferStop.lat, transferStop.lon], [volanLat, volanLon]], {
+        color: '#555', weight: 3, opacity: 0.7, dashArray: '6,5'
+      }).addTo(map);
+      allCoords.push([transferStop.lat, transferStop.lon], [volanLat, volanLon]);
     }
 
     // 2. Helyközi: transferStop → Nemesvámos

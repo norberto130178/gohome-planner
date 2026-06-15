@@ -121,12 +121,6 @@ const _GTFS_TRANSFER_ID = {
   "Veszprém, Színház":          "szinhaz",
 };
 
-// GTFS megállók ahol a GPS eltérés adatforrás-mérési hiba, nem valódi séta
-// (a GTFS és city-data.js azonos fizikai platformot mér, de különböző koordinátákkal)
-const _GTFS_SAME_PLATFORM = new Set([
-  "Veszprém, Komakút tér",
-]);
-
 // GTFS stop rövid megjelenítési neve (kártyán)
 const _TRANSFER_SHORT = {
   "Veszprém, autóbusz-állomás": "Autóbusz-áll.",
@@ -160,6 +154,7 @@ window.planRoutes = function planRoutes({
 
   const icRoutes = (window.INTERCITY_BUSES_FULL || []).filter(r => r.dir === 'haza');
   const _cat = _dayTypeCat(dayType);
+  const walkGraph = window.WALK_GRAPH || {};
 
   const routes = [];
   const seen = new Set();
@@ -195,12 +190,10 @@ window.planRoutes = function planRoutes({
           if (targetOffset <= transferOffset) continue;
 
           let walkAtTransfer = null;
-          if (!_GTFS_SAME_PLATFORM.has(icVeszpStop.name)) {
-            const busStopAtTransfer = bus.stops.find(s => s.name === cityStopName);
-            if (busStopAtTransfer?.lat != null && icVeszpStop.lat != null) {
-              const distM = _haversineM(icVeszpStop.lat, icVeszpStop.lon, busStopAtTransfer.lat, busStopAtTransfer.lon);
-              if (distM >= 10) walkAtTransfer = { distM, walkMin: Math.ceil(distM / 80) };
-            }
+          const busStopAtTransfer = bus.stops.find(s => s.name === cityStopName);
+          if (busStopAtTransfer?.spId && icVeszpStop.citySpId && busStopAtTransfer.spId !== icVeszpStop.citySpId) {
+            const edge = (walkGraph[icVeszpStop.citySpId] || []).find(n => n.spId === busStopAtTransfer.spId);
+            if (edge) walkAtTransfer = { distM: edge.distM, walkMin: edge.walkMin };
           }
           const mustBoardBy = icArriveAtVeszp + (walkAtTransfer?.walkMin ?? 0);
 
@@ -289,6 +282,7 @@ window.planSchoolRoutes = function planSchoolRoutes({
 
   const icRoutes = (window.INTERCITY_BUSES_FULL || []).filter(r => r.dir === 'iskola');
   const _cat = _dayTypeCat(dayType);
+  const walkGraph = window.WALK_GRAPH || {};
 
   const routes = [];
   const seen = new Set();
@@ -319,12 +313,10 @@ window.planSchoolRoutes = function planSchoolRoutes({
         if (fromOffset === null || transOffset === null || transOffset <= fromOffset) continue;
 
         let walkAtTransfer = null;
-        if (!_GTFS_SAME_PLATFORM.has(icBoardStop.name)) {
-          const busStopAtTransfer = bus.stops.find(s => s.name === cityStopName);
-          if (busStopAtTransfer?.lat != null && icBoardStop.lat != null) {
-            const distM = _haversineM(busStopAtTransfer.lat, busStopAtTransfer.lon, icBoardStop.lat, icBoardStop.lon);
-            if (distM >= 10) walkAtTransfer = { distM, walkMin: Math.ceil(distM / 80) };
-          }
+        const busStopAtTransfer = bus.stops.find(s => s.name === cityStopName);
+        if (busStopAtTransfer?.spId && icBoardStop.citySpId && busStopAtTransfer.spId !== icBoardStop.citySpId) {
+          const edge = (walkGraph[icBoardStop.citySpId] || []).find(n => n.spId === busStopAtTransfer.spId);
+          if (edge) walkAtTransfer = { distM: edge.distM, walkMin: edge.walkMin };
         }
         const walkAtTransferMin = walkAtTransfer?.walkMin ?? 0;
 
@@ -385,10 +377,13 @@ window.planSchoolRoutes = function planSchoolRoutes({
   }
 
   // ── WALK-TRANSFER (WALK_GRAPH) ─────────────────────────────
-  const walkGraph = window.WALK_GRAPH || {};
   const walkBestMap = new Map();
 
-  for (const [walkFromStop, neighbors] of Object.entries(walkGraph)) {
+  const _walkNodes = window.WALK_GRAPH_NODES || {};
+  for (const [walkFromSpId, neighbors] of Object.entries(walkGraph)) {
+    const walkFromStop = _walkNodes[walkFromSpId];
+    if (!walkFromStop) continue;
+
     for (const icRoute of icRoutes) {
       const lastStopIdx2 = icRoute.stops.length - 1;
       const buszallIdx2 = icRoute.stops.findIndex(s => s.name === "Veszprém, autóbusz-állomás");
@@ -400,8 +395,9 @@ window.planSchoolRoutes = function planSchoolRoutes({
         if (!cityStopName) continue;
         const transferId = _GTFS_TRANSFER_ID[icBoardStop.name];
         if (allowedTransfers && allowedTransfers.length > 0 && transferId && !allowedTransfers.includes(transferId)) continue;
+        if (!icBoardStop.citySpId) continue;
 
-        const walkMatch = neighbors.find(n => n.stop === cityStopName && n.distM >= 100);
+        const walkMatch = neighbors.find(n => n.spId === icBoardStop.citySpId && n.distM >= 100);
         if (!walkMatch) continue;
 
         const wMin = walkMatch.walkMin;

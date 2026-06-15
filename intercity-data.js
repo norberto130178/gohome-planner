@@ -15,43 +15,50 @@ window.INTERCITY_BUSES_FULL = [
         "name": "Veszprém, autóbusz-állomás",
         "lat": 47.09559,
         "lon": 17.91388,
-        "spId": "VOLAN_hkir_558455_9"
+        "spId": "VOLAN_hkir_558455_9",
+        "citySpId": "VBUSZ_SP1683"
       },
       {
         "name": "Veszprém, Komakút tér",
         "lat": 47.089692,
         "lon": 17.907227,
-        "spId": "VOLAN_hkir_558516_1"
+        "spId": "VOLAN_hkir_558516_1",
+        "citySpId": "VBUSZ_SP1621"
       },
       {
         "name": "Veszprém, József Attila utca",
         "lat": 47.085252,
         "lon": 17.899099,
-        "spId": "VOLAN_hkir_558503_1"
+        "spId": "VOLAN_hkir_558503_1",
+        "citySpId": "VBUSZ_SP1620"
       },
       {
         "name": "Nemesvámos, Haribo",
         "lat": 47.06477,
         "lon": 17.873877,
-        "spId": "VOLAN_hkir_557863_1"
+        "spId": "VOLAN_hkir_557863_1",
+        "citySpId": null
       },
       {
         "name": "Nemesvámos, Köfém",
         "lat": 47.062377,
         "lon": 17.871959,
-        "spId": "VOLAN_hkir_557864_1"
+        "spId": "VOLAN_hkir_557864_1",
+        "citySpId": null
       },
       {
         "name": "Nemesvámos, Dózsa György utca",
         "lat": 47.059056,
         "lon": 17.873308,
-        "spId": "VOLAN_hkir_557860_1"
+        "spId": "VOLAN_hkir_557860_1",
+        "citySpId": null
       },
       {
         "name": "Nemesvámos, autóbusz-váróterem",
         "lat": 47.056432,
         "lon": 17.869564,
-        "spId": "VOLAN_hkir_557858_3"
+        "spId": "VOLAN_hkir_557858_3",
+        "citySpId": null
       }
     ],
     "trips": [
@@ -84,67 +91,78 @@ window.INTERCITY_BUSES_FULL = [
         "name": "Veszprém, vasútállomás",
         "lat": 47.118245,
         "lon": 17.911105,
-        "spId": "VOLAN_hkir_558566_1"
+        "spId": "VOLAN_hkir_558566_1",
+        "citySpId": "VBUSZ_SP1856"
       },
       {
         "name": "Veszprém, Jutasi úti lakótelep",
         "lat": 47.1074,
         "lon": 17.9113,
-        "spId": "VOLAN_hkir_558506_2"
+        "spId": "VOLAN_hkir_558506_2",
+        "citySpId": "VBUSZ_SP1644"
       },
       {
         "name": "Veszprém, autóbusz-állomás",
         "lat": 47.095231,
         "lon": 17.913519,
-        "spId": "VOLAN_hkir_558455_99"
+        "spId": "VOLAN_hkir_558455_99",
+        "citySpId": "VBUSZ_SP1694"
       },
       {
         "name": "Veszprém, autóbusz-állomás",
         "lat": 47.09559,
         "lon": 17.91388,
-        "spId": "VOLAN_hkir_558455_9"
+        "spId": "VOLAN_hkir_558455_9",
+        "citySpId": "VBUSZ_SP1683"
       },
       {
         "name": "Veszprém, Komakút tér",
         "lat": 47.089692,
         "lon": 17.907227,
-        "spId": "VOLAN_hkir_558516_1"
+        "spId": "VOLAN_hkir_558516_1",
+        "citySpId": "VBUSZ_SP1621"
       },
       {
         "name": "Veszprém, József Attila utca",
         "lat": 47.085252,
         "lon": 17.899099,
-        "spId": "VOLAN_hkir_558503_1"
+        "spId": "VOLAN_hkir_558503_1",
+        "citySpId": "VBUSZ_SP1620"
       },
       {
         "name": "Nemesvámos, Vilmapusztai elágazás",
         "lat": 47.070839,
         "lon": 17.880537,
-        "spId": "VOLAN_hkir_557866_1"
+        "spId": "VOLAN_hkir_557866_1",
+        "citySpId": null
       },
       {
         "name": "Nemesvámos, Haribo",
         "lat": 47.06477,
         "lon": 17.873877,
-        "spId": "VOLAN_hkir_557863_1"
+        "spId": "VOLAN_hkir_557863_1",
+        "citySpId": null
       },
       {
         "name": "Nemesvámos, Köfém",
         "lat": 47.062377,
         "lon": 17.871959,
-        "spId": "VOLAN_hkir_557864_1"
+        "spId": "VOLAN_hkir_557864_1",
+        "citySpId": null
       },
       {
         "name": "Nemesvámos, Dózsa György utca",
         "lat": 47.059056,
         "lon": 17.873308,
-        "spId": "VOLAN_hkir_557860_1"
+        "spId": "VOLAN_hkir_557860_1",
+        "citySpId": null
       },
       {
         "name": "Nemesvámos, autóbusz-váróterem",
         "lat": 47.056432,
         "lon": 17.869564,
-        "spId": "VOLAN_hkir_557858_3"
+        "spId": "VOLAN_hkir_557858_3",
+        "citySpId": null
       }
     ],
     "trips": [
@@ -362,73 +380,85 @@ window.INTERCITY_BUSES_FULL = [
         "name": "Nemesvámos, autóbusz-váróterem",
         "lat": 47.056285,
         "lon": 17.870066,
-        "spId": "VOLAN_hkir_557858_2"
+        "spId": "VOLAN_hkir_557858_2",
+        "citySpId": null
       },
       {
         "name": "Nemesvámos, Dózsa György utca",
         "lat": 47.059123,
         "lon": 17.873483,
-        "spId": "VOLAN_hkir_557860_2"
+        "spId": "VOLAN_hkir_557860_2",
+        "citySpId": null
       },
       {
         "name": "Nemesvámos, Köfém",
         "lat": 47.062506,
         "lon": 17.87195,
-        "spId": "VOLAN_hkir_557864_2"
+        "spId": "VOLAN_hkir_557864_2",
+        "citySpId": null
       },
       {
         "name": "Nemesvámos, Haribo",
         "lat": 47.06477,
         "lon": 17.873885,
-        "spId": "VOLAN_hkir_557863_2"
+        "spId": "VOLAN_hkir_557863_2",
+        "citySpId": null
       },
       {
         "name": "Nemesvámos, Vilmapusztai elágazás",
         "lat": 47.071187,
         "lon": 17.881172,
-        "spId": "VOLAN_hkir_557866_2"
+        "spId": "VOLAN_hkir_557866_2",
+        "citySpId": null
       },
       {
         "name": "Veszprém, József Attila utca",
         "lat": 47.085557,
         "lon": 17.899385,
-        "spId": "VOLAN_hkir_558503_2"
+        "spId": "VOLAN_hkir_558503_2",
+        "citySpId": "VBUSZ_SP1667"
       },
       {
         "name": "Veszprém, Komakút tér",
         "lat": 47.089356,
         "lon": 17.907503,
-        "spId": "VOLAN_hkir_558516_2"
+        "spId": "VOLAN_hkir_558516_2",
+        "citySpId": "VBUSZ_SP1668"
       },
       {
         "name": "Veszprém, Színház",
         "lat": 47.09187,
         "lon": 17.9061,
-        "spId": "VOLAN_hkir_558558_2"
+        "spId": "VOLAN_hkir_558558_2",
+        "citySpId": "VBUSZ_SP1670"
       },
       {
         "name": "Veszprém, autóbusz-állomás",
         "lat": 47.095231,
         "lon": 17.913519,
-        "spId": "VOLAN_hkir_558455_99"
+        "spId": "VOLAN_hkir_558455_99",
+        "citySpId": "VBUSZ_SP1694"
       },
       {
         "name": "Veszprém, autóbusz-állomás",
         "lat": 47.09545,
         "lon": 17.9132,
-        "spId": "VOLAN_hkir_558455_16"
+        "spId": "VOLAN_hkir_558455_16",
+        "citySpId": "VBUSZ_SP1694"
       },
       {
         "name": "Veszprém, Jutasi úti lakótelep",
         "lat": 47.107,
         "lon": 17.9116,
-        "spId": "VOLAN_hkir_558506_1"
+        "spId": "VOLAN_hkir_558506_1",
+        "citySpId": "VBUSZ_SP1619"
       },
       {
         "name": "Veszprém, vasútállomás",
         "lat": 47.118012,
         "lon": 17.911086,
-        "spId": "VOLAN_hkir_558566_99"
+        "spId": "VOLAN_hkir_558566_99",
+        "citySpId": "VBUSZ_SP1856"
       }
     ],
     "trips": [
@@ -712,49 +742,57 @@ window.INTERCITY_BUSES_FULL = [
         "name": "Veszprém, autóbusz-állomás",
         "lat": 47.09564,
         "lon": 17.91386,
-        "spId": "VOLAN_hkir_558455_10"
+        "spId": "VOLAN_hkir_558455_10",
+        "citySpId": "VBUSZ_SP1683"
       },
       {
         "name": "Veszprém, Komakút tér",
         "lat": 47.089692,
         "lon": 17.907227,
-        "spId": "VOLAN_hkir_558516_1"
+        "spId": "VOLAN_hkir_558516_1",
+        "citySpId": "VBUSZ_SP1621"
       },
       {
         "name": "Veszprém, József Attila utca",
         "lat": 47.085252,
         "lon": 17.899099,
-        "spId": "VOLAN_hkir_558503_1"
+        "spId": "VOLAN_hkir_558503_1",
+        "citySpId": "VBUSZ_SP1620"
       },
       {
         "name": "Nemesvámos, Vilmapusztai elágazás",
         "lat": 47.070839,
         "lon": 17.880537,
-        "spId": "VOLAN_hkir_557866_1"
+        "spId": "VOLAN_hkir_557866_1",
+        "citySpId": null
       },
       {
         "name": "Nemesvámos, Haribo",
         "lat": 47.06477,
         "lon": 17.873877,
-        "spId": "VOLAN_hkir_557863_1"
+        "spId": "VOLAN_hkir_557863_1",
+        "citySpId": null
       },
       {
         "name": "Nemesvámos, Köfém",
         "lat": 47.062377,
         "lon": 17.871959,
-        "spId": "VOLAN_hkir_557864_1"
+        "spId": "VOLAN_hkir_557864_1",
+        "citySpId": null
       },
       {
         "name": "Nemesvámos, Dózsa György utca",
         "lat": 47.059056,
         "lon": 17.873308,
-        "spId": "VOLAN_hkir_557860_1"
+        "spId": "VOLAN_hkir_557860_1",
+        "citySpId": null
       },
       {
         "name": "Nemesvámos, autóbusz-váróterem",
         "lat": 47.05565,
         "lon": 17.870511,
-        "spId": "VOLAN_hkir_557858_1"
+        "spId": "VOLAN_hkir_557858_1",
+        "citySpId": null
       }
     ],
     "trips": [
@@ -1332,85 +1370,99 @@ window.INTERCITY_BUSES_FULL = [
         "name": "Nemesvámos, autóbusz-forduló",
         "lat": 47.051129,
         "lon": 17.876599,
-        "spId": "VOLAN_hkir_557862_2"
+        "spId": "VOLAN_hkir_557862_2",
+        "citySpId": null
       },
       {
         "name": "Nemesvámos, ABC",
         "lat": 47.053806,
         "lon": 17.874041,
-        "spId": "VOLAN_hkir_557856_2"
+        "spId": "VOLAN_hkir_557856_2",
+        "citySpId": null
       },
       {
         "name": "Nemesvámos, autóbusz-váróterem",
         "lat": 47.056285,
         "lon": 17.870066,
-        "spId": "VOLAN_hkir_557858_2"
+        "spId": "VOLAN_hkir_557858_2",
+        "citySpId": null
       },
       {
         "name": "Nemesvámos, Dózsa György utca",
         "lat": 47.059123,
         "lon": 17.873483,
-        "spId": "VOLAN_hkir_557860_2"
+        "spId": "VOLAN_hkir_557860_2",
+        "citySpId": null
       },
       {
         "name": "Nemesvámos, Köfém",
         "lat": 47.062506,
         "lon": 17.87195,
-        "spId": "VOLAN_hkir_557864_2"
+        "spId": "VOLAN_hkir_557864_2",
+        "citySpId": null
       },
       {
         "name": "Nemesvámos, Haribo",
         "lat": 47.06477,
         "lon": 17.873885,
-        "spId": "VOLAN_hkir_557863_2"
+        "spId": "VOLAN_hkir_557863_2",
+        "citySpId": null
       },
       {
         "name": "Nemesvámos, Vilmapusztai elágazás",
         "lat": 47.071187,
         "lon": 17.881172,
-        "spId": "VOLAN_hkir_557866_2"
+        "spId": "VOLAN_hkir_557866_2",
+        "citySpId": null
       },
       {
         "name": "Veszprém, József Attila utca",
         "lat": 47.085557,
         "lon": 17.899385,
-        "spId": "VOLAN_hkir_558503_2"
+        "spId": "VOLAN_hkir_558503_2",
+        "citySpId": "VBUSZ_SP1667"
       },
       {
         "name": "Veszprém, Komakút tér",
         "lat": 47.089356,
         "lon": 17.907503,
-        "spId": "VOLAN_hkir_558516_2"
+        "spId": "VOLAN_hkir_558516_2",
+        "citySpId": "VBUSZ_SP1668"
       },
       {
         "name": "Veszprém, Színház",
         "lat": 47.09187,
         "lon": 17.9061,
-        "spId": "VOLAN_hkir_558558_2"
+        "spId": "VOLAN_hkir_558558_2",
+        "citySpId": "VBUSZ_SP1670"
       },
       {
         "name": "Veszprém, autóbusz-állomás",
         "lat": 47.095231,
         "lon": 17.913519,
-        "spId": "VOLAN_hkir_558455_99"
+        "spId": "VOLAN_hkir_558455_99",
+        "citySpId": "VBUSZ_SP1694"
       },
       {
         "name": "Veszprém, autóbusz-állomás",
         "lat": 47.09545,
         "lon": 17.9132,
-        "spId": "VOLAN_hkir_558455_16"
+        "spId": "VOLAN_hkir_558455_16",
+        "citySpId": "VBUSZ_SP1694"
       },
       {
         "name": "Veszprém, Jutasi úti lakótelep",
         "lat": 47.107,
         "lon": 17.9116,
-        "spId": "VOLAN_hkir_558506_1"
+        "spId": "VOLAN_hkir_558506_1",
+        "citySpId": "VBUSZ_SP1619"
       },
       {
         "name": "Veszprém, vasútállomás",
         "lat": 47.118012,
         "lon": 17.911086,
-        "spId": "VOLAN_hkir_558566_99"
+        "spId": "VOLAN_hkir_558566_99",
+        "citySpId": "VBUSZ_SP1856"
       }
     ],
     "trips": [
@@ -2210,49 +2262,57 @@ window.INTERCITY_BUSES_FULL = [
         "name": "Veszprém, autóbusz-állomás",
         "lat": 47.09564,
         "lon": 17.91386,
-        "spId": "VOLAN_hkir_558455_10"
+        "spId": "VOLAN_hkir_558455_10",
+        "citySpId": "VBUSZ_SP1683"
       },
       {
         "name": "Veszprém, Komakút tér",
         "lat": 47.089692,
         "lon": 17.907227,
-        "spId": "VOLAN_hkir_558516_1"
+        "spId": "VOLAN_hkir_558516_1",
+        "citySpId": "VBUSZ_SP1621"
       },
       {
         "name": "Veszprém, József Attila utca",
         "lat": 47.085252,
         "lon": 17.899099,
-        "spId": "VOLAN_hkir_558503_1"
+        "spId": "VOLAN_hkir_558503_1",
+        "citySpId": "VBUSZ_SP1620"
       },
       {
         "name": "Nemesvámos, Vilmapusztai elágazás",
         "lat": 47.070839,
         "lon": 17.880537,
-        "spId": "VOLAN_hkir_557866_1"
+        "spId": "VOLAN_hkir_557866_1",
+        "citySpId": null
       },
       {
         "name": "Nemesvámos, Haribo",
         "lat": 47.06477,
         "lon": 17.873877,
-        "spId": "VOLAN_hkir_557863_1"
+        "spId": "VOLAN_hkir_557863_1",
+        "citySpId": null
       },
       {
         "name": "Nemesvámos, Köfém",
         "lat": 47.062377,
         "lon": 17.871959,
-        "spId": "VOLAN_hkir_557864_1"
+        "spId": "VOLAN_hkir_557864_1",
+        "citySpId": null
       },
       {
         "name": "Nemesvámos, Dózsa György utca",
         "lat": 47.059056,
         "lon": 17.873308,
-        "spId": "VOLAN_hkir_557860_1"
+        "spId": "VOLAN_hkir_557860_1",
+        "citySpId": null
       },
       {
         "name": "Nemesvámos, autóbusz-váróterem",
         "lat": 47.05565,
         "lon": 17.870511,
-        "spId": "VOLAN_hkir_557858_1"
+        "spId": "VOLAN_hkir_557858_1",
+        "citySpId": null
       }
     ],
     "trips": [
@@ -2286,67 +2346,78 @@ window.INTERCITY_BUSES_FULL = [
         "name": "Nemesvámos, autóbusz-forduló",
         "lat": 47.051129,
         "lon": 17.876599,
-        "spId": "VOLAN_hkir_557862_2"
+        "spId": "VOLAN_hkir_557862_2",
+        "citySpId": null
       },
       {
         "name": "Nemesvámos, ABC",
         "lat": 47.053806,
         "lon": 17.874041,
-        "spId": "VOLAN_hkir_557856_2"
+        "spId": "VOLAN_hkir_557856_2",
+        "citySpId": null
       },
       {
         "name": "Nemesvámos, autóbusz-váróterem",
         "lat": 47.056285,
         "lon": 17.870066,
-        "spId": "VOLAN_hkir_557858_2"
+        "spId": "VOLAN_hkir_557858_2",
+        "citySpId": null
       },
       {
         "name": "Nemesvámos, Dózsa György utca",
         "lat": 47.059123,
         "lon": 17.873483,
-        "spId": "VOLAN_hkir_557860_2"
+        "spId": "VOLAN_hkir_557860_2",
+        "citySpId": null
       },
       {
         "name": "Nemesvámos, Köfém",
         "lat": 47.062506,
         "lon": 17.87195,
-        "spId": "VOLAN_hkir_557864_2"
+        "spId": "VOLAN_hkir_557864_2",
+        "citySpId": null
       },
       {
         "name": "Nemesvámos, Haribo",
         "lat": 47.06477,
         "lon": 17.873885,
-        "spId": "VOLAN_hkir_557863_2"
+        "spId": "VOLAN_hkir_557863_2",
+        "citySpId": null
       },
       {
         "name": "Nemesvámos, Vilmapusztai elágazás",
         "lat": 47.071187,
         "lon": 17.881172,
-        "spId": "VOLAN_hkir_557866_2"
+        "spId": "VOLAN_hkir_557866_2",
+        "citySpId": null
       },
       {
         "name": "Veszprém, József Attila utca",
         "lat": 47.085557,
         "lon": 17.899385,
-        "spId": "VOLAN_hkir_558503_2"
+        "spId": "VOLAN_hkir_558503_2",
+        "citySpId": "VBUSZ_SP1667"
       },
       {
         "name": "Veszprém, Komakút tér",
         "lat": 47.089356,
         "lon": 17.907503,
-        "spId": "VOLAN_hkir_558516_2"
+        "spId": "VOLAN_hkir_558516_2",
+        "citySpId": "VBUSZ_SP1668"
       },
       {
         "name": "Veszprém, Színház",
         "lat": 47.09187,
         "lon": 17.9061,
-        "spId": "VOLAN_hkir_558558_2"
+        "spId": "VOLAN_hkir_558558_2",
+        "citySpId": "VBUSZ_SP1670"
       },
       {
         "name": "Veszprém, autóbusz-állomás",
         "lat": 47.095231,
         "lon": 17.913519,
-        "spId": "VOLAN_hkir_558455_99"
+        "spId": "VOLAN_hkir_558455_99",
+        "citySpId": "VBUSZ_SP1694"
       }
     ],
     "trips": [
@@ -2420,67 +2491,78 @@ window.INTERCITY_BUSES_FULL = [
         "name": "Veszprém, vasútállomás",
         "lat": 47.118245,
         "lon": 17.911105,
-        "spId": "VOLAN_hkir_558566_1"
+        "spId": "VOLAN_hkir_558566_1",
+        "citySpId": "VBUSZ_SP1856"
       },
       {
         "name": "Veszprém, Jutasi úti lakótelep",
         "lat": 47.1074,
         "lon": 17.9113,
-        "spId": "VOLAN_hkir_558506_2"
+        "spId": "VOLAN_hkir_558506_2",
+        "citySpId": "VBUSZ_SP1644"
       },
       {
         "name": "Veszprém, autóbusz-állomás",
         "lat": 47.095231,
         "lon": 17.913519,
-        "spId": "VOLAN_hkir_558455_99"
+        "spId": "VOLAN_hkir_558455_99",
+        "citySpId": "VBUSZ_SP1694"
       },
       {
         "name": "Veszprém, autóbusz-állomás",
         "lat": 47.09564,
         "lon": 17.91386,
-        "spId": "VOLAN_hkir_558455_10"
+        "spId": "VOLAN_hkir_558455_10",
+        "citySpId": "VBUSZ_SP1683"
       },
       {
         "name": "Veszprém, Komakút tér",
         "lat": 47.089692,
         "lon": 17.907227,
-        "spId": "VOLAN_hkir_558516_1"
+        "spId": "VOLAN_hkir_558516_1",
+        "citySpId": "VBUSZ_SP1621"
       },
       {
         "name": "Veszprém, József Attila utca",
         "lat": 47.085252,
         "lon": 17.899099,
-        "spId": "VOLAN_hkir_558503_1"
+        "spId": "VOLAN_hkir_558503_1",
+        "citySpId": "VBUSZ_SP1620"
       },
       {
         "name": "Nemesvámos, Vilmapusztai elágazás",
         "lat": 47.070839,
         "lon": 17.880537,
-        "spId": "VOLAN_hkir_557866_1"
+        "spId": "VOLAN_hkir_557866_1",
+        "citySpId": null
       },
       {
         "name": "Nemesvámos, Haribo",
         "lat": 47.06477,
         "lon": 17.873877,
-        "spId": "VOLAN_hkir_557863_1"
+        "spId": "VOLAN_hkir_557863_1",
+        "citySpId": null
       },
       {
         "name": "Nemesvámos, Köfém",
         "lat": 47.062377,
         "lon": 17.871959,
-        "spId": "VOLAN_hkir_557864_1"
+        "spId": "VOLAN_hkir_557864_1",
+        "citySpId": null
       },
       {
         "name": "Nemesvámos, Dózsa György utca",
         "lat": 47.059056,
         "lon": 17.873308,
-        "spId": "VOLAN_hkir_557860_1"
+        "spId": "VOLAN_hkir_557860_1",
+        "citySpId": null
       },
       {
         "name": "Nemesvámos, autóbusz-váróterem",
         "lat": 47.056432,
         "lon": 17.869564,
-        "spId": "VOLAN_hkir_557858_3"
+        "spId": "VOLAN_hkir_557858_3",
+        "citySpId": null
       }
     ],
     "trips": [
@@ -2533,55 +2615,64 @@ window.INTERCITY_BUSES_FULL = [
         "name": "Nemesvámos, autóbusz-váróterem",
         "lat": 47.056285,
         "lon": 17.870066,
-        "spId": "VOLAN_hkir_557858_2"
+        "spId": "VOLAN_hkir_557858_2",
+        "citySpId": null
       },
       {
         "name": "Nemesvámos, Dózsa György utca",
         "lat": 47.059123,
         "lon": 17.873483,
-        "spId": "VOLAN_hkir_557860_2"
+        "spId": "VOLAN_hkir_557860_2",
+        "citySpId": null
       },
       {
         "name": "Nemesvámos, Köfém",
         "lat": 47.062506,
         "lon": 17.87195,
-        "spId": "VOLAN_hkir_557864_2"
+        "spId": "VOLAN_hkir_557864_2",
+        "citySpId": null
       },
       {
         "name": "Nemesvámos, Haribo",
         "lat": 47.06477,
         "lon": 17.873885,
-        "spId": "VOLAN_hkir_557863_2"
+        "spId": "VOLAN_hkir_557863_2",
+        "citySpId": null
       },
       {
         "name": "Nemesvámos, Vilmapusztai elágazás",
         "lat": 47.071187,
         "lon": 17.881172,
-        "spId": "VOLAN_hkir_557866_2"
+        "spId": "VOLAN_hkir_557866_2",
+        "citySpId": null
       },
       {
         "name": "Veszprém, József Attila utca",
         "lat": 47.085557,
         "lon": 17.899385,
-        "spId": "VOLAN_hkir_558503_2"
+        "spId": "VOLAN_hkir_558503_2",
+        "citySpId": "VBUSZ_SP1667"
       },
       {
         "name": "Veszprém, Komakút tér",
         "lat": 47.089356,
         "lon": 17.907503,
-        "spId": "VOLAN_hkir_558516_2"
+        "spId": "VOLAN_hkir_558516_2",
+        "citySpId": "VBUSZ_SP1668"
       },
       {
         "name": "Veszprém, Színház",
         "lat": 47.09187,
         "lon": 17.9061,
-        "spId": "VOLAN_hkir_558558_2"
+        "spId": "VOLAN_hkir_558558_2",
+        "citySpId": "VBUSZ_SP1670"
       },
       {
         "name": "Veszprém, autóbusz-állomás",
         "lat": 47.095231,
         "lon": 17.913519,
-        "spId": "VOLAN_hkir_558455_99"
+        "spId": "VOLAN_hkir_558455_99",
+        "citySpId": "VBUSZ_SP1694"
       }
     ],
     "trips": [
@@ -2615,67 +2706,78 @@ window.INTERCITY_BUSES_FULL = [
         "name": "Veszprém, vasútállomás",
         "lat": 47.118245,
         "lon": 17.911105,
-        "spId": "VOLAN_hkir_558566_1"
+        "spId": "VOLAN_hkir_558566_1",
+        "citySpId": "VBUSZ_SP1856"
       },
       {
         "name": "Veszprém, Jutasi úti lakótelep",
         "lat": 47.1074,
         "lon": 17.9113,
-        "spId": "VOLAN_hkir_558506_2"
+        "spId": "VOLAN_hkir_558506_2",
+        "citySpId": "VBUSZ_SP1644"
       },
       {
         "name": "Veszprém, autóbusz-állomás",
         "lat": 47.095231,
         "lon": 17.913519,
-        "spId": "VOLAN_hkir_558455_99"
+        "spId": "VOLAN_hkir_558455_99",
+        "citySpId": "VBUSZ_SP1694"
       },
       {
         "name": "Veszprém, autóbusz-állomás",
         "lat": 47.09559,
         "lon": 17.91388,
-        "spId": "VOLAN_hkir_558455_9"
+        "spId": "VOLAN_hkir_558455_9",
+        "citySpId": "VBUSZ_SP1683"
       },
       {
         "name": "Veszprém, Komakút tér",
         "lat": 47.089692,
         "lon": 17.907227,
-        "spId": "VOLAN_hkir_558516_1"
+        "spId": "VOLAN_hkir_558516_1",
+        "citySpId": "VBUSZ_SP1621"
       },
       {
         "name": "Veszprém, József Attila utca",
         "lat": 47.085252,
         "lon": 17.899099,
-        "spId": "VOLAN_hkir_558503_1"
+        "spId": "VOLAN_hkir_558503_1",
+        "citySpId": "VBUSZ_SP1620"
       },
       {
         "name": "Nemesvámos, Vilmapusztai elágazás",
         "lat": 47.070839,
         "lon": 17.880537,
-        "spId": "VOLAN_hkir_557866_1"
+        "spId": "VOLAN_hkir_557866_1",
+        "citySpId": null
       },
       {
         "name": "Nemesvámos, Haribo",
         "lat": 47.06477,
         "lon": 17.873877,
-        "spId": "VOLAN_hkir_557863_1"
+        "spId": "VOLAN_hkir_557863_1",
+        "citySpId": null
       },
       {
         "name": "Nemesvámos, Köfém",
         "lat": 47.062377,
         "lon": 17.871959,
-        "spId": "VOLAN_hkir_557864_1"
+        "spId": "VOLAN_hkir_557864_1",
+        "citySpId": null
       },
       {
         "name": "Nemesvámos, Dózsa György utca",
         "lat": 47.059056,
         "lon": 17.873308,
-        "spId": "VOLAN_hkir_557860_1"
+        "spId": "VOLAN_hkir_557860_1",
+        "citySpId": null
       },
       {
         "name": "Nemesvámos, autóbusz-váróterem",
         "lat": 47.05565,
         "lon": 17.870511,
-        "spId": "VOLAN_hkir_557858_1"
+        "spId": "VOLAN_hkir_557858_1",
+        "citySpId": null
       }
     ],
     "trips": [
@@ -2765,79 +2867,92 @@ window.INTERCITY_BUSES_FULL = [
         "name": "Nemesvámos, autóbusz-váróterem",
         "lat": 47.05565,
         "lon": 17.870511,
-        "spId": "VOLAN_hkir_557858_1"
+        "spId": "VOLAN_hkir_557858_1",
+        "citySpId": null
       },
       {
         "name": "Nemesvámos, ABC",
         "lat": 47.054271,
         "lon": 17.873443,
-        "spId": "VOLAN_hkir_557856_1"
+        "spId": "VOLAN_hkir_557856_1",
+        "citySpId": null
       },
       {
         "name": "Nemesvámos, autóbusz-forduló",
         "lat": 47.051129,
         "lon": 17.876599,
-        "spId": "VOLAN_hkir_557862_2"
+        "spId": "VOLAN_hkir_557862_2",
+        "citySpId": null
       },
       {
         "name": "Nemesvámos, ABC",
         "lat": 47.053806,
         "lon": 17.874041,
-        "spId": "VOLAN_hkir_557856_2"
+        "spId": "VOLAN_hkir_557856_2",
+        "citySpId": null
       },
       {
         "name": "Nemesvámos, autóbusz-váróterem",
         "lat": 47.056285,
         "lon": 17.870066,
-        "spId": "VOLAN_hkir_557858_2"
+        "spId": "VOLAN_hkir_557858_2",
+        "citySpId": null
       },
       {
         "name": "Nemesvámos, Dózsa György utca",
         "lat": 47.059123,
         "lon": 17.873483,
-        "spId": "VOLAN_hkir_557860_2"
+        "spId": "VOLAN_hkir_557860_2",
+        "citySpId": null
       },
       {
         "name": "Nemesvámos, Köfém",
         "lat": 47.062506,
         "lon": 17.87195,
-        "spId": "VOLAN_hkir_557864_2"
+        "spId": "VOLAN_hkir_557864_2",
+        "citySpId": null
       },
       {
         "name": "Nemesvámos, Haribo",
         "lat": 47.06477,
         "lon": 17.873885,
-        "spId": "VOLAN_hkir_557863_2"
+        "spId": "VOLAN_hkir_557863_2",
+        "citySpId": null
       },
       {
         "name": "Nemesvámos, Vilmapusztai elágazás",
         "lat": 47.071187,
         "lon": 17.881172,
-        "spId": "VOLAN_hkir_557866_2"
+        "spId": "VOLAN_hkir_557866_2",
+        "citySpId": null
       },
       {
         "name": "Veszprém, József Attila utca",
         "lat": 47.085557,
         "lon": 17.899385,
-        "spId": "VOLAN_hkir_558503_2"
+        "spId": "VOLAN_hkir_558503_2",
+        "citySpId": "VBUSZ_SP1667"
       },
       {
         "name": "Veszprém, Komakút tér",
         "lat": 47.089356,
         "lon": 17.907503,
-        "spId": "VOLAN_hkir_558516_2"
+        "spId": "VOLAN_hkir_558516_2",
+        "citySpId": "VBUSZ_SP1668"
       },
       {
         "name": "Veszprém, Színház",
         "lat": 47.09187,
         "lon": 17.9061,
-        "spId": "VOLAN_hkir_558558_2"
+        "spId": "VOLAN_hkir_558558_2",
+        "citySpId": "VBUSZ_SP1670"
       },
       {
         "name": "Veszprém, autóbusz-állomás",
         "lat": 47.095231,
         "lon": 17.913519,
-        "spId": "VOLAN_hkir_558455_99"
+        "spId": "VOLAN_hkir_558455_99",
+        "citySpId": "VBUSZ_SP1694"
       }
     ],
     "trips": [
@@ -2874,67 +2989,78 @@ window.INTERCITY_BUSES_FULL = [
         "name": "Veszprém, vasútállomás",
         "lat": 47.118245,
         "lon": 17.911105,
-        "spId": "VOLAN_hkir_558566_1"
+        "spId": "VOLAN_hkir_558566_1",
+        "citySpId": "VBUSZ_SP1856"
       },
       {
         "name": "Veszprém, Jutasi úti lakótelep",
         "lat": 47.1074,
         "lon": 17.9113,
-        "spId": "VOLAN_hkir_558506_2"
+        "spId": "VOLAN_hkir_558506_2",
+        "citySpId": "VBUSZ_SP1644"
       },
       {
         "name": "Veszprém, autóbusz-állomás",
         "lat": 47.095231,
         "lon": 17.913519,
-        "spId": "VOLAN_hkir_558455_99"
+        "spId": "VOLAN_hkir_558455_99",
+        "citySpId": "VBUSZ_SP1694"
       },
       {
         "name": "Veszprém, autóbusz-állomás",
         "lat": 47.09559,
         "lon": 17.91388,
-        "spId": "VOLAN_hkir_558455_9"
+        "spId": "VOLAN_hkir_558455_9",
+        "citySpId": "VBUSZ_SP1683"
       },
       {
         "name": "Veszprém, Komakút tér",
         "lat": 47.089692,
         "lon": 17.907227,
-        "spId": "VOLAN_hkir_558516_1"
+        "spId": "VOLAN_hkir_558516_1",
+        "citySpId": "VBUSZ_SP1621"
       },
       {
         "name": "Veszprém, József Attila utca",
         "lat": 47.085252,
         "lon": 17.899099,
-        "spId": "VOLAN_hkir_558503_1"
+        "spId": "VOLAN_hkir_558503_1",
+        "citySpId": "VBUSZ_SP1620"
       },
       {
         "name": "Nemesvámos, Vilmapusztai elágazás",
         "lat": 47.070839,
         "lon": 17.880537,
-        "spId": "VOLAN_hkir_557866_1"
+        "spId": "VOLAN_hkir_557866_1",
+        "citySpId": null
       },
       {
         "name": "Nemesvámos, Haribo",
         "lat": 47.06477,
         "lon": 17.873877,
-        "spId": "VOLAN_hkir_557863_1"
+        "spId": "VOLAN_hkir_557863_1",
+        "citySpId": null
       },
       {
         "name": "Nemesvámos, Köfém",
         "lat": 47.062377,
         "lon": 17.871959,
-        "spId": "VOLAN_hkir_557864_1"
+        "spId": "VOLAN_hkir_557864_1",
+        "citySpId": null
       },
       {
         "name": "Nemesvámos, Dózsa György utca",
         "lat": 47.059056,
         "lon": 17.873308,
-        "spId": "VOLAN_hkir_557860_1"
+        "spId": "VOLAN_hkir_557860_1",
+        "citySpId": null
       },
       {
         "name": "Nemesvámos, autóbusz-váróterem",
         "lat": 47.056432,
         "lon": 17.869564,
-        "spId": "VOLAN_hkir_557858_3"
+        "spId": "VOLAN_hkir_557858_3",
+        "citySpId": null
       }
     ],
     "trips": [
@@ -3044,73 +3170,85 @@ window.INTERCITY_BUSES_FULL = [
         "name": "Nemesvámos, autóbusz-váróterem",
         "lat": 47.056285,
         "lon": 17.870066,
-        "spId": "VOLAN_hkir_557858_2"
+        "spId": "VOLAN_hkir_557858_2",
+        "citySpId": null
       },
       {
         "name": "Nemesvámos, Dózsa György utca",
         "lat": 47.059123,
         "lon": 17.873483,
-        "spId": "VOLAN_hkir_557860_2"
+        "spId": "VOLAN_hkir_557860_2",
+        "citySpId": null
       },
       {
         "name": "Nemesvámos, Köfém",
         "lat": 47.062506,
         "lon": 17.87195,
-        "spId": "VOLAN_hkir_557864_2"
+        "spId": "VOLAN_hkir_557864_2",
+        "citySpId": null
       },
       {
         "name": "Nemesvámos, Haribo",
         "lat": 47.06477,
         "lon": 17.873885,
-        "spId": "VOLAN_hkir_557863_2"
+        "spId": "VOLAN_hkir_557863_2",
+        "citySpId": null
       },
       {
         "name": "Nemesvámos, Vilmapusztai elágazás",
         "lat": 47.071187,
         "lon": 17.881172,
-        "spId": "VOLAN_hkir_557866_2"
+        "spId": "VOLAN_hkir_557866_2",
+        "citySpId": null
       },
       {
         "name": "Veszprém, József Attila utca",
         "lat": 47.085557,
         "lon": 17.899385,
-        "spId": "VOLAN_hkir_558503_2"
+        "spId": "VOLAN_hkir_558503_2",
+        "citySpId": "VBUSZ_SP1667"
       },
       {
         "name": "Veszprém, Komakút tér",
         "lat": 47.089356,
         "lon": 17.907503,
-        "spId": "VOLAN_hkir_558516_2"
+        "spId": "VOLAN_hkir_558516_2",
+        "citySpId": "VBUSZ_SP1668"
       },
       {
         "name": "Veszprém, Színház",
         "lat": 47.09187,
         "lon": 17.9061,
-        "spId": "VOLAN_hkir_558558_2"
+        "spId": "VOLAN_hkir_558558_2",
+        "citySpId": "VBUSZ_SP1670"
       },
       {
         "name": "Veszprém, autóbusz-állomás",
         "lat": 47.095231,
         "lon": 17.913519,
-        "spId": "VOLAN_hkir_558455_99"
+        "spId": "VOLAN_hkir_558455_99",
+        "citySpId": "VBUSZ_SP1694"
       },
       {
         "name": "Veszprém, autóbusz-állomás",
         "lat": 47.09545,
         "lon": 17.9132,
-        "spId": "VOLAN_hkir_558455_16"
+        "spId": "VOLAN_hkir_558455_16",
+        "citySpId": "VBUSZ_SP1694"
       },
       {
         "name": "Veszprém, Jutasi úti lakótelep",
         "lat": 47.107,
         "lon": 17.9116,
-        "spId": "VOLAN_hkir_558506_1"
+        "spId": "VOLAN_hkir_558506_1",
+        "citySpId": "VBUSZ_SP1619"
       },
       {
         "name": "Veszprém, vasútállomás",
         "lat": 47.118012,
         "lon": 17.911086,
-        "spId": "VOLAN_hkir_558566_99"
+        "spId": "VOLAN_hkir_558566_99",
+        "citySpId": "VBUSZ_SP1856"
       }
     ],
     "trips": [

@@ -166,8 +166,8 @@ window.planCityRoutes = function planCityRoutes({
     const forwardStops = bus1.stops.filter(s => s.offset > fromOff1);
 
     for (const ts of forwardStops) {
-      const neighbors = walkGraph[ts.name] || [];
-      for (const { stop: walkToStop, distM, walkMin: wMin } of neighbors) {
+      const neighbors = walkGraph[ts.spId] || [];
+      for (const { name: walkToStop, distM, walkMin: wMin } of neighbors) {
         if (distM < 100) continue; // ugyanaz a fizikai megálló, kihagyjuk
 
         for (const bus2 of buses) {

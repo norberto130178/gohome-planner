@@ -11,8 +11,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
 
-<script>window.APP_VERSION = "v3.10";</script>
-<link rel="stylesheet" href="styles.css?v=v3.10">
+<script>window.APP_VERSION = "v3.12";</script>
+<link rel="stylesheet" href="styles.css?v=v3.12">
 
 <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
@@ -45,9 +45,13 @@
 @media (max-width: 700px) {
   .city-results-grid { grid-template-columns: 1fr; }
   .v1 { padding: 14px; padding-bottom: 62px; }
-  .city-form-row { flex-direction: column; }
-  .city-swap-btn { width: 100%; padding: 10px; text-align: center; }
+  .city-form-row { flex-direction: column; gap: 6px; margin-bottom: 8px; }
+  .city-swap-btn { width: auto; padding: 5px 18px; align-self: center; font-size: 16px; }
+  .city-stop-label { font-size: 10px; margin-bottom: 3px; }
   .city-header-timetable { display: none !important; }
+  .city-hero-banner { padding: 10px 14px; margin-bottom: 10px; }
+  .city-form-mobile .v1-time-input { font-size: 12px; padding: 6px 9px; border-radius: 8px; }
+  .city-form-mobile .v1-btn { font-size: 12px; padding: 8px 12px; border-radius: 10px; justify-content: center; }
 }
 .city-empty {
   grid-column: 1 / -1; text-align: center; padding: 60px 20px;

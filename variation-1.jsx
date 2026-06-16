@@ -5,6 +5,47 @@
 
 function MobileSettingsPill({ state, setState }) {
   const [open, setOpen] = React.useState(false);
+  const [collapsed, setCollapsed] = React.useState(false);
+  const sheetRef = React.useRef(null);
+  const dragStartY = React.useRef(null);
+  const isDragging = React.useRef(false);
+  const lastScrollY = React.useRef(0);
+
+  React.useEffect(() => {
+    function onScroll() {
+      const y = window.scrollY;
+      const delta = y - lastScrollY.current;
+      lastScrollY.current = y;
+      if (delta > 8) setCollapsed(true);
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  function onTouchStart(e) {
+    if ((sheetRef.current?.scrollTop || 0) > 0) return;
+    dragStartY.current = e.touches[0].clientY;
+    isDragging.current = false;
+  }
+
+  function onTouchMove(e) {
+    if (dragStartY.current === null) return;
+    const dy = e.touches[0].clientY - dragStartY.current;
+    if (dy > 0 && sheetRef.current) {
+      isDragging.current = true;
+      sheetRef.current.style.transition = "none";
+      sheetRef.current.style.transform = `translateY(${dy}px)`;
+    }
+  }
+
+  function onTouchEnd(e) {
+    if (!isDragging.current || dragStartY.current === null) { dragStartY.current = null; return; }
+    const dy = e.changedTouches[0].clientY - dragStartY.current;
+    dragStartY.current = null;
+    isDragging.current = false;
+    if (sheetRef.current) { sheetRef.current.style.transition = ""; sheetRef.current.style.transform = ""; }
+    if (dy > 80) { setOpen(false); setCollapsed(false); }
+  }
 
   const isNow = state.mode === "now";
   const timePresets = state.direction === "school"
@@ -26,21 +67,24 @@ function MobileSettingsPill({ state, setState }) {
 
   return (
     <>
-      <button className="mobile-pill" onClick={() => setOpen(true)}>
+      <button className={"mobile-pill" + (collapsed ? " pill-collapsed" : "")} onClick={() => setOpen(true)}>
         <span style={{fontSize:13, opacity:0.6}}>⚙️</span>
-        <span className="pill-sep" />
-        <span className="pill-chip pill-hl">{dirLabel}</span>
-        <span className="pill-chip">{activeDay.label}</span>
-        <span className="pill-chip">{timeLabel}</span>
-        {flags.length > 0 && <span className="pill-chip">{flags.join(" ")}</span>}
+        <div className="pill-extras">
+          <span className="pill-sep" />
+          <span className="pill-chip pill-hl">{dirLabel}</span>
+          <span className="pill-chip">{activeDay.label}</span>
+          <span className="pill-chip">{timeLabel}</span>
+          {flags.length > 0 && <span className="pill-chip">{flags.join(" ")}</span>}
+        </div>
       </button>
 
-      <div className={"settings-scrim" + (open ? " open" : "")} onClick={() => setOpen(false)} />
-      <div className={"settings-sheet" + (open ? " open" : "")}>
+      <div className={"settings-scrim" + (open ? " open" : "")} onClick={() => { setOpen(false); setCollapsed(false); }} />
+      <div ref={sheetRef} className={"settings-sheet" + (open ? " open" : "")}
+        onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
         <div className="sheet-handle" />
         <div className="sheet-head">
           <span className="sheet-head-title">Tervezés</span>
-          <button className="sheet-close" onClick={() => setOpen(false)}>✕</button>
+          <button className="sheet-close" onClick={() => { setOpen(false); setCollapsed(false); }}>✕</button>
         </div>
 
         <div className="sec-title">Irány</div>
@@ -149,22 +193,24 @@ function V1Variation({ state, setState, t, langSwitcher, navLinks }) {
 
   const isSchool = state.direction === "school";
   const subtitle = isSchool
-    ? (state.schoolData ? `Iskolába: ${state.schoolData.name} 🏫` : (state.lang === "hu" ? "Hogy jutsz el az iskolába? 🏫" : "How to get to school? 🏫"))
-    : (state.settingsHomeStop ? `Hazaút: ${state.settingsHomeStop.name} 🏠` : t.appSubtitle);
+    ? (state.schoolData ? `Iskolába: ${state.schoolData.name}` : (state.lang === "hu" ? "Hogy jutsz el az iskolába?" : "How to get to school?"))
+    : (state.settingsHomeStop ? `Hazaút: ${state.settingsHomeStop.name}` : t.appSubtitle);
 
   return (
     <div className="v1">
       {settingsOpen && <window.SchoolSettingsModal onClose={() => { setSettingsOpen(false); state.refreshSettings?.(); }} />}
-      <div className="v1-header" style={isMobile ? {flexDirection:"row",alignItems:"flex-start",justifyContent:"space-between",gap:8} : {}}>
+      <div className="v1-header" style={isMobile ? {flexDirection:"row",alignItems:"center",justifyContent:"space-between",gap:8} : {}}>
         <div style={isMobile ? {flex:1,minWidth:0} : {}}>
           <div style={{display:"flex",alignItems:"center",gap:10,flexWrap:isMobile?undefined:"wrap"}}>
             <div className="v1-title">{t.appTitle} ✨</div>
             <div style={{fontSize:11,fontWeight:700,background:"linear-gradient(135deg,#7C3AED,#C026D3)",color:"white",padding:"2px 8px",borderRadius:6}}>{window.APP_VERSION}</div>
             {!isMobile && langSwitcher}
           </div>
-          <div style={{marginTop:6}}>
-            <div className="v1-subtitle">{subtitle}</div>
-          </div>
+          {!isMobile && (
+            <div style={{marginTop:6}}>
+              <div className="v1-subtitle">{subtitle}</div>
+            </div>
+          )}
         </div>
         {isMobile && (
           <div style={{display:"flex",gap:6,alignItems:"center",flexShrink:0}}>
@@ -173,6 +219,11 @@ function V1Variation({ state, setState, t, langSwitcher, navLinks }) {
           </div>
         )}
       </div>
+      {isMobile && (
+        <div style={{marginTop:4, marginBottom:10}}>
+          <div className="v1-subtitle">{subtitle}</div>
+        </div>
+      )}
 
       {!isMobile && (
         <div style={{position:"absolute",right:32,top:24,display:"flex",flexDirection:"column",alignItems:"flex-end",gap:8}}>

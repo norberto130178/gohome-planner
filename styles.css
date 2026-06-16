@@ -672,15 +672,25 @@ button { font-family: inherit; cursor: pointer; border: none; }
 /* ── Mobile settings pill + sheet ── */
 .mobile-pill {
   position: fixed;
-  bottom: 62px; right: 14px;
+  bottom: 76px; right: 14px;
   background: #1a2a3a; color: white; border: none;
   border-radius: 22px; padding: 9px 13px;
   display: none; align-items: center; gap: 7px;
   cursor: pointer; font-family: Nunito, sans-serif;
   font-weight: 800; font-size: 12px;
   box-shadow: 0 4px 18px rgba(0,0,0,0.28);
+  overflow: hidden;
   transition: transform 0.15s, box-shadow 0.15s;
   z-index: 99; max-width: calc(100vw - 28px);
+}
+.pill-extras {
+  display: flex; align-items: center; gap: 7px;
+  max-width: 260px; opacity: 1; overflow: hidden;
+  transition: max-width 0.32s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.22s ease;
+}
+.pill-collapsed .pill-extras {
+  max-width: 0;
+  opacity: 0;
 }
 .mobile-pill:active { transform: scale(0.96); }
 .pill-sep { width: 1px; height: 13px; background: rgba(255,255,255,0.22); flex-shrink: 0; }
@@ -743,7 +753,8 @@ button { font-family: inherit; cursor: pointer; border: none; }
     font-size: 26px;
   }
   .v1-subtitle {
-    font-size: 12px;
+    font-size: 14px;
+    font-weight: 800;
   }
   .v1-clock {
     padding: 10px 16px;

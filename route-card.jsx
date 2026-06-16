@@ -782,6 +782,12 @@ window.CitySchoolRouteCard = CitySchoolRouteCard;
 function SchoolSettingsModal({ onClose }) {
   const schools = window.SCHOOLS || [];
   const [selected, setSelected] = React.useState(() => localStorage.getItem("selectedSchool") || "");
+  const [schoolQuery, setSchoolQuery] = React.useState(() => {
+    const sel = localStorage.getItem("selectedSchool") || "";
+    const found = (window.SCHOOLS || []).find(s => s.id === sel);
+    return found ? found.name : "";
+  });
+  const [schoolInputFocused, setSchoolInputFocused] = React.useState(false);
   const [showMap, setShowMap] = React.useState(false);
   const mapRef = React.useRef(null);
   const containerRef = React.useRef(null);
@@ -813,6 +819,10 @@ function SchoolSettingsModal({ onClose }) {
     }
     return [...m.values()].sort((a, b) => a.name.localeCompare(b.name, 'hu'));
   }, []);
+
+  const filteredSchools = schoolQuery.length >= 1
+    ? schools.filter(s => s.name.toLowerCase().includes(schoolQuery.toLowerCase()))
+    : schools;
 
   const filteredStops = homeQuery.length >= 1
     ? allStops.filter(s => s.name.toLowerCase().includes(homeQuery.toLowerCase()))
@@ -1017,7 +1027,7 @@ function SchoolSettingsModal({ onClose }) {
     >
       <div style={{
         background: "white", borderRadius: 20, padding: "24px 24px 20px",
-        maxWidth: 540, width: "100%", maxHeight: "90vh", overflowY: "auto",
+        maxWidth: 540, width: "100%", maxHeight: "90vh", overflowY: "auto", overflowX: "hidden",
         boxShadow: "0 16px 48px rgba(0,0,0,0.3)", fontFamily: "Nunito, sans-serif",
       }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
@@ -1029,22 +1039,47 @@ function SchoolSettingsModal({ onClose }) {
           <div style={{ fontSize: 12, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--ink-soft)", marginBottom: 8 }}>
             Melyik iskolába jársz?
           </div>
-          <div style={{ display: "flex", gap: 8, alignItems: "stretch" }}>
-            <select
-              value={selected}
-              onChange={e => setSelected(e.target.value)}
-              style={{
-                flex: 1, padding: "9px 12px", borderRadius: 10,
-                border: "2px solid var(--line)", fontFamily: "Nunito, sans-serif",
-                fontSize: 14, fontWeight: 700, color: "var(--ink)",
-                background: "white", cursor: "pointer", outline: "none",
-              }}
-            >
-              <option value="">— Válassz iskolát —</option>
-              {schools.map(s => (
-                <option key={s.id} value={s.id}>{s.name}</option>
-              ))}
-            </select>
+          <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+                <input
+                  type="text"
+                  placeholder="— Keress iskola névre —"
+                  value={schoolQuery}
+                  onChange={e => {
+                    setSchoolQuery(e.target.value);
+                    if (selected && e.target.value !== schools.find(s => s.id === selected)?.name) setSelected("");
+                  }}
+                  onFocus={() => setSchoolInputFocused(true)}
+                  onBlur={() => setTimeout(() => setSchoolInputFocused(false), 150)}
+                  style={{ width: "100%", padding: "9px 36px 9px 12px", borderRadius: 10, border: "2px solid var(--line)", fontFamily: "Nunito, sans-serif", fontSize: 14, fontWeight: 700, color: "var(--ink)", background: "white", outline: "none", boxSizing: "border-box" }}
+                />
+                {(schoolQuery || selected) && (
+                  <button
+                    onClick={() => { setSelected(""); setSchoolQuery(""); }}
+                    style={{ position: "absolute", right: 8, background: "none", border: "none", cursor: "pointer", fontSize: 16, color: "var(--ink-soft)", lineHeight: 1, padding: "2px 4px" }}
+                  >✕</button>
+                )}
+              </div>
+              {schoolInputFocused && (
+                <div style={{ background: "white", border: "2px solid var(--line)", borderTop: "none", borderRadius: "0 0 10px 10px", maxHeight: 220, overflowY: "auto", boxShadow: "0 8px 24px rgba(0,0,0,0.15)" }}>
+                  {filteredSchools.length === 0 && (
+                    <div style={{ padding: "10px 12px", fontSize: 13, color: "var(--ink-soft)", fontStyle: "italic" }}>Nincs találat</div>
+                  )}
+                  {filteredSchools.map(school => (
+                    <div
+                      key={school.id}
+                      onMouseDown={e => { e.preventDefault(); setSelected(school.id); setSchoolQuery(school.name); setSchoolInputFocused(false); }}
+                      style={{ padding: "8px 12px", cursor: "pointer", fontSize: 13, fontWeight: school.id === selected ? 800 : 700, color: school.id === selected ? "var(--accent)" : "var(--ink)", borderBottom: "1px solid var(--line)", background: school.id === selected ? "var(--bg)" : "white" }}
+                      onMouseEnter={e => { if (school.id !== selected) e.currentTarget.style.background = "var(--bg)"; }}
+                      onMouseLeave={e => { if (school.id !== selected) e.currentTarget.style.background = "white"; }}
+                    >
+                      {school.name}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
             <button
               onClick={() => setShowMap(o => !o)}
               title="Iskolák a térképen"
@@ -1078,7 +1113,7 @@ function SchoolSettingsModal({ onClose }) {
             Hol szállsz fel reggel?
           </div>
           <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
-            <div style={{ flex: 1 }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
                 <input
                   type="text"

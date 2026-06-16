@@ -494,9 +494,151 @@ function CityRouteCard({ route, index, isPrimary, fromStop, toStop, walkMin, isW
 }
 
 
+// ── CityMobilePill ───────────────────────────────────────────────────
+function CityMobilePill({ timeMode, setTimeMode, customTime, setCustomTime, dayOffset, setDayOffset, schoolHoliday, setSchoolHoliday, canPlan, plan }) {
+  const [open, setOpen] = React.useState(false);
+  const [collapsed, setCollapsed] = React.useState(false);
+  const sheetRef = React.useRef(null);
+  const dragStartY = React.useRef(null);
+  const isDragging = React.useRef(false);
+  const lastScrollY = React.useRef(0);
+
+  React.useEffect(() => {
+    function onScroll() {
+      const y = window.scrollY;
+      if (y - lastScrollY.current > 8) setCollapsed(true);
+      lastScrollY.current = y;
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  function onTouchStart(e) {
+    if ((sheetRef.current?.scrollTop || 0) > 0) return;
+    dragStartY.current = e.touches[0].clientY;
+    isDragging.current = false;
+  }
+  function onTouchMove(e) {
+    if (dragStartY.current === null) return;
+    const dy = e.touches[0].clientY - dragStartY.current;
+    if (dy > 0 && sheetRef.current) {
+      isDragging.current = true;
+      sheetRef.current.style.transition = "none";
+      sheetRef.current.style.transform = `translateY(${dy}px)`;
+    }
+  }
+  function onTouchEnd(e) {
+    if (!isDragging.current || dragStartY.current === null) { dragStartY.current = null; return; }
+    const dy = e.changedTouches[0].clientY - dragStartY.current;
+    dragStartY.current = null; isDragging.current = false;
+    if (sheetRef.current) { sheetRef.current.style.transition = ""; sheetRef.current.style.transform = ""; }
+    if (dy > 80) { setOpen(false); setCollapsed(false); }
+  }
+
+  const isNow = timeMode === "now";
+  const timePresets = ["06:00","07:00","08:00","09:00","10:00","12:00","14:00","16:00","18:00","20:00"];
+  const dayOptions = Array.from({length:7}, (_, i) => {
+    const d = new Date(); d.setDate(d.getDate() + i);
+    const full = d.toLocaleDateString("hu-HU", { weekday: "long" });
+    const short = i === 0 ? "Ma" : i === 1 ? "Hol" : full.slice(0, 3);
+    return { offset: i, label: i === 0 ? "Ma" : i === 1 ? "Holnap" : full, short };
+  });
+  const activeDay = dayOptions[dayOffset] || dayOptions[0];
+
+  function setTime(t) {
+    setCustomTime(t); localStorage.setItem("city_customTime", t);
+    setTimeMode("custom"); localStorage.setItem("city_timeMode", "custom");
+    if (canPlan) plan({ timeMode: "custom", customTime: t });
+  }
+  function goNow() {
+    setTimeMode("now"); localStorage.setItem("city_timeMode", "now");
+    if (canPlan) plan({ timeMode: "now" });
+  }
+  function close() { setOpen(false); setCollapsed(false); }
+
+  return (
+    <>
+      <button className={"mobile-pill" + (collapsed ? " pill-collapsed" : "")} onClick={() => setOpen(true)}>
+        <span style={{fontSize:13, opacity:0.6}}>⚙️</span>
+        <div className="pill-extras">
+          <span className="pill-sep" />
+          <span className="pill-chip pill-hl">{isNow ? "Most" : customTime}</span>
+          {!isNow && <span className="pill-chip">{activeDay.short}</span>}
+          {schoolHoliday && <span className="pill-chip">🏖️</span>}
+        </div>
+      </button>
+
+      <div className={"settings-scrim" + (open ? " open" : "")} onClick={close} />
+      <div ref={sheetRef} className={"settings-sheet" + (open ? " open" : "")}
+        onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
+        <div className="sheet-handle" />
+        <div className="sheet-head">
+          <span className="sheet-head-title">Tervezési beállítások</span>
+          <button className="sheet-close" onClick={close}>✕</button>
+        </div>
+
+        <div className="sec-title">Indulási idő</div>
+        <div style={{padding:"0 20px 14px"}}>
+          <div style={{display:"flex", gap:5, flexWrap:"wrap", marginBottom:10}}>
+            <button className={"sel-pill" + (isNow ? " on" : "")} onClick={goNow}>⏱ Most</button>
+            {timePresets.map(t => (
+              <button key={t} className={"sel-pill" + (!isNow && customTime===t ? " on" : "")}
+                onClick={() => setTime(t)}>{t}</button>
+            ))}
+          </div>
+          <input type="time" value={isNow ? "" : customTime}
+            onChange={e => setTime(e.target.value)}
+            placeholder="egyéni…" className="v1-time-input"
+            style={{fontSize:14, padding:"6px 10px", borderRadius:10}} />
+        </div>
+
+        <div className="sec-title">Nap</div>
+        <div className="day-chips-grid">
+          {dayOptions.map(o => (
+            <button key={o.offset}
+              className={"day-pill" + (dayOffset===o.offset ? " on" : "") + (o.offset===0 ? " today" : "")}
+              onClick={() => {
+                setDayOffset(o.offset);
+                const newMode = o.offset === 0 && isNow ? "now" : "custom";
+                if (newMode !== timeMode) { setTimeMode(newMode); localStorage.setItem("city_timeMode", newMode); }
+                if (canPlan) plan({ dayOffset: o.offset, timeMode: newMode });
+              }}>
+              {o.short}
+            </button>
+          ))}
+        </div>
+
+        <div className="sec-title">Szűrők</div>
+        <div className="sheet-row">
+          <span className="row-icon">🏖️</span>
+          <div className="row-label">
+            <strong>Tanszünet</strong>
+            <small>Szünetidőszak menetrendje</small>
+          </div>
+          <button className={"toggle" + (schoolHoliday ? " on" : "")}
+            onClick={() => {
+              const v = !schoolHoliday; setSchoolHoliday(v);
+              localStorage.setItem("city.schoolholiday", v ? "1" : "0");
+              if (canPlan) plan({ schoolHoliday: v });
+            }} />
+        </div>
+        <div style={{height:20}} />
+      </div>
+    </>
+  );
+}
+
 // ── CityApp ──────────────────────────────────────────────────────────
 function CityApp() {
   const U = window.BUS_UTILS;
+  const [isMobile, setIsMobile] = React.useState(() => window.matchMedia("(max-width: 640px)").matches);
+  React.useEffect(() => {
+    const mq = window.matchMedia("(max-width: 640px)");
+    const h = e => setIsMobile(e.matches);
+    mq.addEventListener("change", h);
+    return () => mq.removeEventListener("change", h);
+  }, []);
+
   const [now, setNow] = React.useState(new Date());
   const [fromStop, setFromStop] = React.useState(() => localStorage.getItem("city_from") || "");
   const [toStop, setToStop] = React.useState(() => localStorage.getItem("city_to") || "");
@@ -511,6 +653,7 @@ function CityApp() {
   const [dayOffset, setDayOffset] = React.useState(0);
   const [schoolHoliday, setSchoolHoliday] = React.useState(() => localStorage.getItem("city.schoolholiday") === "1");
   const [results, setResults] = React.useState(null);
+  const [formCollapsed, setFormCollapsed] = React.useState(false);
   const [timetableBusId, setTimetableBusId] = React.useState(null);
   const [planIsWeekend, setPlanIsWeekend] = React.useState(() => { const d = new Date(); return d.getDay() === 0 || d.getDay() === 6; });
   const [planNowMins, setPlanNowMins] = React.useState(() => { const d = new Date(); return d.getHours() * 60 + d.getMinutes(); });
@@ -547,13 +690,14 @@ function CityApp() {
     setResults(r);
     setPlanIsWeekend(planTime.getDay() === 0 || planTime.getDay() === 6);
     setPlanNowMins(planTime.getHours() * 60 + planTime.getMinutes());
+    if (isMobile) setFormCollapsed(true);
   }
 
   function swap() {
     const tmp = fromStop;
     setFromStop(toStop); localStorage.setItem("city_from", toStop);
     setToStop(tmp);      localStorage.setItem("city_to", tmp);
-    setResults(null);
+    setResults(null); setFormCollapsed(false);
   }
 
   const canPlan = fromStop && toStop && fromStop !== toStop;
@@ -564,34 +708,46 @@ function CityApp() {
         <window.BusTimetableModal busId={timetableBusId} onClose={() => setTimetableBusId(null)} isWeekend={planIsWeekend} nowMins={planNowMins} />
       )}
       {/* Header */}
-      <div className="v1-header">
-        <div>
-          <div className="v1-title">VeszprémBusz 🚌</div>
-          <div className="v1-subtitle">Veszprém helyi járatok — útvonaltervező</div>
-          <div className="city-header-timetable" style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", marginTop: 10 }}>
-            <window.TimetableDropdown onSelect={id => setTimetableBusId(id)} />
+      <div className="v1-header" style={isMobile ? {flexDirection:"row", alignItems:"center", justifyContent:"space-between", gap:8} : {}}>
+        <div style={isMobile ? {flex:1, minWidth:0} : {}}>
+          <div style={{display:"flex", alignItems:"center", gap:10}}>
+            <div className="v1-title">VeszprémBusz 🚌</div>
+            <div style={{fontSize:11,fontWeight:700,background:"linear-gradient(135deg,#7C3AED,#C026D3)",color:"white",padding:"2px 8px",borderRadius:6}}>{window.APP_VERSION}</div>
           </div>
+          {!isMobile && <div className="v1-subtitle">Veszprém helyi járatok — útvonaltervező</div>}
+          {!isMobile && (
+            <div className="city-header-timetable" style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", marginTop: 10 }}>
+              <window.TimetableDropdown onSelect={id => setTimetableBusId(id)} />
+            </div>
+          )}
         </div>
-        <div
-          className="v1-clock"
-          onClick={() => { setTimeMode(m => m === "now" ? "custom" : "now"); setResults(null); }}
-          style={{
-            cursor:"pointer",
-            background: timeMode !== "now" ? "var(--accent)" : undefined,
-            color: timeMode !== "now" ? "white" : undefined,
-            outline: timeMode === "now" ? "3px solid var(--sun)" : "3px solid var(--accent)",
-            outlineOffset: 2,
-            transition: "background 0.2s, outline 0.2s",
-          }}
-        >
-          <div className="v1-clock-label">{timeMode === "now" ? "MOSTANRA" : "SAJÁT IDŐ"}</div>
-          <div className="v1-clock-time">{timeMode === "now" ? nowFmt : customTime}</div>
-          <div className="v1-clock-date">{dateFmt}</div>
-        </div>
+        {!isMobile && (
+          <div
+            className="v1-clock"
+            onClick={() => { setTimeMode(m => m === "now" ? "custom" : "now"); setResults(null); }}
+            style={{
+              cursor:"pointer",
+              background: timeMode !== "now" ? "var(--accent)" : undefined,
+              color: timeMode !== "now" ? "white" : undefined,
+              outline: timeMode === "now" ? "3px solid var(--sun)" : "3px solid var(--accent)",
+              outlineOffset: 2,
+              transition: "background 0.2s, outline 0.2s",
+            }}
+          >
+            <div className="v1-clock-label">{timeMode === "now" ? "MOSTANRA" : "SAJÁT IDŐ"}</div>
+            <div className="v1-clock-time">{timeMode === "now" ? nowFmt : customTime}</div>
+            <div className="v1-clock-date">{dateFmt}</div>
+          </div>
+        )}
       </div>
+      {isMobile && (
+        <div style={{marginTop:4, marginBottom:10}}>
+          <div className="v1-subtitle">Veszprém helyi járatok — útvonaltervező</div>
+        </div>
+      )}
 
-      {/* Custom time strip */}
-      {timeMode === "custom" && (
+      {/* Custom time strip — desktop only */}
+      {timeMode === "custom" && !isMobile && (
         <div style={{
           background:"var(--accent)", borderRadius:"var(--radius)",
           padding:"14px 20px", marginBottom:16,
@@ -654,44 +810,92 @@ function CityApp() {
       )}
 
       {/* Planner form */}
-      <div style={{
+      {isMobile && formCollapsed && results !== null ? (
+        <button onClick={() => setFormCollapsed(false)} style={{
+          display:"flex", alignItems:"center", justifyContent:"space-between",
+          width:"100%", background:"white", borderRadius:"var(--radius)",
+          padding:"11px 14px", boxShadow:"var(--shadow)", marginBottom:12,
+          border:"none", cursor:"pointer", fontFamily:"Nunito,sans-serif",
+          textAlign:"left",
+        }}>
+          <div style={{display:"flex", flexDirection:"column", gap:2, minWidth:0}}>
+            <div style={{fontSize:11, fontWeight:800, color:"var(--ink-soft)", textTransform:"uppercase", letterSpacing:"0.06em"}}>Útvonal</div>
+            <div style={{fontSize:13, fontWeight:800, color:"var(--ink)", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap"}}>
+              {fromStop} → {toStop}
+            </div>
+          </div>
+          <span style={{fontSize:18, color:"var(--ink-soft)", flexShrink:0, marginLeft:8}}>✎</span>
+        </button>
+      ) : (
+      <div className={isMobile ? "city-form-mobile" : ""} style={{
         background: "white", borderRadius: "var(--radius)",
-        padding: "20px 24px", boxShadow: "var(--shadow)", marginBottom: 20
+        padding: isMobile ? 0 : "20px 24px",
+        boxShadow: "var(--shadow)", marginBottom: isMobile ? 10 : 20,
+        overflow: isMobile ? "hidden" : undefined,
       }}>
-        {/* FROM / TO row */}
-        <div className="city-form-row">
-          <div className="city-stop-wrapper">
-            <div className="city-stop-label">Honnan</div>
-            <StopSearch
-              id="from-stop"
-              value={fromStop}
-              onChange={v => { setFromStop(v); localStorage.setItem("city_from", v); setResults(null); }}
-              placeholder="Megálló neve..."
-            />
+        {isMobile ? (
+          /* Mobile: ↕ gomb bal oldalt, két input egymás alatt */
+          <div style={{display:"flex", alignItems:"stretch"}}>
+            <button onClick={swap} title="Megállók cseréje" style={{
+              background:"none", border:"none", borderRight:"2px solid var(--line)",
+              padding:"0 14px", cursor:"pointer", fontSize:20, fontWeight:900, color:"var(--ink-soft)",
+              display:"flex", alignItems:"center", flexShrink:0,
+            }}>⇅</button>
+            <div style={{flex:1, minWidth:0}}>
+              <div style={{padding:"10px 12px 8px"}}>
+                <div className="city-stop-label">Honnan</div>
+                <StopSearch id="from-stop" value={fromStop}
+                  onChange={v => { setFromStop(v); localStorage.setItem("city_from", v); setResults(null); setFormCollapsed(false); }}
+                  placeholder="Megálló neve..." />
+              </div>
+              <div style={{padding:"8px 12px 8px"}}>
+                <div className="city-stop-label">Hova</div>
+                <StopSearch id="to-stop" value={toStop}
+                  onChange={v => { setToStop(v); localStorage.setItem("city_to", v); setResults(null); setFormCollapsed(false); }}
+                  placeholder="Megálló neve..." />
+              </div>
+              <div style={{padding:"8px 10px 10px"}}>
+                <button
+                  className="v1-btn primary"
+                  style={{ width:"100%", justifyContent:"center", opacity: canPlan ? 1 : 0.4, cursor: canPlan ? "pointer" : "not-allowed" }}
+                  onClick={canPlan ? plan : undefined}
+                >🔍 Útvonal keresése</button>
+              </div>
+            </div>
           </div>
-          <button className="city-swap-btn" onClick={swap} title="Megállók cseréje">⇄</button>
-          <div className="city-stop-wrapper">
-            <div className="city-stop-label">Hova</div>
-            <StopSearch
-              id="to-stop"
-              value={toStop}
-              onChange={v => { setToStop(v); localStorage.setItem("city_to", v); setResults(null); }}
-              placeholder="Megálló neve..."
-            />
+        ) : (
+          /* Desktop: vízszintes layout */
+          <div className="city-form-row">
+            <div className="city-stop-wrapper">
+              <div className="city-stop-label">Honnan</div>
+              <StopSearch id="from-stop" value={fromStop}
+                onChange={v => { setFromStop(v); localStorage.setItem("city_from", v); setResults(null); }}
+                placeholder="Megálló neve..." />
+            </div>
+            <button className="city-swap-btn" onClick={swap} title="Megállók cseréje">⇄</button>
+            <div className="city-stop-wrapper">
+              <div className="city-stop-label">Hova</div>
+              <StopSearch id="to-stop" value={toStop}
+                onChange={v => { setToStop(v); localStorage.setItem("city_to", v); setResults(null); }}
+                placeholder="Megálló neve..." />
+            </div>
           </div>
-        </div>
+        )}
 
-        {/* Plan row */}
-        <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
-          <button
-            className="v1-btn primary"
-            style={{ marginLeft: "auto", opacity: canPlan ? 1 : 0.4, cursor: canPlan ? "pointer" : "not-allowed" }}
-            onClick={canPlan ? plan : undefined}
-          >
-            🔍 Útvonal keresése
-          </button>
-        </div>
+        {/* Plan row — desktop only, mobile button is inside the right column above */}
+        {!isMobile && (
+          <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+            <button
+              className="v1-btn primary"
+              style={{ marginLeft: "auto", opacity: canPlan ? 1 : 0.4, cursor: canPlan ? "pointer" : "not-allowed" }}
+              onClick={canPlan ? plan : undefined}
+            >
+              🔍 Útvonal keresése
+            </button>
+          </div>
+        )}
       </div>
+      )}
 
       {/* Results */}
       {results === null ? (
@@ -716,22 +920,22 @@ function CityApp() {
           {/* Hero banner — best result */}
           <div className="city-hero-banner">
             <div>
-              <div style={{ fontSize: 12, opacity: 0.85, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 4 }}>
+              <div style={{ fontSize: 11, opacity: 0.85, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 4 }}>
                 Legjobb útvonal
               </div>
-              <div style={{ fontSize: 52, fontWeight: 900, lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>
+              <div style={{ fontSize: isMobile ? 28 : 52, fontWeight: 900, lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>
                 {U.fmtTime(results[0].arriveAt)}
               </div>
-              <div style={{ fontSize: 15, opacity: 0.9, marginTop: 4 }}>
+              <div style={{ fontSize: 12, opacity: 0.9, marginTop: 3 }}>
                 {toStop} · {results[0].totalDuration} perc
               </div>
             </div>
             <div style={{ textAlign: "right" }}>
-              <div style={{ fontSize: 14, opacity: 0.85 }}>{results.length} útvonal</div>
-              <div style={{ fontSize: 36, fontWeight: 900, lineHeight: 1, marginTop: 4 }}>
+              <div style={{ fontSize: 11, opacity: 0.85 }}>{results.length} útvonal</div>
+              <div style={{ fontSize: isMobile ? 17 : 36, fontWeight: 900, lineHeight: 1, marginTop: 4 }}>
                 {results[0].type === "direct" ? "Közvetlen" : "1 átszállás"}
               </div>
-              <div style={{ fontSize: 13, opacity: 0.8, marginTop: 4 }}>
+              <div style={{ fontSize: 12, opacity: 0.8, marginTop: 4 }}>
                 {fromStop.length > 20 ? fromStop.slice(0, 20) + "…" : fromStop} →
               </div>
             </div>
@@ -765,6 +969,16 @@ function CityApp() {
           ← HazaÚt
         </a>
       </div>
+
+      {isMobile && (
+        <CityMobilePill
+          timeMode={timeMode} setTimeMode={setTimeMode}
+          customTime={customTime} setCustomTime={setCustomTime}
+          dayOffset={dayOffset} setDayOffset={setDayOffset}
+          schoolHoliday={schoolHoliday} setSchoolHoliday={setSchoolHoliday}
+          canPlan={canPlan} plan={plan}
+        />
+      )}
 
       {/* Bottom toolbar — mobile only (nav-bottom class, CSS shows on ≤700px) */}
       <div className="nav-bottom">

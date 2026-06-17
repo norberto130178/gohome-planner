@@ -32,24 +32,21 @@ A `CityRouteMap` és shape logika jelenleg inline Babel scriptben van a `city.ht
 
 ## Menetrend modal (city.html)
 
-### Munkanap/hétvége váltó
-A menetrend modal jelenleg mindig az aktuális nap típusát mutatja (ha hétvége van, hétvégi menetrendet). Nincs lehetőség kézzel váltani a két nézet között.
-- Megoldás: Munkanapos / Hétvégi toggle gomb a modal fejlécébe (pl. a buszszám alatt)
-- Ha a felhasználó manuálisan vált, azt megjegyezni az adott session idejére
+### ✅ 7. Munkanap/hétvége váltó — KÉSZ
 
-### Útvonal-változat jelzők a menetrend modalban
+### 8. Útvonal-változat jelzők a menetrend modalban
 A menetrendben egyes indulási időknél betűjelölések vannak (pl. `A`, `N`, `V`) amelyek azt jelzik, hogy az adott járat rövidebb vagy eltérő útvonalon megy. Ezek jelenleg nem jelennek meg a modalban, az adatokból ki is vannak szűrve.
 - Szükséges: a betűjelölések tárolása az adatstruktúrában és megjelenítése az időpontoknál (pl. tooltip vagy kis badge)
-- Lásd még: Adatstruktúra / Útvonal-változat jelzők fejezet
+- Lásd még: 11. Útvonal-változat jelzők adatstruktúra
 
-### Compound annotációk kezelése a UI-ban
+### 9. Compound annotációk kezelése a UI-ban
 Egyes indulási időknél több betűjelölés is érvényes egyszerre — pl. `Hv` = "csak Hotelig" + "csak vasárnap". Ezek `n: 'Hv'` alakban vannak tárolva a `city-data.js`-ben, a `footnotes` objektumban viszont `H` és `V` külön-külön szerepelnek.
 - A `timetable-modal.jsx` jelenleg `footnotes[n]`-t keres — `'Hv'` esetén nem talál semmit
 - **Megoldás:** az annotáció kiírásánál az `n` értéket karakterenként split-elni, és mindegyikhez külön `footnotes[char]` lookup-ot végezni
 - Ugyanez vonatkozik a tooltip/badge megjelenítésre is: mindkét annotációt külön sorban vagy vesszővel elválasztva felsorolni
 - Érintett vonal jelenleg: **13-as busz** hétvégi indulásai (`Hv`)
 
-### Shape–indulás összerendelés (térképnézet pontosítása)
+### 10. Shape–indulás összerendelés (térképnézet pontosítása)
 A 7-es, 10-es, 13-as buszoknál több GTFS shape létezik (különböző route variánsok), a térkép jelenleg heurisztikával választ közülük — ez nem mindig tökéletes.
 - **Gyökér ok:** egy buszhoz minden megálló szerepel a `city-data.js`-ben (összes variáns), de egy adott indulás csak az egyik variáns shape-jéhez tartozik
 - **Megoldás:** a betűjelölések bevezetésekor rendelni hozzá `shape_id`-t is — a GTFS `trips.txt`-ben a `trip_id → shape_id` kapcsolat megvan, ezt kell a menetrend adatokhoz kötni
@@ -57,7 +54,7 @@ A 7-es, 10-es, 13-as buszoknál több GTFS shape létezik (különböző route v
 
 ## Adatstruktúra
 
-### Útvonal-változat jelzők (betűkódok az indulási időknél)
+### 11. Útvonal-változat jelzők (betűkódok az indulási időknél)
 A menetrend PDF-ben egyes indulási időpontok után betű áll, amely azt jelzi, hogy az adott járat egy rövidebb vagy eltérő útvonalon közlekedik. A betűk jelentése oldalanként eltérő, a PDF Megjegyzés szekciójából kiolvasható.
 
 Példák:
@@ -73,26 +70,17 @@ Példák:
 - Minden irányhoz `footnotes` mező: `{ 'A': 'Vasútállomásig közlekedik', ... }`
 - Útvonaltervező logikában figyelembe venni: ha a célmegálló nincs a rövidített útvonalon, az adott indulást ne ajánlja
 
-### Szombat/vasárnap külön menetrend
-Az adatbázisban (`city-buses.js`) a hétvégi indulási idők `weekend` kulcs alatt egybe vannak vonva. Az eredeti VeszprémBusz menetrendben egyes járatok csak szombaton, mások csak vasárnap közlekednek.
-- Új struktúra: `weekend` → `saturday` + `sunday` (vagy `weekend` marad a közös járatokhoz, `saturday`/`sunday` csak ahol eltér)
-- `city-buses.js` összes bejegyzését felül kell vizsgálni az eredeti menetrend alapján
-- `getDeps` logikát frissíteni a `timetable-modal.jsx`-ben és a tervezőben
+### ✅ 12. Szombat/vasárnap külön menetrend — KÉSZ
 
-### Munkaszüneti napok kezelése
-Jelenleg csak szombat/vasárnap = hétvégi menetrend. Magyar ünnepnapokon szintén hétvégi menetrend kell.
-- Rögzített ünnepek: jan 1, márc 15, ápr 4, máj 1, aug 20, okt 23, nov 1, dec 25-26
-- Mozgó ünnepek: húsvét, pünkösd — képlettel számítható
-- Áthelyezett munkanapok (pótszombatok) éves manuális lista
-- Ezt a szombat/vasárnap szétválasztással együtt célszerű megoldani
+### ✅ 13. Munkaszüneti napok kezelése — KÉSZ
 
-## 4-es és 4A busz — menetrend és útvonal tisztázása szükséges
+## 14. 4-es és 4A busz — menetrend és útvonal tisztázása szükséges
 
 A PDF menetrend a 4-es és 4A busznál értelmezhetetlen módon össze van vonva — a két irány táblái és valószínűleg a két járat adatai is keverednek. A `city-data.js`-ben jelenleg csak egy irány van a 4-esnél (Jutaspuszta → Vámosi úti forduló), a visszaút hiányzik.
 - **Teendő:** VGO oldalán és az eredeti PDF-ben manuálisan tisztázni a 4-es és 4A struktúráját (körjárat-e, hol a fordítópont, mik a helyes menetrendi idők)
 - A GTFS-ben két trip van (dir:0 és dir:1) — ez alapul szolgálhat a visszaút rekonstruálásához
 
-## 11A busz koordináták
+## 15. 11A busz koordináták
 
 A 11A busznak van menetrendje a city-data.js-ben, de a VeszprémGO OTP rendszerben nincs aktív menetrend hozzá (üres arrivals, nem jelenik meg route-details-for-stop válaszokban). Valószínűleg csúcsidős/iskolai járat.
 - Jelenleg directional algoritmust használ (menetirány-alapú SP választás) — ez elég pontos
@@ -102,7 +90,7 @@ A 11A busznak van menetrendje a city-data.js-ben, de a VeszprémGO OTP rendszerb
 
 Ha új menetrend lép érvénybe, a `city-data.js` teljes újraépítése szükséges:
 
-### ⚠️ PDF parser csere — pdfplumber alapú megoldás (magas prioritás)
+### ⚠️ 16. PDF parser csere — pdfplumber alapú megoldás (magas prioritás)
 
 A jelenlegi `parse-menetrend.js` szöveg-alapú kinyerése (`pdftotext`-féle) megbízhatatlan:
 a három oszlopot nem tudja tisztán szétválasztani, főleg sűrűbb soroknál (pl. 13-17h).
@@ -124,11 +112,7 @@ mindig manuális ellenőrzést igényel — ott a PDF sem jelöli melyik adat me
 
 ## VeszprémBusz teljes hálózat (city.html)
 
-### Hiányzó buszjáratok adatbázisa
-A city.html útvonaltervező jelenleg csak a GoHome tervező 12 vonalát tartalmazza. A teljes VeszprémBusz hálózathoz ~30 vonal kell teljesen.
-- Koordináták: Playwright scraper már működik (OTP API + menetirány-logika), újra futtatható
-- Menetrend (indulási idők): OTP API-ból esetleg kinyerhető Playwright-tal, vagy kézi bevitel
-- Érdemes megnézni van-e trip/timetable endpoint az OTP-ban amit Playwright-on keresztül el lehet érni
+### ✅ 17. Hiányzó buszjáratok adatbázisa — KÉSZ
 
 ## Térképes nézet
 
@@ -139,13 +123,6 @@ A city.html útvonaltervező jelenleg csak a GoHome tervező 12 vonalát tartalm
 
 ## UI
 
-### Mission Board toggle
-A Mission Board jelenleg külön oldal (`mission.html`). Terv: toggle legyen a HazaÚt és Mission Board nézet között oldalnavigáció nélkül.
-- Előbb a Mission Board oldalt kell újratervezni, utána integrálni a főoldalba
-- Egyszerre kell átgondolni a böngészős és mobilos nézetet
+### ✅ 18. Mission Board toggle — KÉSZ
 
-### Célállomás sor chip ugrálás
-Az Átszállás sorban a chipek (Komakút, Színház, Autóbusz-áll.) ugranak amikor a Célállomás keresőmező input↔pink gomb módot vált.
-- Megpróbált megközelítések (mind kudarc): CSS grid, `position:absolute`, flex-in-flex
-- Alapos böngészős debug kell (DevTools layout panel) — mi változik pontosan rendereléskor
-- Esetleg ResizeObserver / ref mért szélesség alapú megközelítés
+### ✅ 19. Célállomás sor chip ugrálás — KÉSZ

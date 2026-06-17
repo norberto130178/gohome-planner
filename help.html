@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<title>Súgó — GoHome Planner</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#FFF7EC">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<style>
+  body { background: var(--bg); font-family: Nunito, sans-serif; margin: 0; padding: 0; color: var(--ink); }
+
+  .help-header {
+    position: sticky; top: 0; z-index: 10;
+    background: var(--bg); border-bottom: 2px solid var(--line);
+    padding: 12px 20px; display: flex; align-items: center; gap: 12px;
+  }
+  .help-back {
+    background: var(--line); border: none; border-radius: 10px;
+    padding: 6px 12px; cursor: pointer; font-size: 15px; font-weight: 800;
+    font-family: Nunito, sans-serif; color: var(--ink); text-decoration: none;
+    display: inline-flex; align-items: center; gap: 5px; flex-shrink: 0;
+  }
+  .help-back:hover { background: var(--ink); color: white; }
+  .help-header-title { font-size: 17px; font-weight: 900; flex: 1; }
+  .help-lang { display: flex; gap: 4px; }
+  .help-lang button {
+    background: var(--line); border: none; border-radius: 8px;
+    padding: 5px 10px; font-size: 12px; font-weight: 800;
+    font-family: Nunito, sans-serif; cursor: pointer; color: var(--ink);
+  }
+  .help-lang button.active { background: var(--accent); color: white; }
+
+  .help-body { max-width: 720px; margin: 0 auto; padding: 24px 20px 120px; }
+
+  .help-section {
+    background: white; border-radius: var(--radius);
+    box-shadow: var(--shadow); margin-bottom: 20px; overflow: hidden;
+  }
+  .help-section-header {
+    background: linear-gradient(135deg, #1a2a3a, #2d4a6a);
+    color: white; padding: 16px 20px;
+  }
+  .help-section-header.green { background: linear-gradient(135deg, #26A69A, #00796B); }
+  .help-section-title { font-size: 18px; font-weight: 900; margin: 0 0 2px; }
+  .help-section-sub { font-size: 12px; opacity: 0.8; font-weight: 700; }
+
+  .help-block { padding: 16px 20px; border-bottom: 1px solid var(--line); }
+  .help-block:last-child { border-bottom: none; }
+  .help-block-title { font-size: 13px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent); margin-bottom: 8px; }
+  .help-block p { margin: 0 0 8px; font-size: 14px; line-height: 1.6; }
+  .help-block p:last-child { margin-bottom: 0; }
+  .help-block ol, .help-block ul { margin: 0; padding-left: 20px; font-size: 14px; line-height: 1.8; }
+
+  .help-chip {
+    display: inline-block; background: var(--line); border-radius: 6px;
+    padding: 1px 7px; font-size: 12px; font-weight: 800; font-family: Nunito, sans-serif;
+  }
+  .help-tip {
+    background: #FFF7EC; border-left: 3px solid var(--sun);
+    border-radius: 0 8px 8px 0; padding: 10px 14px; margin-top: 8px;
+    font-size: 13px; line-height: 1.5;
+  }
+</style>
+</head>
+<body>
+
+<div class="help-header">
+  <a class="help-back" href="javascript:history.length>1?history.back():location.href='index.html'">← <span id="back-label">Vissza</span></a>
+  <div class="help-header-title" id="page-title">Súgó</div>
+  <div class="help-lang">
+    <button id="btn-hu" class="active" onclick="setLang('hu')">HU</button>
+    <button id="btn-en" onclick="setLang('en')">EN</button>
+  </div>
+</div>
+
+<div class="help-body">
+
+  <!-- ── HU ── -->
+  <div id="lang-hu">
+
+    <div class="help-section">
+      <div class="help-section-header">
+        <div class="help-section-title">Mi ez az app?</div>
+        <div class="help-section-sub">Rövid áttekintés</div>
+      </div>
+      <div class="help-block">
+        <p>A <strong>GoHome Planner</strong> Veszprém helyi közlekedéséhez készült. Két részből áll:</p>
+        <ul>
+          <li><strong>HazaÚt</strong> – megmutatja mikor kell elindulni, hogy időben érj haza az iskolából</li>
+          <li><strong>VeszprémBusz</strong> – bármely két megálló között megkeresi az elérhető járatokat</li>
+        </ul>
+        <p>A két oldal között a jobb alsó sarokba lévő <span class="help-chip">🏠</span> és <span class="help-chip">🚌</span> gombokkal lehet váltani.</p>
+      </div>
+    </div>
+
+    <div class="help-section">
+      <div class="help-section-header green">
+        <div class="help-section-title">HazaÚt ✨</div>
+        <div class="help-section-sub">Hazautazás tervező</div>
+      </div>
+      <div class="help-block">
+        <div class="help-block-title">Első beállítás</div>
+        <p>Az első használat előtt meg kell adni az iskolát és az otthoni megállót:</p>
+        <ol>
+          <li>Kattints a <span class="help-chip">⚙️</span> fogaskerék ikonra a fejlécben</li>
+          <li>Válaszd ki az iskolát a listából</li>
+          <li>Add meg az otthoni buszmegállót (névvel kereshető)</li>
+        </ol>
+        <p>Ezeket az app menti, legközelebb nem kell újra beállítani.</p>
+      </div>
+      <div class="help-block">
+        <div class="help-block-title">A főoldal értelmezése</div>
+        <p>A nagy zöld banner mutatja a <strong>következő elérhető járatot</strong> és hogy <strong>hány perc múlva</strong> kell elindulni. Az alatta lévő kártyák az összes opciót mutatják időrendben.</p>
+        <div class="help-tip">💡 Ha lejár az idő és nincs több járat, az app ezt jelzi. Másnapi menetrendhez állítsd be a napot a beállításokban.</div>
+      </div>
+      <div class="help-block">
+        <div class="help-block-title">Irány</div>
+        <p>A beállítások pillben (jobb alsó sarok) vagy a fogaskerék panelben váltható:</p>
+        <ul>
+          <li><span class="help-chip">Iskola → Haza</span> – az iskolából hazafelé</li>
+          <li><span class="help-chip">Haza → Iskola</span> – otthonról az iskolába</li>
+        </ul>
+      </div>
+      <div class="help-block">
+        <div class="help-block-title">Időpont</div>
+        <p><span class="help-chip">MOST</span> módban az app valós időt használ és folyamatosan frissül. Az óra elemre kattintva megnyílik a beállítások panel, ahol saját időpontot és napot is meg lehet adni.</p>
+      </div>
+    </div>
+
+    <div class="help-section">
+      <div class="help-section-header">
+        <div class="help-section-title">VeszprémBusz 🚌</div>
+        <div class="help-section-sub">Városon belüli útvonaltervező</div>
+      </div>
+      <div class="help-block">
+        <div class="help-block-title">Útvonal keresése</div>
+        <ol>
+          <li>Add meg a <strong>Honnan</strong> megállót – kezdj el gépelni, az app kiegészíti</li>
+          <li>Add meg a <strong>Hova</strong> megállót</li>
+          <li>Nyomj az <span class="help-chip">Útvonal keresése</span> gombra</li>
+        </ol>
+        <p>A <span class="help-chip">⇅</span> gombbal felcserélhetők a megállók – az app automatikusan újratervez.</p>
+      </div>
+      <div class="help-block">
+        <div class="help-block-title">Eredmények</div>
+        <p>Minden kártya egy lehetséges útvonalat mutat: indulási idő, érkezési idő, menetidő, szükséges járatok. A legjobb opció a zöld bannerben is kiemelve jelenik meg.</p>
+        <p>Egy kártyára kattintva megjelenik a <strong>térképes nézet</strong> az útvonallal.</p>
+      </div>
+      <div class="help-block">
+        <div class="help-block-title">Időpont és nap beállítása</div>
+        <p>Az óra elemre kattintva (jobb felső sarok) megnyílik a beállítások panel:</p>
+        <ul>
+          <li>Időpont: <span class="help-chip">MOST</span> vagy egyéni óra:perc</li>
+          <li>Nap: ma, holnap, vagy más nap</li>
+          <li><span class="help-chip">🏖️</span> tanítási szünet kapcsoló – szünetben más menetrend érvényes</li>
+        </ul>
+        <div class="help-tip">💡 Ha saját idő van beállítva, az óra elemre kattintva azonnal visszaállsz MOST módba és az app újratervez.</div>
+      </div>
+    </div>
+
+    <div class="help-section">
+      <div class="help-section-header">
+        <div class="help-section-title">Közös funkciók</div>
+        <div class="help-section-sub">Mindkét oldalon elérhető</div>
+      </div>
+      <div class="help-block">
+        <div class="help-block-title">FAB gombok (jobb alsó sarok)</div>
+        <ul>
+          <li><span class="help-chip">🏠</span> – átváltás a HazaÚt oldalra</li>
+          <li><span class="help-chip">🚌</span> – átváltás a VeszprémBusz oldalra</li>
+          <li><span class="help-chip">🗓</span> – menetrend: válassz járatot, megjelenik a teljes napi menetrend</li>
+        </ul>
+      </div>
+      <div class="help-block">
+        <div class="help-block-title">Beállítások pill (mobilon)</div>
+        <p>A jobb alsó sarokban lévő kis pill mutatja az aktuális irányát, napot és időpontot. Rákattintva megnyílik a beállítások panel. Görgetéskor összecsukódik, rákattintva újra kinyílik.</p>
+      </div>
+      <div class="help-block">
+        <div class="help-block-title">Bezárás</div>
+        <p>A beállítások panelt be lehet zárni:</p>
+        <ul>
+          <li>A <span class="help-chip">✕</span> gombbal</li>
+          <li><span class="help-chip">ESC</span> billentyűvel</li>
+          <li>Le húzva (mobilon)</li>
+          <li>Android vissza gombbal</li>
+        </ul>
+      </div>
+      <div class="help-block">
+        <div class="help-block-title">Nyelv</div>
+        <p>A fejlécben lévő <span class="help-chip">HU</span> / <span class="help-chip">EN</span> gombokkal váltható a megjelenítési nyelv.</p>
+      </div>
+    </div>
+
+  </div><!-- /lang-hu -->
+
+  <!-- ── EN ── -->
+  <div id="lang-en" style="display:none">
+
+    <div class="help-section">
+      <div class="help-section-header">
+        <div class="help-section-title">What is this app?</div>
+        <div class="help-section-sub">Quick overview</div>
+      </div>
+      <div class="help-block">
+        <p><strong>GoHome Planner</strong> is a public transport helper for Veszprém, Hungary. It has two parts:</p>
+        <ul>
+          <li><strong>HazaÚt</strong> – tells you when to leave so you get home from school on time</li>
+          <li><strong>VeszprémBusz</strong> – finds available routes between any two bus stops</li>
+        </ul>
+        <p>Switch between the two pages using the <span class="help-chip">🏠</span> and <span class="help-chip">🚌</span> buttons in the bottom right corner.</p>
+      </div>
+    </div>
+
+    <div class="help-section">
+      <div class="help-section-header green">
+        <div class="help-section-title">HazaÚt ✨</div>
+        <div class="help-section-sub">Home departure planner</div>
+      </div>
+      <div class="help-block">
+        <div class="help-block-title">First-time setup</div>
+        <p>Before using the app, you need to set your school and home bus stop:</p>
+        <ol>
+          <li>Click the <span class="help-chip">⚙️</span> gear icon in the header</li>
+          <li>Select your school from the list</li>
+          <li>Enter your home bus stop (search by name)</li>
+        </ol>
+        <p>These settings are saved — you won't need to enter them again.</p>
+      </div>
+      <div class="help-block">
+        <div class="help-block-title">Reading the main screen</div>
+        <p>The large green banner shows the <strong>next available departure</strong> and <strong>how many minutes</strong> until you need to leave. The cards below list all available options in order.</p>
+        <div class="help-tip">💡 If no routes remain today, the app will tell you. Use the day setting in the settings panel to check the next day's schedule.</div>
+      </div>
+      <div class="help-block">
+        <div class="help-block-title">Direction</div>
+        <p>Switch in the settings pill (bottom right) or the gear panel:</p>
+        <ul>
+          <li><span class="help-chip">School → Home</span> – from school heading home</li>
+          <li><span class="help-chip">Home → School</span> – from home to school</li>
+        </ul>
+      </div>
+      <div class="help-block">
+        <div class="help-block-title">Time</div>
+        <p>In <span class="help-chip">NOW</span> mode the app uses real time and updates automatically. Click the clock element to open the settings panel where you can set a custom time and day.</p>
+      </div>
+    </div>
+
+    <div class="help-section">
+      <div class="help-section-header">
+        <div class="help-section-title">VeszprémBusz 🚌</div>
+        <div class="help-section-sub">City bus route planner</div>
+      </div>
+      <div class="help-block">
+        <div class="help-block-title">Searching for a route</div>
+        <ol>
+          <li>Enter the <strong>From</strong> stop — start typing, the app autocompletes</li>
+          <li>Enter the <strong>To</strong> stop</li>
+          <li>Press <span class="help-chip">Search route</span></li>
+        </ol>
+        <p>Use the <span class="help-chip">⇅</span> button to swap stops — the app automatically re-plans.</p>
+      </div>
+      <div class="help-block">
+        <div class="help-block-title">Results</div>
+        <p>Each card shows one possible route: departure time, arrival time, duration, and required bus lines. The best option is also highlighted in the green banner at the top.</p>
+        <p>Tap a card to see the <strong>map view</strong> of the route.</p>
+      </div>
+      <div class="help-block">
+        <div class="help-block-title">Time and day settings</div>
+        <p>Click the clock element (top right) to open the settings panel:</p>
+        <ul>
+          <li>Time: <span class="help-chip">NOW</span> or a custom hour:minute</li>
+          <li>Day: today, tomorrow, or another day</li>
+          <li><span class="help-chip">🏖️</span> school holiday toggle — a different schedule applies during holidays</li>
+        </ul>
+        <div class="help-tip">💡 When a custom time is set, clicking the clock instantly switches back to NOW mode and re-plans.</div>
+      </div>
+    </div>
+
+    <div class="help-section">
+      <div class="help-section-header">
+        <div class="help-section-title">Shared features</div>
+        <div class="help-section-sub">Available on both pages</div>
+      </div>
+      <div class="help-block">
+        <div class="help-block-title">FAB buttons (bottom right corner)</div>
+        <ul>
+          <li><span class="help-chip">🏠</span> – switch to the HazaÚt page</li>
+          <li><span class="help-chip">🚌</span> – switch to the VeszprémBusz page</li>
+          <li><span class="help-chip">🗓</span> – timetable: select a bus line to see its full daily schedule</li>
+        </ul>
+      </div>
+      <div class="help-block">
+        <div class="help-block-title">Settings pill (mobile)</div>
+        <p>The small pill in the bottom right corner shows the current direction, day and time. Tap it to open the settings panel. It collapses while scrolling and expands again when tapped.</p>
+      </div>
+      <div class="help-block">
+        <div class="help-block-title">Closing panels</div>
+        <p>The settings panel can be closed by:</p>
+        <ul>
+          <li>The <span class="help-chip">✕</span> button</li>
+          <li><span class="help-chip">ESC</span> key</li>
+          <li>Swiping down (mobile)</li>
+          <li>Android back button</li>
+        </ul>
+      </div>
+      <div class="help-block">
+        <div class="help-block-title">Language</div>
+        <p>Use the <span class="help-chip">HU</span> / <span class="help-chip">EN</span> buttons in the header to switch the display language.</p>
+      </div>
+    </div>
+
+  </div><!-- /lang-en -->
+
+</div><!-- /help-body -->
+
+<div class="app-footer" style="padding-bottom:40px;">© 2026 Sándor Norbert</div>
+
+<script>
+  var currentLang = localStorage.getItem("lang") || "hu";
+  setLang(currentLang);
+
+  function setLang(l) {
+    currentLang = l;
+    document.getElementById("lang-hu").style.display = l === "hu" ? "" : "none";
+    document.getElementById("lang-en").style.display = l === "en" ? "" : "none";
+    document.getElementById("btn-hu").className = l === "hu" ? "active" : "";
+    document.getElementById("btn-en").className = l === "en" ? "active" : "";
+    document.getElementById("back-label").textContent = l === "hu" ? "Vissza" : "Back";
+    document.getElementById("page-title").textContent = l === "hu" ? "Súgó" : "Help";
+    document.documentElement.lang = l;
+  }
+</script>
+</body>
+</html>

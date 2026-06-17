@@ -9,6 +9,8 @@
   "background_color": "#FFF7EC",
   "theme_color": "#FFF7EC",
   "lang": "hu",
+  "dir": "ltr",
+  "id": "/",
   "categories": [
     "travel",
     "utilities"

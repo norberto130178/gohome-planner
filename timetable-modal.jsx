@@ -20,6 +20,27 @@ function BusTimetableModal({ busId, onClose, fromStop, isWeekend: isWeekendProp,
 
   const [currentBusId, setCurrentBusId] = React.useState(busId);
 
+  const didPushRef = React.useRef(false);
+  React.useEffect(() => {
+    history.pushState({ timetableModal: true }, "");
+    didPushRef.current = true;
+    function onPop() {
+      didPushRef.current = false;
+      onClose();
+    }
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
+
+  function handleClose() {
+    if (didPushRef.current) {
+      didPushRef.current = false;
+      history.back();
+    } else {
+      onClose();
+    }
+  }
+
   // Összes vonal ID-ja rendezve (navigációhoz)
   const allBusIds = React.useMemo(() => {
     const ids = [...new Set((window.CITY_BUSES_FULL || []).map(b => b.id))];
@@ -97,10 +118,10 @@ function BusTimetableModal({ busId, onClose, fromStop, isWeekend: isWeekendProp,
   }, []);
 
   React.useEffect(() => {
-    const handler = (e) => { if (e.key === 'Escape') onClose(); };
+    const handler = (e) => { if (e.key === 'Escape') handleClose(); };
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
-  }, [onClose]);
+  }, []);
 
   if (!allDirs.length) return null;
 
@@ -118,7 +139,7 @@ function BusTimetableModal({ busId, onClose, fromStop, isWeekend: isWeekendProp,
 
   const modal = (
     <div
-      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+      onClick={(e) => { if (e.target === e.currentTarget) handleClose(); }}
       style={{
         position: 'fixed', inset: 0, zIndex: 99999,
         background: 'rgba(0,0,0,0.55)',
@@ -197,7 +218,7 @@ function BusTimetableModal({ busId, onClose, fromStop, isWeekend: isWeekendProp,
             }}
           >🗺</button>
           <button
-            onClick={onClose}
+            onClick={handleClose}
             style={{
               background: 'rgba(255,255,255,0.25)', border: 'none',
               borderRadius: '50%', width: 36, height: 36,

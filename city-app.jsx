@@ -75,6 +75,7 @@ function StopSearch({ value, onChange, placeholder, id }) {
         onChange={handleChange}
         onFocus={calcAndOpen}
         onBlur={handleBlur}
+        onKeyDown={e => { if (e.key === "Escape") { setOpen(false); e.target.blur(); } }}
         placeholder={placeholder}
         autoComplete="off"
         className="v1-time-input"
@@ -83,7 +84,7 @@ function StopSearch({ value, onChange, placeholder, id }) {
       {query && (
         <button
           onMouseDown={e => e.preventDefault()}
-          onClick={() => { setQuery(""); onChange(""); setOpen(true); }}
+          onClick={() => { setQuery(""); onChange(""); calcAndOpen(); }}
           style={{
             position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)",
             background: "none", border: "none", cursor: "pointer",
@@ -616,6 +617,7 @@ function CityMobilePill({ timeMode, setTimeMode, customTime, setCustomTime, dayO
         <div className="sheet-handle" />
         <div className="sheet-head">
           <span className="sheet-head-title">{t.cityPlanTitle}</span>
+          <a href="help.html" style={{marginLeft:"auto",marginRight:8,fontSize:15,fontWeight:900,color:"var(--ink-soft)",textDecoration:"none",lineHeight:1,padding:"4px 8px",borderRadius:8,background:"var(--line)"}}>?</a>
           <button className="sheet-close" onClick={close}>✕</button>
         </div>
 
@@ -829,12 +831,10 @@ function CityApp() {
         <button onClick={() => setFormCollapsed(false)} style={{
           display:"flex", alignItems:"center", justifyContent:"space-between",
           background:"white", borderRadius:"var(--radius)",
-          padding:"11px 14px", boxShadow:"var(--shadow)", marginBottom:12,
+          padding:"11px 14px", boxShadow:"var(--shadow)",
           border:"none", cursor:"pointer", fontFamily:"Nunito,sans-serif",
           textAlign:"left",
-          width: isMobile ? "100%" : undefined,
-          maxWidth: isMobile ? undefined : 580,
-          margin: isMobile ? undefined : "0 auto 12px",
+          ...(isMobile ? { width:"100%", marginBottom: 12 } : { maxWidth: 580, margin: "0 auto 18px" }),
         }}>
           <div style={{display:"flex", flexDirection:"column", gap:2, minWidth:0}}>
             <div style={{fontSize:11, fontWeight:800, color:"var(--ink-soft)", textTransform:"uppercase", letterSpacing:"0.06em"}}>{t.routeSummaryLabel}</div>
@@ -847,8 +847,8 @@ function CityApp() {
       ) : (
       <div className="city-form-mobile" style={{
         background: "white", borderRadius: "var(--radius)",
-        boxShadow: "var(--shadow)", marginBottom: 16, overflow: "hidden",
-        maxWidth: isMobile ? undefined : 580, margin: isMobile ? undefined : "0 auto 16px",
+        boxShadow: "var(--shadow)", overflow: "hidden",
+        ...(isMobile ? { marginBottom: 12 } : { maxWidth: 580, margin: "0 auto 18px" }),
       }}>
         <div style={{display:"flex", alignItems:"stretch"}}>
           <button onClick={swap} title={t.swapStops} style={{
@@ -955,6 +955,8 @@ function CityApp() {
           </div>
         </>
       )}
+
+      <div className="app-footer">© 2026 Sándor Norbert</div>
 
       <CityMobilePill
         timeMode={timeMode} setTimeMode={setTimeMode}

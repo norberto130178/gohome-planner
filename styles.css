@@ -331,6 +331,11 @@ button { font-family: inherit; cursor: pointer; border: none; }
 .v1-empty-title { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
 .v1-empty-hint { color: var(--ink-soft); font-size: 15px; }
 
+.app-footer {
+  text-align: center; color: #9b8fad; font-size: 11px; font-weight: 700;
+  padding: 18px 0 8px;
+}
+
 /* ============================================================
    Variation 2: "Mission Board" — játékos kártya design küldetés érzéssel
    ============================================================ */
@@ -733,7 +738,8 @@ button { font-family: inherit; cursor: pointer; border: none; }
 .sheet-handle { width: 36px; height: 4px; background: #d0d8e0; border-radius: 2px; margin: 12px auto 0; }
 .sheet-head { display: flex; align-items: center; padding: 10px 20px 4px; }
 .sheet-head-title { flex: 1; font-size: 15px; font-weight: 900; color: #1a2a3a; }
-.sheet-close { background: #f0f4f8; border: none; border-radius: 50%; width: 28px; height: 28px; cursor: pointer; font-size: 14px; color: #8a9aaa; display: flex; align-items: center; justify-content: center; }
+.sheet-close { background: #1a2a3a; border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; font-size: 14px; font-weight: 900; color: white; display: flex; align-items: center; justify-content: center; transition: background 0.15s; }
+.sheet-close:hover { background: #e53935; }
 .sec-title { font-size: 10px; font-weight: 800; color: #b0c0cc; text-transform: uppercase; letter-spacing: 0.09em; padding: 14px 20px 5px; }
 .sheet-row { display: flex; align-items: center; padding: 12px 20px; gap: 13px; border-bottom: 1px solid #f0f4f8; }
 .row-icon { font-size: 19px; width: 26px; text-align: center; flex-shrink: 0; }

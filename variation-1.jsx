@@ -85,17 +85,15 @@ function MobileSettingsPill({ state, setState, open, setOpen, onTimetable }) {
             <window.TimetableDropdown onSelect={onTimetable} upward fabStyle lang={state.lang} />
           </div>
         )}
-        <div className="mobile-pill">
-          <button className="pill-zone pill-zone-gear" onClick={() => setOpen(true)}>⚙️</button>
+        <div className="mobile-pill" onClick={() => setOpen(true)} style={{cursor:"pointer"}}>
+          <span style={{fontSize:15, padding:"5px 9px", opacity:0.8}}>⚙️</span>
           <span className="pill-sep-mid" />
-          <button className="pill-zone pill-zone-chips" onClick={() => setOpen(true)}>
-            <div className="pill-extras">
-              <span className="pill-chip pill-hl">{dirLabel}</span>
-              <span className="pill-chip">{activeDay.label}</span>
-              <span className="pill-chip">{timeLabel}</span>
-              {flags.length > 0 && <span className="pill-chip">{flags.join(" ")}</span>}
-            </div>
-          </button>
+          <div className="pill-extras pill-zone-chips">
+            <span className="pill-chip pill-hl">{dirLabel}</span>
+            <span className="pill-chip">{activeDay.label}</span>
+            <span className="pill-chip">{timeLabel}</span>
+            {flags.length > 0 && <span className="pill-chip">{flags.join(" ")}</span>}
+          </div>
         </div>
       </div>
 
@@ -105,6 +103,7 @@ function MobileSettingsPill({ state, setState, open, setOpen, onTimetable }) {
         <div className="sheet-handle" />
         <div className="sheet-head">
           <span className="sheet-head-title">{t.planningTitle}</span>
+          <a href="help.html" style={{marginLeft:"auto",marginRight:8,fontSize:15,fontWeight:900,color:"var(--ink-soft)",textDecoration:"none",lineHeight:1,padding:"4px 8px",borderRadius:8,background:"var(--line)"}}>?</a>
           <button className="sheet-close" onClick={() => { setOpen(false); setCollapsed(false); }}>✕</button>
         </div>
 
@@ -212,6 +211,7 @@ function V1Variation({ state, setState, t, langSwitcher, navLinks, onTimetable }
   const [settingsOpen, setSettingsOpen] = React.useState(false);
   const [sheetOpen, setSheetOpen] = React.useState(false);
   const didPushHistory = React.useRef(false);
+  const didPushSettingsHistory = React.useRef(false);
   const isNowMode = state.mode === "now";
 
   function openSheet() {
@@ -226,11 +226,27 @@ function V1Variation({ state, setState, t, langSwitcher, navLinks, onTimetable }
       history.back();
     }
   }
+  function openSettingsModal() {
+    setSettingsOpen(true);
+    history.pushState({ settingsModal: true }, "");
+    didPushSettingsHistory.current = true;
+  }
+  function closeSettingsModal() {
+    setSettingsOpen(false);
+    if (didPushSettingsHistory.current) {
+      didPushSettingsHistory.current = false;
+      history.back();
+    }
+  }
   React.useEffect(() => {
     function onPop() {
       if (didPushHistory.current) {
         didPushHistory.current = false;
         setSheetOpen(false);
+      }
+      if (didPushSettingsHistory.current) {
+        didPushSettingsHistory.current = false;
+        setSettingsOpen(false);
       }
     }
     window.addEventListener("popstate", onPop);
@@ -244,7 +260,7 @@ function V1Variation({ state, setState, t, langSwitcher, navLinks, onTimetable }
 
   return (
     <div className="v1">
-      {settingsOpen && <window.SchoolSettingsModal onClose={() => { setSettingsOpen(false); state.refreshSettings?.(); }} lang={state.lang} />}
+      {settingsOpen && <window.SchoolSettingsModal onClose={() => { closeSettingsModal(); state.refreshSettings?.(); }} lang={state.lang} />}
       <div className="v1-header" style={isMobile ? {flexDirection:"row",alignItems:"center",justifyContent:"space-between",gap:8} : {}}>
         <div style={isMobile ? {flex:1,minWidth:0} : {}}>
           <div style={{display:"flex",alignItems:"center",gap:10,flexWrap:isMobile?undefined:"wrap"}}>
@@ -253,7 +269,7 @@ function V1Variation({ state, setState, t, langSwitcher, navLinks, onTimetable }
             {!isMobile && (
               <div style={{display:"flex",gap:6,alignItems:"center"}}>
                 {langSwitcher}
-                <button onClick={() => setSettingsOpen(true)}
+                <button onClick={() => openSettingsModal()}
                   data-tooltip={state.lang==="hu" ? "Iskola és megálló beállítások" : "School & stop settings"}
                   data-tooltip-dir="down"
                   style={{background:"var(--line)",border:"none",borderRadius:10,padding:"6px 10px",cursor:"pointer",fontSize:16,lineHeight:1,color:"var(--ink)"}}>⚙️</button>
@@ -269,7 +285,7 @@ function V1Variation({ state, setState, t, langSwitcher, navLinks, onTimetable }
         {isMobile && (
           <div style={{display:"flex",gap:6,alignItems:"center",flexShrink:0}}>
             {langSwitcher}
-            <button onClick={() => setSettingsOpen(true)} title="Beállítások" style={{background:"var(--line)",border:"none",borderRadius:10,padding:"6px 10px",cursor:"pointer",fontSize:16,lineHeight:1,color:"var(--ink)"}}>⚙️</button>
+            <button onClick={() => openSettingsModal()} title="Beállítások" style={{background:"var(--line)",border:"none",borderRadius:10,padding:"6px 10px",cursor:"pointer",fontSize:16,lineHeight:1,color:"var(--ink)"}}>⚙️</button>
           </div>
         )}
         {!isMobile && (
@@ -345,7 +361,7 @@ function V1Variation({ state, setState, t, langSwitcher, navLinks, onTimetable }
           <div className="v1-empty-title">{state.lang === "hu" ? "Nincs beállítva iskola és megálló" : "School and stop not configured"}</div>
           <div className="v1-empty-hint">{state.lang === "hu" ? "A tervezőhöz add meg a lakóhelyed megállóját és a kiválasztott iskolát a beállításokban." : "Set your home stop and school in settings to enable route planning."}</div>
           <button
-            onClick={() => setSettingsOpen(true)}
+            onClick={() => openSettingsModal()}
             style={{marginTop:16,fontSize:14,fontWeight:800,fontFamily:'Nunito,sans-serif',background:'var(--accent)',color:'white',border:'none',padding:'10px 20px',borderRadius:12,cursor:'pointer',boxShadow:'0 4px 16px rgba(0,0,0,0.15)'}}
           >⚙️ {state.lang === "hu" ? "Beállítások megnyitása" : "Open settings"}</button>
         </div>
@@ -374,6 +390,7 @@ function V1Variation({ state, setState, t, langSwitcher, navLinks, onTimetable }
           </div>
         </div>
       )}
+      <div className="app-footer">© 2026 Sándor Norbert</div>
     </div>
   );
 }

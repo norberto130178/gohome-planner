@@ -6,9 +6,10 @@
 let _modalOpenCount = 0;
 
 // dayType: "workday" | "schoolholiday" | "weekend"  (isWeekend kept for backward compat)
-function BusTimetableModal({ busId, onClose, fromStop, isWeekend: isWeekendProp, dayType: dayTypeProp, nowMins: nowMinsProp, initialDep }) {
+function BusTimetableModal({ busId, onClose, fromStop, isWeekend: isWeekendProp, dayType: dayTypeProp, nowMins: nowMinsProp, initialDep, lang }) {
   const U = window.BUS_UTILS;
   const fmt = (m) => U.fmtTime(m);
+  const t = (window.I18N && window.I18N[lang || "hu"]) || window.I18N?.hu || {};
 
   const _now = new Date();
   const nowMins = nowMinsProp !== undefined ? nowMinsProp : _now.getHours() * 60 + _now.getMinutes();
@@ -160,7 +161,7 @@ function BusTimetableModal({ busId, onClose, fromStop, isWeekend: isWeekendProp,
             <div style={{ fontSize: 17, fontWeight: 900 }}>{bus0.label}</div>
             <div style={{ fontSize: 11, opacity: 0.8, display:'flex', gap:6, flexWrap:'wrap', alignItems:'center' }}>
               {(['workday','schoolholiday','weekend']).map(dt => {
-                const label = dt === 'workday' ? 'Hétköznap' : dt === 'schoolholiday' ? 'Tanszünet' : 'Hétvége';
+                const label = dt === 'workday' ? (t.workday || 'Hétköznap') : dt === 'schoolholiday' ? (t.schoolHolidayLabel || 'Tanszünet') : (t.weekend || 'Hétvége');
                 const hasData = allDirs.some(b => b.departures[dt] && Object.keys(b.departures[dt]).length > 0);
                 if (!hasData && dt !== activeDayType) return null;
                 return (
@@ -174,7 +175,7 @@ function BusTimetableModal({ busId, onClose, fromStop, isWeekend: isWeekendProp,
                 );
               })}
               {/* hidden placeholder to keep original text for compat */}
-              <span style={{display:'none'}}>{isWeekend ? 'Hétvégi' : 'Hétköznapi'} menetrend</span>
+              <span style={{display:'none'}}>{isWeekend ? t.weekendSchedule : t.weekdaySchedule}</span>
             </div>
           </div>
           <button onClick={goNext} style={{
@@ -268,11 +269,11 @@ function BusTimetableModal({ busId, onClose, fromStop, isWeekend: isWeekendProp,
                 gap: 8, justifyContent: 'center',
               }}
             >
-              {stopsOpen ? '▲ Megállók elrejtése' : `▼ ${middleCount} közbülső megálló`}
+              {stopsOpen ? `▲ ${t.hideStops || 'Megállók elrejtése'}` : `▼ ${middleCount} ${t.midStopsLabel || 'közbülső megálló'}`}
             </button>
             {stopsOpen && (
               <div style={{ maxHeight: '45vh', overflowY: 'auto' }}>
-                <StopTimeline bus={selBus} selectedDep={selDep} nowMins={nowMins} fmt={fmt} />
+                <StopTimeline bus={selBus} selectedDep={selDep} nowMins={nowMins} fmt={fmt} lang={lang} />
               </div>
             )}
           </div>
@@ -305,7 +306,8 @@ function BusTimetableModal({ busId, onClose, fromStop, isWeekend: isWeekendProp,
   return ReactDOM.createPortal(modal, document.body);
 }
 
-function StopTimeline({ bus, selectedDep, nowMins, fmt }) {
+function StopTimeline({ bus, selectedDep, nowMins, fmt, lang }) {
+  const t = (window.I18N && window.I18N[lang || "hu"]) || window.I18N?.hu || {};
   const stops = bus.stops;
   const first = stops[0];
   const last = stops[stops.length - 1];
@@ -367,7 +369,7 @@ function StopTimeline({ bus, selectedDep, nowMins, fmt }) {
             cursor: 'pointer', color: 'var(--ink-soft)',
           }}
         >
-          {midOpen ? '▲ Elrejtés' : `▼ ${middle.length} megálló részletei`}
+          {midOpen ? `▲ ${t.hideTimeline || 'Elrejtés'}` : `▼ ${middle.length} ${t.stopDetailsLabel || 'megálló részletei'}`}
         </button>
       </div>
 
@@ -604,7 +606,8 @@ function BusRouteMap({ bus, color, selectedDep, nowMins, fmt, modalRef }) {
 window.BusTimetableModal = BusTimetableModal;
 
 // Menetrendek dropdown — közös komponens, főoldalon és city oldalon is elérhető
-function TimetableDropdown({ onSelect, upward, tabStyle, bgColor }) {
+function TimetableDropdown({ onSelect, upward, tabStyle, bgColor, lang }) {
+  const t = (window.I18N && window.I18N[lang || "hu"]) || window.I18N?.hu || {};
   const [open, setOpen] = React.useState(false);
   const ref = React.useRef(null);
   const buses = [...new Map((window.CITY_BUSES_FULL||[]).map(b=>[b.id,b])).values()];
@@ -646,10 +649,10 @@ function TimetableDropdown({ onSelect, upward, tabStyle, bgColor }) {
         {tabStyle ? (
           <>
             <span style={{fontSize:18, lineHeight:1}}>🗓</span>
-            <span style={{fontSize:10, fontWeight:700, fontFamily:"Nunito,sans-serif", color:"rgba(255,255,255,0.9)", letterSpacing:"0.02em"}}>Menetrendek</span>
+            <span style={{fontSize:10, fontWeight:700, fontFamily:"Nunito,sans-serif", color:"rgba(255,255,255,0.9)", letterSpacing:"0.02em"}}>{t.timetables || "Menetrendek"}</span>
           </>
         ) : (
-          <>🗓 Menetrendek {open ? "▲" : "▼"}</>
+          <>🗓 {t.timetables || "Menetrendek"} {open ? "▲" : "▼"}</>
         )}
       </button>
       {open && (

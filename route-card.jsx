@@ -59,7 +59,7 @@ function RouteCard({ route, index, isPrimary, t, style, isWeekend, dayType, nowM
         </span>
       </div>
       {route.homeStop && route.homeStop !== "Csererdő" && (
-        <div style={{fontSize:12,opacity:0.7,marginBottom:4,fontWeight:700}}>📍 Leszállás: {route.homeStop}</div>
+        <div style={{fontSize:12,opacity:0.7,marginBottom:4,fontWeight:700}}>📍 {t.alightStop}: {route.homeStop}</div>
       )}
 
       <div className="route-steps">
@@ -204,6 +204,7 @@ function normStop(name) {
 }
 
 function HomeRouteMap({ route }) {
+  const _t = (window.I18N?.[localStorage.getItem("lang") || "hu"]) || window.I18N?.hu || {};
   const mapRef = React.useRef(null);
   const containerRef = React.useRef(null);
   const instanceRef = React.useRef(null);
@@ -333,7 +334,7 @@ function HomeRouteMap({ route }) {
   return (
     <div ref={containerRef} style={{ borderTop: '2px solid var(--line)', position: 'relative' }}>
       <div ref={mapRef} style={{ height: fsState ? '100%' : 300, width: '100%' }} />
-      <button onClick={toggleFullscreen} title={fsState ? 'Kilépés' : 'Teljes képernyő'} style={{
+      <button onClick={toggleFullscreen} title={fsState ? _t.exitFullscreen : _t.fullscreen} style={{
         position: 'absolute', top: fsState ? 28 : 10, right: fsState ? 28 : 10, zIndex: 1000,
         background: '#1a73e8',
         border: '2px solid #1a73e8',
@@ -367,6 +368,7 @@ function walkArc(lat1, lon1, lat2, lon2, steps = 24) {
 
 // ── CitySchoolRouteMap — Leaflet térkép a városi iskolás útvonalhoz ──
 function CitySchoolRouteMap({ route, direction, schoolData }) {
+  const _t = (window.I18N?.[localStorage.getItem("lang") || "hu"]) || window.I18N?.hu || {};
   const mapRef = React.useRef(null);
   const containerRef = React.useRef(null);
   const instanceRef = React.useRef(null);
@@ -494,7 +496,7 @@ function CitySchoolRouteMap({ route, direction, schoolData }) {
   return (
     <div ref={containerRef} style={{ borderTop: '2px solid var(--line)', position: 'relative' }}>
       <div ref={mapRef} style={{ height: fsState ? '100%' : 300, width: '100%' }} />
-      <button onClick={toggleFullscreen} title={fsState ? 'Kilépés' : 'Teljes képernyő'} style={{
+      <button onClick={toggleFullscreen} title={fsState ? _t.exitFullscreen : _t.fullscreen} style={{
         position: 'absolute', top: fsState ? 28 : 10, right: fsState ? 28 : 10, zIndex: 1000,
         background: '#1a73e8', border: '2px solid #1a73e8',
         borderRadius: 8, padding: '4px 8px', cursor: 'pointer',
@@ -779,7 +781,8 @@ function CitySchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, n
 window.CitySchoolRouteCard = CitySchoolRouteCard;
 
 // ── SchoolSettingsModal ──────────────────────────────────────────────
-function SchoolSettingsModal({ onClose }) {
+function SchoolSettingsModal({ onClose, lang }) {
+  const t = (window.I18N && window.I18N[lang || "hu"]) || window.I18N?.hu || {};
   const schools = window.SCHOOLS || [];
   const [selected, setSelected] = React.useState(() => localStorage.getItem("selectedSchool") || "");
   const [schoolQuery, setSchoolQuery] = React.useState(() => {
@@ -1031,20 +1034,20 @@ function SchoolSettingsModal({ onClose }) {
         boxShadow: "0 16px 48px rgba(0,0,0,0.3)", fontFamily: "Nunito, sans-serif",
       }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
-          <div style={{ fontSize: 20, fontWeight: 900, color: "var(--ink)" }}>⚙ Beállítások</div>
+          <div style={{ fontSize: 20, fontWeight: 900, color: "var(--ink)" }}>⚙ {t.settings || "Beállítások"}</div>
           <button onClick={onClose} style={{ background: "none", border: "none", fontSize: 24, cursor: "pointer", color: "var(--ink-soft)", padding: "0 4px", lineHeight: 1 }}>×</button>
         </div>
 
         <div style={{ marginBottom: 16 }}>
           <div style={{ fontSize: 12, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--ink-soft)", marginBottom: 8 }}>
-            Melyik iskolába jársz?
+            {t.schoolQuestion || "Melyik iskolába jársz?"}
           </div>
           <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
                 <input
                   type="text"
-                  placeholder="— Keress iskola névre —"
+                  placeholder={t.schoolSearchPlaceholder || "— Keress iskola névre —"}
                   value={schoolQuery}
                   onChange={e => {
                     setSchoolQuery(e.target.value);
@@ -1064,7 +1067,7 @@ function SchoolSettingsModal({ onClose }) {
               {schoolInputFocused && (
                 <div style={{ background: "white", border: "2px solid var(--line)", borderTop: "none", borderRadius: "0 0 10px 10px", maxHeight: 220, overflowY: "auto", boxShadow: "0 8px 24px rgba(0,0,0,0.15)" }}>
                   {filteredSchools.length === 0 && (
-                    <div style={{ padding: "10px 12px", fontSize: 13, color: "var(--ink-soft)", fontStyle: "italic" }}>Nincs találat</div>
+                    <div style={{ padding: "10px 12px", fontSize: 13, color: "var(--ink-soft)", fontStyle: "italic" }}>{t.noResults || "Nincs találat"}</div>
                   )}
                   {filteredSchools.map(school => (
                     <div
@@ -1096,28 +1099,28 @@ function SchoolSettingsModal({ onClose }) {
             const mins = Math.ceil(stop.dist / 80);
             return (
               <div style={{ marginTop: 8, fontSize: 12, color: "var(--ink-soft)", fontWeight: 600 }}>
-                {selectedSchool.helykoziOnly ? "Helyközi busz · legközelebbi megálló: " : "Legközelebbi megálló: "}
-                <b style={{ color: "var(--ink)" }}>{stop.name}</b> ({stop.dist}m · ~{mins} perc gyalog)
+                {selectedSchool.helykoziOnly ? (t.intercityBusStop || "Helyközi busz · legközelebbi megálló: ") : (t.nearestStop || "Legközelebbi megálló: ")}
+                <b style={{ color: "var(--ink)" }}>{stop.name}</b> ({stop.dist}m · ~{mins} {t.walkMinLabel || "perc gyalog"})
               </div>
             );
           })()}
           {selectedSchool?.helykoziOnly && !selectedSchool.nearbyStops?.length && (
             <div style={{ marginTop: 8, fontSize: 12, color: "var(--ink-soft)", fontWeight: 600 }}>
-              Helyközi busz szükséges (Nemesvámos)
+              {t.intercityRequired || "Helyközi busz szükséges (Nemesvámos)"}
             </div>
           )}
         </div>
 
         <div style={{ marginBottom: 16 }}>
           <div style={{ fontSize: 12, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--ink-soft)", marginBottom: 8 }}>
-            Hol szállsz fel reggel?
+            {t.boardingQuestion || "Hol szállsz fel reggel?"}
           </div>
           <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
                 <input
                   type="text"
-                  placeholder="— Keress megálló névre —"
+                  placeholder={t.stopSearchPlaceholder || "— Keress megálló névre —"}
                   value={homeQuery}
                   onChange={e => { setHomeQuery(e.target.value); if (homeStop && e.target.value !== homeStop.name) setHomeStop(null); }}
                   onFocus={() => setHomeInputFocused(true)}
@@ -1134,7 +1137,7 @@ function SchoolSettingsModal({ onClose }) {
               {homeInputFocused && (
                 <div style={{ background: "white", border: "2px solid var(--line)", borderTop: "none", borderRadius: "0 0 10px 10px", maxHeight: 280, overflowY: "auto", boxShadow: "0 8px 24px rgba(0,0,0,0.15)" }}>
                   {filteredStops.length === 0 && (
-                    <div style={{ padding: "10px 12px", fontSize: 13, color: "var(--ink-soft)", fontStyle: "italic" }}>Nincs találat</div>
+                    <div style={{ padding: "10px 12px", fontSize: 13, color: "var(--ink-soft)", fontStyle: "italic" }}>{t.noResults || "Nincs találat"}</div>
                   )}
                   {filteredStops.map(stop => (
                     <div
@@ -1187,12 +1190,12 @@ function SchoolSettingsModal({ onClose }) {
               ))}
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, fontWeight: 700, color: 'var(--ink-soft)' }}>
                 <span style={{ width: 12, height: 12, borderRadius: '50%', background: '#e53935', display: 'inline-block', flexShrink: 0, border: '2px solid white', boxShadow: '0 0 0 1px #e53935' }} />
-                Kiválasztott
+                {t.selectedLabel}
               </span>
             </div>
             <div ref={containerRef} style={{ borderTop: '2px solid var(--line)', position: 'relative', marginBottom: 16, borderRadius: 12, overflow: 'hidden' }}>
               <div ref={mapRef} style={{ height: fsState ? '100%' : 340, width: '100%' }} />
-              <button onClick={toggleFullscreen} title={fsState ? 'Kilépés' : 'Teljes képernyő'} style={{
+              <button onClick={toggleFullscreen} title={fsState ? _t.exitFullscreen : _t.fullscreen} style={{
                 position: 'absolute', top: fsState ? 28 : 10, right: fsState ? 28 : 10, zIndex: 1000,
                 background: '#1a73e8', border: '2px solid #1a73e8',
                 borderRadius: 8, padding: '4px 8px', cursor: 'pointer',
@@ -1208,12 +1211,12 @@ function SchoolSettingsModal({ onClose }) {
             padding: "9px 18px", borderRadius: 10, border: "2px solid var(--line)",
             background: "white", fontFamily: "Nunito, sans-serif",
             fontSize: 14, fontWeight: 800, cursor: "pointer", color: "var(--ink)",
-          }}>Mégse</button>
+          }}>{t.cancel || "Mégse"}</button>
           <button onClick={save} style={{
             padding: "9px 22px", borderRadius: 10, border: "none",
             background: "var(--accent)", color: "white", fontFamily: "Nunito, sans-serif",
             fontSize: 14, fontWeight: 800, cursor: "pointer",
-          }}>Mentés</button>
+          }}>{t.save || "Mentés"}</button>
         </div>
       </div>
     </div>
@@ -1430,6 +1433,7 @@ function SchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, nowMi
 }
 
 function SchoolRouteMap({ route, schoolData }) {
+  const _t = (window.I18N?.[localStorage.getItem("lang") || "hu"]) || window.I18N?.hu || {};
   const mapRef = React.useRef(null);
   const containerRef = React.useRef(null);
   const instanceRef = React.useRef(null);
@@ -1564,7 +1568,7 @@ function SchoolRouteMap({ route, schoolData }) {
   return (
     <div ref={containerRef} style={{ borderTop: '2px solid var(--line)', position: 'relative' }}>
       <div ref={mapRef} style={{ height: fsState ? '100%' : 300, width: '100%' }} />
-      <button onClick={toggleFullscreen} title={fsState ? 'Kilépés' : 'Teljes képernyő'} style={{
+      <button onClick={toggleFullscreen} title={fsState ? _t.exitFullscreen : _t.fullscreen} style={{
         position: 'absolute', top: fsState ? 28 : 10, right: fsState ? 28 : 10, zIndex: 1000,
         background: '#1a73e8',
         border: '2px solid #1a73e8',

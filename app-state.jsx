@@ -29,7 +29,7 @@ function DestinationPickerWidget({ stops, linesMap, value, onSelect, onClear, la
 
   return (
     <div ref={wrapRef} style={{display:"flex",alignItems:"center",gap:8}}>
-      <span style={{fontSize:isMobile?10:12,fontWeight:800,color:labelColor,letterSpacing:'0.1em',textTransform:'uppercase',marginRight:4}}>
+      <span style={{fontSize:19,fontWeight:800,color:labelColor,letterSpacing:'0.1em',textTransform:'uppercase',marginRight:4}}>
         🏠{!isMobile && <> {lang==="hu"?"Célállomás":"Destination"}:</>}
       </span>
       <div className="stop-picker-input-wrap">
@@ -183,7 +183,7 @@ function useAppState(options = {}) {
       return Object.assign([], { notConfigured: true });
     }
 
-    const homeStopName = settingsHomeStop.name;
+    const homeStopName = (direction === "home" && homeStop) ? homeStop : settingsHomeStop.name;
     const nearestStop = schoolData.nearbyStops?.[0];
     const schoolWalkMins = nearestStop ? Math.ceil(nearestStop.dist / 80) : 0;
 
@@ -261,7 +261,7 @@ function useAppState(options = {}) {
       r.homeStopName = homeStopName;
     });
     return cityRoutes;
-  }, [now, direction, schoolFilter, schoolHoliday, settingsKey, settingsHomeStop, schoolData]);
+  }, [now, direction, schoolFilter, schoolHoliday, settingsKey, settingsHomeStop, schoolData, homeStop]);
 
   const t = window.I18N[lang];
 

@@ -47,14 +47,15 @@ function MobileSettingsPill({ state, setState }) {
     if (dy > 80) { setOpen(false); setCollapsed(false); }
   }
 
+  const t = window.I18N[state.lang] || window.I18N.hu;
   const isNow = state.mode === "now";
   const timePresets = state.direction === "school"
     ? ["06:00","06:30","07:00","07:30","08:00","08:30"]
     : ["13:00","13:30","14:00","14:30","15:00","15:30","16:00","16:30"];
 
   const activeDay = (state.dayPickerOptions || [])[state.activeDayOffset] || { label: "Ma" };
-  const dirLabel = state.direction === "school" ? "🏫 Iskolába" : "🏠 Haza";
-  const timeLabel = isNow ? "Most" : state.customTime;
+  const dirLabel = state.direction === "school" ? t.directionSchool : t.directionHome;
+  const timeLabel = isNow ? t.now : state.customTime;
   const flags = [
     state.direction === "school" && state.schoolFilter ? "🎒" : null,
     state.schoolHoliday ? "🏖️" : null,
@@ -83,22 +84,22 @@ function MobileSettingsPill({ state, setState }) {
         onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
         <div className="sheet-handle" />
         <div className="sheet-head">
-          <span className="sheet-head-title">Tervezés</span>
+          <span className="sheet-head-title">{t.planningTitle}</span>
           <button className="sheet-close" onClick={() => { setOpen(false); setCollapsed(false); }}>✕</button>
         </div>
 
-        <div className="sec-title">Irány</div>
+        <div className="sec-title">{t.directionLabel}</div>
         <div className="sheet-row" style={{paddingBottom:8, borderBottom:"none"}}>
           <span className="row-icon">🔀</span>
           <div style={{display:"flex", gap:6}}>
             <button className={"sel-pill" + (state.direction==="school" ? " on green" : "")}
-              onClick={() => setState({...state, direction:"school"})}>🏫 Iskolába</button>
+              onClick={() => setState({...state, direction:"school"})}>{t.directionSchool}</button>
             <button className={"sel-pill" + (state.direction==="home" ? " on blue" : "")}
-              onClick={() => setState({...state, direction:"home"})}>🏠 Haza</button>
+              onClick={() => setState({...state, direction:"home"})}>{t.directionHome}</button>
           </div>
         </div>
         {state.direction === "home" && hp.stops && (
-          <div style={{padding:"4px 20px 12px 59px"}}>
+          <div style={{padding:"4px 20px 12px 20px"}}>
             <window.DestinationPickerWidget
               stops={hp.stops} linesMap={hp.linesMap}
               value={hp.value} onSelect={hp.onSelect} onClear={hp.onClear}
@@ -108,7 +109,7 @@ function MobileSettingsPill({ state, setState }) {
           </div>
         )}
 
-        <div className="sec-title">Nap</div>
+        <div className="sec-title">{t.daySection}</div>
         <div className="day-chips-grid">
           {(state.dayPickerOptions || []).map(o => {
             const short = o.offset === 1 ? (state.lang === "hu" ? "Hol" : "Tom") : o.label.slice(0, 3);
@@ -122,10 +123,10 @@ function MobileSettingsPill({ state, setState }) {
           })}
         </div>
 
-        <div className="sec-title">Indulási idő</div>
+        <div className="sec-title">{t.departureTime}</div>
         <div style={{padding:"0 20px 14px"}}>
           <div style={{display:"flex", gap:5, flexWrap:"wrap", marginBottom:10}}>
-            <button className={"sel-pill" + (isNow ? " on" : "")} onClick={goNow}>⏱ Most</button>
+            <button className={"sel-pill" + (isNow ? " on" : "")} onClick={goNow}>{t.nowBtn}</button>
             {timePresets.map(t => (
               <button key={t} className={"sel-pill" + (!isNow && state.customTime===t ? " on" : "")}
                 onClick={() => setTime(t)}>{t}</button>
@@ -133,18 +134,18 @@ function MobileSettingsPill({ state, setState }) {
           </div>
           <input type="time" value={isNow ? "" : state.customTime}
             onChange={e => setTime(e.target.value)}
-            placeholder="egyéni…"
+            placeholder={t.customPlaceholder}
             className="v1-time-input"
             style={{fontSize:14, padding:"6px 10px", borderRadius:10}} />
         </div>
 
-        <div className="sec-title">Szűrők</div>
+        <div className="sec-title">{t.filters}</div>
         {state.direction === "school" && (
           <div className="sheet-row">
             <span className="row-icon">🎒</span>
             <div className="row-label">
-              <strong>Reggeli szűrő</strong>
-              <small>Csak 10:00 előtt érkező járatok</small>
+              <strong>{t.morningFilter}</strong>
+              <small>{t.morningFilterSub}</small>
             </div>
             <button className={"toggle" + (state.schoolFilter ? " on" : "")}
               onClick={() => state.setSchoolFilter(f => !f)} />
@@ -153,8 +154,8 @@ function MobileSettingsPill({ state, setState }) {
         <div className="sheet-row">
           <span className="row-icon">🏖️</span>
           <div className="row-label">
-            <strong>Tanszünet</strong>
-            <small>Szünetidőszak menetrendje</small>
+            <strong>{t.schoolHolidayLabel}</strong>
+            <small>{t.schoolHolidaySub}</small>
           </div>
           <button className={"toggle" + (state.schoolHoliday ? " on" : "")}
             onClick={state.toggleSchoolHoliday} />
@@ -193,12 +194,12 @@ function V1Variation({ state, setState, t, langSwitcher, navLinks }) {
 
   const isSchool = state.direction === "school";
   const subtitle = isSchool
-    ? (state.schoolData ? `Iskolába: ${state.schoolData.name}` : (state.lang === "hu" ? "Hogy jutsz el az iskolába?" : "How to get to school?"))
-    : (state.settingsHomeStop ? `Hazaút: ${state.settingsHomeStop.name}` : t.appSubtitle);
+    ? (state.schoolData ? `${t.subtitleSchool}: ${state.schoolData.name}` : (state.lang === "hu" ? "Hogy jutsz el az iskolába?" : "How to get to school?"))
+    : (state.settingsHomeStop ? `${t.subtitleHome}: ${state.settingsHomeStop.name}` : t.appSubtitle);
 
   return (
     <div className="v1">
-      {settingsOpen && <window.SchoolSettingsModal onClose={() => { setSettingsOpen(false); state.refreshSettings?.(); }} />}
+      {settingsOpen && <window.SchoolSettingsModal onClose={() => { setSettingsOpen(false); state.refreshSettings?.(); }} lang={state.lang} />}
       <div className="v1-header" style={isMobile ? {flexDirection:"row",alignItems:"center",justifyContent:"space-between",gap:8} : {}}>
         <div style={isMobile ? {flex:1,minWidth:0} : {}}>
           <div style={{display:"flex",alignItems:"center",gap:10,flexWrap:isMobile?undefined:"wrap"}}>
@@ -277,7 +278,7 @@ function V1Variation({ state, setState, t, langSwitcher, navLinks }) {
             {state.TransferPicker && state.TransferPicker({})}
           </div>
           <div style={{display:'flex',gap:8,alignItems:'center',alignSelf:'flex-end',marginLeft:'auto'}}>
-            <button onClick={() => setSettingsOpen(true)} title="Beállítások" style={{fontSize:13,fontWeight:800,fontFamily:"Nunito,sans-serif",background:"var(--line)",color:"var(--ink)",border:"none",padding:"10px 14px",borderRadius:10,whiteSpace:"nowrap",cursor:"pointer",boxShadow:"0 8px 24px rgba(0,0,0,0.1)"}}>⚙️ Beállítások</button>
+            <button onClick={() => setSettingsOpen(true)} title="Beállítások" style={{fontSize:13,fontWeight:800,fontFamily:"Nunito,sans-serif",background:"var(--line)",color:"var(--ink)",border:"none",padding:"10px 14px",borderRadius:10,whiteSpace:"nowrap",cursor:"pointer",boxShadow:"0 8px 24px rgba(0,0,0,0.1)"}}>{t.settingsBtn}</button>
             <a href="city.html" style={{fontSize:13,fontWeight:800,fontFamily:"Nunito,sans-serif",textDecoration:"none",background:"#00796B",color:"white",padding:"10px 14px",borderRadius:10,whiteSpace:"nowrap",boxShadow:"0 8px 24px rgba(0,0,0,0.2)"}}>🚌 VeszprémBusz →</a>
           </div>
         </div>

@@ -11,8 +11,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
 
-<script>window.APP_VERSION = "v3.13";</script>
-<link rel="stylesheet" href="styles.css?v=v3.13">
+<script>window.APP_VERSION = "v3.14";</script>
+<link rel="stylesheet" href="styles.css?v=v3.14">
 
 <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
@@ -46,27 +46,13 @@ function App() {
 
   return (
     <>
-      <window.V1Variation state={state} setState={setState} t={t} langSwitcher={
+      <window.V1Variation state={state} setState={setState} t={t} onTimetable={id => setTimetableBusId(id)} langSwitcher={
         <div style={{display:"flex",gap:4,alignItems:"center"}}>
           <button className="tweaks-pill" data-tooltip="Magyar" style={lang==="hu"?{background:"var(--accent)",color:"white"}:{}} onClick={() => setLang("hu")}>HU</button>
           <button className="tweaks-pill" data-tooltip="English" style={lang==="en"?{background:"var(--accent)",color:"white"}:{}} onClick={() => setLang("en")}>EN</button>
         </div>
       } />
       {timetableBusId && <window.BusTimetableModal busId={timetableBusId} onClose={() => setTimetableBusId(null)} lang={lang} />}
-      <div className="nav-bottom">
-        <a href="city.html" style={{
-          flex:1, display:"flex", flexDirection:"column", alignItems:"center",
-          justifyContent:"center", gap:3, textDecoration:"none",
-          borderTop:"2px solid transparent", background:"#00695C",
-        }}>
-          <span style={{display:"flex", alignItems:"center", gap:5, lineHeight:1}}>
-            <span style={{fontSize:17}}>🚌</span>
-            <span style={{fontSize:18, fontWeight:900, color:"white", fontFamily:"Nunito,sans-serif"}}>→</span>
-          </span>
-          <span style={{fontSize:10, fontWeight:700, fontFamily:"Nunito,sans-serif", color:"rgba(255,255,255,0.8)", letterSpacing:"0.02em"}}>{t.cityTitle || "VeszprémBusz"}</span>
-        </a>
-        <window.TimetableDropdown onSelect={id => setTimetableBusId(id)} upward tabStyle bgColor="#1e3a5a" lang={lang} />
-      </div>
     </>
   );
 }

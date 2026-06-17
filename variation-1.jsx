@@ -3,8 +3,7 @@
    Napló-szerű, világos, barátságos, domináns nagy óra + timeline
    ============================================================ */
 
-function MobileSettingsPill({ state, setState }) {
-  const [open, setOpen] = React.useState(false);
+function MobileSettingsPill({ state, setState, open, setOpen, onTimetable }) {
   const [collapsed, setCollapsed] = React.useState(false);
   const sheetRef = React.useRef(null);
   const dragStartY = React.useRef(null);
@@ -21,6 +20,15 @@ function MobileSettingsPill({ state, setState }) {
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
+
+  React.useEffect(() => {
+    if (!open) return;
+    function onKey(e) {
+      if (e.key === 'Escape') { setOpen(false); setCollapsed(false); }
+    }
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open]);
 
   function onTouchStart(e) {
     if ((sheetRef.current?.scrollTop || 0) > 0) return;
@@ -61,23 +69,35 @@ function MobileSettingsPill({ state, setState }) {
     state.schoolHoliday ? "🏖️" : null,
   ].filter(Boolean);
 
-  function setTime(t) { setState({ ...state, mode: "custom", customTime: t }); }
+  function setTime(val) { setState({ ...state, mode: "custom", customTime: val }); }
   function goNow() { setState({ ...state, mode: "now" }); }
 
   const hp = state.homeStopPicker || {};
 
   return (
     <>
-      <button className={"mobile-pill" + (collapsed ? " pill-collapsed" : "")} onClick={() => setOpen(true)}>
-        <span style={{fontSize:13, opacity:0.6}}>⚙️</span>
-        <div className="pill-extras">
-          <span className="pill-sep" />
-          <span className="pill-chip pill-hl">{dirLabel}</span>
-          <span className="pill-chip">{activeDay.label}</span>
-          <span className="pill-chip">{timeLabel}</span>
-          {flags.length > 0 && <span className="pill-chip">{flags.join(" ")}</span>}
+      <div className={"pill-container" + (collapsed ? " pill-collapsed" : "")}>
+        <a href="city.html" className="fab-action"
+          data-tooltip="VeszprémBusz"
+          data-tooltip-dir="left">🚌</a>
+        {onTimetable && window.TimetableDropdown && (
+          <div className="fab-timetable-wrap">
+            <window.TimetableDropdown onSelect={onTimetable} upward fabStyle lang={state.lang} />
+          </div>
+        )}
+        <div className="mobile-pill">
+          <button className="pill-zone pill-zone-gear" onClick={() => setOpen(true)}>⚙️</button>
+          <span className="pill-sep-mid" />
+          <button className="pill-zone pill-zone-chips" onClick={() => setOpen(true)}>
+            <div className="pill-extras">
+              <span className="pill-chip pill-hl">{dirLabel}</span>
+              <span className="pill-chip">{activeDay.label}</span>
+              <span className="pill-chip">{timeLabel}</span>
+              {flags.length > 0 && <span className="pill-chip">{flags.join(" ")}</span>}
+            </div>
+          </button>
         </div>
-      </button>
+      </div>
 
       <div className={"settings-scrim" + (open ? " open" : "")} onClick={() => { setOpen(false); setCollapsed(false); }} />
       <div ref={sheetRef} className={"settings-sheet" + (open ? " open" : "")}
@@ -127,9 +147,9 @@ function MobileSettingsPill({ state, setState }) {
         <div style={{padding:"0 20px 14px"}}>
           <div style={{display:"flex", gap:5, flexWrap:"wrap", marginBottom:10}}>
             <button className={"sel-pill" + (isNow ? " on" : "")} onClick={goNow}>{t.nowBtn}</button>
-            {timePresets.map(t => (
-              <button key={t} className={"sel-pill" + (!isNow && state.customTime===t ? " on" : "")}
-                onClick={() => setTime(t)}>{t}</button>
+            {timePresets.map(preset => (
+              <button key={preset} className={"sel-pill" + (!isNow && state.customTime===preset ? " on" : "")}
+                onClick={() => setTime(preset)}>{preset}</button>
             ))}
           </div>
           <input type="time" value={isNow ? "" : state.customTime}
@@ -160,13 +180,13 @@ function MobileSettingsPill({ state, setState }) {
           <button className={"toggle" + (state.schoolHoliday ? " on" : "")}
             onClick={state.toggleSchoolHoliday} />
         </div>
-        <div style={{height:20}} />
+        <div style={{height:16}} />
       </div>
     </>
   );
 }
 
-function V1Variation({ state, setState, t, langSwitcher, navLinks }) {
+function V1Variation({ state, setState, t, langSwitcher, navLinks, onTimetable }) {
   const routes = state.routes;
   const now = state.now;
   const isMobile = state.isMobile;
@@ -190,7 +210,32 @@ function V1Variation({ state, setState, t, langSwitcher, navLinks }) {
 
   const [clockHovered, setClockHovered] = React.useState(false);
   const [settingsOpen, setSettingsOpen] = React.useState(false);
+  const [sheetOpen, setSheetOpen] = React.useState(false);
+  const didPushHistory = React.useRef(false);
   const isNowMode = state.mode === "now";
+
+  function openSheet() {
+    setSheetOpen(true);
+    history.pushState({ sheet: true }, "");
+    didPushHistory.current = true;
+  }
+  function closeSheet() {
+    setSheetOpen(false);
+    if (didPushHistory.current) {
+      didPushHistory.current = false;
+      history.back();
+    }
+  }
+  React.useEffect(() => {
+    function onPop() {
+      if (didPushHistory.current) {
+        didPushHistory.current = false;
+        setSheetOpen(false);
+      }
+    }
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
 
   const isSchool = state.direction === "school";
   const subtitle = isSchool
@@ -205,7 +250,15 @@ function V1Variation({ state, setState, t, langSwitcher, navLinks }) {
           <div style={{display:"flex",alignItems:"center",gap:10,flexWrap:isMobile?undefined:"wrap"}}>
             <div className="v1-title">{t.appTitle} ✨</div>
             <div style={{fontSize:11,fontWeight:700,background:"linear-gradient(135deg,#7C3AED,#C026D3)",color:"white",padding:"2px 8px",borderRadius:6}}>{window.APP_VERSION}</div>
-            {!isMobile && langSwitcher}
+            {!isMobile && (
+              <div style={{display:"flex",gap:6,alignItems:"center"}}>
+                {langSwitcher}
+                <button onClick={() => setSettingsOpen(true)}
+                  data-tooltip={state.lang==="hu" ? "Iskola és megálló beállítások" : "School & stop settings"}
+                  data-tooltip-dir="down"
+                  style={{background:"var(--line)",border:"none",borderRadius:10,padding:"6px 10px",cursor:"pointer",fontSize:16,lineHeight:1,color:"var(--ink)"}}>⚙️</button>
+              </div>
+            )}
           </div>
           {!isMobile && (
             <div style={{marginTop:6}}>
@@ -219,24 +272,19 @@ function V1Variation({ state, setState, t, langSwitcher, navLinks }) {
             <button onClick={() => setSettingsOpen(true)} title="Beállítások" style={{background:"var(--line)",border:"none",borderRadius:10,padding:"6px 10px",cursor:"pointer",fontSize:16,lineHeight:1,color:"var(--ink)"}}>⚙️</button>
           </div>
         )}
-      </div>
-      {isMobile && (
-        <div style={{marginTop:4, marginBottom:10}}>
-          <div className="v1-subtitle">{subtitle}</div>
-        </div>
-      )}
-
-      {!isMobile && (
-        <div style={{position:"absolute",right:32,top:24,display:"flex",flexDirection:"column",alignItems:"flex-end",gap:8}}>
+        {!isMobile && (
           <div
             className="v1-clock"
             data-tooltip={isNowMode ? (state.lang==="hu" ? "Kattints: saját idő beállítása" : "Click: set custom time") : (state.lang==="hu" ? "Kattints: vissza a mosthoz" : "Click: back to now")}
             data-tooltip-dir="left"
-            onClick={() => setState({ ...state, mode: isNowMode ? "custom" : "now" })}
+            onClick={() => {
+              if (isNowMode) { setState({ ...state, mode: "custom" }); openSheet(); }
+              else { setState({ ...state, mode: "now" }); }
+            }}
             onMouseEnter={() => setClockHovered(true)}
             onMouseLeave={() => setClockHovered(false)}
             style={{
-              cursor: "pointer",
+              cursor: "pointer", flexShrink: 0,
               transform: clockHovered ? "translateY(-3px)" : "translateY(0)",
               transition: "transform 0.15s, box-shadow 0.15s, background 0.2s, outline 0.2s",
               boxShadow: clockHovered
@@ -252,37 +300,15 @@ function V1Variation({ state, setState, t, langSwitcher, navLinks }) {
             <div className="v1-clock-time">{nowFmt}</div>
             <div className="v1-clock-date">{dateFmt}</div>
           </div>
-          <div
-            data-tooltip={state.lang==="hu" ? (state.compactMode ? "Teljes nézetre váltás" : "Kompakt nézetre váltás") : (state.compactMode ? "Switch to full view" : "Switch to compact view")}
-            data-tooltip-dir="left"
-            style={{display:"flex",alignItems:"center",gap:7,cursor:"pointer",userSelect:"none"}}
-            onClick={state.toggleCompact}
-          >
-            <span style={{fontSize:13,fontWeight:700,opacity:0.55}}>{state.lang==="hu"?"Kompakt":"Compact"}</span>
-            <div style={{width:36,height:20,borderRadius:10,background:state.compactMode?"var(--accent)":"var(--line)",position:"relative",transition:"background 0.2s",flexShrink:0}}>
-              <div style={{position:"absolute",top:2,left:state.compactMode?18:2,width:16,height:16,borderRadius:"50%",background:"white",transition:"left 0.2s",boxShadow:"0 1px 3px rgba(0,0,0,0.2)"}} />
-            </div>
-          </div>
+        )}
+      </div>
+      {isMobile && (
+        <div style={{marginTop:4, marginBottom:10}}>
+          <div className="v1-subtitle">{subtitle}</div>
         </div>
       )}
 
-      {isMobile && <MobileSettingsPill state={state} setState={setState} />}
-
-      {!isMobile && (
-        <div className="v1-toolbar" style={{alignItems:"flex-start"}}>
-          <div style={{display:"flex",flexDirection:"column",gap:0}}>
-            <div style={{display:"flex",flexDirection:"row",alignItems:"flex-start",gap:12,flexWrap:"wrap"}}>
-              {state.DirectionPicker && state.DirectionPicker({})}
-              {state.DayPicker && state.DayPicker({})}
-            </div>
-            {state.TransferPicker && state.TransferPicker({})}
-          </div>
-          <div style={{display:'flex',gap:8,alignItems:'center',alignSelf:'flex-end',marginLeft:'auto'}}>
-            <button onClick={() => setSettingsOpen(true)} title="Beállítások" style={{fontSize:13,fontWeight:800,fontFamily:"Nunito,sans-serif",background:"var(--line)",color:"var(--ink)",border:"none",padding:"10px 14px",borderRadius:10,whiteSpace:"nowrap",cursor:"pointer",boxShadow:"0 8px 24px rgba(0,0,0,0.1)"}}>{t.settingsBtn}</button>
-            <a href="city.html" style={{fontSize:13,fontWeight:800,fontFamily:"Nunito,sans-serif",textDecoration:"none",background:"#00796B",color:"white",padding:"10px 14px",borderRadius:10,whiteSpace:"nowrap",boxShadow:"0 8px 24px rgba(0,0,0,0.2)"}}>🚌 VeszprémBusz →</a>
-          </div>
-        </div>
-      )}
+      <MobileSettingsPill state={state} setState={setState} open={sheetOpen} setOpen={v => v ? openSheet() : closeSheet()} onTimetable={onTimetable} />
 
       {hero && heroInfo && (
         <div className="v1-hero-banner">
@@ -291,24 +317,6 @@ function V1Variation({ state, setState, t, langSwitcher, navLinks }) {
             <div className="v1-hero-time">{U.fmtTime(hero.departLeaveHome)}</div>
             <div className="v1-hero-sub">{heroInfo.stateText}</div>
           </div>
-          {state.mode === "custom" && !isMobile && (
-            <div style={{position:"absolute",left:"50%",top:"50%",transform:"translate(-50%,-50%)",display:"flex",gap:6,flexWrap:"wrap",alignItems:"center",zIndex:2}}>
-              <input
-                type="time"
-                value={state.customTime}
-                className="v1-time-input"
-                onChange={(e) => setState({ ...state, customTime: e.target.value })}
-              />
-              {(state.direction === "school" ? ["06:00","06:30","07:00","07:30","08:00","08:30"] : ["14:00","14:30","15:00","15:30","16:00","16:30"]).map((time) => (
-                <button key={time} className={`v1-btn${state.customTime===time?" active":""}`}
-                  onClick={() => setState({ ...state, customTime: time })}
-                  data-tooltip={state.lang==="hu" ? `${time} beállítása` : `Set time to ${time}`}
-                  style={{padding:'4px 10px',fontSize:13}}>
-                  {time}
-                </button>
-              ))}
-            </div>
-          )}
           <div className="v1-hero-right" style={{display:"flex",alignItems:"center",gap:12,position:"relative",zIndex:1,flexShrink:0}}>
             <button
               className="v1-btn warn"

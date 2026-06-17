@@ -606,7 +606,7 @@ function BusRouteMap({ bus, color, selectedDep, nowMins, fmt, modalRef }) {
 window.BusTimetableModal = BusTimetableModal;
 
 // Menetrendek dropdown — közös komponens, főoldalon és city oldalon is elérhető
-function TimetableDropdown({ onSelect, upward, tabStyle, bgColor, lang }) {
+function TimetableDropdown({ onSelect, upward, tabStyle, fabStyle, bgColor, lang }) {
   const t = (window.I18N && window.I18N[lang || "hu"]) || window.I18N?.hu || {};
   const [open, setOpen] = React.useState(false);
   const ref = React.useRef(null);
@@ -615,12 +615,19 @@ function TimetableDropdown({ onSelect, upward, tabStyle, bgColor, lang }) {
   React.useEffect(() => {
     if (!open) return;
     function outside(e) { if (ref.current && !ref.current.contains(e.target)) setOpen(false); }
+    function onKey(e) { if (e.key === "Escape") setOpen(false); }
     document.addEventListener("mousedown", outside);
-    return () => document.removeEventListener("mousedown", outside);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", outside);
+      document.removeEventListener("keydown", onKey);
+    };
   }, [open]);
 
   const dropPos = upward
-    ? { bottom:"calc(100% + 6px)", left:"50%", transform:"translateX(-50%)" }
+    ? (fabStyle
+        ? { bottom:"calc(100% + 6px)", right:0 }
+        : { bottom:"calc(100% + 6px)", left:"50%", transform:"translateX(-50%)" })
     : { top:"calc(100% + 6px)", left:0 };
 
   return (
@@ -632,7 +639,15 @@ function TimetableDropdown({ onSelect, upward, tabStyle, bgColor, lang }) {
     }}>
       <button
         onClick={() => setOpen(o => !o)}
-        style={tabStyle ? {
+        data-tooltip={fabStyle ? (t.timetables || "Menetrendek") : undefined}
+        data-tooltip-dir={fabStyle ? "left" : undefined}
+        style={fabStyle ? {
+          width:44, height:44, borderRadius:"50%",
+          background:"#1a2a3a", color:"white", border:"none",
+          cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center",
+          fontSize:22, boxShadow:"0 3px 14px rgba(0,0,0,0.28)",
+          transition:"transform 0.15s, background 0.12s",
+        } : tabStyle ? {
           flex:1, width:"100%", height:"100%", display:"flex", flexDirection:"column",
           alignItems:"center", justifyContent:"center", gap:2,
           background:"none", border:"none", cursor:"pointer",
@@ -646,7 +661,7 @@ function TimetableDropdown({ onSelect, upward, tabStyle, bgColor, lang }) {
           boxShadow: bgColor ? "0 8px 24px rgba(0,0,0,0.2)" : "none",
         }}
       >
-        {tabStyle ? (
+        {fabStyle ? "🗓" : tabStyle ? (
           <>
             <span style={{fontSize:18, lineHeight:1}}>🗓</span>
             <span style={{fontSize:10, fontWeight:700, fontFamily:"Nunito,sans-serif", color:"rgba(255,255,255,0.9)", letterSpacing:"0.02em"}}>{t.timetables || "Menetrendek"}</span>

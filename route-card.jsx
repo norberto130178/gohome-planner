@@ -1085,7 +1085,7 @@ function SchoolSettingsModal({ onClose, lang }) {
             </div>
             <button
               onClick={() => setShowMap(o => !o)}
-              title="Iskolák a térképen"
+              title={lang === "hu" ? "Iskolák a térképen" : "Schools on map"}
               style={{
                 padding: "9px 14px", borderRadius: 10, border: "none",
                 background: showMap ? "var(--accent)" : "var(--line)",
@@ -1155,7 +1155,7 @@ function SchoolSettingsModal({ onClose, lang }) {
             </div>
             <button
               onClick={() => setShowHomeMap(o => !o)}
-              title="Megállók a térképen"
+              title={lang === "hu" ? "Megállók a térképen" : "Stops on map"}
               style={{ padding: "9px 14px", borderRadius: 10, border: "none", background: showHomeMap ? "var(--accent)" : "var(--line)", color: showHomeMap ? "white" : "var(--ink)", fontSize: 20, cursor: "pointer", transition: "all 0.15s", flexShrink: 0 }}
             >🗺</button>
           </div>
@@ -1195,7 +1195,7 @@ function SchoolSettingsModal({ onClose, lang }) {
             </div>
             <div ref={containerRef} style={{ borderTop: '2px solid var(--line)', position: 'relative', marginBottom: 16, borderRadius: 12, overflow: 'hidden' }}>
               <div ref={mapRef} style={{ height: fsState ? '100%' : 340, width: '100%' }} />
-              <button onClick={toggleFullscreen} title={fsState ? _t.exitFullscreen : _t.fullscreen} style={{
+              <button onClick={toggleFullscreen} title={fsState ? t.exitFullscreen : t.fullscreen} style={{
                 position: 'absolute', top: fsState ? 28 : 10, right: fsState ? 28 : 10, zIndex: 1000,
                 background: '#1a73e8', border: '2px solid #1a73e8',
                 borderRadius: 8, padding: '4px 8px', cursor: 'pointer',

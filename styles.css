@@ -669,36 +669,66 @@ button { font-family: inherit; cursor: pointer; border: none; }
   color: #0E1524;
 }
 
-/* ── Mobile settings pill + sheet ── */
-.mobile-pill {
+/* ── Floating pill container + FABs ── */
+.pill-container {
   position: fixed;
-  bottom: 76px; right: 14px;
+  bottom: 24px; right: 24px;
+  display: flex; flex-direction: column;
+  align-items: flex-end; gap: 8px;
+  z-index: 99;
+}
+.fab-action {
+  width: 44px; height: 44px; border-radius: 50%;
   background: #1a2a3a; color: white; border: none;
-  border-radius: 22px; padding: 9px 13px;
-  display: none; align-items: center; gap: 7px;
-  cursor: pointer; font-family: Nunito, sans-serif;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  font-size: 22px; text-decoration: none; flex-shrink: 0;
+  box-shadow: 0 3px 14px rgba(0,0,0,0.28);
+  transition: transform 0.15s, background 0.12s, opacity 0.2s;
+}
+.fab-action:hover { transform: scale(1.1); background: #253545; }
+.fab-action:active { transform: scale(0.95); }
+.fab-timetable-wrap { position: relative; }
+.mobile-pill {
+  background: #1a2a3a; color: white;
+  border-radius: 22px; padding: 3px;
+  display: flex; align-items: center;
+  font-family: Nunito, sans-serif;
   font-weight: 800; font-size: 12px;
   box-shadow: 0 4px 18px rgba(0,0,0,0.28);
   overflow: hidden;
-  transition: transform 0.15s, box-shadow 0.15s;
-  z-index: 99; max-width: calc(100vw - 28px);
+  transition: box-shadow 0.15s;
+  max-width: calc(100vw - 28px);
 }
 .pill-extras {
   display: flex; align-items: center; gap: 7px;
   max-width: 260px; opacity: 1; overflow: hidden;
   transition: max-width 0.32s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.22s ease;
 }
-.pill-collapsed .pill-extras {
-  max-width: 0;
-  opacity: 0;
+.pill-zone {
+  background: none; border: none; color: white;
+  display: flex; align-items: center;
+  cursor: pointer; padding: 5px 9px; border-radius: 18px;
+  transition: background 0.12s; font-family: Nunito, sans-serif;
+  font-weight: 800; font-size: 13px; text-decoration: none;
+  white-space: nowrap; flex-shrink: 0;
 }
-.mobile-pill:active { transform: scale(0.96); }
+.pill-zone:hover { background: rgba(255,255,255,0.13); }
+.pill-zone:active { transform: scale(0.95); }
+.pill-zone-gear { font-size: 16px; padding: 5px 9px; }
+.pill-zone-bus { font-size: 12px; }
+.pill-zone-chips { max-width: 300px; overflow: hidden; padding: 5px 9px; transition: max-width 0.32s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.22s ease, padding 0.22s ease; }
+.pill-sep-mid { width: 1px; height: 18px; background: rgba(255,255,255,0.18); flex-shrink: 0; align-self: center; transition: opacity 0.22s; }
+.pill-collapsed .pill-zone-chips { max-width: 0; opacity: 0; padding: 0; }
+.pill-collapsed .pill-sep-mid { opacity: 0; }
 .pill-sep { width: 1px; height: 13px; background: rgba(255,255,255,0.22); flex-shrink: 0; }
 .pill-chip { background: rgba(255,255,255,0.13); border-radius: 7px; padding: 2px 7px; font-size: 11px; font-weight: 700; white-space: nowrap; }
 .pill-chip.pill-hl { background: #FFC93C; color: #1a2a3a; }
 .settings-scrim { position: fixed; inset: 0; background: rgba(0,0,0,0.38); z-index: 9999; opacity: 0; pointer-events: none; transition: opacity 0.22s; }
 .settings-scrim.open { opacity: 1; pointer-events: all; }
 .settings-sheet { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-radius: 20px 20px 0 0; z-index: 10000; transform: translateY(100%); transition: transform 0.28s cubic-bezier(0.32, 0.72, 0, 1); max-height: 88dvh; overflow-y: scroll; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
+@media (min-width: 641px) {
+  .settings-sheet { left: auto; max-width: 460px; border-radius: 20px 20px 0 0; }
+}
 .settings-sheet.open { transform: translateY(0); }
 .sheet-handle { width: 36px; height: 4px; background: #d0d8e0; border-radius: 2px; margin: 12px auto 0; }
 .sheet-head { display: flex; align-items: center; padding: 10px 20px 4px; }
@@ -724,16 +754,46 @@ button { font-family: inherit; cursor: pointer; border: none; }
 .day-pill.today { border-color: #FFC93C; }
 .day-pill.today.on { background: #cc9900; border-color: #cc9900; }
 
-.nav-bottom {
-  position: fixed;
-  bottom: 0; left: 0; right: 0;
-  display: none;
-  flex-direction: row;
-  height: 52px;
-  background: #1e2b3a;
-  border-radius: 16px 16px 0 0;
-  box-shadow: 0 -2px 16px rgba(0,0,0,0.2);
-  z-index: 9998;
+
+/* ============================================================
+   Desktop settings panel
+   ============================================================ */
+.desktop-panel {
+  background: white;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  margin-bottom: 18px;
+  display: flex;
+  align-items: stretch;
+  flex-wrap: wrap;
+}
+.desktop-panel-col {
+  padding: 12px 18px 14px;
+  border-right: 1.5px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+.desktop-panel-col:last-child {
+  border-right: none;
+}
+.desktop-panel-col-actions {
+  margin-left: auto;
+  padding: 12px 18px 14px;
+  border-left: 1.5px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  justify-content: flex-end;
+}
+.desktop-panel .sec-title {
+  padding: 0 0 4px 0;
+}
+.desktop-panel .day-pill {
+  min-width: 34px;
+  padding: 5px 4px;
+  font-size: 11px;
 }
 
 /* ============================================================
@@ -742,7 +802,7 @@ button { font-family: inherit; cursor: pointer; border: none; }
 @media (max-width: 700px) {
   .v1 {
     padding: 12px 10px;
-    padding-bottom: 62px;
+    padding-bottom: 180px;
   }
   .v1-header {
     gap: 10px;
@@ -796,12 +856,14 @@ button { font-family: inherit; cursor: pointer; border: none; }
     font-size: 24px;
   }
   [data-tooltip]::after { display: none; }
-  .nav-bottom { display: flex; }
 }
 
 @media (max-width: 640px) {
-  .mobile-pill { display: flex; }
-  .v1 { padding-bottom: 130px; }
+  .pill-container { bottom: 24px; right: 14px; }
+  .v1 { padding-bottom: 180px; }
+}
+@media (min-width: 641px) {
+  .v1 { padding-bottom: 180px; }
 }
 
 /* ============================================================

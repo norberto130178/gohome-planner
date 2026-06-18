@@ -2,7 +2,7 @@
   "relation": ["delegate_permission/common.handle_all_urls"],
   "target": {
     "namespace": "android_app",
-    "package_name": "dev.pages.gohome_planner",
+    "package_name": "dev.pages.gohome_planner.twa",
     "sha256_cert_fingerprints": [
       "19:DB:41:0B:9F:75:59:2F:8A:6C:5A:9D:37:60:F2:A9:01:C3:65:80:BA:37:8B:C5:70:5E:86:96:7F:BA:0C:66"
     ]

@@ -18,10 +18,13 @@ function StopSearch({ value, onChange, placeholder, id }) {
   const [open, setOpen] = React.useState(false);
   const [dropdownStyle, setDropdownStyle] = React.useState({});
   const ref = React.useRef(null);
+  const skipNextOpenRef = React.useRef(false);
+  const pendingFocusFirstRef = React.useRef(false);
 
   React.useEffect(() => { setQuery(value || ""); }, [value]);
 
   function calcAndOpen() {
+    if (skipNextOpenRef.current) { skipNextOpenRef.current = false; return; }
     if (ref.current) {
       const rect = ref.current.getBoundingClientRect();
       setDropdownStyle({ position: 'fixed', top: rect.bottom + 4, left: rect.left, width: rect.width, maxHeight: 280 });
@@ -37,6 +40,13 @@ function StopSearch({ value, onChange, placeholder, id }) {
     return () => document.removeEventListener("mousedown", outside);
   }, []);
 
+  React.useEffect(() => {
+    if (open && pendingFocusFirstRef.current) {
+      pendingFocusFirstRef.current = false;
+      ref.current?.querySelectorAll('[role="option"]')?.[0]?.focus();
+    }
+  }, [open]);
+
   const filtered = React.useMemo(() => {
     if (!query) return ALL_STOPS;
     const norm = str => str.normalize("NFD").replace(/[̀-ͯ]/g, "");
@@ -51,6 +61,8 @@ function StopSearch({ value, onChange, placeholder, id }) {
     onChange(stop);
     setQuery(stop);
     setOpen(false);
+    skipNextOpenRef.current = true;
+    ref.current?.querySelector('input')?.focus();
   }
 
   function handleChange(e) {
@@ -59,10 +71,13 @@ function StopSearch({ value, onChange, placeholder, id }) {
     if (!e.target.value) onChange("");
   }
 
-  function handleBlur() {
+  function handleBlur(e) {
+    const relatedTarget = e.relatedTarget;
     setTimeout(() => {
-      setOpen(false);
-      setQuery(value || "");
+      if (!ref.current?.contains(relatedTarget)) {
+        setOpen(false);
+        setQuery(value || "");
+      }
     }, 200);
   }
 
@@ -71,11 +86,28 @@ function StopSearch({ value, onChange, placeholder, id }) {
       <input
         id={id}
         type="text"
+        aria-expanded={open}
+        aria-haspopup="listbox"
         value={query}
         onChange={handleChange}
-        onFocus={calcAndOpen}
+        onClick={calcAndOpen}
         onBlur={handleBlur}
-        onKeyDown={e => { if (e.key === "Escape") { setOpen(false); e.target.blur(); } }}
+        onKeyDown={e => {
+          if (e.key === "Escape") { setOpen(false); e.target.blur(); }
+          else if (e.key === "Tab") { setOpen(false); }
+          else if (e.key === "ArrowDown") {
+            e.preventDefault();
+            if (open) { ref.current?.querySelectorAll('[role="option"]')?.[0]?.focus(); }
+            else { pendingFocusFirstRef.current = true; calcAndOpen(); }
+          }
+          else if (e.key === "ArrowUp") {
+            e.preventDefault();
+            if (open) {
+              const items = ref.current?.querySelectorAll('[role="option"]');
+              items?.[items.length - 1]?.focus();
+            }
+          }
+        }}
         placeholder={placeholder}
         autoComplete="off"
         className="v1-time-input"
@@ -84,7 +116,8 @@ function StopSearch({ value, onChange, placeholder, id }) {
       {query && (
         <button
           onMouseDown={e => e.preventDefault()}
-          onClick={() => { setQuery(""); onChange(""); calcAndOpen(); }}
+          onClick={() => { setQuery(""); onChange(""); ref.current?.querySelector('input')?.focus(); }}
+          onBlur={handleBlur}
           style={{
             position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)",
             background: "none", border: "none", cursor: "pointer",
@@ -103,8 +136,26 @@ function StopSearch({ value, onChange, placeholder, id }) {
             <div
               key={stop}
               className="stop-option"
+              role="option"
+              tabIndex={-1}
               onMouseDown={e => e.preventDefault()}
               onClick={() => select(stop)}
+              onKeyDown={(e, idx2 = filtered.indexOf(stop)) => {
+                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); select(stop); }
+                else if (e.key === 'Escape') { skipNextOpenRef.current = true; setOpen(false); ref.current?.querySelector('input')?.focus(); }
+                else if (e.key === 'Tab') { setOpen(false); }
+                else if (e.key === 'ArrowDown') {
+                  e.preventDefault();
+                  const items = ref.current?.querySelectorAll('[role="option"]');
+                  if (items && idx2 < items.length - 1) items[idx2 + 1].focus();
+                }
+                else if (e.key === 'ArrowUp') {
+                  e.preventDefault();
+                  const items = ref.current?.querySelectorAll('[role="option"]');
+                  if (idx2 > 0) items[idx2 - 1].focus();
+                  else ref.current?.querySelector('input')?.focus();
+                }
+              }}
               style={{
                 padding: "9px 14px", cursor: "pointer",
                 borderBottom: "1px solid var(--line)",
@@ -271,7 +322,7 @@ function CityRouteMap({ route, fromStop, toStop }) {
   return (
     <div ref={containerRef} style={{ position: 'relative', borderTop: '2px solid var(--line)' }}>
       <div ref={mapRef} style={{ height: fsState ? '100%' : 300, width: '100%' }} />
-      <button onClick={toggleFullscreen} title={fsState ? 'Kilépés' : 'Teljes képernyő'} style={{
+      <button onClick={toggleFullscreen} title={fsState ? 'Kilépés' : 'Teljes képernyő'} aria-label={fsState ? 'Kilépés' : 'Teljes képernyő'} style={{
         position: 'absolute', top: fsState ? 28 : 10, right: fsState ? 28 : 10, zIndex: 1000,
         background: '#1a73e8',
         border: '2px solid #1a73e8',
@@ -332,9 +383,13 @@ function CityRouteCard({ route, index, isPrimary, fromStop, toStop, walkMin, isW
   const BusIcon = ({ bus, boardAt, boardStop }) => (
     <div
       className="city-bus-badge"
+      role="button"
+      tabIndex={0}
       style={{ background: bus.color, cursor: 'pointer' }}
       title="Menetrend megtekintése"
+      aria-label={`${bus.id} – Menetrend megtekintése`}
       onClick={() => openTimetable(bus, boardAt, boardStop)}
+      onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openTimetable(bus, boardAt, boardStop); } }}
     >
       {bus.id}
     </div>
@@ -354,6 +409,8 @@ function CityRouteCard({ route, index, isPrimary, fromStop, toStop, walkMin, isW
           <button
             onClick={() => setMapOpen(o => !o)}
             title="Útvonal a térképen"
+            aria-label={lang === "hu" ? "Útvonal a térképen" : "Route on map"}
+            aria-pressed={mapOpen}
             style={{
               marginLeft: 8, background: mapOpen ? 'var(--accent)' : 'var(--line)',
               border: 'none', borderRadius: 8, padding: '2px 8px',
@@ -522,11 +579,23 @@ function CityMobilePill({ timeMode, setTimeMode, customTime, setCustomTime, dayO
   const t = window.I18N[lang] || window.I18N.hu;
   const [collapsed, setCollapsed] = React.useState(false);
   const sheetRef = React.useRef(null);
+  const closeButtonRef = React.useRef(null);
+  const savedFocusRef = React.useRef(null);
   const dragStartY = React.useRef(null);
   const isDragging = React.useRef(false);
   const lastScrollY = React.useRef(0);
 
   function close() { setCollapsed(false); onClose(); }
+
+  React.useEffect(() => {
+    if (open) {
+      savedFocusRef.current = document.activeElement;
+      closeButtonRef.current?.focus();
+    } else if (savedFocusRef.current) {
+      savedFocusRef.current.focus();
+      savedFocusRef.current = null;
+    }
+  }, [open]);
 
   React.useEffect(() => {
     function onScroll() {
@@ -545,6 +614,27 @@ function CityMobilePill({ timeMode, setTimeMode, customTime, setCustomTime, dayO
     }
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
+  }, [open]);
+
+  React.useEffect(() => {
+    if (!open || !sheetRef.current) return;
+    const sheet = sheetRef.current;
+    function trap(e) {
+      if (e.key !== 'Tab') return;
+      const focusable = Array.from(sheet.querySelectorAll(
+        'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      ));
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey) {
+        if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+      } else {
+        if (document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
+    }
+    sheet.addEventListener('keydown', trap);
+    return () => sheet.removeEventListener('keydown', trap);
   }, [open]);
 
   function onTouchStart(e) {
@@ -594,13 +684,14 @@ function CityMobilePill({ timeMode, setTimeMode, customTime, setCustomTime, dayO
       <div className={"pill-container" + (collapsed ? " pill-collapsed" : "")}>
         <a href="index.html" className="fab-action"
           data-tooltip={lang === "hu" ? "HazaÚt" : "Home Planner"}
-          data-tooltip-dir="left">🏠</a>
+          data-tooltip-dir="left"
+          aria-label={lang === "hu" ? "HazaÚt" : "Home Planner"}>🏠</a>
         {onTimetable && window.TimetableDropdown && (
           <div className="fab-timetable-wrap">
             <window.TimetableDropdown onSelect={onTimetable} upward fabStyle lang={lang} />
           </div>
         )}
-        <div className="mobile-pill" onClick={openSheet} style={{cursor:"pointer"}}>
+        <div className="mobile-pill" role="button" tabIndex={0} onClick={openSheet} onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openSheet(); } }} style={{cursor:"pointer"}}>
           <span style={{fontSize:15, padding:"5px 9px", opacity:0.8}}>⚙️</span>
           <span className="pill-sep-mid" />
           <div className="pill-extras pill-zone-chips">
@@ -617,8 +708,8 @@ function CityMobilePill({ timeMode, setTimeMode, customTime, setCustomTime, dayO
         <div className="sheet-handle" />
         <div className="sheet-head">
           <span className="sheet-head-title">{t.cityPlanTitle}</span>
-          <a href="help.html" style={{marginLeft:"auto",marginRight:8,fontSize:15,fontWeight:900,color:"var(--ink-soft)",textDecoration:"none",lineHeight:1,padding:"4px 8px",borderRadius:8,background:"var(--line)"}}>?</a>
-          <button className="sheet-close" onClick={close}>✕</button>
+          <a href="help.html" aria-label={lang === "hu" ? "Súgó" : "Help"} style={{marginLeft:"auto",marginRight:8,fontSize:15,fontWeight:900,color:"var(--ink-soft)",textDecoration:"none",lineHeight:1,padding:"4px 8px",borderRadius:8,background:"var(--line)"}}>?</a>
+          <button ref={closeButtonRef} className="sheet-close" aria-label={lang === "hu" ? "Bezárás" : "Close"} onClick={close}>✕</button>
         </div>
 
         <div className="sec-title">{t.departureTime}</div>
@@ -632,7 +723,9 @@ function CityMobilePill({ timeMode, setTimeMode, customTime, setCustomTime, dayO
           </div>
           <input type="time" value={isNow ? "" : customTime}
             onChange={e => setTime(e.target.value)}
-            placeholder={t.customPlaceholder} className="v1-time-input"
+            placeholder={t.customPlaceholder}
+            aria-label={t.departureTime || (lang==="hu" ? "Egyedi indulási idő" : "Custom departure time")}
+            className="v1-time-input"
             style={{fontSize:14, padding:"6px 10px", borderRadius:10}} />
         </div>
 
@@ -660,6 +753,9 @@ function CityMobilePill({ timeMode, setTimeMode, customTime, setCustomTime, dayO
             <small>{t.schoolHolidaySub}</small>
           </div>
           <button className={"toggle" + (schoolHoliday ? " on" : "")}
+            role="switch"
+            aria-checked={schoolHoliday}
+            aria-label={t.schoolHolidayLabel}
             onClick={() => {
               const v = !schoolHoliday; setSchoolHoliday(v);
               localStorage.setItem("city.schoolholiday", v ? "1" : "0");
@@ -803,7 +899,11 @@ function CityApp() {
         {!isMobile && (
           <div
             className="v1-clock"
+            role="button"
+            tabIndex={0}
+            aria-label={lang === "hu" ? (timeMode === "now" ? "Jelenlegi idő – kattints az időbeállításhoz" : "Egyéni idő – kattints a visszaállításhoz") : (timeMode === "now" ? "Current time – click to set time" : "Custom time – click to reset to now")}
             onClick={() => { if (timeMode === "now") openSheet(); else { setTimeMode("now"); localStorage.setItem("city_timeMode","now"); if (canPlan) plan({ timeMode: "now" }); } }}
+            onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); if (timeMode === "now") openSheet(); else { setTimeMode("now"); localStorage.setItem("city_timeMode","now"); if (canPlan) plan({ timeMode: "now" }); } } }}
             style={{
               cursor:"pointer",
               background: timeMode !== "now" ? "var(--accent)" : undefined,
@@ -851,20 +951,20 @@ function CityApp() {
         ...(isMobile ? { marginBottom: 12 } : { maxWidth: 580, margin: "0 auto 18px" }),
       }}>
         <div style={{display:"flex", alignItems:"stretch"}}>
-          <button onClick={swap} title={t.swapStops} style={{
+          <button onClick={swap} title={t.swapStops} aria-label={t.swapStops} style={{
             background:"none", border:"none", borderRight:"2px solid var(--line)",
             padding:"0 14px", cursor:"pointer", fontSize:20, fontWeight:900, color:"var(--ink-soft)",
             display:"flex", alignItems:"center", flexShrink:0,
           }}>⇅</button>
           <div style={{flex:1, minWidth:0}}>
             <div style={{padding:"10px 12px 8px"}}>
-              <div className="city-stop-label">{t.fromLabel}</div>
+              <label className="city-stop-label" htmlFor="from-stop" style={{display:"block"}}>{t.fromLabel}</label>
               <StopSearch id="from-stop" value={fromStop}
                 onChange={v => { setFromStop(v); localStorage.setItem("city_from", v); setResults(null); setFormCollapsed(false); }}
                 placeholder={t.stopPlaceholder} />
             </div>
             <div style={{padding:"8px 12px 8px"}}>
-              <div className="city-stop-label">{t.toLabel}</div>
+              <label className="city-stop-label" htmlFor="to-stop" style={{display:"block"}}>{t.toLabel}</label>
               <StopSearch id="to-stop" value={toStop}
                 onChange={v => { setToStop(v); localStorage.setItem("city_to", v); setResults(null); setFormCollapsed(false); }}
                 placeholder={t.stopPlaceholder} />
@@ -882,6 +982,7 @@ function CityApp() {
       )}
 
       {/* Results */}
+      <div aria-live="polite" role="region" aria-label={lang === "hu" ? "Útvonaltervek" : "Route options"}>
       {results === null ? (
         <div className="v1-empty">
           <div className="v1-empty-emoji">🗺️</div>
@@ -955,6 +1056,7 @@ function CityApp() {
           </div>
         </>
       )}
+      </div>
 
       <div className="app-footer">© 2026 Sándor Norbert</div>
 

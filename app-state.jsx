@@ -14,6 +14,7 @@ function DestinationPickerWidget({ stops, linesMap, value, onSelect, onClear, la
   const setQuery = onQueryChange !== undefined ? onQueryChange : setInternalQuery;
   const [open, setOpen] = React.useState(false);
   const wrapRef = React.useRef(null);
+  const pendingFocusFirstRef = React.useRef(false);
   const labelColor = '#6A5F7C';
 
   React.useEffect(() => {
@@ -23,6 +24,20 @@ function DestinationPickerWidget({ stops, linesMap, value, onSelect, onClear, la
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
+
+  React.useEffect(() => {
+    if (open && pendingFocusFirstRef.current) {
+      pendingFocusFirstRef.current = false;
+      wrapRef.current?.querySelectorAll('[role="option"]')?.[0]?.focus();
+    }
+  }, [open]);
+
+  function handleBlur(e) {
+    const relatedTarget = e.relatedTarget;
+    setTimeout(() => {
+      if (!wrapRef.current?.contains(relatedTarget)) setOpen(false);
+    }, 200);
+  }
 
   const normalize = (s) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
   const filtered = query ? stops.filter(s => normalize(s).includes(normalize(query))) : stops;
@@ -41,16 +56,42 @@ function DestinationPickerWidget({ stops, linesMap, value, onSelect, onClear, la
         ) : (
           <input type="text" className="stop-picker-input"
             placeholder={lang==="hu"?"Megálló keresése...":"Search stop..."}
+            aria-label={lang==="hu" ? "Célállomás megálló keresése" : "Search destination stop"}
+            aria-expanded={open}
+            aria-haspopup="listbox"
             value={query}
             onChange={(e) => { setQuery(e.target.value); setOpen(true); }}
-            onFocus={() => setOpen(true)}
+            onClick={() => setOpen(true)}
+            onBlur={handleBlur}
+            onKeyDown={e => {
+              if (e.key === 'Escape') { setOpen(false); e.target.blur(); }
+              else if (e.key === 'Tab') { setOpen(false); }
+              else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                if (open) { wrapRef.current?.querySelectorAll('[role="option"]')?.[0]?.focus(); }
+                else { pendingFocusFirstRef.current = true; setOpen(true); }
+              }
+              else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                if (open) { const items = wrapRef.current?.querySelectorAll('[role="option"]'); items?.[items.length - 1]?.focus(); }
+              }
+            }}
           />
         )}
         {open && !value && filtered.length > 0 && (
           <div className="stop-picker-dropdown" onMouseDown={(e) => e.preventDefault()}>
             {filtered.map(stop => (
               <div key={stop} className="stop-picker-option"
-                onClick={() => { onSelect(stop); setQuery(""); setOpen(false); }}
+                role="option"
+                tabIndex={-1}
+                onClick={() => { onSelect(stop); setQuery(""); setOpen(false); wrapRef.current?.querySelector('input')?.focus(); }}
+                onKeyDown={(e, idx = filtered.indexOf(stop)) => {
+                  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(stop); setQuery(""); setOpen(false); wrapRef.current?.querySelector('input')?.focus(); }
+                  else if (e.key === 'Escape') { setOpen(false); wrapRef.current?.querySelector('input')?.focus(); }
+                  else if (e.key === 'Tab') { setOpen(false); }
+                  else if (e.key === 'ArrowDown') { e.preventDefault(); const items = wrapRef.current?.querySelectorAll('[role="option"]'); if (items && idx < items.length - 1) items[idx + 1].focus(); }
+                  else if (e.key === 'ArrowUp') { e.preventDefault(); const items = wrapRef.current?.querySelectorAll('[role="option"]'); if (idx > 0) items[idx - 1].focus(); else wrapRef.current?.querySelector('input')?.focus(); }
+                }}
                 style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:8}}>
                 <span style={{flex:1}}>{stop}</span>
                 <span style={{display:"flex",gap:3,flexWrap:"wrap",justifyContent:"flex-end"}}>
@@ -371,8 +412,11 @@ function useAppState(options = {}) {
         <div style={{display:'flex',gap:6,flexWrap:'wrap',alignItems:'center',flex:isMobile?undefined:1,minWidth:isMobile?undefined:0}}>
         {direction === "school" && (
           <div
+            role="button"
+            tabIndex={0}
             style={{display:"flex",alignItems:"center",gap:8,cursor:"pointer"}}
             onClick={() => setSchoolFilter(f => !f)}
+            onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSchoolFilter(f => !f); } }}
             data-tooltip={lang==="hu" ? "Csak 10:00 előtt érkező járatok" : "Only buses arriving before 10:00"}
           >
             <span style={{fontSize:13,fontWeight:700,userSelect:"none"}}>
@@ -408,8 +452,11 @@ function useAppState(options = {}) {
           />
         )}
         <div
+            role="button"
+            tabIndex={0}
             style={{display:"flex",alignItems:"center",gap:8,cursor:"pointer"}}
             onClick={toggleSchoolHoliday}
+            onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleSchoolHoliday(); } }}
             data-tooltip={lang==="hu" ? "Tanszüneti menetrend (nyár, szünetek)" : "School holiday timetable (summer, breaks)"}
           >
             <span style={{fontSize:13,fontWeight:700,userSelect:"none"}}>
@@ -475,6 +522,7 @@ function useAppState(options = {}) {
           <select
             value={activeDayOffset}
             onChange={e => setState({ ...state, dayOffset: Number(e.target.value) })}
+            aria-label={lang==="hu" ? "Nap kiválasztása" : "Select day"}
             data-tooltip={lang==="hu" ? "Nap kiválasztása" : "Select day"}
             style={{fontFamily:'inherit',fontSize:12,fontWeight:700,padding:'6px 10px',borderRadius:10,border:'none',background:'var(--line)',color:'var(--ink)',cursor:'pointer',appearance:'none',WebkitAppearance:'none',MozAppearance:'none'}}
           >

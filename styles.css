@@ -120,7 +120,7 @@ button { font-family: inherit; cursor: pointer; border: none; }
 }
 .v1-btn:hover { transform: translate(0, -2px); box-shadow: var(--shadow); }
 .v1-btn.primary { background: var(--accent); color: white; border-color: var(--accent); }
-.v1-btn.warn { background: var(--accent-2); color: white; border-color: var(--accent-2); }
+.v1-btn.warn { background: var(--accent-2); color: var(--ink); border-color: var(--accent-2); }
 .v1-btn.active { background: var(--ink); color: #FFF7EC; border-color: var(--ink); }
 
 .v1-time-input { font-family: inherit; font-size: 15px; font-weight: 700; padding: 10px 14px; border-radius: 12px; border: 2px solid var(--line); background: white; color: var(--ink); }
@@ -332,7 +332,7 @@ button { font-family: inherit; cursor: pointer; border: none; }
 .v1-empty-hint { color: var(--ink-soft); font-size: 15px; }
 
 .app-footer {
-  text-align: center; color: #9b8fad; font-size: 11px; font-weight: 700;
+  text-align: center; color: #6E6380; font-size: 11px; font-weight: 700;
   padding: 18px 0 8px;
 }
 
@@ -391,7 +391,7 @@ button { font-family: inherit; cursor: pointer; border: none; }
 .v2-hud-time { font-size: 26px; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1; margin-top: 2px; }
 
 .v2-ready {
-  background: linear-gradient(135deg, #FF6E9C 0%, #7C4DFF 100%);
+  background: linear-gradient(135deg, #C2185B 0%, #6B35FF 100%);
   border-radius: 20px;
   padding: 18px 22px;
   margin-bottom: 16px;
@@ -426,7 +426,7 @@ button { font-family: inherit; cursor: pointer; border: none; }
 }
 .v2-btn:hover { background: rgba(255, 255, 255, 0.14); }
 .v2-btn.active { background: var(--sun); color: #0E1524; border-color: var(--sun); }
-.v2-btn.warn { background: #FF6E9C; color: white; border-color: #FF6E9C; }
+.v2-btn.warn { background: #FF6E9C; color: #0E1524; border-color: #FF6E9C; }
 
 .v2-routes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 @media (max-width: 900px) { .v2-routes { grid-template-columns: repeat(2, 1fr); } }
@@ -460,7 +460,7 @@ button { font-family: inherit; cursor: pointer; border: none; }
   font-weight: 900;
   font-size: 14px;
 }
-.v2-route.primary .v2-rank-num { background: var(--accent-2); color: white; }
+.v2-route.primary .v2-rank-num { background: var(--accent-2); color: #0E1524; }
 .v2-rank-label { font-size: 12px; font-weight: 700; color: rgba(243, 233, 210, 0.8); }
 .v2-route-eta {
   font-size: 13px;
@@ -573,6 +573,30 @@ button { font-family: inherit; cursor: pointer; border: none; }
 [data-tooltip][data-tooltip-dir="up"]::after { top: auto; bottom: calc(100% + 7px); }
 [data-tooltip][data-tooltip-dir="left"]::after { top: 50%; bottom: auto; left: auto; right: calc(100% + 7px); transform: translateY(-50%); }
 [data-tooltip][data-tooltip-color="warn"]::after { background: #C0392B; }
+
+/* ============================================================
+   Accessibility — skip link
+   ============================================================ */
+.skip-link {
+  position: absolute;
+  top: -48px;
+  left: 0;
+  background: var(--accent);
+  color: white;
+  padding: 10px 18px;
+  border-radius: 0 0 10px 0;
+  font-weight: 800;
+  font-size: 14px;
+  font-family: 'Nunito', sans-serif;
+  z-index: 100000;
+  text-decoration: none;
+  transition: top 0.15s;
+}
+.skip-link:focus {
+  top: 0;
+  outline: 3px solid var(--sun);
+  outline-offset: 2px;
+}
 
 /* ============================================================
    Accessibility — focus-visible
@@ -730,22 +754,22 @@ button { font-family: inherit; cursor: pointer; border: none; }
 .pill-chip.pill-hl { background: #FFC93C; color: #1a2a3a; }
 .settings-scrim { position: fixed; inset: 0; background: rgba(0,0,0,0.38); z-index: 9999; opacity: 0; pointer-events: none; transition: opacity 0.22s; }
 .settings-scrim.open { opacity: 1; pointer-events: all; }
-.settings-sheet { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-radius: 20px 20px 0 0; z-index: 10000; transform: translateY(100%); transition: transform 0.28s cubic-bezier(0.32, 0.72, 0, 1); max-height: 88dvh; overflow-y: scroll; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
+.settings-sheet { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-radius: 20px 20px 0 0; z-index: 10000; transform: translateY(100%); visibility: hidden; transition: transform 0.28s cubic-bezier(0.32, 0.72, 0, 1), visibility 0s linear 0.28s; max-height: 88dvh; overflow-y: scroll; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
 @media (min-width: 641px) {
   .settings-sheet { left: auto; max-width: 460px; border-radius: 20px 20px 0 0; }
 }
-.settings-sheet.open { transform: translateY(0); }
+.settings-sheet.open { transform: translateY(0); visibility: visible; transition: transform 0.28s cubic-bezier(0.32, 0.72, 0, 1), visibility 0s; }
 .sheet-handle { width: 36px; height: 4px; background: #d0d8e0; border-radius: 2px; margin: 12px auto 0; }
 .sheet-head { display: flex; align-items: center; padding: 10px 20px 4px; }
 .sheet-head-title { flex: 1; font-size: 15px; font-weight: 900; color: #1a2a3a; }
 .sheet-close { background: #1a2a3a; border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; font-size: 14px; font-weight: 900; color: white; display: flex; align-items: center; justify-content: center; transition: background 0.15s; }
 .sheet-close:hover { background: #e53935; }
-.sec-title { font-size: 10px; font-weight: 800; color: #b0c0cc; text-transform: uppercase; letter-spacing: 0.09em; padding: 14px 20px 5px; }
+.sec-title { font-size: 10px; font-weight: 800; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.09em; padding: 14px 20px 5px; }
 .sheet-row { display: flex; align-items: center; padding: 12px 20px; gap: 13px; border-bottom: 1px solid #f0f4f8; }
 .row-icon { font-size: 19px; width: 26px; text-align: center; flex-shrink: 0; }
 .row-label { flex: 1; }
 .row-label strong { display: block; font-size: 13px; font-weight: 800; color: #1a2a3a; }
-.row-label small { font-size: 11px; color: #9aaabb; font-weight: 600; }
+.row-label small { font-size: 11px; color: var(--ink-soft); font-weight: 600; }
 .toggle { width: 44px; height: 26px; border-radius: 13px; background: #d0d8e0; position: relative; cursor: pointer; transition: background 0.2s; flex-shrink: 0; border: none; }
 .toggle.on { background: #FFC93C; }
 .toggle::after { content: ""; position: absolute; width: 20px; height: 20px; border-radius: 50%; background: white; top: 3px; left: 3px; transition: transform 0.2s; box-shadow: 0 1px 4px rgba(0,0,0,0.18); }
@@ -875,10 +899,36 @@ button { font-family: inherit; cursor: pointer; border: none; }
 /* ============================================================
    Accessibility — focus-visible
    ============================================================ */
+[role="option"]:focus {
+  outline: none;
+  background-color: rgba(124, 77, 255, 0.08);
+  box-shadow: inset 0 0 0 2px var(--accent);
+  position: relative;
+  z-index: 1;
+}
+
 button:focus-visible,
 input:focus-visible,
-a:focus-visible {
+a:focus-visible,
+select:focus-visible,
+[role="button"]:focus-visible {
   outline: 3px solid var(--accent);
   outline-offset: 2px;
   border-radius: 8px;
+  box-shadow: 0 0 0 5px rgba(124, 77, 255, 0.25);
+}
+
+/* ============================================================
+   Accessibility — prefers-reduced-motion
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .skip-link {
+    transition: none;
+  }
 }

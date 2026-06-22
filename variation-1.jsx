@@ -6,9 +6,21 @@
 function MobileSettingsPill({ state, setState, open, setOpen, onTimetable }) {
   const [collapsed, setCollapsed] = React.useState(false);
   const sheetRef = React.useRef(null);
+  const closeButtonRef = React.useRef(null);
+  const savedFocusRef = React.useRef(null);
   const dragStartY = React.useRef(null);
   const isDragging = React.useRef(false);
   const lastScrollY = React.useRef(0);
+
+  React.useEffect(() => {
+    if (open) {
+      savedFocusRef.current = document.activeElement;
+      closeButtonRef.current?.focus();
+    } else if (savedFocusRef.current) {
+      savedFocusRef.current.focus();
+      savedFocusRef.current = null;
+    }
+  }, [open]);
 
   React.useEffect(() => {
     function onScroll() {
@@ -28,6 +40,27 @@ function MobileSettingsPill({ state, setState, open, setOpen, onTimetable }) {
     }
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
+  }, [open]);
+
+  React.useEffect(() => {
+    if (!open || !sheetRef.current) return;
+    const sheet = sheetRef.current;
+    function trap(e) {
+      if (e.key !== 'Tab') return;
+      const focusable = Array.from(sheet.querySelectorAll(
+        'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      ));
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey) {
+        if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+      } else {
+        if (document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
+    }
+    sheet.addEventListener('keydown', trap);
+    return () => sheet.removeEventListener('keydown', trap);
   }, [open]);
 
   function onTouchStart(e) {
@@ -79,13 +112,14 @@ function MobileSettingsPill({ state, setState, open, setOpen, onTimetable }) {
       <div className={"pill-container" + (collapsed ? " pill-collapsed" : "")}>
         <a href="city.html" className="fab-action"
           data-tooltip="VeszprémBusz"
-          data-tooltip-dir="left">🚌</a>
+          data-tooltip-dir="left"
+          aria-label="VeszprémBusz">🚌</a>
         {onTimetable && window.TimetableDropdown && (
           <div className="fab-timetable-wrap">
             <window.TimetableDropdown onSelect={onTimetable} upward fabStyle lang={state.lang} />
           </div>
         )}
-        <div className="mobile-pill" onClick={() => setOpen(true)} style={{cursor:"pointer"}}>
+        <div className="mobile-pill" role="button" tabIndex={0} onClick={() => setOpen(true)} onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setOpen(true); } }} style={{cursor:"pointer"}}>
           <span style={{fontSize:15, padding:"5px 9px", opacity:0.8}}>⚙️</span>
           <span className="pill-sep-mid" />
           <div className="pill-extras pill-zone-chips">
@@ -103,8 +137,8 @@ function MobileSettingsPill({ state, setState, open, setOpen, onTimetable }) {
         <div className="sheet-handle" />
         <div className="sheet-head">
           <span className="sheet-head-title">{t.planningTitle}</span>
-          <a href="help.html" style={{marginLeft:"auto",marginRight:8,fontSize:15,fontWeight:900,color:"var(--ink-soft)",textDecoration:"none",lineHeight:1,padding:"4px 8px",borderRadius:8,background:"var(--line)"}}>?</a>
-          <button className="sheet-close" onClick={() => { setOpen(false); setCollapsed(false); }}>✕</button>
+          <a href="help.html" aria-label={state.lang==="hu" ? "Súgó" : "Help"} style={{marginLeft:"auto",marginRight:8,fontSize:15,fontWeight:900,color:"var(--ink-soft)",textDecoration:"none",lineHeight:1,padding:"4px 8px",borderRadius:8,background:"var(--line)"}}>?</a>
+          <button ref={closeButtonRef} className="sheet-close" aria-label={state.lang==="hu" ? "Bezárás" : "Close"} onClick={() => { setOpen(false); setCollapsed(false); }}>✕</button>
         </div>
 
         <div className="sec-title">{t.directionLabel}</div>
@@ -154,6 +188,7 @@ function MobileSettingsPill({ state, setState, open, setOpen, onTimetable }) {
           <input type="time" value={isNow ? "" : state.customTime}
             onChange={e => setTime(e.target.value)}
             placeholder={t.customPlaceholder}
+            aria-label={t.departureTime || (state.lang==="hu" ? "Egyedi indulási idő" : "Custom departure time")}
             className="v1-time-input"
             style={{fontSize:14, padding:"6px 10px", borderRadius:10}} />
         </div>
@@ -167,6 +202,9 @@ function MobileSettingsPill({ state, setState, open, setOpen, onTimetable }) {
               <small>{t.morningFilterSub}</small>
             </div>
             <button className={"toggle" + (state.schoolFilter ? " on" : "")}
+              role="switch"
+              aria-checked={state.schoolFilter}
+              aria-label={t.morningFilter}
               onClick={() => state.setSchoolFilter(f => !f)} />
           </div>
         )}
@@ -177,6 +215,9 @@ function MobileSettingsPill({ state, setState, open, setOpen, onTimetable }) {
             <small>{t.schoolHolidaySub}</small>
           </div>
           <button className={"toggle" + (state.schoolHoliday ? " on" : "")}
+            role="switch"
+            aria-checked={state.schoolHoliday}
+            aria-label={t.schoolHolidayLabel}
             onClick={state.toggleSchoolHoliday} />
         </div>
         <div style={{height:16}} />
@@ -272,6 +313,7 @@ function V1Variation({ state, setState, t, langSwitcher, navLinks, onTimetable }
                 <button onClick={() => openSettingsModal()}
                   data-tooltip={state.lang==="hu" ? "Iskola és megálló beállítások" : "School & stop settings"}
                   data-tooltip-dir="down"
+                  aria-label={state.lang==="hu" ? "Iskola és megálló beállítások" : "School & stop settings"}
                   style={{background:"var(--line)",border:"none",borderRadius:10,padding:"6px 10px",cursor:"pointer",fontSize:16,lineHeight:1,color:"var(--ink)"}}>⚙️</button>
               </div>
             )}
@@ -285,17 +327,27 @@ function V1Variation({ state, setState, t, langSwitcher, navLinks, onTimetable }
         {isMobile && (
           <div style={{display:"flex",gap:6,alignItems:"center",flexShrink:0}}>
             {langSwitcher}
-            <button onClick={() => openSettingsModal()} title="Beállítások" style={{background:"var(--line)",border:"none",borderRadius:10,padding:"6px 10px",cursor:"pointer",fontSize:16,lineHeight:1,color:"var(--ink)"}}>⚙️</button>
+            <button onClick={() => openSettingsModal()} title="Beállítások" aria-label={state.lang==="hu" ? "Iskola és megálló beállítások" : "School & stop settings"} style={{background:"var(--line)",border:"none",borderRadius:10,padding:"6px 10px",cursor:"pointer",fontSize:16,lineHeight:1,color:"var(--ink)"}}>⚙️</button>
           </div>
         )}
         {!isMobile && (
           <div
             className="v1-clock"
+            role="button"
+            tabIndex={0}
             data-tooltip={isNowMode ? (state.lang==="hu" ? "Kattints: saját idő beállítása" : "Click: set custom time") : (state.lang==="hu" ? "Kattints: vissza a mosthoz" : "Click: back to now")}
+            aria-label={isNowMode ? (state.lang==="hu" ? "Saját idő beállítása" : "Set custom time") : (state.lang==="hu" ? "Vissza a mosthoz" : "Back to now")}
             data-tooltip-dir="left"
             onClick={() => {
               if (isNowMode) { setState({ ...state, mode: "custom" }); openSheet(); }
               else { setState({ ...state, mode: "now" }); }
+            }}
+            onKeyDown={e => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                if (isNowMode) { setState({ ...state, mode: "custom" }); openSheet(); }
+                else { setState({ ...state, mode: "now" }); }
+              }
             }}
             onMouseEnter={() => setClockHovered(true)}
             onMouseLeave={() => setClockHovered(false)}

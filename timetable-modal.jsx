@@ -94,6 +94,8 @@ function BusTimetableModal({ busId, onClose, fromStop, isWeekend: isWeekendProp,
   const [isFullscreen, setIsFullscreen] = React.useState(false);
   const modalRef = React.useRef(null);
   const isMountRef = React.useRef(true);
+  const closeButtonRef = React.useRef(null);
+  const triggerRef = React.useRef(null);
 
   React.useEffect(() => {
     const handler = () => setIsFullscreen(!!document.fullscreenElement);
@@ -123,6 +125,33 @@ function BusTimetableModal({ busId, onClose, fromStop, isWeekend: isWeekendProp,
     return () => document.removeEventListener('keydown', handler);
   }, []);
 
+  React.useEffect(() => {
+    triggerRef.current = document.activeElement;
+    closeButtonRef.current?.focus();
+    return () => { triggerRef.current?.focus(); };
+  }, []);
+
+  React.useEffect(() => {
+    const modal = modalRef.current;
+    if (!modal) return;
+    function trap(e) {
+      if (e.key !== 'Tab') return;
+      const focusable = Array.from(modal.querySelectorAll(
+        'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      ));
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey) {
+        if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+      } else {
+        if (document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
+    }
+    modal.addEventListener('keydown', trap);
+    return () => modal.removeEventListener('keydown', trap);
+  }, []);
+
   if (!allDirs.length) return null;
 
   function shortName(name) {
@@ -148,7 +177,11 @@ function BusTimetableModal({ busId, onClose, fromStop, isWeekend: isWeekendProp,
         justifyContent: 'center',
       }}
     >
-      <div ref={modalRef} style={{
+      <div ref={modalRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label={`${bus0.id} – ${bus0.label}`}
+        style={{
         background: 'white',
         borderRadius: isDesktop ? 20 : '20px 20px 0 0',
         width: '100%',
@@ -167,7 +200,7 @@ function BusTimetableModal({ busId, onClose, fromStop, isWeekend: isWeekendProp,
           gap: 12, flexShrink: 0,
           borderRadius: isDesktop ? '20px 20px 0 0' : '20px 20px 0 0',
         }}>
-          <button onClick={goPrev} style={{
+          <button onClick={goPrev} aria-label={lang === "hu" ? "Előző járat" : "Previous bus"} style={{
             background: 'rgba(255,255,255,0.2)', border: 'none', borderRadius: '50%',
             width: 32, height: 32, cursor: 'pointer', color: 'white', fontSize: 16,
             display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
@@ -199,7 +232,7 @@ function BusTimetableModal({ busId, onClose, fromStop, isWeekend: isWeekendProp,
               <span style={{display:'none'}}>{isWeekend ? t.weekendSchedule : t.weekdaySchedule}</span>
             </div>
           </div>
-          <button onClick={goNext} style={{
+          <button onClick={goNext} aria-label={lang === "hu" ? "Következő járat" : "Next bus"} style={{
             background: 'rgba(255,255,255,0.2)', border: 'none', borderRadius: '50%',
             width: 32, height: 32, cursor: 'pointer', color: 'white', fontSize: 16,
             display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
@@ -207,6 +240,8 @@ function BusTimetableModal({ busId, onClose, fromStop, isWeekend: isWeekendProp,
           <button
             onClick={() => setMapOpen(o => !o)}
             title="Útvonal a térképen"
+            aria-label={lang === "hu" ? "Útvonal a térképen" : "Route on map"}
+            aria-pressed={mapOpen}
             style={{
               background: mapOpen ? 'white' : 'rgba(255,255,255,0.25)',
               border: mapOpen ? `2px solid white` : '2px solid transparent',
@@ -218,7 +253,9 @@ function BusTimetableModal({ busId, onClose, fromStop, isWeekend: isWeekendProp,
             }}
           >🗺</button>
           <button
+            ref={closeButtonRef}
             onClick={handleClose}
+            aria-label={lang === "hu" ? "Bezárás" : "Close"}
             style={{
               background: 'rgba(255,255,255,0.25)', border: 'none',
               borderRadius: '50%', width: 36, height: 36,
@@ -612,7 +649,7 @@ function BusRouteMap({ bus, color, selectedDep, nowMins, fmt, modalRef }) {
   return (
     <div style={{ position: 'relative', flex: 1, display: 'flex', flexDirection: 'column' }}>
       <div ref={mapRef} style={{ flex: 1, width: '100%' }} />
-      <button onClick={toggleFullscreen} title={fsState ? 'Kilépés' : 'Teljes képernyő'} style={{
+      <button onClick={toggleFullscreen} title={fsState ? 'Kilépés' : 'Teljes képernyő'} aria-label={fsState ? 'Kilépés' : 'Teljes képernyő'} style={{
         position: 'absolute', top: fsState ? 28 : 10, right: fsState ? 28 : 10, zIndex: 1000,
         background: '#1a73e8',
         border: '2px solid #1a73e8',
@@ -631,6 +668,8 @@ function TimetableDropdown({ onSelect, upward, tabStyle, fabStyle, bgColor, lang
   const t = (window.I18N && window.I18N[lang || "hu"]) || window.I18N?.hu || {};
   const [open, setOpen] = React.useState(false);
   const ref = React.useRef(null);
+  const panelRef = React.useRef(null);
+  const savedFocusRef = React.useRef(null);
   const buses = [...new Map((window.CITY_BUSES_FULL||[]).map(b=>[b.id,b])).values()];
 
   React.useEffect(() => {
@@ -643,6 +682,31 @@ function TimetableDropdown({ onSelect, upward, tabStyle, fabStyle, bgColor, lang
       document.removeEventListener("mousedown", outside);
       document.removeEventListener("keydown", onKey);
     };
+  }, [open]);
+
+  React.useEffect(() => {
+    if (open) {
+      savedFocusRef.current = document.activeElement;
+      panelRef.current?.querySelector('button')?.focus();
+    } else if (savedFocusRef.current) {
+      savedFocusRef.current.focus();
+      savedFocusRef.current = null;
+    }
+  }, [open]);
+
+  React.useEffect(() => {
+    if (!open || !panelRef.current) return;
+    const panel = panelRef.current;
+    function trap(e) {
+      if (e.key !== 'Tab') return;
+      const buttons = Array.from(panel.querySelectorAll('button:not([disabled])'));
+      if (!buttons.length) return;
+      const first = buttons[0], last = buttons[buttons.length - 1];
+      if (e.shiftKey) { if (document.activeElement === first) { e.preventDefault(); last.focus(); } }
+      else { if (document.activeElement === last) { e.preventDefault(); first.focus(); } }
+    }
+    panel.addEventListener('keydown', trap);
+    return () => panel.removeEventListener('keydown', trap);
   }, [open]);
 
   const dropPos = upward
@@ -662,6 +726,7 @@ function TimetableDropdown({ onSelect, upward, tabStyle, fabStyle, bgColor, lang
         onClick={() => setOpen(o => !o)}
         data-tooltip={fabStyle ? (t.timetables || "Menetrendek") : undefined}
         data-tooltip-dir={fabStyle ? "left" : undefined}
+        aria-label={fabStyle ? (t.timetables || "Menetrendek") : undefined}
         style={fabStyle ? {
           width:44, height:44, borderRadius:"50%",
           background:"#1a2a3a", color:"white", border:"none",
@@ -692,7 +757,7 @@ function TimetableDropdown({ onSelect, upward, tabStyle, fabStyle, bgColor, lang
         )}
       </button>
       {open && (
-        <div style={{
+        <div ref={panelRef} style={{
           position:"absolute", ...dropPos,
           background:"white", borderRadius:14, padding:"12px 14px",
           boxShadow:"0 8px 28px rgba(0,0,0,0.15)", border:"2px solid var(--line)",

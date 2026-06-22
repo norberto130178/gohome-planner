@@ -49,6 +49,8 @@ function RouteCard({ route, index, isPrimary, t, style, isWeekend, dayType, nowM
           <button
             onClick={() => setMapOpen(o => !o)}
             title="Útvonal a térképen"
+            aria-label="Útvonal a térképen"
+            aria-pressed={mapOpen}
             style={{
               marginLeft: 8, background: mapOpen ? 'var(--accent)' : 'var(--line)',
               border: 'none', borderRadius: 8, padding: '2px 8px',
@@ -127,9 +129,13 @@ function RouteCard({ route, index, isPrimary, t, style, isWeekend, dayType, nowM
           <div className="step-time">{fmt(route.localBoardAt)}</div>
           <div
             className="step-icon bus-icon-local"
+            role="button"
+            tabIndex={0}
             style={{ background: busColor, cursor: 'pointer' }}
             title="Menetrend megtekintése"
+            aria-label={`${route.localBus.id} – Menetrend megtekintése`}
             onClick={() => setTimetableInfo({ busId: route.localBus.id, fromStop: route.localBus.stops[0].name, initialDep: route.localBoardAt })}
+            onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setTimetableInfo({ busId: route.localBus.id, fromStop: route.localBus.stops[0].name, initialDep: route.localBoardAt }); } }}
           >
             {route.localBus.id}
           </div>
@@ -166,6 +172,7 @@ function RouteCard({ route, index, isPrimary, t, style, isWeekend, dayType, nowM
 
       <button
         className="route-expand-btn"
+        aria-expanded={expanded}
         onClick={() => setExpanded(!expanded)}
       >
         {expanded ? t.hideMoreStops : t.showMoreStops} ▾
@@ -334,7 +341,7 @@ function HomeRouteMap({ route }) {
   return (
     <div ref={containerRef} style={{ borderTop: '2px solid var(--line)', position: 'relative' }}>
       <div ref={mapRef} style={{ height: fsState ? '100%' : 300, width: '100%' }} />
-      <button onClick={toggleFullscreen} title={fsState ? _t.exitFullscreen : _t.fullscreen} style={{
+      <button onClick={toggleFullscreen} title={fsState ? _t.exitFullscreen : _t.fullscreen} aria-label={fsState ? (_t.exitFullscreen || "Kilépés") : (_t.fullscreen || "Teljes képernyő")} style={{
         position: 'absolute', top: fsState ? 28 : 10, right: fsState ? 28 : 10, zIndex: 1000,
         background: '#1a73e8',
         border: '2px solid #1a73e8',
@@ -496,7 +503,7 @@ function CitySchoolRouteMap({ route, direction, schoolData }) {
   return (
     <div ref={containerRef} style={{ borderTop: '2px solid var(--line)', position: 'relative' }}>
       <div ref={mapRef} style={{ height: fsState ? '100%' : 300, width: '100%' }} />
-      <button onClick={toggleFullscreen} title={fsState ? _t.exitFullscreen : _t.fullscreen} style={{
+      <button onClick={toggleFullscreen} title={fsState ? _t.exitFullscreen : _t.fullscreen} aria-label={fsState ? (_t.exitFullscreen || "Kilépés") : (_t.fullscreen || "Teljes képernyő")} style={{
         position: 'absolute', top: fsState ? 28 : 10, right: fsState ? 28 : 10, zIndex: 1000,
         background: '#1a73e8', border: '2px solid #1a73e8',
         borderRadius: 8, padding: '4px 8px', cursor: 'pointer',
@@ -577,6 +584,8 @@ function CitySchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, n
           <button
             onClick={() => setMapOpen(o => !o)}
             title="Útvonal a térképen"
+            aria-label="Útvonal a térképen"
+            aria-pressed={mapOpen}
             style={{
               marginLeft: 8, background: mapOpen ? 'var(--accent)' : 'var(--line)',
               border: 'none', borderRadius: 8, padding: '2px 8px',
@@ -608,9 +617,13 @@ function CitySchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, n
           <div className="step-time">{fmt(route.boardAt)}</div>
           <div
             className="step-icon bus-icon-local"
+            role="button"
+            tabIndex={0}
             style={{ background: route.bus1.color, cursor: 'pointer' }}
             title="Menetrend megtekintése"
+            aria-label={`${route.bus1.id} – Menetrend megtekintése`}
             onClick={() => setTimetableInfo({ busId: route.bus1.id, fromStop: route.bus1.stops[0].name, initialDep: route.boardAt })}
+            onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setTimetableInfo({ busId: route.bus1.id, fromStop: route.bus1.stops[0].name, initialDep: route.boardAt }); } }}
           >
             {route.bus1.id}
           </div>
@@ -651,9 +664,13 @@ function CitySchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, n
               <div className="step-time">{fmt(route.boardAt2)}</div>
               <div
                 className="step-icon bus-icon-local"
+                role="button"
+                tabIndex={0}
                 style={{ background: route.bus2.color, cursor: 'pointer' }}
                 title="Menetrend megtekintése"
+                aria-label={`${route.bus2.id} – Menetrend megtekintése`}
                 onClick={() => setTimetableInfo({ busId: route.bus2.id, fromStop: route.bus2.stops[0].name, initialDep: route.boardAt2 })}
+                onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setTimetableInfo({ busId: route.bus2.id, fromStop: route.bus2.stops[0].name, initialDep: route.boardAt2 }); } }}
               >
                 {route.bus2.id}
               </div>
@@ -719,6 +736,7 @@ function CitySchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, n
 
       <button
         className="route-expand-btn"
+        aria-expanded={expanded}
         onClick={() => setExpanded(!expanded)}
       >
         {expanded ? t.hideMoreStops : t.showMoreStops} ▾
@@ -793,6 +811,8 @@ function SchoolSettingsModal({ onClose, lang }) {
   const [schoolInputFocused, setSchoolInputFocused] = React.useState(false);
   const [showMap, setShowMap] = React.useState(false);
   const mapRef = React.useRef(null);
+  const schoolWrapRef = React.useRef(null);
+  const schoolPendingFocusRef = React.useRef(false);
   const containerRef = React.useRef(null);
   const mapInstanceRef = React.useRef(null);
   const markersRef = React.useRef({});
@@ -808,7 +828,12 @@ function SchoolSettingsModal({ onClose, lang }) {
   const [homeInputFocused, setHomeInputFocused] = React.useState(false);
   const [showHomeMap, setShowHomeMap] = React.useState(false);
   const homeMapRef = React.useRef(null);
+  const homeWrapRef = React.useRef(null);
+  const homePendingFocusRef = React.useRef(false);
   const homeContainerRef = React.useRef(null);
+  const modalRef = React.useRef(null);
+  const closeButtonRef = React.useRef(null);
+  const triggerRef = React.useRef(null);
   const homeMapInstanceRef = React.useRef(null);
   const homeMarkersRef = React.useRef({});
   const [homeFsState, setHomeFsState] = React.useState(false);
@@ -852,6 +877,43 @@ function SchoolSettingsModal({ onClose, lang }) {
     document.addEventListener('keydown', h);
     return () => document.removeEventListener('keydown', h);
   }, []);
+
+  React.useEffect(() => {
+    triggerRef.current = document.activeElement;
+    closeButtonRef.current?.focus();
+    return () => { triggerRef.current?.focus(); };
+  }, []);
+
+  React.useEffect(() => {
+    if (!modalRef.current) return;
+    const modal = modalRef.current;
+    function trap(e) {
+      if (e.key !== 'Tab') return;
+      const focusable = Array.from(modal.querySelectorAll(
+        'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      ));
+      if (focusable.length === 0) return;
+      const first = focusable[0], last = focusable[focusable.length - 1];
+      if (e.shiftKey) { if (document.activeElement === first) { e.preventDefault(); last.focus(); } }
+      else { if (document.activeElement === last) { e.preventDefault(); first.focus(); } }
+    }
+    modal.addEventListener('keydown', trap);
+    return () => modal.removeEventListener('keydown', trap);
+  }, []);
+
+  React.useEffect(() => {
+    if (schoolInputFocused && schoolPendingFocusRef.current) {
+      schoolPendingFocusRef.current = false;
+      schoolWrapRef.current?.querySelectorAll('[role="option"]')?.[0]?.focus();
+    }
+  }, [schoolInputFocused]);
+
+  React.useEffect(() => {
+    if (homeInputFocused && homePendingFocusRef.current) {
+      homePendingFocusRef.current = false;
+      homeWrapRef.current?.querySelectorAll('[role="option"]')?.[0]?.focus();
+    }
+  }, [homeInputFocused]);
 
   React.useEffect(() => {
     if (!showMap) {
@@ -1028,14 +1090,14 @@ function SchoolSettingsModal({ onClose, lang }) {
       }}
       onClick={e => { if (e.target === e.currentTarget) onClose(); }}
     >
-      <div style={{
+      <div ref={modalRef} role="dialog" aria-modal="true" aria-label={t.settings || "Beállítások"} style={{
         background: "white", borderRadius: 20, padding: "24px 24px 20px",
         maxWidth: 540, width: "100%", maxHeight: "90vh", overflowY: "auto", overflowX: "hidden",
         boxShadow: "0 16px 48px rgba(0,0,0,0.3)", fontFamily: "Nunito, sans-serif",
       }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
           <div style={{ fontSize: 20, fontWeight: 900, color: "var(--ink)" }}>⚙ {t.settings || "Beállítások"}</div>
-          <button onClick={onClose} style={{ background: "none", border: "none", fontSize: 24, cursor: "pointer", color: "var(--ink-soft)", padding: "0 4px", lineHeight: 1 }}>×</button>
+          <button ref={closeButtonRef} onClick={onClose} aria-label={lang === "hu" ? "Bezárás" : "Close"} style={{ background: "none", border: "none", fontSize: 24, cursor: "pointer", color: "var(--ink-soft)", padding: "0 4px", lineHeight: 1 }}>×</button>
         </div>
 
         <div style={{ marginBottom: 16 }}>
@@ -1043,23 +1105,41 @@ function SchoolSettingsModal({ onClose, lang }) {
             {t.schoolQuestion || "Melyik iskolába jársz?"}
           </div>
           <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
-            <div style={{ flex: 1, minWidth: 0 }}>
+            <div ref={schoolWrapRef} style={{ flex: 1, minWidth: 0 }}>
               <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
                 <input
                   type="text"
                   placeholder={t.schoolSearchPlaceholder || "— Keress iskola névre —"}
+                  aria-label={t.schoolQuestion || "Iskola keresése"}
+                  aria-expanded={schoolInputFocused}
+                  aria-haspopup="listbox"
                   value={schoolQuery}
                   onChange={e => {
                     setSchoolQuery(e.target.value);
+                    setSchoolInputFocused(true);
                     if (selected && e.target.value !== schools.find(s => s.id === selected)?.name) setSelected("");
                   }}
-                  onFocus={() => setSchoolInputFocused(true)}
-                  onBlur={() => setTimeout(() => setSchoolInputFocused(false), 150)}
+                  onClick={() => setSchoolInputFocused(true)}
+                  onBlur={e => { const rel = e.relatedTarget; setTimeout(() => { if (!rel?.dataset.schoolOption) setSchoolInputFocused(false); }, 150); }}
+                  onKeyDown={e => {
+                    if (e.key === 'Escape') { if (schoolInputFocused) { e.stopPropagation(); setSchoolInputFocused(false); } }
+                    else if (e.key === 'Tab') { setSchoolInputFocused(false); }
+                    else if (e.key === 'ArrowDown') {
+                      e.preventDefault();
+                      if (schoolInputFocused) { schoolWrapRef.current?.querySelectorAll('[role="option"]')?.[0]?.focus(); }
+                      else { schoolPendingFocusRef.current = true; setSchoolInputFocused(true); }
+                    }
+                    else if (e.key === 'ArrowUp') {
+                      e.preventDefault();
+                      if (schoolInputFocused) { const items = schoolWrapRef.current?.querySelectorAll('[role="option"]'); items?.[items.length - 1]?.focus(); }
+                    }
+                  }}
                   style={{ width: "100%", padding: "9px 36px 9px 12px", borderRadius: 10, border: "2px solid var(--line)", fontFamily: "Nunito, sans-serif", fontSize: 14, fontWeight: 700, color: "var(--ink)", background: "white", outline: "none", boxSizing: "border-box" }}
                 />
                 {(schoolQuery || selected) && (
                   <button
-                    onClick={() => { setSelected(""); setSchoolQuery(""); }}
+                    onClick={() => { setSelected(""); setSchoolQuery(""); schoolWrapRef.current?.querySelector('input')?.focus(); }}
+                    aria-label={lang === "hu" ? "Iskola keresés törlése" : "Clear school search"}
                     style={{ position: "absolute", right: 8, background: "none", border: "none", cursor: "pointer", fontSize: 16, color: "var(--ink-soft)", lineHeight: 1, padding: "2px 4px" }}
                   >✕</button>
                 )}
@@ -1072,7 +1152,18 @@ function SchoolSettingsModal({ onClose, lang }) {
                   {filteredSchools.map(school => (
                     <div
                       key={school.id}
-                      onMouseDown={e => { e.preventDefault(); setSelected(school.id); setSchoolQuery(school.name); setSchoolInputFocused(false); }}
+                      role="option"
+                      tabIndex={-1}
+                      data-school-option="true"
+                      aria-selected={school.id === selected}
+                      onMouseDown={e => { e.preventDefault(); setSelected(school.id); setSchoolQuery(school.name); setSchoolInputFocused(false); schoolWrapRef.current?.querySelector('input')?.focus(); }}
+                      onKeyDown={(e, idx = filteredSchools.indexOf(school)) => {
+                        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelected(school.id); setSchoolQuery(school.name); setSchoolInputFocused(false); schoolWrapRef.current?.querySelector('input')?.focus(); }
+                        else if (e.key === 'Escape') { e.stopPropagation(); setSchoolInputFocused(false); schoolWrapRef.current?.querySelector('input')?.focus(); }
+                        else if (e.key === 'Tab') { setSchoolInputFocused(false); }
+                        else if (e.key === 'ArrowDown') { e.preventDefault(); const items = schoolWrapRef.current?.querySelectorAll('[role="option"]'); if (items && idx < items.length - 1) items[idx + 1].focus(); }
+                        else if (e.key === 'ArrowUp') { e.preventDefault(); const items = schoolWrapRef.current?.querySelectorAll('[role="option"]'); if (idx > 0) items[idx - 1].focus(); else schoolWrapRef.current?.querySelector('input')?.focus(); }
+                      }}
                       style={{ padding: "8px 12px", cursor: "pointer", fontSize: 13, fontWeight: school.id === selected ? 800 : 700, color: school.id === selected ? "var(--accent)" : "var(--ink)", borderBottom: "1px solid var(--line)", background: school.id === selected ? "var(--bg)" : "white" }}
                       onMouseEnter={e => { if (school.id !== selected) e.currentTarget.style.background = "var(--bg)"; }}
                       onMouseLeave={e => { if (school.id !== selected) e.currentTarget.style.background = "white"; }}
@@ -1116,20 +1207,37 @@ function SchoolSettingsModal({ onClose, lang }) {
             {t.boardingQuestion || "Hol szállsz fel reggel?"}
           </div>
           <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
-            <div style={{ flex: 1, minWidth: 0 }}>
+            <div ref={homeWrapRef} style={{ flex: 1, minWidth: 0 }}>
               <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
                 <input
                   type="text"
                   placeholder={t.stopSearchPlaceholder || "— Keress megálló névre —"}
+                  aria-label={t.boardingQuestion || "Megálló keresése"}
+                  aria-expanded={homeInputFocused}
+                  aria-haspopup="listbox"
                   value={homeQuery}
-                  onChange={e => { setHomeQuery(e.target.value); if (homeStop && e.target.value !== homeStop.name) setHomeStop(null); }}
-                  onFocus={() => setHomeInputFocused(true)}
-                  onBlur={() => setTimeout(() => setHomeInputFocused(false), 150)}
+                  onChange={e => { setHomeQuery(e.target.value); setHomeInputFocused(true); if (homeStop && e.target.value !== homeStop.name) setHomeStop(null); }}
+                  onClick={() => setHomeInputFocused(true)}
+                  onBlur={e => { const rel = e.relatedTarget; setTimeout(() => { if (!rel?.dataset.stopOption) setHomeInputFocused(false); }, 150); }}
+                  onKeyDown={e => {
+                    if (e.key === 'Escape') { if (homeInputFocused) { e.stopPropagation(); setHomeInputFocused(false); } }
+                    else if (e.key === 'Tab') { setHomeInputFocused(false); }
+                    else if (e.key === 'ArrowDown') {
+                      e.preventDefault();
+                      if (homeInputFocused) { homeWrapRef.current?.querySelectorAll('[role="option"]')?.[0]?.focus(); }
+                      else { homePendingFocusRef.current = true; setHomeInputFocused(true); }
+                    }
+                    else if (e.key === 'ArrowUp') {
+                      e.preventDefault();
+                      if (homeInputFocused) { const items = homeWrapRef.current?.querySelectorAll('[role="option"]'); items?.[items.length - 1]?.focus(); }
+                    }
+                  }}
                   style={{ width: "100%", padding: "9px 36px 9px 12px", borderRadius: 10, border: "2px solid var(--line)", fontFamily: "Nunito, sans-serif", fontSize: 14, fontWeight: 700, color: "var(--ink)", background: "white", outline: "none", boxSizing: "border-box" }}
                 />
                 {(homeQuery || homeStop) && (
                   <button
-                    onClick={() => { setHomeStop(null); setHomeQuery(''); }}
+                    onClick={() => { setHomeStop(null); setHomeQuery(''); homeWrapRef.current?.querySelector('input')?.focus(); }}
+                    aria-label={lang === "hu" ? "Megálló keresés törlése" : "Clear stop search"}
                     style={{ position: "absolute", right: 8, background: "none", border: "none", cursor: "pointer", fontSize: 16, color: "var(--ink-soft)", lineHeight: 1, padding: "2px 4px" }}
                   >✕</button>
                 )}
@@ -1142,7 +1250,18 @@ function SchoolSettingsModal({ onClose, lang }) {
                   {filteredStops.map(stop => (
                     <div
                       key={stop.name}
-                      onMouseDown={e => { e.preventDefault(); setHomeStop(stop); setHomeQuery(stop.name); setHomeInputFocused(false); }}
+                      role="option"
+                      tabIndex={-1}
+                      data-stop-option="true"
+                      aria-selected={stop.name === homeStop?.name}
+                      onMouseDown={e => { e.preventDefault(); setHomeStop(stop); setHomeQuery(stop.name); setHomeInputFocused(false); homeWrapRef.current?.querySelector('input')?.focus(); }}
+                      onKeyDown={(e, idx = filteredStops.indexOf(stop)) => {
+                        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setHomeStop(stop); setHomeQuery(stop.name); setHomeInputFocused(false); homeWrapRef.current?.querySelector('input')?.focus(); }
+                        else if (e.key === 'Escape') { e.stopPropagation(); setHomeInputFocused(false); homeWrapRef.current?.querySelector('input')?.focus(); }
+                        else if (e.key === 'Tab') { setHomeInputFocused(false); }
+                        else if (e.key === 'ArrowDown') { e.preventDefault(); const items = homeWrapRef.current?.querySelectorAll('[role="option"]'); if (items && idx < items.length - 1) items[idx + 1].focus(); }
+                        else if (e.key === 'ArrowUp') { e.preventDefault(); const items = homeWrapRef.current?.querySelectorAll('[role="option"]'); if (idx > 0) items[idx - 1].focus(); else homeWrapRef.current?.querySelector('input')?.focus(); }
+                      }}
                       style={{ padding: "8px 12px", cursor: "pointer", fontSize: 13, fontWeight: stop.name === homeStop?.name ? 800 : 700, color: stop.name === homeStop?.name ? "var(--accent)" : "var(--ink)", borderBottom: "1px solid var(--line)", background: stop.name === homeStop?.name ? "var(--bg)" : "white" }}
                       onMouseEnter={e => { if (stop.name !== homeStop?.name) e.currentTarget.style.background = "var(--bg)"; }}
                       onMouseLeave={e => { if (stop.name !== homeStop?.name) e.currentTarget.style.background = "white"; }}
@@ -1156,6 +1275,8 @@ function SchoolSettingsModal({ onClose, lang }) {
             <button
               onClick={() => setShowHomeMap(o => !o)}
               title={lang === "hu" ? "Megállók a térképen" : "Stops on map"}
+              aria-label={lang === "hu" ? "Megállók a térképen" : "Stops on map"}
+              aria-pressed={showHomeMap}
               style={{ padding: "9px 14px", borderRadius: 10, border: "none", background: showHomeMap ? "var(--accent)" : "var(--line)", color: showHomeMap ? "white" : "var(--ink)", fontSize: 20, cursor: "pointer", transition: "all 0.15s", flexShrink: 0 }}
             >🗺</button>
           </div>
@@ -1164,7 +1285,7 @@ function SchoolSettingsModal({ onClose, lang }) {
         {showHomeMap && (
           <div ref={homeContainerRef} style={{ position: "relative", marginBottom: 16, borderRadius: 12, overflow: "hidden", border: "2px solid var(--line)" }}>
             <div ref={homeMapRef} style={{ height: homeFsState ? "100%" : 300, width: "100%" }} />
-            <button onClick={toggleHomeFullscreen} title={homeFsState ? "Kilépés" : "Teljes képernyő"} style={{
+            <button onClick={toggleHomeFullscreen} title={homeFsState ? "Kilépés" : "Teljes képernyő"} aria-label={homeFsState ? "Kilépés" : "Teljes képernyő"} style={{
               position: "absolute", top: homeFsState ? 28 : 10, right: homeFsState ? 28 : 10, zIndex: 1000,
               background: "#1a73e8", border: "2px solid #1a73e8",
               borderRadius: 8, padding: "4px 8px", cursor: "pointer",
@@ -1195,7 +1316,7 @@ function SchoolSettingsModal({ onClose, lang }) {
             </div>
             <div ref={containerRef} style={{ borderTop: '2px solid var(--line)', position: 'relative', marginBottom: 16, borderRadius: 12, overflow: 'hidden' }}>
               <div ref={mapRef} style={{ height: fsState ? '100%' : 340, width: '100%' }} />
-              <button onClick={toggleFullscreen} title={fsState ? t.exitFullscreen : t.fullscreen} style={{
+              <button onClick={toggleFullscreen} title={fsState ? t.exitFullscreen : t.fullscreen} aria-label={fsState ? (t.exitFullscreen || "Kilépés") : (t.fullscreen || "Teljes képernyő")} style={{
                 position: 'absolute', top: fsState ? 28 : 10, right: fsState ? 28 : 10, zIndex: 1000,
                 background: '#1a73e8', border: '2px solid #1a73e8',
                 borderRadius: 8, padding: '4px 8px', cursor: 'pointer',
@@ -1270,6 +1391,8 @@ function SchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, nowMi
           <button
             onClick={() => setMapOpen(o => !o)}
             title="Útvonal a térképen"
+            aria-label="Útvonal a térképen"
+            aria-pressed={mapOpen}
             style={{
               marginLeft: 8, background: mapOpen ? 'var(--accent)' : 'var(--line)',
               border: 'none', borderRadius: 8, padding: '2px 8px',
@@ -1286,9 +1409,13 @@ function SchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, nowMi
           <div className="step-time">{fmt(route.localBoardAt)}</div>
           <div
             className="step-icon bus-icon-local"
+            role="button"
+            tabIndex={0}
             style={{ background: busColor, cursor: 'pointer' }}
             title="Menetrend megtekintése"
+            aria-label={`${route.localBus.id} – Menetrend megtekintése`}
             onClick={() => setTimetableInfo({ busId: route.localBus.id, fromStop: route.localBus.stops[0].name, initialDep: route.localBoardAt })}
+            onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setTimetableInfo({ busId: route.localBus.id, fromStop: route.localBus.stops[0].name, initialDep: route.localBoardAt }); } }}
           >
             {route.localBus.id}
           </div>
@@ -1568,7 +1695,7 @@ function SchoolRouteMap({ route, schoolData }) {
   return (
     <div ref={containerRef} style={{ borderTop: '2px solid var(--line)', position: 'relative' }}>
       <div ref={mapRef} style={{ height: fsState ? '100%' : 300, width: '100%' }} />
-      <button onClick={toggleFullscreen} title={fsState ? _t.exitFullscreen : _t.fullscreen} style={{
+      <button onClick={toggleFullscreen} title={fsState ? _t.exitFullscreen : _t.fullscreen} aria-label={fsState ? (_t.exitFullscreen || "Kilépés") : (_t.fullscreen || "Teljes képernyő")} style={{
         position: 'absolute', top: fsState ? 28 : 10, right: fsState ? 28 : 10, zIndex: 1000,
         background: '#1a73e8',
         border: '2px solid #1a73e8',

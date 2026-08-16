@@ -1,7 +1,7 @@
 // intercity-data.js — AUTO-GENERÁLT, ne szerkeszd kézzel
-// Forrás: _inputs/gtfs_volan/ (VOLÁN GTFS)
-// Frissítés: node _temp/extract-intercity.js && node _temp/convert-intercity.js
-// Generálva: 2026-06-15
+// Forrás: gtfs.menetbrand.com/download/volanbusz/ (VOLÁNBUSZ hivatalos GTFS-tükör)
+// Frissítés: _gtfs_update/ scriptek (09-regenerate-intercity.js + 10-apply-intercity.js)
+// Generálva: 2026-08-16
 
 window.INTERCITY_BUSES_FULL = [
   {
@@ -76,6 +76,102 @@ window.INTERCITY_BUSES_FULL = [
           1239,
           1240,
           1241
+        ]
+      },
+      {
+        "dayTypes": [
+          "munkanap",
+          "tanszunet",
+          "szabadnap"
+        ],
+        "deps": [
+          450,
+          452,
+          453,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      {
+        "dayTypes": [
+          "munkanap",
+          "tanszunet",
+          "szabadnap"
+        ],
+        "deps": [
+          510,
+          512,
+          513,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      {
+        "dayTypes": [
+          "munkanap",
+          "tanszunet",
+          "szabadnap"
+        ],
+        "deps": [
+          630,
+          632,
+          633,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      {
+        "dayTypes": [
+          "munkanap",
+          "tanszunet",
+          "szabadnap"
+        ],
+        "deps": [
+          870,
+          872,
+          873,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      {
+        "dayTypes": [
+          "munkanap",
+          "tanszunet",
+          "szabadnap"
+        ],
+        "deps": [
+          1110,
+          1112,
+          1113,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      {
+        "dayTypes": [
+          "munkanap",
+          "tanszunet",
+          "szabadnap"
+        ],
+        "deps": [
+          385,
+          387,
+          388,
+          null,
+          null,
+          null,
+          null
         ]
       }
     ]
@@ -168,7 +264,8 @@ window.INTERCITY_BUSES_FULL = [
     "trips": [
       {
         "dayTypes": [
-          "munkanap"
+          "munkanap",
+          "tanszunet"
         ],
         "deps": [
           null,
@@ -223,13 +320,14 @@ window.INTERCITY_BUSES_FULL = [
       {
         "dayTypes": [
           "munkanap",
-          "tanszunet"
+          "tanszunet",
+          "szabadnap"
         ],
         "deps": [
           525,
           529,
-          533,
-          533,
+          540,
+          540,
           542,
           544,
           548,
@@ -241,7 +339,8 @@ window.INTERCITY_BUSES_FULL = [
       },
       {
         "dayTypes": [
-          "munkanap"
+          "munkanap",
+          "tanszunet"
         ],
         "deps": [
           null,
@@ -264,8 +363,8 @@ window.INTERCITY_BUSES_FULL = [
         "deps": [
           765,
           769,
-          773,
-          773,
+          780,
+          780,
           782,
           784,
           788,
@@ -278,7 +377,8 @@ window.INTERCITY_BUSES_FULL = [
       {
         "dayTypes": [
           "munkanap",
-          "tanszunet"
+          "tanszunet",
+          "szabadnap"
         ],
         "deps": [
           null,
@@ -296,13 +396,14 @@ window.INTERCITY_BUSES_FULL = [
       },
       {
         "dayTypes": [
-          "munkanap"
+          "munkanap",
+          "tanszunet"
         ],
         "deps": [
           1000,
           1004,
-          1008,
-          1008,
+          1015,
+          1015,
           1017,
           1019,
           1023,
@@ -319,8 +420,8 @@ window.INTERCITY_BUSES_FULL = [
         "deps": [
           1005,
           1009,
-          1013,
-          1013,
+          1020,
+          1020,
           1022,
           1024,
           1028,
@@ -333,7 +434,8 @@ window.INTERCITY_BUSES_FULL = [
       {
         "dayTypes": [
           "munkanap",
-          "tanszunet"
+          "tanszunet",
+          "szabadnap"
         ],
         "deps": [
           null,
@@ -365,6 +467,63 @@ window.INTERCITY_BUSES_FULL = [
           1252,
           1253,
           1254
+        ]
+      },
+      {
+        "dayTypes": [
+          "munkanap",
+          "tanszunet"
+        ],
+        "deps": [
+          null,
+          null,
+          1085,
+          1085,
+          1087,
+          1088,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      {
+        "dayTypes": [
+          "munkanap",
+          "tanszunet"
+        ],
+        "deps": [
+          null,
+          null,
+          850,
+          850,
+          852,
+          854,
+          858,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      {
+        "dayTypes": [
+          "munkanap",
+          "tanszunet"
+        ],
+        "deps": [
+          null,
+          null,
+          900,
+          900,
+          902,
+          904,
+          908,
+          null,
+          null,
+          null,
+          null
         ]
       }
     ]
@@ -502,7 +661,8 @@ window.INTERCITY_BUSES_FULL = [
       },
       {
         "dayTypes": [
-          "munkanap"
+          "munkanap",
+          "tanszunet"
         ],
         "deps": [
           401,
@@ -521,7 +681,8 @@ window.INTERCITY_BUSES_FULL = [
       },
       {
         "dayTypes": [
-          "munkanap"
+          "munkanap",
+          "tanszunet"
         ],
         "deps": [
           431,
@@ -560,7 +721,8 @@ window.INTERCITY_BUSES_FULL = [
       {
         "dayTypes": [
           "munkanap",
-          "tanszunet"
+          "tanszunet",
+          "szabadnap"
         ],
         "deps": [
           643,
@@ -598,7 +760,8 @@ window.INTERCITY_BUSES_FULL = [
       },
       {
         "dayTypes": [
-          "munkanap"
+          "munkanap",
+          "tanszunet"
         ],
         "deps": [
           875,
@@ -636,7 +799,8 @@ window.INTERCITY_BUSES_FULL = [
       },
       {
         "dayTypes": [
-          "munkanap"
+          "munkanap",
+          "tanszunet"
         ],
         "deps": [
           1061,
@@ -693,7 +857,8 @@ window.INTERCITY_BUSES_FULL = [
       },
       {
         "dayTypes": [
-          "munkanap"
+          "munkanap",
+          "tanszunet"
         ],
         "deps": [
           1248,
@@ -725,6 +890,126 @@ window.INTERCITY_BUSES_FULL = [
           1284,
           1285,
           1285,
+          null,
+          null
+        ]
+      },
+      {
+        "dayTypes": [
+          "munkanap",
+          "tanszunet",
+          "szabadnap"
+        ],
+        "deps": [
+          null,
+          null,
+          null,
+          null,
+          813,
+          815,
+          817,
+          818,
+          819,
+          819,
+          null,
+          null
+        ]
+      },
+      {
+        "dayTypes": [
+          "munkanap",
+          "tanszunet"
+        ],
+        "deps": [
+          null,
+          null,
+          null,
+          null,
+          446,
+          450,
+          452,
+          453,
+          457,
+          457,
+          null,
+          null
+        ]
+      },
+      {
+        "dayTypes": [
+          "szabadnap"
+        ],
+        "deps": [
+          null,
+          null,
+          null,
+          null,
+          444,
+          448,
+          450,
+          451,
+          452,
+          452,
+          null,
+          null
+        ]
+      },
+      {
+        "dayTypes": [
+          "munkanap",
+          "tanszunet"
+        ],
+        "deps": [
+          null,
+          null,
+          null,
+          null,
+          379,
+          382,
+          384,
+          386,
+          389,
+          389,
+          null,
+          null
+        ]
+      },
+      {
+        "dayTypes": [
+          "munkanap",
+          "tanszunet"
+        ],
+        "deps": [
+          null,
+          null,
+          null,
+          null,
+          306,
+          310,
+          312,
+          313,
+          314,
+          314,
+          null,
+          null
+        ]
+      },
+      {
+        "dayTypes": [
+          "munkanap",
+          "tanszunet"
+        ],
+        "deps": [
+          null,
+          null,
+          null,
+          null,
+          914,
+          918,
+          920,
+          921,
+          922,
+          922,
           null,
           null
         ]
@@ -813,7 +1098,8 @@ window.INTERCITY_BUSES_FULL = [
       },
       {
         "dayTypes": [
-          "munkanap"
+          "munkanap",
+          "tanszunet"
         ],
         "deps": [
           330,
@@ -843,7 +1129,8 @@ window.INTERCITY_BUSES_FULL = [
       },
       {
         "dayTypes": [
-          "munkanap"
+          "munkanap",
+          "tanszunet"
         ],
         "deps": [
           350,
@@ -858,7 +1145,8 @@ window.INTERCITY_BUSES_FULL = [
       },
       {
         "dayTypes": [
-          "munkanap"
+          "munkanap",
+          "tanszunet"
         ],
         "deps": [
           360,
@@ -873,7 +1161,8 @@ window.INTERCITY_BUSES_FULL = [
       },
       {
         "dayTypes": [
-          "munkanap"
+          "munkanap",
+          "tanszunet"
         ],
         "deps": [
           390,
@@ -903,7 +1192,8 @@ window.INTERCITY_BUSES_FULL = [
       },
       {
         "dayTypes": [
-          "munkanap"
+          "munkanap",
+          "tanszunet"
         ],
         "deps": [
           405,
@@ -918,7 +1208,8 @@ window.INTERCITY_BUSES_FULL = [
       },
       {
         "dayTypes": [
-          "munkanap"
+          "munkanap",
+          "tanszunet"
         ],
         "deps": [
           415,
@@ -933,7 +1224,8 @@ window.INTERCITY_BUSES_FULL = [
       },
       {
         "dayTypes": [
-          "munkanap"
+          "munkanap",
+          "tanszunet"
         ],
         "deps": [
           420,
@@ -979,7 +1271,8 @@ window.INTERCITY_BUSES_FULL = [
       {
         "dayTypes": [
           "munkanap",
-          "tanszunet"
+          "tanszunet",
+          "szabadnap"
         ],
         "deps": [
           485,
@@ -995,7 +1288,8 @@ window.INTERCITY_BUSES_FULL = [
       {
         "dayTypes": [
           "munkanap",
-          "tanszunet"
+          "tanszunet",
+          "szabadnap"
         ],
         "deps": [
           540,
@@ -1026,7 +1320,8 @@ window.INTERCITY_BUSES_FULL = [
       {
         "dayTypes": [
           "munkanap",
-          "tanszunet"
+          "tanszunet",
+          "szabadnap"
         ],
         "deps": [
           630,
@@ -1041,7 +1336,8 @@ window.INTERCITY_BUSES_FULL = [
       },
       {
         "dayTypes": [
-          "munkanap"
+          "munkanap",
+          "tanszunet"
         ],
         "deps": [
           685,
@@ -1057,7 +1353,8 @@ window.INTERCITY_BUSES_FULL = [
       {
         "dayTypes": [
           "munkanap",
-          "tanszunet"
+          "tanszunet",
+          "szabadnap"
         ],
         "deps": [
           745,
@@ -1072,7 +1369,8 @@ window.INTERCITY_BUSES_FULL = [
       },
       {
         "dayTypes": [
-          "munkanap"
+          "munkanap",
+          "tanszunet"
         ],
         "deps": [
           795,
@@ -1088,7 +1386,8 @@ window.INTERCITY_BUSES_FULL = [
       {
         "dayTypes": [
           "munkanap",
-          "tanszunet"
+          "tanszunet",
+          "szabadnap"
         ],
         "deps": [
           805,
@@ -1103,7 +1402,8 @@ window.INTERCITY_BUSES_FULL = [
       },
       {
         "dayTypes": [
-          "munkanap"
+          "munkanap",
+          "tanszunet"
         ],
         "deps": [
           850,
@@ -1133,7 +1433,8 @@ window.INTERCITY_BUSES_FULL = [
       },
       {
         "dayTypes": [
-          "munkanap"
+          "munkanap",
+          "tanszunet"
         ],
         "deps": [
           870,
@@ -1163,7 +1464,8 @@ window.INTERCITY_BUSES_FULL = [
       },
       {
         "dayTypes": [
-          "munkanap"
+          "munkanap",
+          "tanszunet"
         ],
         "deps": [
           900,
@@ -1193,7 +1495,8 @@ window.INTERCITY_BUSES_FULL = [
       },
       {
         "dayTypes": [
-          "munkanap"
+          "munkanap",
+          "tanszunet"
         ],
         "deps": [
           940,
@@ -1208,7 +1511,8 @@ window.INTERCITY_BUSES_FULL = [
       },
       {
         "dayTypes": [
-          "munkanap"
+          "munkanap",
+          "tanszunet"
         ],
         "deps": [
           965,
@@ -1223,7 +1527,8 @@ window.INTERCITY_BUSES_FULL = [
       },
       {
         "dayTypes": [
-          "munkanap"
+          "munkanap",
+          "tanszunet"
         ],
         "deps": [
           1000,
@@ -1253,7 +1558,8 @@ window.INTERCITY_BUSES_FULL = [
       },
       {
         "dayTypes": [
-          "munkanap"
+          "munkanap",
+          "tanszunet"
         ],
         "deps": [
           1030,
@@ -1268,7 +1574,8 @@ window.INTERCITY_BUSES_FULL = [
       },
       {
         "dayTypes": [
-          "munkanap"
+          "munkanap",
+          "tanszunet"
         ],
         "deps": [
           1085,
@@ -1283,7 +1590,8 @@ window.INTERCITY_BUSES_FULL = [
       },
       {
         "dayTypes": [
-          "munkanap"
+          "munkanap",
+          "tanszunet"
         ],
         "deps": [
           1140,
@@ -1294,21 +1602,6 @@ window.INTERCITY_BUSES_FULL = [
           1154,
           1155,
           1156
-        ]
-      },
-      {
-        "dayTypes": [
-          "munkanap"
-        ],
-        "deps": [
-          1140,
-          1144,
-          1146,
-          1150,
-          1153,
-          1154,
-          1155,
-          1157
         ]
       },
       {
@@ -1328,7 +1621,8 @@ window.INTERCITY_BUSES_FULL = [
       },
       {
         "dayTypes": [
-          "munkanap"
+          "munkanap",
+          "tanszunet"
         ],
         "deps": [
           1180,
@@ -1344,7 +1638,8 @@ window.INTERCITY_BUSES_FULL = [
       {
         "dayTypes": [
           "munkanap",
-          "tanszunet"
+          "tanszunet",
+          "szabadnap"
         ],
         "deps": [
           1285,
@@ -1468,7 +1763,8 @@ window.INTERCITY_BUSES_FULL = [
     "trips": [
       {
         "dayTypes": [
-          "munkanap"
+          "munkanap",
+          "tanszunet"
         ],
         "deps": [
           290,
@@ -1489,7 +1785,8 @@ window.INTERCITY_BUSES_FULL = [
       },
       {
         "dayTypes": [
-          "munkanap"
+          "munkanap",
+          "tanszunet"
         ],
         "deps": [
           298,
@@ -1531,7 +1828,8 @@ window.INTERCITY_BUSES_FULL = [
       },
       {
         "dayTypes": [
-          "munkanap"
+          "munkanap",
+          "tanszunet"
         ],
         "deps": [
           360,
@@ -1573,7 +1871,8 @@ window.INTERCITY_BUSES_FULL = [
       },
       {
         "dayTypes": [
-          "munkanap"
+          "munkanap",
+          "tanszunet"
         ],
         "deps": [
           370,
@@ -1615,7 +1914,8 @@ window.INTERCITY_BUSES_FULL = [
       },
       {
         "dayTypes": [
-          "munkanap"
+          "munkanap",
+          "tanszunet"
         ],
         "deps": [
           390,
@@ -1636,7 +1936,8 @@ window.INTERCITY_BUSES_FULL = [
       },
       {
         "dayTypes": [
-          "munkanap"
+          "munkanap",
+          "tanszunet"
         ],
         "deps": [
           415,
@@ -1657,7 +1958,8 @@ window.INTERCITY_BUSES_FULL = [
       },
       {
         "dayTypes": [
-          "munkanap"
+          "munkanap",
+          "tanszunet"
         ],
         "deps": [
           425,
@@ -1699,7 +2001,8 @@ window.INTERCITY_BUSES_FULL = [
       },
       {
         "dayTypes": [
-          "munkanap"
+          "munkanap",
+          "tanszunet"
         ],
         "deps": [
           440,
@@ -1720,7 +2023,8 @@ window.INTERCITY_BUSES_FULL = [
       },
       {
         "dayTypes": [
-          "munkanap"
+          "munkanap",
+          "tanszunet"
         ],
         "deps": [
           445,
@@ -1784,7 +2088,8 @@ window.INTERCITY_BUSES_FULL = [
       {
         "dayTypes": [
           "munkanap",
-          "tanszunet"
+          "tanszunet",
+          "szabadnap"
         ],
         "deps": [
           515,
@@ -1806,7 +2111,8 @@ window.INTERCITY_BUSES_FULL = [
       {
         "dayTypes": [
           "munkanap",
-          "tanszunet"
+          "tanszunet",
+          "szabadnap"
         ],
         "deps": [
           570,
@@ -1828,7 +2134,8 @@ window.INTERCITY_BUSES_FULL = [
       {
         "dayTypes": [
           "munkanap",
-          "tanszunet"
+          "tanszunet",
+          "szabadnap"
         ],
         "deps": [
           660,
@@ -1870,7 +2177,8 @@ window.INTERCITY_BUSES_FULL = [
       },
       {
         "dayTypes": [
-          "munkanap"
+          "munkanap",
+          "tanszunet"
         ],
         "deps": [
           715,
@@ -1892,7 +2200,8 @@ window.INTERCITY_BUSES_FULL = [
       {
         "dayTypes": [
           "munkanap",
-          "tanszunet"
+          "tanszunet",
+          "szabadnap"
         ],
         "deps": [
           775,
@@ -1913,7 +2222,8 @@ window.INTERCITY_BUSES_FULL = [
       },
       {
         "dayTypes": [
-          "munkanap"
+          "munkanap",
+          "tanszunet"
         ],
         "deps": [
           825,
@@ -1935,7 +2245,8 @@ window.INTERCITY_BUSES_FULL = [
       {
         "dayTypes": [
           "munkanap",
-          "tanszunet"
+          "tanszunet",
+          "szabadnap"
         ],
         "deps": [
           850,
@@ -1956,7 +2267,8 @@ window.INTERCITY_BUSES_FULL = [
       },
       {
         "dayTypes": [
-          "munkanap"
+          "munkanap",
+          "tanszunet"
         ],
         "deps": [
           880,
@@ -1998,7 +2310,8 @@ window.INTERCITY_BUSES_FULL = [
       },
       {
         "dayTypes": [
-          "munkanap"
+          "munkanap",
+          "tanszunet"
         ],
         "deps": [
           900,
@@ -2040,7 +2353,8 @@ window.INTERCITY_BUSES_FULL = [
       },
       {
         "dayTypes": [
-          "munkanap"
+          "munkanap",
+          "tanszunet"
         ],
         "deps": [
           935,
@@ -2082,7 +2396,8 @@ window.INTERCITY_BUSES_FULL = [
       },
       {
         "dayTypes": [
-          "munkanap"
+          "munkanap",
+          "tanszunet"
         ],
         "deps": [
           976,
@@ -2103,7 +2418,8 @@ window.INTERCITY_BUSES_FULL = [
       },
       {
         "dayTypes": [
-          "munkanap"
+          "munkanap",
+          "tanszunet"
         ],
         "deps": [
           995,
@@ -2124,7 +2440,8 @@ window.INTERCITY_BUSES_FULL = [
       },
       {
         "dayTypes": [
-          "munkanap"
+          "munkanap",
+          "tanszunet"
         ],
         "deps": [
           1065,
@@ -2166,7 +2483,8 @@ window.INTERCITY_BUSES_FULL = [
       },
       {
         "dayTypes": [
-          "munkanap"
+          "munkanap",
+          "tanszunet"
         ],
         "deps": [
           1115,
@@ -2187,7 +2505,8 @@ window.INTERCITY_BUSES_FULL = [
       },
       {
         "dayTypes": [
-          "munkanap"
+          "munkanap",
+          "tanszunet"
         ],
         "deps": [
           1230,
@@ -2209,7 +2528,8 @@ window.INTERCITY_BUSES_FULL = [
       {
         "dayTypes": [
           "munkanap",
-          "tanszunet"
+          "tanszunet",
+          "szabadnap"
         ],
         "deps": [
           1325,
@@ -2230,21 +2550,22 @@ window.INTERCITY_BUSES_FULL = [
       },
       {
         "dayTypes": [
-          "munkanap"
+          "munkanap",
+          "tanszunet"
         ],
         "deps": [
-          1402,
-          1403,
-          1404,
-          1406,
-          1407,
-          1408,
-          1411,
-          1415,
-          1417,
-          1419,
-          1421,
-          1421,
+          null,
+          null,
+          null,
+          null,
+          855,
+          856,
+          859,
+          863,
+          865,
+          867,
+          870,
+          870,
           null,
           null
         ]
@@ -2423,7 +2744,8 @@ window.INTERCITY_BUSES_FULL = [
     "trips": [
       {
         "dayTypes": [
-          "munkanap"
+          "munkanap",
+          "tanszunet"
         ],
         "deps": [
           610,
@@ -2461,8 +2783,7 @@ window.INTERCITY_BUSES_FULL = [
       },
       {
         "dayTypes": [
-          "tanszunet",
-          "szabadnap"
+          "tanszunet"
         ],
         "deps": [
           1180,
@@ -2568,13 +2889,14 @@ window.INTERCITY_BUSES_FULL = [
     "trips": [
       {
         "dayTypes": [
-          "munkanap"
+          "munkanap",
+          "tanszunet"
         ],
         "deps": [
           765,
           769,
-          773,
-          773,
+          780,
+          780,
           782,
           784,
           788,
@@ -2679,7 +3001,8 @@ window.INTERCITY_BUSES_FULL = [
       {
         "dayTypes": [
           "munkanap",
-          "tanszunet"
+          "tanszunet",
+          "szabadnap"
         ],
         "deps": [
           506,
@@ -2788,8 +3111,8 @@ window.INTERCITY_BUSES_FULL = [
         "deps": [
           525,
           529,
-          533,
-          533,
+          540,
+          540,
           542,
           544,
           548,
@@ -2802,7 +3125,8 @@ window.INTERCITY_BUSES_FULL = [
       {
         "dayTypes": [
           "munkanap",
-          "tanszunet"
+          "tanszunet",
+          "szabadnap"
         ],
         "deps": [
           null,
@@ -2820,7 +3144,8 @@ window.INTERCITY_BUSES_FULL = [
       },
       {
         "dayTypes": [
-          "munkanap"
+          "munkanap",
+          "tanszunet"
         ],
         "deps": [
           null,
@@ -2958,7 +3283,8 @@ window.INTERCITY_BUSES_FULL = [
     "trips": [
       {
         "dayTypes": [
-          "munkanap"
+          "munkanap",
+          "tanszunet"
         ],
         "deps": [
           308,
@@ -3066,7 +3392,8 @@ window.INTERCITY_BUSES_FULL = [
     "trips": [
       {
         "dayTypes": [
-          "munkanap"
+          "munkanap",
+          "tanszunet"
         ],
         "deps": [
           null,
@@ -3085,7 +3412,8 @@ window.INTERCITY_BUSES_FULL = [
       {
         "dayTypes": [
           "munkanap",
-          "tanszunet"
+          "tanszunet",
+          "szabadnap"
         ],
         "deps": [
           null,
@@ -3108,8 +3436,8 @@ window.INTERCITY_BUSES_FULL = [
         "deps": [
           645,
           649,
-          653,
-          653,
+          660,
+          660,
           662,
           664,
           668,
@@ -3121,13 +3449,14 @@ window.INTERCITY_BUSES_FULL = [
       },
       {
         "dayTypes": [
-          "munkanap"
+          "munkanap",
+          "tanszunet"
         ],
         "deps": [
           645,
           649,
-          653,
-          653,
+          660,
+          660,
           662,
           664,
           668,
@@ -3155,6 +3484,120 @@ window.INTERCITY_BUSES_FULL = [
           882,
           883,
           884
+        ]
+      },
+      {
+        "dayTypes": [
+          "munkanap"
+        ],
+        "deps": [
+          null,
+          null,
+          810,
+          810,
+          812,
+          814,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      {
+        "dayTypes": [
+          "munkanap",
+          "tanszunet"
+        ],
+        "deps": [
+          null,
+          null,
+          930,
+          930,
+          932,
+          934,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      {
+        "dayTypes": [
+          "munkanap",
+          "tanszunet"
+        ],
+        "deps": [
+          null,
+          null,
+          975,
+          975,
+          977,
+          978,
+          984,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      {
+        "dayTypes": [
+          "munkanap",
+          "tanszunet",
+          "szabadnap"
+        ],
+        "deps": [
+          null,
+          null,
+          1350,
+          1350,
+          1352,
+          1353,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      {
+        "dayTypes": [
+          "munkanap",
+          "tanszunet"
+        ],
+        "deps": [
+          null,
+          null,
+          855,
+          855,
+          857,
+          859,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      {
+        "dayTypes": [
+          "munkanap",
+          "tanszunet"
+        ],
+        "deps": [
+          null,
+          null,
+          900,
+          900,
+          902,
+          904,
+          908,
+          null,
+          null,
+          null,
+          null
         ]
       }
     ]
@@ -3274,7 +3717,8 @@ window.INTERCITY_BUSES_FULL = [
       {
         "dayTypes": [
           "munkanap",
-          "tanszunet"
+          "tanszunet",
+          "szabadnap"
         ],
         "deps": [
           781,
@@ -3293,7 +3737,8 @@ window.INTERCITY_BUSES_FULL = [
       },
       {
         "dayTypes": [
-          "munkanap"
+          "munkanap",
+          "tanszunet"
         ],
         "deps": [
           1061,
@@ -3308,6 +3753,126 @@ window.INTERCITY_BUSES_FULL = [
           1075,
           1077,
           1083
+        ]
+      },
+      {
+        "dayTypes": [
+          "munkanap",
+          "tanszunet"
+        ],
+        "deps": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          405,
+          407,
+          408,
+          410,
+          410,
+          null,
+          null
+        ]
+      },
+      {
+        "dayTypes": [
+          "munkanap",
+          "tanszunet",
+          "szabadnap"
+        ],
+        "deps": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          774,
+          776,
+          777,
+          780,
+          780,
+          null,
+          null
+        ]
+      },
+      {
+        "dayTypes": [
+          "szabadnap"
+        ],
+        "deps": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          960,
+          962,
+          963,
+          964,
+          964,
+          null,
+          null
+        ]
+      },
+      {
+        "dayTypes": [
+          "szabadnap"
+        ],
+        "deps": [
+          null,
+          null,
+          null,
+          null,
+          995,
+          999,
+          1001,
+          1002,
+          1003,
+          1003,
+          null,
+          null
+        ]
+      },
+      {
+        "dayTypes": [
+          "munkanap",
+          "tanszunet"
+        ],
+        "deps": [
+          null,
+          null,
+          null,
+          null,
+          994,
+          998,
+          1000,
+          1001,
+          1002,
+          1002,
+          null,
+          null
+        ]
+      },
+      {
+        "dayTypes": [
+          "munkanap",
+          "tanszunet",
+          "szabadnap"
+        ],
+        "deps": [
+          null,
+          null,
+          null,
+          null,
+          371,
+          375,
+          377,
+          378,
+          379,
+          379,
+          null,
+          null
         ]
       }
     ]

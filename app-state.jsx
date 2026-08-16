@@ -56,6 +56,7 @@ function DestinationPickerWidget({ stops, linesMap, value, onSelect, onClear, la
         ) : (
           <input type="text" className="stop-picker-input"
             placeholder={lang==="hu"?"Megálló keresése...":"Search stop..."}
+            role="combobox"
             aria-label={lang==="hu" ? "Célállomás megálló keresése" : "Search destination stop"}
             aria-expanded={open}
             aria-haspopup="listbox"

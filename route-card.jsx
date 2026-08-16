@@ -1109,6 +1109,7 @@ function SchoolSettingsModal({ onClose, lang }) {
               <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
                 <input
                   type="text"
+                  role="combobox"
                   placeholder={t.schoolSearchPlaceholder || "— Keress iskola névre —"}
                   aria-label={t.schoolQuestion || "Iskola keresése"}
                   aria-expanded={schoolInputFocused}
@@ -1211,6 +1212,7 @@ function SchoolSettingsModal({ onClose, lang }) {
               <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
                 <input
                   type="text"
+                  role="combobox"
                   placeholder={t.stopSearchPlaceholder || "— Keress megálló névre —"}
                   aria-label={t.boardingQuestion || "Megálló keresése"}
                   aria-expanded={homeInputFocused}

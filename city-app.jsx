@@ -86,6 +86,7 @@ function StopSearch({ value, onChange, placeholder, id }) {
       <input
         id={id}
         type="text"
+        role="combobox"
         aria-expanded={open}
         aria-haspopup="listbox"
         value={query}
@@ -119,9 +120,10 @@ function StopSearch({ value, onChange, placeholder, id }) {
           onClick={() => { setQuery(""); onChange(""); ref.current?.querySelector('input')?.focus(); }}
           onBlur={handleBlur}
           style={{
-            position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)",
+            position: "absolute", right: 4, top: "50%", transform: "translateY(-50%)",
             background: "none", border: "none", cursor: "pointer",
-            fontSize: 18, color: "var(--ink-soft)", padding: "2px 4px", lineHeight: 1,
+            fontSize: 18, color: "var(--ink-soft)", padding: 0, lineHeight: 1,
+            minWidth: 44, minHeight: 44, display: "flex", alignItems: "center", justifyContent: "center",
           }}
         >×</button>
       )}

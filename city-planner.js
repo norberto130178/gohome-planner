@@ -123,7 +123,7 @@ window.planCityRoutes = function planCityRoutes({
             // Skip if staying on bus1 would reach toStop at least as early
             if (toOff1 !== null && dep1 + toOff1 <= arriveAt) continue;
 
-            const key = `T|${bus1.id}|${bus1.direction}|${dep1}|${bus2.id}|${bus2.direction}|${dep2}`;
+            const key = `T|${bus1.id}|${bus1.direction}|${dep1}|${bus2.id}|${bus2.direction}|${dep2}|${ts.name}`;
             if (seen.has(key)) continue;
             seen.add(key);
 
@@ -164,6 +164,7 @@ window.planCityRoutes = function planCityRoutes({
     if (deps1.length === 0) continue;
 
     const forwardStops = bus1.stops.filter(s => s.offset > fromOff1);
+    const toOff1 = U.stopOffset(bus1, toStop);
 
     for (const ts of forwardStops) {
       const neighbors = walkGraph[ts.spId] || [];
@@ -195,6 +196,10 @@ window.planCityRoutes = function planCityRoutes({
               if (trueDirectSeen.has(sdKey)) continue;
 
               const arriveAt = dep2 + toOff2;
+
+              // Skip if staying on bus1 would reach toStop at least as early (same guard as the
+              // same-physical-stop transfer loop above — this one was missing it entirely).
+              if (toOff1 !== null && dep1 + toOff1 <= arriveAt) continue;
 
               // Azonos csoporton belül csak a legrövidebb gyalogos marad
               const groupKey = `WTG|${bus1.id}|${bus1.direction}|${dep1}|${ts.name}|${bus2.id}|${bus2.direction}|${dep2}`;
@@ -241,7 +246,7 @@ window.planCityRoutes = function planCityRoutes({
       ? `D|${r.bus1.id}|${r.bus1.direction}|${r.boardAt}`
       : (r.walkTransfer && !r.walkTransferSameStop)
         ? `WT|${r.bus1.id}|${r.bus1.direction}|${r.boardAt}|${r.bus2.id}|${r.bus2.direction}|${r.walkToStop}`
-        : `T|${r.bus1.id}|${r.bus1.direction}|${r.boardAt}|${r.bus2.id}|${r.bus2.direction}`;
+        : `T|${r.bus1.id}|${r.bus1.direction}|${r.boardAt}|${r.bus2.id}|${r.bus2.direction}|${r.transferStopName}`;
     if (seenRide.has(k)) continue;
     seenRide.add(k);
     deduped.push(r);
@@ -256,7 +261,7 @@ window.planCityRoutes = function planCityRoutes({
     if (!r.walkTransfer || r.walkTransferSameStop) return true;
     return !deduped.some(other =>
       other !== r &&
-      other.walkTransfer &&
+      other.bus2 &&
       other.bus1.id === r.bus1.id &&
       other.bus1.direction === r.bus1.direction &&
       other.boardAt === r.boardAt &&
@@ -264,7 +269,7 @@ window.planCityRoutes = function planCityRoutes({
       other.bus2.direction === r.bus2.direction &&
       other.arriveAt <= r.arriveAt &&
       other.arriveAtTransfer === r.arriveAtTransfer &&
-      other.walkTransfer.distM < r.walkTransfer.distM
+      (other.walkTransfer ? other.walkTransfer.distM < r.walkTransfer.distM : true)
     );
   });
 

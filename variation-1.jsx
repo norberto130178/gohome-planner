@@ -214,12 +214,34 @@ function MobileSettingsPill({ state, setState, open, setOpen, onTimetable }) {
             <strong>{t.schoolHolidayLabel}</strong>
             <small>{t.schoolHolidaySub}</small>
           </div>
-          <button className={"toggle" + (state.schoolHoliday ? " on" : "")}
-            role="switch"
-            aria-checked={state.schoolHoliday}
-            aria-label={t.schoolHolidayLabel}
-            onClick={state.toggleSchoolHoliday} />
+          <div className="tweaks-pill-group" role="radiogroup" aria-label={t.schoolHolidayLabel}>
+            {[
+              { v: "auto", hu: "Automatikus", en: "Automatic" },
+              { v: "on", hu: "Mindig", en: "Always" },
+              { v: "off", hu: "Soha", en: "Never" },
+            ].map(opt => (
+              <button key={opt.v} type="button" role="radio" aria-checked={state.schoolHolidayMode === opt.v}
+                className={"tweaks-pill" + (state.schoolHolidayMode === opt.v ? " active" : "")}
+                onClick={() => state.setSchoolHolidayMode(opt.v)}>
+                {state.lang==="hu" ? opt.hu : opt.en}
+              </button>
+            ))}
+          </div>
         </div>
+        {state.schoolHolidayMode === "auto" && (
+          <div className="sheet-row">
+            <span className="row-icon">📅</span>
+            <div className="row-label" style={{display:"flex",alignItems:"center",gap:6,flexWrap:"wrap"}}>
+              <input type="date" value={state.schoolHolidayRange.start}
+                onChange={e => state.setSchoolHolidayRange(e.target.value, state.schoolHolidayRange.end)}
+                style={{fontSize:13,padding:"4px 6px",borderRadius:6,border:"1px solid var(--line)",fontFamily:"inherit"}} />
+              <span>–</span>
+              <input type="date" value={state.schoolHolidayRange.end}
+                onChange={e => state.setSchoolHolidayRange(state.schoolHolidayRange.start, e.target.value)}
+                style={{fontSize:13,padding:"4px 6px",borderRadius:6,border:"1px solid var(--line)",fontFamily:"inherit"}} />
+            </div>
+          </div>
+        )}
         <div style={{height:16}} />
       </div>
     </>
@@ -327,7 +349,7 @@ function V1Variation({ state, setState, t, langSwitcher, navLinks, onTimetable }
         {isMobile && (
           <div style={{display:"flex",gap:6,alignItems:"center",flexShrink:0}}>
             {langSwitcher}
-            <button onClick={() => openSettingsModal()} title="Beállítások" aria-label={state.lang==="hu" ? "Iskola és megálló beállítások" : "School & stop settings"} style={{background:"var(--line)",border:"none",borderRadius:10,padding:"6px 10px",cursor:"pointer",fontSize:16,lineHeight:1,color:"var(--ink)"}}>⚙️</button>
+            <button onClick={() => openSettingsModal()} title={t.settingsTooltip || "Beállítások"} aria-label={state.lang==="hu" ? "Iskola és megálló beállítások" : "School & stop settings"} style={{background:"var(--line)",border:"none",borderRadius:10,padding:"6px 10px",cursor:"pointer",fontSize:16,lineHeight:1,color:"var(--ink)"}}>⚙️</button>
           </div>
         )}
         {!isMobile && (

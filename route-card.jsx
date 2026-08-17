@@ -48,8 +48,8 @@ function RouteCard({ route, index, isPrimary, t, style, isWeekend, dayType, nowM
           🏠 {fmt(route.localArriveCsererdo)} · {totalStr}
           <button
             onClick={() => setMapOpen(o => !o)}
-            title="Útvonal a térképen"
-            aria-label="Útvonal a térképen"
+            title={t.routeOnMap || "Útvonal a térképen"}
+            aria-label={t.routeOnMap || "Útvonal a térképen"}
             aria-pressed={mapOpen}
             style={{
               marginLeft: 8, background: mapOpen ? 'var(--accent)' : 'var(--line)',
@@ -105,7 +105,7 @@ function RouteCard({ route, index, isPrimary, t, style, isWeekend, dayType, nowM
             {route.walkAtTransfer ? (
               <>
                 <div className="step-title">{route.transferStop} → {route.transferStop}</div>
-                <div className="step-sub">{route.walkAtTransfer.walkMin} {t.min} gyalog · {route.walkAtTransfer.distM} m</div>
+                <div className="step-sub">{route.walkAtTransfer.walkMin} {t.min} {t.walkWord || "gyalog"} · {route.walkAtTransfer.distM} m</div>
                 {route.waitAtTransfer - route.walkAtTransfer.walkMin > 0 && (
                   <div className="wait-pill">⏱ {route.waitAtTransfer - route.walkAtTransfer.walkMin} {t.min} {t.waitTime}</div>
                 )}
@@ -132,8 +132,8 @@ function RouteCard({ route, index, isPrimary, t, style, isWeekend, dayType, nowM
             role="button"
             tabIndex={0}
             style={{ background: busColor, cursor: 'pointer' }}
-            title="Menetrend megtekintése"
-            aria-label={`${route.localBus.id} – Menetrend megtekintése`}
+            title={t.viewTimetable || "Menetrend megtekintése"}
+            aria-label={`${route.localBus.id} – ${t.viewTimetable || "Menetrend megtekintése"}`}
             onClick={() => setTimetableInfo({ busId: route.localBus.id, fromStop: route.localBus.stops[0].name, initialDep: route.localBoardAt })}
             onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setTimetableInfo({ busId: route.localBus.id, fromStop: route.localBus.stops[0].name, initialDep: route.localBoardAt }); } }}
           >
@@ -143,10 +143,10 @@ function RouteCard({ route, index, isPrimary, t, style, isWeekend, dayType, nowM
             <div className="step-title">
               {t.takeLocal}{" "}
               <span style={{ color: busColor, fontWeight: 800 }}>
-                {route.localBus.label}
+                {window.busLabel(route.localBus, t)}
               </span>
             </div>
-            <div className="step-sub">{route.localBus.direction}</div>
+            <div className="step-sub">{window.busDirection(route.localBus, t)}</div>
           </div>
         </div>
 
@@ -583,8 +583,8 @@ function CitySchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, n
           {direction === "school" ? "🏫" : "🏠"} {fmt(finalArriveAt)} · {totalStr}
           <button
             onClick={() => setMapOpen(o => !o)}
-            title="Útvonal a térképen"
-            aria-label="Útvonal a térképen"
+            title={t.routeOnMap || "Útvonal a térképen"}
+            aria-label={t.routeOnMap || "Útvonal a térképen"}
             aria-pressed={mapOpen}
             style={{
               marginLeft: 8, background: mapOpen ? 'var(--accent)' : 'var(--line)',
@@ -609,7 +609,7 @@ function CitySchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, n
 
         <div className="step-connector">
           <div className="connector-line" />
-          {walkMin > 0 && <div className="connector-label">{walkMin} {t.min} gyalog</div>}
+          {walkMin > 0 && <div className="connector-label">{walkMin} {t.min} {t.walkWord || "gyalog"}</div>}
         </div>
 
         {/* Busz 1 */}
@@ -620,8 +620,8 @@ function CitySchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, n
             role="button"
             tabIndex={0}
             style={{ background: route.bus1.color, cursor: 'pointer' }}
-            title="Menetrend megtekintése"
-            aria-label={`${route.bus1.id} – Menetrend megtekintése`}
+            title={t.viewTimetable || "Menetrend megtekintése"}
+            aria-label={`${route.bus1.id} – ${t.viewTimetable || "Menetrend megtekintése"}`}
             onClick={() => setTimetableInfo({ busId: route.bus1.id, fromStop: route.bus1.stops[0].name, initialDep: route.boardAt })}
             onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setTimetableInfo({ busId: route.bus1.id, fromStop: route.bus1.stops[0].name, initialDep: route.boardAt }); } }}
           >
@@ -630,9 +630,9 @@ function CitySchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, n
           <div className="step-body">
             <div className="step-title">
               {t.takeLocal}{" "}
-              <span style={{ color: route.bus1.color, fontWeight: 800 }}>{route.bus1.label}</span>
+              <span style={{ color: route.bus1.color, fontWeight: 800 }}>{window.busLabel(route.bus1, t)}</span>
             </div>
-            <div className="step-sub">{route.bus1.direction}</div>
+            <div className="step-sub">{window.busDirection(route.bus1, t)}</div>
           </div>
         </div>
 
@@ -649,7 +649,7 @@ function CitySchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, n
               <div className="step-body">
                 <div className="step-title">{route.walkTransfer ? `${route.transferStopName} → ${route.walkToStop}` : (t.transfer + ": " + route.transferStopName)}</div>
                 {route.walkTransfer
-                  ? <div className="step-sub">{route.walkTransfer.walkMin} {t.min} gyalog · {route.walkTransfer.distM} m</div>
+                  ? <div className="step-sub">{route.walkTransfer.walkMin} {t.min} {t.walkWord || "gyalog"} · {route.walkTransfer.distM} m</div>
                   : <div className="wait-pill">⏱ {route.waitAtTransfer} {t.min} {t.waitTime}</div>
                 }
                 {route.walkTransfer && route.waitAtTransfer - route.walkTransfer.walkMin > 0 && (
@@ -667,8 +667,8 @@ function CitySchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, n
                 role="button"
                 tabIndex={0}
                 style={{ background: route.bus2.color, cursor: 'pointer' }}
-                title="Menetrend megtekintése"
-                aria-label={`${route.bus2.id} – Menetrend megtekintése`}
+                title={t.viewTimetable || "Menetrend megtekintése"}
+                aria-label={`${route.bus2.id} – ${t.viewTimetable || "Menetrend megtekintése"}`}
                 onClick={() => setTimetableInfo({ busId: route.bus2.id, fromStop: route.bus2.stops[0].name, initialDep: route.boardAt2 })}
                 onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setTimetableInfo({ busId: route.bus2.id, fromStop: route.bus2.stops[0].name, initialDep: route.boardAt2 }); } }}
               >
@@ -677,9 +677,9 @@ function CitySchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, n
               <div className="step-body">
                 <div className="step-title">
                   {t.takeLocal}{" "}
-                  <span style={{ color: route.bus2.color, fontWeight: 800 }}>{route.bus2.label}</span>
+                  <span style={{ color: route.bus2.color, fontWeight: 800 }}>{window.busLabel(route.bus2, t)}</span>
                 </div>
-                <div className="step-sub">{route.bus2.direction}</div>
+                <div className="step-sub">{window.busDirection(route.bus2, t)}</div>
               </div>
             </div>
 
@@ -709,7 +709,7 @@ function CitySchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, n
               <>
                 <div className="step-connector">
                   <div className="connector-line" />
-                  <div className="connector-label">{route.walkToSchool} {t.min} gyalog{route.walkToSchoolDist ? ` (${route.walkToSchoolDist} m)` : ""}</div>
+                  <div className="connector-label">{route.walkToSchool} {t.min} {t.walkWord || "gyalog"}{route.walkToSchoolDist ? ` (${route.walkToSchoolDist} m)` : ""}</div>
                 </div>
                 <div className="route-step step-home">
                   <div className="step-time">{fmt(route.arriveSchool)}</div>
@@ -749,7 +749,7 @@ function CitySchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, n
           {route.type === "transfer" && (
             <div className="details-title">
               {t.thisBusPasses}{" "}
-              <span style={{ background: route.bus1.color, color: '#fff', padding: '1px 7px', borderRadius: 7, fontSize: 12, fontWeight: 800 }}>{route.bus1.label}</span>
+              <span style={{ background: route.bus1.color, color: '#fff', padding: '1px 7px', borderRadius: 7, fontSize: 12, fontWeight: 800 }}>{window.busLabel(route.bus1, t)}</span>
             </div>
           )}
           {route.type !== "transfer" && (
@@ -773,7 +773,7 @@ function CitySchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, n
             <>
               <div className="details-title" style={{ marginTop: 8 }}>
                 {t.thisBusPasses}{" "}
-                <span style={{ background: route.bus2.color, color: '#fff', padding: '1px 7px', borderRadius: 7, fontSize: 12, fontWeight: 800 }}>{route.bus2.label}</span>
+                <span style={{ background: route.bus2.color, color: '#fff', padding: '1px 7px', borderRadius: 7, fontSize: 12, fontWeight: 800 }}>{window.busLabel(route.bus2, t)}</span>
               </div>
               <div className="details-stops">
                 {bus2Visible.map((s, i) => {
@@ -957,8 +957,8 @@ function SchoolSettingsModal({ onClose, lang }) {
       const nearest = school.nearbyStops?.[0];
       marker.bindPopup(
         `<b style="font-family:Nunito,sans-serif;font-size:13px">${school.name}</b>` +
-        (nearest ? `<br><span style="font-size:11px;color:#555">${nearest.name} · ${nearest.dist}m · ~${Math.ceil(nearest.dist/80)} perc gyalog</span>` : '') +
-        (school.helykoziOnly ? `<br><span style="font-size:11px;color:#888">Helyközi busz</span>` : ''),
+        (nearest ? `<br><span style="font-size:11px;color:#555">${nearest.name} · ${nearest.dist}m · ~${Math.ceil(nearest.dist/80)} ${t.walkMinLabel || "perc gyalog"}</span>` : '') +
+        (school.helykoziOnly ? `<br><span style="font-size:11px;color:#888">${t.intercityBusLabel || "Helyközi busz"}</span>` : ''),
         { className: 'school-popup' }
       );
       const ttOpts = { permanent: false, direction: 'top', offset: [0, -10] };
@@ -1287,7 +1287,7 @@ function SchoolSettingsModal({ onClose, lang }) {
         {showHomeMap && (
           <div ref={homeContainerRef} style={{ position: "relative", marginBottom: 16, borderRadius: 12, overflow: "hidden", border: "2px solid var(--line)" }}>
             <div ref={homeMapRef} style={{ height: homeFsState ? "100%" : 300, width: "100%" }} />
-            <button onClick={toggleHomeFullscreen} title={homeFsState ? "Kilépés" : "Teljes képernyő"} aria-label={homeFsState ? "Kilépés" : "Teljes képernyő"} style={{
+            <button onClick={toggleHomeFullscreen} title={homeFsState ? (t.exitFullscreen || "Kilépés") : (t.fullscreen || "Teljes képernyő")} aria-label={homeFsState ? (t.exitFullscreen || "Kilépés") : (t.fullscreen || "Teljes képernyő")} style={{
               position: "absolute", top: homeFsState ? 28 : 10, right: homeFsState ? 28 : 10, zIndex: 1000,
               background: "#1a73e8", border: "2px solid #1a73e8",
               borderRadius: 8, padding: "4px 8px", cursor: "pointer",
@@ -1300,11 +1300,11 @@ function SchoolSettingsModal({ onClose, lang }) {
           <>
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 8 }}>
               {[
-                { type: 'altalanos', color: '#1565C0', label: 'Általános' },
-                { type: 'gimnazium', color: '#6A1B9A', label: 'Gimnázium' },
-                { type: 'technikum', color: '#E65100', label: 'Technikum' },
-                { type: 'specialis', color: '#546E7A', label: 'Speciális' },
-                { type: 'osszetett', color: '#00695C', label: 'Összetett' },
+                { type: 'altalanos', color: '#1565C0', label: t.schoolTypeGeneral || 'Általános' },
+                { type: 'gimnazium', color: '#6A1B9A', label: t.schoolTypeGrammar || 'Gimnázium' },
+                { type: 'technikum', color: '#E65100', label: t.schoolTypeTechnikum || 'Technikum' },
+                { type: 'specialis', color: '#546E7A', label: t.schoolTypeSpecial || 'Speciális' },
+                { type: 'osszetett', color: '#00695C', label: t.schoolTypeCombined || 'Összetett' },
               ].map(({ color, label }) => (
                 <span key={label} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, fontWeight: 700, color: 'var(--ink-soft)' }}>
                   <span style={{ width: 12, height: 12, borderRadius: '50%', background: color, display: 'inline-block', flexShrink: 0, border: '2px solid white', boxShadow: '0 0 0 1px ' + color }} />
@@ -1392,8 +1392,8 @@ function SchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, nowMi
           🏫 {fmt(route.arriveSchool)} · {totalStr}
           <button
             onClick={() => setMapOpen(o => !o)}
-            title="Útvonal a térképen"
-            aria-label="Útvonal a térképen"
+            title={t.routeOnMap || "Útvonal a térképen"}
+            aria-label={t.routeOnMap || "Útvonal a térképen"}
             aria-pressed={mapOpen}
             style={{
               marginLeft: 8, background: mapOpen ? 'var(--accent)' : 'var(--line)',
@@ -1414,8 +1414,8 @@ function SchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, nowMi
             role="button"
             tabIndex={0}
             style={{ background: busColor, cursor: 'pointer' }}
-            title="Menetrend megtekintése"
-            aria-label={`${route.localBus.id} – Menetrend megtekintése`}
+            title={t.viewTimetable || "Menetrend megtekintése"}
+            aria-label={`${route.localBus.id} – ${t.viewTimetable || "Menetrend megtekintése"}`}
             onClick={() => setTimetableInfo({ busId: route.localBus.id, fromStop: route.localBus.stops[0].name, initialDep: route.localBoardAt })}
             onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setTimetableInfo({ busId: route.localBus.id, fromStop: route.localBus.stops[0].name, initialDep: route.localBoardAt }); } }}
           >
@@ -1425,7 +1425,7 @@ function SchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, nowMi
             <div className="step-title">
               {t.catchLocal}{" "}
               <span style={{ color: busColor, fontWeight: 800 }}>
-                {route.localBus.label}
+                {window.busLabel(route.localBus, t)}
               </span>
             </div>
             <div className="step-sub">{route.boardingStopName || "Csererdő"} → {hasWalk ? route.transferLocalStop : route.transferStopShort}</div>
@@ -1445,7 +1445,7 @@ function SchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, nowMi
               <div className="step-time">{fmt(route.localArriveAtTransfer)}</div>
               <div className="step-icon">🚶</div>
               <div className="step-body">
-                <div className="step-title">{route.walkAfterBus} {t.min} gyalog{route.walkAfterBusDist ? ` (${route.walkAfterBusDist} m)` : ""}</div>
+                <div className="step-title">{route.walkAfterBus} {t.min} {t.walkWord || "gyalog"}{route.walkAfterBusDist ? ` (${route.walkAfterBusDist} m)` : ""}</div>
                 <div className="step-sub">{route.transferLocalStop} → {route.transferStopShort}</div>
               </div>
             </div>
@@ -1463,7 +1463,7 @@ function SchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, nowMi
             {route.walkAtTransfer ? (
               <>
                 <div className="step-title">{route.transferStop} → {route.transferStop}</div>
-                <div className="step-sub">{route.walkAtTransfer.walkMin} {t.min} gyalog · {route.walkAtTransfer.distM} m</div>
+                <div className="step-sub">{route.walkAtTransfer.walkMin} {t.min} {t.walkWord || "gyalog"} · {route.walkAtTransfer.distM} m</div>
                 {route.waitAtTransfer - route.walkAtTransfer.walkMin > 0 && (
                   <div className="wait-pill">⏱ {route.waitAtTransfer - route.walkAtTransfer.walkMin} {t.min} {t.waitTime}</div>
                 )}
@@ -1513,7 +1513,7 @@ function SchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, nowMi
 
         <div className="step-connector">
           <div className="connector-line" />
-          <div className="connector-label">{route.walkToSchool} {t.min} gyalog{route.walkToSchoolDist ? ` (${route.walkToSchoolDist} m)` : ""}</div>
+          <div className="connector-label">{route.walkToSchool} {t.min} {t.walkWord || "gyalog"}{route.walkToSchoolDist ? ` (${route.walkToSchoolDist} m)` : ""}</div>
         </div>
 
         <div className="route-step step-home">

@@ -164,7 +164,8 @@ function useAppState(options = {}) {
   const [tick, setTick] = useState(0);
   const [direction, setDirection] = useState(initDirection);
   const [schoolFilter, setSchoolFilter] = useState(true);
-  const [schoolHoliday, setSchoolHoliday] = useState(() => localStorage.getItem("hazaut.schoolholiday") === "1");
+  const [schoolHolidayMode, setSchoolHolidayMode] = useState(() => localStorage.getItem("hazaut.schoolholiday.mode") || "auto");
+  const [schoolHolidayRange, setSchoolHolidayRangeState] = useState(() => window.SchoolHolidayUtil.getRange());
   const [homeStop, setHomeStop] = useState(null);
   const [homeStopQuery, setHomeStopQuery] = useState("");
   const [settingsKey, setSettingsKey] = useState(0);
@@ -180,7 +181,11 @@ function useAppState(options = {}) {
   useEffect(() => { localStorage.setItem("hazaut.lang", lang); }, [lang]);
   useEffect(() => { localStorage.setItem("hazaut.compact", compactMode ? "1" : "0"); }, [compactMode]);
   useEffect(() => { localStorage.setItem("hazaut.direction", direction); }, [direction]);
-  useEffect(() => { localStorage.setItem("hazaut.schoolholiday", schoolHoliday ? "1" : "0"); }, [schoolHoliday]);
+  useEffect(() => { localStorage.setItem("hazaut.schoolholiday.mode", schoolHolidayMode); }, [schoolHolidayMode]);
+  function setSchoolHolidayRange(start, end) {
+    window.SchoolHolidayUtil.setRange(start, end);
+    setSchoolHolidayRangeState({ start, end });
+  }
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 640px)");
     const handler = (e) => setIsMobile(e.matches);
@@ -208,6 +213,12 @@ function useAppState(options = {}) {
     base.setMinutes(base.getMinutes() + missed);
     return base;
   }, [mode, customTime, missed, tick, dayOffset]);
+
+  // --- Tanszünet: "auto" módban a tervezéshez használt dátum (now) dönt a beállított tartomány alapján ---
+  const schoolHoliday = useMemo(
+    () => window.SchoolHolidayUtil.resolve(schoolHolidayMode, now),
+    [schoolHolidayMode, now, schoolHolidayRange]
+  );
 
   // --- Settings beolvasása (újraszámítódik ha settingsKey változik) ---
   const schoolData = useMemo(() => {
@@ -317,12 +328,12 @@ function useAppState(options = {}) {
   };
 
   // --- State object & dispatcher ---
-  const state = { now, mode, customTime, missed, lang, routes, dayOffset, direction, schoolFilter, schoolHoliday, homeStop, compactMode, isMobile, schoolData, settingsHomeStop };
+  const state = { now, mode, customTime, missed, lang, routes, dayOffset, direction, schoolFilter, schoolHoliday, schoolHolidayMode, schoolHolidayRange, homeStop, compactMode, isMobile, schoolData, settingsHomeStop };
   state.setSchoolFilter = setSchoolFilter;
   const toggleCompact = () => setCompactMode(c => !c);
-  const toggleSchoolHoliday = () => setSchoolHoliday(v => !v);
   state.toggleCompact = toggleCompact;
-  state.toggleSchoolHoliday = toggleSchoolHoliday;
+  state.setSchoolHolidayMode = setSchoolHolidayMode;
+  state.setSchoolHolidayRange = setSchoolHolidayRange;
   state.setHomeStop = setHomeStop;
   state.refreshSettings = () => setSettingsKey(k => k + 1);
 
@@ -452,32 +463,38 @@ function useAppState(options = {}) {
             isMobile={isMobile}
           />
         )}
-        <div
-            role="button"
-            tabIndex={0}
-            style={{display:"flex",alignItems:"center",gap:8,cursor:"pointer"}}
-            onClick={toggleSchoolHoliday}
-            onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleSchoolHoliday(); } }}
-            data-tooltip={lang==="hu" ? "Tanszüneti menetrend (nyár, szünetek)" : "School holiday timetable (summer, breaks)"}
-          >
+        </div>
+        <div style={{display:"flex",flexDirection:"column",gap:6,alignItems:isMobile?"flex-start":"flex-end"}}>
+          <div style={{display:"flex",alignItems:"center",gap:8}}>
             <span style={{fontSize:13,fontWeight:700,userSelect:"none"}}>
               {lang==="hu" ? "🏖️ Tanszünet" : "🏖️ School holiday"}
             </span>
-            <div style={{
-              width:42, height:24, borderRadius:12, flexShrink:0,
-              background: schoolHoliday ? "var(--accent)" : "var(--line)",
-              position:"relative", transition:"background 0.2s",
-            }}>
-              <div style={{
-                position:"absolute",
-                top:3, left: schoolHoliday ? 21 : 3,
-                width:18, height:18, borderRadius:"50%",
-                background:"white",
-                boxShadow:"0 1px 4px rgba(0,0,0,0.25)",
-                transition:"left 0.2s",
-              }} />
+            <div className="tweaks-pill-group" role="radiogroup" aria-label={lang==="hu" ? "Tanszünet mód" : "School holiday mode"}>
+              {[
+                { v: "auto", hu: "Automatikus", en: "Automatic" },
+                { v: "on", hu: "Mindig", en: "Always" },
+                { v: "off", hu: "Soha", en: "Never" },
+              ].map(opt => (
+                <button key={opt.v} type="button" role="radio" aria-checked={schoolHolidayMode === opt.v}
+                  className={"tweaks-pill" + (schoolHolidayMode === opt.v ? " active" : "")}
+                  onClick={() => setSchoolHolidayMode(opt.v)}>
+                  {lang==="hu" ? opt.hu : opt.en}
+                </button>
+              ))}
             </div>
           </div>
+          {schoolHolidayMode === "auto" && (
+            <div style={{display:"flex",alignItems:"center",gap:6,fontSize:12,color:"var(--ink-soft)"}}>
+              <span>{lang==="hu" ? "Nyári szünet:" : "Summer break:"}</span>
+              <input type="date" value={schoolHolidayRange.start}
+                onChange={e => setSchoolHolidayRange(e.target.value, schoolHolidayRange.end)}
+                style={{fontSize:12,padding:"3px 4px",borderRadius:6,border:"1px solid var(--line)",fontFamily:"inherit"}} />
+              <span>–</span>
+              <input type="date" value={schoolHolidayRange.end}
+                onChange={e => setSchoolHolidayRange(schoolHolidayRange.start, e.target.value)}
+                style={{fontSize:12,padding:"3px 4px",borderRadius:6,border:"1px solid var(--line)",fontFamily:"inherit"}} />
+            </div>
+          )}
         </div>
       </div>
     );

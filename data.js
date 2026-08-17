@@ -18,6 +18,60 @@ function _haversineM(lat1, lon1, lat2, lon2) {
   return Math.round(R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
 }
 
+// Nyári szünet dátumtartomány + "Automatikus / Mindig / Soha" mód kezelése.
+// Megosztott a két app között (mindkettő betölti a data.js-t), mert ugyanaz a
+// valós iskolai naptár — a mód (auto/on/off) viszont app-onként külön van elmentve,
+// mert a kézi felülbírálás apponként eltérő lehet.
+window.SchoolHolidayUtil = {
+  getRange() {
+    return {
+      start: localStorage.getItem('schoolholiday.range.start') || '',
+      end: localStorage.getItem('schoolholiday.range.end') || '',
+    };
+  },
+  setRange(start, end) {
+    if (start) localStorage.setItem('schoolholiday.range.start', start);
+    else localStorage.removeItem('schoolholiday.range.start');
+    if (end) localStorage.setItem('schoolholiday.range.end', end);
+    else localStorage.removeItem('schoolholiday.range.end');
+  },
+  isInRange(date) {
+    const { start, end } = this.getRange();
+    if (!start || !end) return false;
+    const d = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    return d >= start && d <= end;
+  },
+  // mode: 'auto' | 'on' | 'off'; date: a tervezéshez használt dátum (pl. `now`, ami a dayOffset-tel már el van tolva)
+  resolve(mode, date) {
+    if (mode === 'on') return true;
+    if (mode === 'off') return false;
+    return this.isInRange(date);
+  },
+};
+
+// Busz megjelenítendő címkéje nyelvfüggően. A city-data.js `label` mezője csak
+// magyarul létezik (pl. "1-es busz"); angol módban a tiszta `id`-ra esünk vissza
+// ("Bus 1"), mert a magyar sorszám-toldalék ("-es"/"-os"/"-as") nem parse-olható
+// megbízhatóan vissza angolra.
+window.busLabel = function (bus, t) {
+  if (!bus) return "";
+  if (t && t._lang === "en") return "Bus " + bus.id;
+  return bus.label;
+};
+
+// A city-data.js `direction` mezője szabad szöveg ("A ▸ B felé", néha "körjárat" vagy
+// "(X-en át)" zárójeles kiegészítéssel) — csak magyarul létezik. Angol módban a
+// domináns mintákat ("felé", "körjárat") lecseréljük; a ritka zárójeles útvonal-
+// kiegészítők (pl. "(Sportuszodán át)") magyarul maradnak, mert szabad szöveges
+// fordításuk megbízhatóan nem automatizálható.
+window.busDirection = function (bus, t) {
+  if (!bus) return "";
+  if (!(t && t._lang === "en")) return bus.direction;
+  return (bus.direction || "")
+    .replace(/\s*felé\b/g, "")
+    .replace(/körjárat/g, "circular route");
+};
+
 // GTFS shape segédfüggvény — mindkét nézetben elérhető (index.html + city.html)
 window.nearestShapeIdx = function(shape, lat, lon) {
   let best = 0, bestD = Infinity;

@@ -206,7 +206,8 @@ function getShapeSegment(bus, fromStopName, toStopName) {
   ];
 }
 
-function CityRouteMap({ route, fromStop, toStop }) {
+function CityRouteMap({ route, fromStop, toStop, lang }) {
+  const t = (window.I18N && window.I18N[lang || "hu"]) || window.I18N?.hu || {};
   const mapRef = React.useRef(null);
   const containerRef = React.useRef(null);
   const instanceRef = React.useRef(null);
@@ -324,7 +325,7 @@ function CityRouteMap({ route, fromStop, toStop }) {
   return (
     <div ref={containerRef} style={{ position: 'relative', borderTop: '2px solid var(--line)' }}>
       <div ref={mapRef} style={{ height: fsState ? '100%' : 300, width: '100%' }} />
-      <button onClick={toggleFullscreen} title={fsState ? 'Kilépés' : 'Teljes képernyő'} aria-label={fsState ? 'Kilépés' : 'Teljes képernyő'} style={{
+      <button onClick={toggleFullscreen} title={fsState ? (t.exitFullscreen || 'Kilépés') : (t.fullscreen || 'Teljes képernyő')} aria-label={fsState ? (t.exitFullscreen || 'Kilépés') : (t.fullscreen || 'Teljes képernyő')} style={{
         position: 'absolute', top: fsState ? 28 : 10, right: fsState ? 28 : 10, zIndex: 1000,
         background: '#1a73e8',
         border: '2px solid #1a73e8',
@@ -388,8 +389,8 @@ function CityRouteCard({ route, index, isPrimary, fromStop, toStop, walkMin, isW
       role="button"
       tabIndex={0}
       style={{ background: bus.color, cursor: 'pointer' }}
-      title="Menetrend megtekintése"
-      aria-label={`${bus.id} – Menetrend megtekintése`}
+      title={t.viewTimetable || "Menetrend megtekintése"}
+      aria-label={`${bus.id} – ${t.viewTimetable || "Menetrend megtekintése"}`}
       onClick={() => openTimetable(bus, boardAt, boardStop)}
       onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openTimetable(bus, boardAt, boardStop); } }}
     >
@@ -410,8 +411,8 @@ function CityRouteCard({ route, index, isPrimary, fromStop, toStop, walkMin, isW
           📍 {fmt(route.arriveAt)} · {totalStr}
           <button
             onClick={() => setMapOpen(o => !o)}
-            title="Útvonal a térképen"
-            aria-label={lang === "hu" ? "Útvonal a térképen" : "Route on map"}
+            title={t.routeOnMap || "Útvonal a térképen"}
+            aria-label={t.routeOnMap || "Útvonal a térképen"}
             aria-pressed={mapOpen}
             style={{
               marginLeft: 8, background: mapOpen ? 'var(--accent)' : 'var(--line)',
@@ -448,7 +449,7 @@ function CityRouteCard({ route, index, isPrimary, fromStop, toStop, walkMin, isW
             <div className="step-title">
               {t.boardBus || "Szállj fel"} ·{" "}
               <span style={{ color: route.bus1.color, fontWeight: 800 }}>
-                {route.bus1.label}
+                {window.busLabel(route.bus1, t)}
               </span>
             </div>
             <div className="step-sub">{fromStop}</div>
@@ -507,7 +508,7 @@ function CityRouteCard({ route, index, isPrimary, fromStop, toStop, walkMin, isW
                 <div className="step-title">
                   {t.boardBus || "Szállj fel"} ·{" "}
                   <span style={{ color: route.bus2.color, fontWeight: 800 }}>
-                    {route.bus2.label}
+                    {window.busLabel(route.bus2, t)}
                   </span>
                 </div>
                 <div className="step-sub">{route.walkToStop || route.transferStopName}</div>
@@ -535,11 +536,11 @@ function CityRouteCard({ route, index, isPrimary, fromStop, toStop, walkMin, isW
         {expanded ? t.hideMoreStops : t.showMoreStops} ▾
       </button>
 
-      {mapOpen && <CityRouteMap route={route} fromStop={fromStop} toStop={toStop} />}
+      {mapOpen && <CityRouteMap route={route} fromStop={fromStop} toStop={toStop} lang={lang} />}
 
       {expanded && (
         <div className="route-details">
-          <div className="details-title">{route.bus1.label} {t.stopsOf || "megállói:"}</div>
+          <div className="details-title">{window.busLabel(route.bus1, t)} {t.stopsOf || "megállói:"}</div>
           <div className="details-stops">
             {visibleStops1.map((s, i) => {
               const absTime = fromBoard1 + s.offset;
@@ -554,7 +555,7 @@ function CityRouteCard({ route, index, isPrimary, fromStop, toStop, walkMin, isW
           </div>
           {visibleStops2.length > 0 && (
             <>
-              <div className="details-title" style={{ marginTop: 8 }}>{route.bus2.label} {t.stopsOf || "megállói:"}</div>
+              <div className="details-title" style={{ marginTop: 8 }}>{window.busLabel(route.bus2, t)} {t.stopsOf || "megállói:"}</div>
               <div className="details-stops">
                 {visibleStops2.map((s, i) => {
                   const absTime = fromBoard2 + s.offset;
@@ -577,7 +578,7 @@ function CityRouteCard({ route, index, isPrimary, fromStop, toStop, walkMin, isW
 
 
 // ── CityMobilePill ───────────────────────────────────────────────────
-function CityMobilePill({ timeMode, setTimeMode, customTime, setCustomTime, dayOffset, setDayOffset, schoolHoliday, setSchoolHoliday, canPlan, plan, lang, onTimetable, open, openSheet, onClose }) {
+function CityMobilePill({ timeMode, setTimeMode, customTime, setCustomTime, dayOffset, setDayOffset, schoolHoliday, schoolHolidayMode, setSchoolHolidayMode, schoolHolidayRange, setSchoolHolidayRange, canPlan, plan, lang, onTimetable, open, openSheet, onClose }) {
   const t = window.I18N[lang] || window.I18N.hu;
   const [collapsed, setCollapsed] = React.useState(false);
   const sheetRef = React.useRef(null);
@@ -754,16 +755,37 @@ function CityMobilePill({ timeMode, setTimeMode, customTime, setCustomTime, dayO
             <strong>{t.schoolHolidayLabel}</strong>
             <small>{t.schoolHolidaySub}</small>
           </div>
-          <button className={"toggle" + (schoolHoliday ? " on" : "")}
-            role="switch"
-            aria-checked={schoolHoliday}
-            aria-label={t.schoolHolidayLabel}
-            onClick={() => {
-              const v = !schoolHoliday; setSchoolHoliday(v);
-              localStorage.setItem("city.schoolholiday", v ? "1" : "0");
-              if (canPlan) plan({ schoolHoliday: v });
-            }} />
+          <div className="tweaks-pill-group" role="radiogroup" aria-label={t.schoolHolidayLabel}>
+            {[
+              { v: "auto", hu: "Automatikus", en: "Automatic" },
+              { v: "on", hu: "Mindig", en: "Always" },
+              { v: "off", hu: "Soha", en: "Never" },
+            ].map(opt => (
+              <button key={opt.v} type="button" role="radio" aria-checked={schoolHolidayMode === opt.v}
+                className={"tweaks-pill" + (schoolHolidayMode === opt.v ? " active" : "")}
+                onClick={() => {
+                  setSchoolHolidayMode(opt.v);
+                  if (canPlan) plan({ schoolHoliday: window.SchoolHolidayUtil.resolve(opt.v, new Date(Date.now() + dayOffset * 86400000)) });
+                }}>
+                {lang==="hu" ? opt.hu : opt.en}
+              </button>
+            ))}
+          </div>
         </div>
+        {schoolHolidayMode === "auto" && (
+          <div className="sheet-row">
+            <span className="row-icon">📅</span>
+            <div className="row-label" style={{display:"flex",alignItems:"center",gap:6,flexWrap:"wrap"}}>
+              <input type="date" value={schoolHolidayRange.start}
+                onChange={e => { setSchoolHolidayRange(e.target.value, schoolHolidayRange.end); if (canPlan) plan(); }}
+                style={{fontSize:13,padding:"4px 6px",borderRadius:6,border:"1px solid var(--line)",fontFamily:"inherit"}} />
+              <span>–</span>
+              <input type="date" value={schoolHolidayRange.end}
+                onChange={e => { setSchoolHolidayRange(schoolHolidayRange.start, e.target.value); if (canPlan) plan(); }}
+                style={{fontSize:13,padding:"4px 6px",borderRadius:6,border:"1px solid var(--line)",fontFamily:"inherit"}} />
+            </div>
+          </div>
+        )}
         <div style={{height:20}} />
       </div>
     </>
@@ -797,7 +819,13 @@ function CityApp() {
   });
   const walkMin = 0;
   const [dayOffset, setDayOffset] = React.useState(0);
-  const [schoolHoliday, setSchoolHoliday] = React.useState(() => localStorage.getItem("city.schoolholiday") === "1");
+  const [schoolHolidayMode, setSchoolHolidayMode] = React.useState(() => localStorage.getItem("city.schoolholiday.mode") || "auto");
+  const [schoolHolidayRange, setSchoolHolidayRangeState] = React.useState(() => window.SchoolHolidayUtil.getRange());
+  function setSchoolHolidayRange(start, end) {
+    window.SchoolHolidayUtil.setRange(start, end);
+    setSchoolHolidayRangeState({ start, end });
+  }
+  React.useEffect(() => { localStorage.setItem("city.schoolholiday.mode", schoolHolidayMode); }, [schoolHolidayMode]);
   const [results, setResults] = React.useState(null);
   const [formCollapsed, setFormCollapsed] = React.useState(false);
   const [timetableBusId, setTimetableBusId] = React.useState(null);
@@ -837,6 +865,12 @@ function CityApp() {
   const nowFmt = U.fmtTime(now.getHours() * 60 + now.getMinutes());
   const dateFmt = now.toLocaleDateString(lang === "hu" ? "hu-HU" : "en-US", { weekday: "long", month: "short", day: "numeric" });
 
+  // "auto" módban a kiválasztott nap (dayOffset-tel eltolva) dönt a beállított nyári-szünet tartomány alapján
+  const schoolHoliday = React.useMemo(() => {
+    const d = new Date(now); d.setDate(d.getDate() + dayOffset);
+    return window.SchoolHolidayUtil.resolve(schoolHolidayMode, d);
+  }, [schoolHolidayMode, now, dayOffset, schoolHolidayRange]);
+
   function plan(overrides = {}) {
     const effectiveMode = overrides.timeMode ?? timeMode;
     const effectiveTime = overrides.customTime ?? customTime;
@@ -858,7 +892,7 @@ function CityApp() {
       toStop: effectiveTo,
       walkMin,
       maxResults: 6,
-      schoolHoliday: overrides.schoolHoliday ?? schoolHoliday,
+      schoolHoliday: overrides.schoolHoliday ?? window.SchoolHolidayUtil.resolve(schoolHolidayMode, planTime),
     });
     setResults(r);
     setPlanIsWeekend(planTime.getDay() === 0 || planTime.getDay() === 6);
@@ -1066,7 +1100,8 @@ function CityApp() {
         timeMode={timeMode} setTimeMode={setTimeMode}
         customTime={customTime} setCustomTime={setCustomTime}
         dayOffset={dayOffset} setDayOffset={setDayOffset}
-        schoolHoliday={schoolHoliday} setSchoolHoliday={setSchoolHoliday}
+        schoolHoliday={schoolHoliday} schoolHolidayMode={schoolHolidayMode} setSchoolHolidayMode={setSchoolHolidayMode}
+        schoolHolidayRange={schoolHolidayRange} setSchoolHolidayRange={setSchoolHolidayRange}
         canPlan={canPlan} plan={plan} lang={lang}
         onTimetable={id => setTimetableBusId(id)}
         open={sheetOpen} openSheet={openSheet} onClose={closeSheet}

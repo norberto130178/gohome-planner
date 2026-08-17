@@ -180,7 +180,7 @@ function BusTimetableModal({ busId, onClose, fromStop, isWeekend: isWeekendProp,
       <div ref={modalRef}
         role="dialog"
         aria-modal="true"
-        aria-label={`${bus0.id} – ${bus0.label}`}
+        aria-label={`${bus0.id} – ${window.busLabel(bus0, t)}`}
         style={{
         background: 'white',
         borderRadius: isDesktop ? 20 : '20px 20px 0 0',
@@ -212,7 +212,7 @@ function BusTimetableModal({ busId, onClose, fromStop, isWeekend: isWeekendProp,
             fontSize: 18, fontWeight: 900, flexShrink: 0,
           }}>{bus0.id}</div>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 17, fontWeight: 900 }}>{bus0.label}</div>
+            <div style={{ fontSize: 17, fontWeight: 900 }}>{window.busLabel(bus0, t)}</div>
             <div style={{ fontSize: 11, opacity: 0.8, display:'flex', gap:6, flexWrap:'wrap', alignItems:'center' }}>
               {(['workday','schoolholiday','weekend']).map(dt => {
                 const label = dt === 'workday' ? (t.workday || 'Hétköznap') : dt === 'schoolholiday' ? (t.schoolHolidayLabel || 'Tanszünet') : (t.weekend || 'Hétvége');
@@ -239,8 +239,8 @@ function BusTimetableModal({ busId, onClose, fromStop, isWeekend: isWeekendProp,
           }}>▶</button>
           <button
             onClick={() => setMapOpen(o => !o)}
-            title="Útvonal a térképen"
-            aria-label={lang === "hu" ? "Útvonal a térképen" : "Route on map"}
+            title={t.routeOnMap || "Útvonal a térképen"}
+            aria-label={t.routeOnMap || "Útvonal a térképen"}
             aria-pressed={mapOpen}
             style={{
               background: mapOpen ? 'white' : 'rgba(255,255,255,0.25)',
@@ -341,11 +341,15 @@ function BusTimetableModal({ busId, onClose, fromStop, isWeekend: isWeekendProp,
         {allDirs.some(b => b.footnotes && Object.keys(b.footnotes).length > 0) && (
           <div style={{ flexShrink:0, borderTop:'1px solid var(--line)', padding:'8px 14px', background:'#fafafa' }}>
             {allDirs.filter(b => b.footnotes).map((b, di) => (
-              Object.entries(b.footnotes).map(([k, v]) => (
-                <div key={`${di}-${k}`} style={{ fontSize:11, color:'var(--ink-soft)', lineHeight:1.5 }}>
-                  <sup style={{fontWeight:900}}>{k}</sup> {v}
-                </div>
-              ))
+              Object.entries(b.footnotes).map(([k, v]) => {
+                const [huText, enText] = v.split(' / ');
+                const text = lang === "hu" ? huText : (enText || huText);
+                return (
+                  <div key={`${di}-${k}`} style={{ fontSize:11, color:'var(--ink-soft)', lineHeight:1.5 }}>
+                    <sup style={{fontWeight:900}}>{k}</sup> {text}
+                  </div>
+                );
+              })
             ))}
           </div>
         )}
@@ -354,7 +358,7 @@ function BusTimetableModal({ busId, onClose, fromStop, isWeekend: isWeekendProp,
         {mapOpen && (
           <div style={{ flex: 1, minHeight: 320, borderTop: '2px solid var(--line)', display: 'flex', flexDirection: 'column' }}>
             <BusRouteMap bus={selBus} color={bus0.color} selectedDep={selDep} nowMins={nowMins} fmt={fmt}
-              modalRef={modalRef} />
+              modalRef={modalRef} lang={lang} />
           </div>
         )}
       </div>
@@ -449,7 +453,8 @@ function StopTimeline({ bus, selectedDep, nowMins, fmt, lang }) {
   );
 }
 
-function BusRouteMap({ bus, color, selectedDep, nowMins, fmt, modalRef }) {
+function BusRouteMap({ bus, color, selectedDep, nowMins, fmt, modalRef, lang }) {
+  const t = (window.I18N && window.I18N[lang || "hu"]) || window.I18N?.hu || {};
   const mapRef = React.useRef(null);
   const instanceRef = React.useRef(null);
   const busKey = `${bus.id}-${bus.direction}-${selectedDep ?? 'none'}`;
@@ -649,7 +654,7 @@ function BusRouteMap({ bus, color, selectedDep, nowMins, fmt, modalRef }) {
   return (
     <div style={{ position: 'relative', flex: 1, display: 'flex', flexDirection: 'column' }}>
       <div ref={mapRef} style={{ flex: 1, width: '100%' }} />
-      <button onClick={toggleFullscreen} title={fsState ? 'Kilépés' : 'Teljes képernyő'} aria-label={fsState ? 'Kilépés' : 'Teljes képernyő'} style={{
+      <button onClick={toggleFullscreen} title={fsState ? (t.exitFullscreen || 'Kilépés') : (t.fullscreen || 'Teljes képernyő')} aria-label={fsState ? (t.exitFullscreen || 'Kilépés') : (t.fullscreen || 'Teljes képernyő')} style={{
         position: 'absolute', top: fsState ? 28 : 10, right: fsState ? 28 : 10, zIndex: 1000,
         background: '#1a73e8',
         border: '2px solid #1a73e8',
@@ -764,7 +769,7 @@ function TimetableDropdown({ onSelect, upward, tabStyle, fabStyle, bgColor, lang
           display:"flex", gap:8, flexWrap:"wrap", zIndex:500, minWidth:220,
         }}>
           {buses.map(b => (
-            <button key={b.id} title={b.label}
+            <button key={b.id} title={window.busLabel(b, t)}
               onClick={() => { onSelect(b.id); setOpen(false); }}
               style={{
                 width:40, height:40, borderRadius:"50%",

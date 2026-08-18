@@ -182,6 +182,7 @@ function StopSearch({ value, onChange, placeholder, id }) {
     </div>
   );
 }
+window.StopSearch = StopSearch;
 
 // ── CityRouteCard ────────────────────────────────────────────────────
 // Kiválasztja a helyes GTFS shape-et és kiszeli a fromStop–toStop szakaszt
@@ -583,7 +584,7 @@ function CityRouteCard({ route, index, isPrimary, fromStop, toStop, walkMin, isW
 
 
 // ── CityMobilePill ───────────────────────────────────────────────────
-function CityMobilePill({ timeMode, setTimeMode, customTime, setCustomTime, dayOffset, setDayOffset, schoolHoliday, schoolHolidayMode, setSchoolHolidayMode, schoolHolidayRange, setSchoolHolidayRange, canPlan, plan, lang, onTimetable, open, openSheet, onClose }) {
+function CityMobilePill({ timeMode, setTimeMode, customTime, setCustomTime, dayOffset, setDayOffset, schoolHoliday, schoolHolidayMode, setSchoolHolidayMode, schoolHolidayRange, setSchoolHolidayRange, canPlan, plan, lang, onTimetable, onStopViewer, open, openSheet, onClose }) {
   const t = window.I18N[lang] || window.I18N.hu;
   const [collapsed, setCollapsed] = React.useState(false);
   const sheetRef = React.useRef(null);
@@ -698,6 +699,12 @@ function CityMobilePill({ timeMode, setTimeMode, customTime, setCustomTime, dayO
           <div className="fab-timetable-wrap">
             <window.TimetableDropdown onSelect={onTimetable} upward fabStyle lang={lang} />
           </div>
+        )}
+        {onStopViewer && (
+          <button className="fab-action" onClick={onStopViewer}
+            data-tooltip={lang === "hu" ? "Megállók" : "Stops"}
+            data-tooltip-dir="left"
+            aria-label={lang === "hu" ? "Megállók" : "Stops"}>🚏</button>
         )}
         <div className="mobile-pill" role="button" tabIndex={0} onClick={openSheet} onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openSheet(); } }} style={{cursor:"pointer"}}>
           <span style={{fontSize:15, padding:"5px 9px", opacity:0.8}}>⚙️</span>
@@ -834,6 +841,7 @@ function CityApp() {
   const [results, setResults] = React.useState(null);
   const [formCollapsed, setFormCollapsed] = React.useState(false);
   const [timetableBusId, setTimetableBusId] = React.useState(null);
+  const [stopViewerOpen, setStopViewerOpen] = React.useState(false);
   const [sheetOpen, setSheetOpen] = React.useState(false);
   const didPushHistory = React.useRef(false);
 
@@ -923,6 +931,9 @@ function CityApp() {
     <div className="v1">
       {timetableBusId && (
         <window.BusTimetableModal busId={timetableBusId} onClose={() => setTimetableBusId(null)} isWeekend={planIsWeekend} nowMins={planNowMins} lang={lang} />
+      )}
+      {stopViewerOpen && window.StopTimetableModal && (
+        <window.StopTimetableModal onClose={() => setStopViewerOpen(false)} dayType={U.dayType(now, schoolHoliday)} lang={lang} />
       )}
       {/* Header */}
       <div className="v1-header" style={isMobile ? {flexDirection:"row", alignItems:"center", justifyContent:"space-between", gap:8} : {}}>
@@ -1109,6 +1120,7 @@ function CityApp() {
         schoolHolidayRange={schoolHolidayRange} setSchoolHolidayRange={setSchoolHolidayRange}
         canPlan={canPlan} plan={plan} lang={lang}
         onTimetable={id => setTimetableBusId(id)}
+        onStopViewer={() => setStopViewerOpen(true)}
         open={sheetOpen} openSheet={openSheet} onClose={closeSheet}
       />
 

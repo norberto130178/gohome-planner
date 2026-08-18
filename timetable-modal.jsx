@@ -787,3 +787,360 @@ function TimetableDropdown({ onSelect, upward, tabStyle, fabStyle, bgColor, lang
   );
 }
 window.TimetableDropdown = TimetableDropdown;
+
+/* ============================================================
+   StopTimetableModal — megálló-néző ("departure board")
+   Egy kiválasztott megálló összes indulása, vonal-chipekkel
+   szűrhetően, teljes napi listával, "most"-hoz görgetve.
+   A megálló-keresőt a city-app.jsx StopSearch komponense adja
+   (window.StopSearch) — ezért egyelőre csak a city.html oldalon
+   használható.
+   ============================================================ */
+function StopTimetableModal({ onClose, dayType, lang }) {
+  const U = window.BUS_UTILS;
+  const fmt = (m) => U.fmtTime(m);
+  const t = (window.I18N && window.I18N[lang || "hu"]) || window.I18N?.hu || {};
+
+  const _now = new Date();
+  const nowMins = _now.getHours() * 60 + _now.getMinutes();
+
+  const [selectedStop, setSelectedStop] = React.useState(null);
+  const [activeDayType, setActiveDayType] = React.useState(dayType || "workday");
+  const [activeIds, setActiveIds] = React.useState(null); // null = minden vonal aktív
+
+  // --- Modal boilerplate (history back, ESC, scroll-lock, fókusz) ---
+  const didPushRef = React.useRef(false);
+  React.useEffect(() => {
+    history.pushState({ stopTimetableModal: true }, "");
+    didPushRef.current = true;
+    function onPop() { didPushRef.current = false; onClose(); }
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
+
+  function handleClose() {
+    if (didPushRef.current) { didPushRef.current = false; history.back(); }
+    else onClose();
+  }
+
+  React.useEffect(() => {
+    _modalOpenCount++;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      _modalOpenCount--;
+      if (_modalOpenCount === 0) document.body.style.overflow = '';
+    };
+  }, []);
+
+  React.useEffect(() => {
+    const handler = (e) => { if (e.key === 'Escape') handleClose(); };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, []);
+
+  const modalRef = React.useRef(null);
+  const closeButtonRef = React.useRef(null);
+  const triggerRef = React.useRef(null);
+  React.useEffect(() => {
+    triggerRef.current = document.activeElement;
+    closeButtonRef.current?.focus();
+    return () => { triggerRef.current?.focus(); };
+  }, []);
+
+  React.useEffect(() => {
+    const modal = modalRef.current;
+    if (!modal) return;
+    function trap(e) {
+      if (e.key !== 'Tab') return;
+      const focusable = Array.from(modal.querySelectorAll(
+        'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      ));
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey) {
+        if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+      } else {
+        if (document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
+    }
+    modal.addEventListener('keydown', trap);
+    return () => modal.removeEventListener('keydown', trap);
+  }, []);
+
+  // --- Adatok ---
+  const dirsAtStop = React.useMemo(() => {
+    if (!selectedStop) return [];
+    return (window.CITY_BUSES_FULL || []).filter(b => U.busVisits(b, selectedStop));
+  }, [selectedStop]);
+
+  // Egyedi vonalak a chipekhez (id szerint dedupelve, numerikusan rendezve)
+  const lines = React.useMemo(() => {
+    const map = new Map();
+    for (const b of dirsAtStop) if (!map.has(b.id)) map.set(b.id, b);
+    return [...map.values()].sort((a, b) => {
+      const na = parseFloat(a.id), nb = parseFloat(b.id);
+      if (na !== nb) return na - nb;
+      return a.id.localeCompare(b.id);
+    });
+  }, [dirsAtStop]);
+
+  function isActive(id) {
+    return activeIds === null ? true : activeIds.has(id);
+  }
+  function toggleLine(id) {
+    const next = new Set(activeIds === null ? lines.map(l => l.id) : activeIds);
+    if (next.has(id)) next.delete(id); else next.add(id);
+    setActiveIds(next);
+  }
+
+  // Összefésült indulási lista. A csak végállomásként érintett irányokat kihagyjuk
+  // (oda csak érkezik a busz, nem indul tovább) — körjáratnál a megálló első
+  // előfordulása számít, így az indulási oldala megmarad.
+  const mergedDeps = React.useMemo(() => {
+    const out = [];
+    for (const bus of dirsAtStop) {
+      if (!isActive(bus.id)) continue;
+      const idx = bus.stops.findIndex(s => s.name === selectedStop);
+      if (idx < 0 || idx === bus.stops.length - 1) continue;
+      const off = bus.stops[idx].offset;
+      const sched = bus.departures[activeDayType] || {};
+      for (const [hStr, arr] of Object.entries(sched)) {
+        const h = Number(hStr);
+        for (const raw of arr) {
+          const m = typeof raw === "object" ? raw.t : raw;
+          const note = typeof raw === "object" ? raw.n : null;
+          out.push({ mins: h * 60 + m + off, note, bus });
+        }
+      }
+    }
+    return out.sort((a, b) => a.mins - b.mins);
+  }, [dirsAtStop, activeIds, activeDayType, selectedStop]);
+
+  const nextIdx = mergedDeps.findIndex(d => d.mins >= nowMins);
+
+  // "Most"-hoz görgetés (lista közepére), megálló/nap/szűrő váltásnál újra
+  const listRef = React.useRef(null);
+  const nextRowRef = React.useRef(null);
+  React.useEffect(() => {
+    const list = listRef.current, row = nextRowRef.current;
+    if (list && row) {
+      list.scrollTop = row.offsetTop - list.clientHeight / 2 + row.clientHeight / 2;
+    }
+  }, [selectedStop, activeDayType, mergedDeps]);
+
+  // Lábjegyzet-magyarázatok az aktuális listában előforduló jelölésekhez.
+  // Vonalanként gyűjtjük, mert ugyanaz a betű más vonalon mást jelenthet;
+  // az összetett jelöléseket (pl. "Hv") karakterenként bontjuk (backlog #9).
+  const usedFootnotes = React.useMemo(() => {
+    const map = new Map(); // "busId|char" -> { busId, color, char, text }
+    for (const d of mergedDeps) {
+      if (!d.note) continue;
+      const fn = d.bus.footnotes || {};
+      for (const ch of String(d.note)) {
+        const raw = fn[ch] || fn[ch.toUpperCase()];
+        if (!raw) continue;
+        const key = d.bus.id + '|' + ch.toUpperCase();
+        if (map.has(key)) continue;
+        const [huText, enText] = raw.split(' / ');
+        map.set(key, { busId: d.bus.id, color: d.bus.color, char: ch, text: lang === "hu" ? huText : (enText || huText) });
+      }
+    }
+    return [...map.values()];
+  }, [mergedDeps, lang]);
+
+  const isDesktop = window.innerWidth >= 640;
+  const headerColor = '#1a2a3a';
+
+  const dayTabs = (['workday', 'schoolholiday', 'weekend']).map(dt => {
+    const label = dt === 'workday' ? (t.workday || 'Hétköznap') : dt === 'schoolholiday' ? (t.schoolHolidayLabel || 'Tanszünet') : (t.weekend || 'Hétvége');
+    const hasData = dirsAtStop.some(b => b.departures[dt] && Object.keys(b.departures[dt]).length > 0);
+    if (selectedStop && !hasData && dt !== activeDayType) return null;
+    return (
+      <button key={dt} onClick={() => setActiveDayType(dt)} style={{
+        background: activeDayType === dt ? 'white' : 'rgba(255,255,255,0.18)',
+        border: 'none', borderRadius: 6, padding: '2px 7px',
+        color: activeDayType === dt ? headerColor : 'white',
+        fontSize: 10, fontWeight: 700, cursor: 'pointer',
+        opacity: hasData || !selectedStop ? 1 : 0.5,
+      }}>{label}</button>
+    );
+  });
+
+  const modal = (
+    <div
+      onClick={(e) => { if (e.target === e.currentTarget) handleClose(); }}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 99999,
+        background: 'rgba(0,0,0,0.55)',
+        display: 'flex',
+        alignItems: isDesktop ? 'center' : 'flex-end',
+        justifyContent: 'center',
+      }}
+    >
+      <div ref={modalRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label={selectedStop || (t.stopViewerTitle || "Megállók")}
+        style={{
+          background: 'white',
+          borderRadius: isDesktop ? 20 : '20px 20px 0 0',
+          width: '100%',
+          maxWidth: isDesktop ? 560 : 680,
+          maxHeight: isDesktop ? '80vh' : '90vh',
+          minHeight: selectedStop ? (isDesktop ? '60vh' : '70vh') : undefined,
+          overflow: 'hidden', display: 'flex', flexDirection: 'column',
+          boxShadow: '0 8px 40px rgba(0,0,0,0.35)',
+          fontFamily: 'Nunito, sans-serif',
+        }}>
+
+        {/* Fejléc */}
+        <div style={{
+          background: headerColor, color: 'white',
+          padding: '16px 20px', display: 'flex', alignItems: 'center',
+          gap: 12, flexShrink: 0,
+        }}>
+          <div style={{
+            width: 44, height: 44, borderRadius: '50%',
+            background: 'rgba(255,255,255,0.25)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: 20, flexShrink: 0,
+          }}>🚏</div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 17, fontWeight: 900, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {selectedStop || (t.stopViewerTitle || "Megállók")}
+            </div>
+            <div style={{ fontSize: 11, opacity: 0.8, display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
+              {dayTabs}
+            </div>
+          </div>
+          {selectedStop && (
+            <button
+              onClick={() => { setSelectedStop(null); setActiveIds(null); }}
+              title={t.changeStop || "Megálló váltása"}
+              aria-label={t.changeStop || "Megálló váltása"}
+              style={{
+                background: 'rgba(255,255,255,0.25)', border: 'none',
+                borderRadius: '50%', width: 36, height: 36,
+                cursor: 'pointer', color: 'white', fontSize: 16,
+                display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+              }}
+            >🔍</button>
+          )}
+          <button
+            ref={closeButtonRef}
+            onClick={handleClose}
+            aria-label={lang === "hu" ? "Bezárás" : "Close"}
+            style={{
+              background: 'rgba(255,255,255,0.25)', border: 'none',
+              borderRadius: '50%', width: 36, height: 36,
+              cursor: 'pointer', color: 'white', fontSize: 20, fontWeight: 900,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+            }}
+          >✕</button>
+        </div>
+
+        {!selectedStop ? (
+          /* Megálló-választó nézet */
+          <div style={{ padding: '24px 20px 32px' }}>
+            <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--ink)', marginBottom: 12 }}>
+              {t.stopViewerPick || "Melyik megálló indulásait nézzük?"}
+            </div>
+            {window.StopSearch ? (
+              <window.StopSearch
+                id="stop-viewer-search"
+                value=""
+                onChange={(s) => { if (s) { setSelectedStop(s); setActiveIds(null); } }}
+                placeholder={t.stopSearchPlaceholder || "— Keress megálló névre —"}
+              />
+            ) : null}
+          </div>
+        ) : (
+          <>
+            {/* Vonal-chipek */}
+            <div style={{
+              display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center',
+              padding: '10px 14px', borderBottom: '1px solid var(--line)', flexShrink: 0,
+            }}>
+              {lines.map(b => {
+                const on = isActive(b.id);
+                return (
+                  <button key={b.id}
+                    onClick={() => toggleLine(b.id)}
+                    role="checkbox"
+                    aria-checked={on}
+                    aria-label={window.busLabel(b, t)}
+                    style={{
+                      width: 34, height: 34, borderRadius: '50%',
+                      background: on ? b.color : 'var(--line)',
+                      color: on ? 'white' : 'var(--ink-soft)',
+                      border: 'none', cursor: 'pointer',
+                      fontFamily: 'Nunito,sans-serif', fontSize: 12, fontWeight: 900,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      boxShadow: on ? '0 2px 6px rgba(0,0,0,0.18)' : 'none',
+                      opacity: on ? 1 : 0.6,
+                      transition: 'all 0.12s',
+                    }}
+                  >{b.id}</button>
+                );
+              })}
+            </div>
+
+            {/* Indulási lista */}
+            <div ref={listRef} style={{ flex: 1, overflowY: 'auto', position: 'relative' }}>
+              {mergedDeps.length === 0 ? (
+                <div style={{ padding: '32px 20px', textAlign: 'center', fontSize: 13, color: 'var(--ink-soft)', fontWeight: 700 }}>
+                  {activeIds !== null && activeIds.size === 0
+                    ? (t.stopViewerNoLine || "Válassz legalább egy vonalat")
+                    : (t.stopViewerNoDeps || "Ezen a napon nincs indulás erről a megállóról")}
+                </div>
+              ) : mergedDeps.map((d, i) => {
+                const isPast = d.mins < nowMins;
+                const isNext = i === nextIdx;
+                return (
+                  <div key={i} ref={isNext ? nextRowRef : null} style={{
+                    display: 'flex', alignItems: 'center', gap: 10,
+                    padding: '7px 14px',
+                    opacity: isPast ? 0.45 : 1,
+                    background: isNext ? 'rgba(255,201,60,0.18)' : 'none',
+                    borderLeft: isNext ? '4px solid #FFC93C' : '4px solid transparent',
+                    borderBottom: '1px solid #f4f2ee',
+                  }}>
+                    <span style={{ fontVariantNumeric: 'tabular-nums', fontWeight: 800, fontSize: 15, width: 52, flexShrink: 0, color: 'var(--ink)' }}>
+                      {fmt(d.mins)}
+                      {d.note && <sup style={{ fontSize: 9, fontWeight: 900, marginLeft: 1 }}>{d.note}</sup>}
+                    </span>
+                    <span style={{
+                      width: 30, height: 30, borderRadius: '50%', flexShrink: 0,
+                      background: d.bus.color, color: 'white',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontSize: 11, fontWeight: 900,
+                    }}>{d.bus.id}</span>
+                    <span style={{ flex: 1, minWidth: 0, fontSize: 12, fontWeight: 600, color: 'var(--ink-soft)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {window.busDirection(d.bus, t)}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Lábjegyzet-magyarázatok */}
+            {usedFootnotes.length > 0 && (
+              <div style={{ flexShrink: 0, borderTop: '1px solid var(--line)', padding: '8px 14px', background: '#fafafa', maxHeight: '20vh', overflowY: 'auto' }}>
+                {usedFootnotes.map(f => (
+                  <div key={f.busId + f.char} style={{ fontSize: 11, color: 'var(--ink-soft)', lineHeight: 1.5, display: 'flex', alignItems: 'baseline', gap: 5 }}>
+                    <span style={{ background: f.color, color: 'white', borderRadius: 5, padding: '0 5px', fontSize: 10, fontWeight: 800, flexShrink: 0 }}>{f.busId}</span>
+                    <span><sup style={{ fontWeight: 900 }}>{f.char}</sup> {f.text}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  );
+
+  return ReactDOM.createPortal(modal, document.body);
+}
+window.StopTimetableModal = StopTimetableModal;

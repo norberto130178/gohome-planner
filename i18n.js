@@ -97,6 +97,12 @@ window.I18N = {
     noRoutesHintCity: "Ezen a napon és időpontban nem találtunk útvonalat",
     // Timetable dropdown
     timetables: "Menetrendek",
+    // StopTimetableModal (megálló-néző)
+    stopViewerTitle: "Megállók",
+    stopViewerPick: "Melyik megálló indulásait nézzük?",
+    stopViewerNoLine: "Válassz legalább egy vonalat",
+    stopViewerNoDeps: "Ezen a napon nincs indulás erről a megállóról",
+    changeStop: "Megálló váltása",
     // SchoolSettingsModal
     schoolQuestion: "Melyik iskolába jársz?",
     schoolSearchPlaceholder: "— Keress iskola névre —",
@@ -247,6 +253,12 @@ window.I18N = {
     noRoutesHintCity: "No route found for this day and time between",
     // Timetable dropdown
     timetables: "Timetables",
+    // StopTimetableModal (stop viewer)
+    stopViewerTitle: "Stops",
+    stopViewerPick: "Which stop's departures shall we check?",
+    stopViewerNoLine: "Select at least one line",
+    stopViewerNoDeps: "No departures from this stop on this day",
+    changeStop: "Change stop",
     // SchoolSettingsModal
     schoolQuestion: "Which school do you attend?",
     schoolSearchPlaceholder: "— Search by school name —",

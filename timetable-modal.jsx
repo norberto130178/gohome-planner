@@ -31,14 +31,48 @@ function StopSearch({ value, onChange, placeholder, id }) {
 
   React.useEffect(() => { setQuery(value || ""); }, [value]);
 
+  // A látható terület (visualViewport) figyelembevétele — mobilon a virtuális billentyűzet
+  // csak a visualViewport-ot zsugorítja, a layout viewport-ot nem, így a `position:fixed`
+  // dropdown enélkül a billentyűzet mögé/alá pozicionálódna. Kevés hely esetén felfelé nyílik.
+  function reposition() {
+    if (!ref.current) return;
+    const rect = ref.current.getBoundingClientRect();
+    const vv = window.visualViewport;
+    const viewportH = vv ? vv.height + vv.offsetTop : window.innerHeight;
+    const spaceBelow = viewportH - rect.bottom - 8;
+    const spaceAbove = rect.top - (vv ? vv.offsetTop : 0) - 8;
+    if (spaceBelow < 140 && spaceAbove > spaceBelow) {
+      setDropdownStyle({
+        position: 'fixed', bottom: window.innerHeight - rect.top + 4,
+        left: rect.left, width: rect.width, maxHeight: Math.max(120, Math.min(280, spaceAbove)),
+      });
+    } else {
+      setDropdownStyle({
+        position: 'fixed', top: rect.bottom + 4,
+        left: rect.left, width: rect.width, maxHeight: Math.max(120, Math.min(280, spaceBelow)),
+      });
+    }
+  }
+
   function calcAndOpen() {
     if (skipNextOpenRef.current) { skipNextOpenRef.current = false; return; }
-    if (ref.current) {
-      const rect = ref.current.getBoundingClientRect();
-      setDropdownStyle({ position: 'fixed', top: rect.bottom + 4, left: rect.left, width: rect.width, maxHeight: 280 });
-    }
+    reposition();
     setOpen(true);
   }
+
+  React.useEffect(() => {
+    if (!open) return;
+    reposition();
+    const vv = window.visualViewport;
+    vv?.addEventListener('resize', reposition);
+    vv?.addEventListener('scroll', reposition);
+    window.addEventListener('resize', reposition);
+    return () => {
+      vv?.removeEventListener('resize', reposition);
+      vv?.removeEventListener('scroll', reposition);
+      window.removeEventListener('resize', reposition);
+    };
+  }, [open]);
 
   React.useEffect(() => {
     function outside(e) {

@@ -671,6 +671,16 @@ function CityApp() {
   const [timetableBusId, setTimetableBusId] = React.useState(null);
   const [stopViewerOpen, setStopViewerOpen] = React.useState(false);
   const [stopViewerStop, setStopViewerStop] = React.useState(null);
+  const [gpsState, setGpsState] = React.useState('idle'); // 'idle' | 'loading' | 'error'
+
+  // Minden fizikai megálló (spId szerint dedupelve) a GPS-alapú legközelebbi-megálló kereséshez
+  const allPhysicalStops = React.useMemo(() => {
+    const m = new Map();
+    for (const bus of window.CITY_BUSES_FULL) {
+      for (const s of bus.stops) if (s.lat && !m.has(s.spId)) m.set(s.spId, s);
+    }
+    return Array.from(m.values());
+  }, []);
 
   // Térképi popupok "Indulások" gombja ezen keresztül nyitja a megálló-nézőt
   React.useEffect(() => {
@@ -719,12 +729,10 @@ function CityApp() {
     return window.SchoolHolidayUtil.resolve(schoolHolidayMode, d);
   }, [schoolHolidayMode, now, dayOffset, schoolHolidayRange]);
 
-  function plan(overrides = {}) {
+  function computePlanTime(overrides = {}) {
     const effectiveMode = overrides.timeMode ?? timeMode;
     const effectiveTime = overrides.customTime ?? customTime;
     const effectiveOffset = overrides.dayOffset ?? dayOffset;
-    const effectiveFrom = overrides.fromStop ?? fromStop;
-    const effectiveTo = overrides.toStop ?? toStop;
     let planTime;
     if (effectiveMode === "now") {
       planTime = new Date();
@@ -734,6 +742,13 @@ function CityApp() {
       planTime.setDate(planTime.getDate() + effectiveOffset);
       planTime.setHours(h, m, 0, 0);
     }
+    return planTime;
+  }
+
+  function plan(overrides = {}) {
+    const effectiveFrom = overrides.fromStop ?? fromStop;
+    const effectiveTo = overrides.toStop ?? toStop;
+    const planTime = computePlanTime(overrides);
     const r = window.planCityRoutes({
       now: planTime,
       fromStop: effectiveFrom,
@@ -761,6 +776,49 @@ function CityApp() {
   }
 
   const canPlan = fromStop && toStop && fromStop !== toStop;
+  const gpsSupported = typeof navigator !== "undefined" && !!navigator.geolocation;
+
+  function handleGps() {
+    if (!toStop || gpsState === 'loading') return;
+    setGpsState('loading');
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords;
+        const ranked = allPhysicalStops
+          .filter(s => s.name !== toStop)
+          .map(s => ({ ...s, dist: _haversineM(latitude, longitude, s.lat, s.lon) }))
+          .sort((a, b) => a.dist - b.dist);
+
+        const candidates = [];
+        const seenNames = new Set();
+        for (const s of ranked) {
+          if (seenNames.has(s.name)) continue;
+          seenNames.add(s.name);
+          candidates.push(s.name);
+          if (candidates.length >= 3) break;
+        }
+
+        if (candidates.length === 0) { setGpsState('error'); setTimeout(() => setGpsState('idle'), 3000); return; }
+
+        const planTime = computePlanTime();
+        const schoolHol = window.SchoolHolidayUtil.resolve(schoolHolidayMode, planTime);
+        let best = null;
+        for (const name of candidates) {
+          const r = window.planCityRoutes({ now: planTime, fromStop: name, toStop, walkMin, maxResults: 1, schoolHoliday: schoolHol });
+          if (r.length && (!best || r[0].totalDuration < best.duration)) {
+            best = { name, duration: r[0].totalDuration };
+          }
+        }
+        const winner = best ? best.name : candidates[0];
+
+        setFromStop(winner); localStorage.setItem("city_from", winner);
+        plan({ fromStop: winner });
+        setGpsState('idle');
+      },
+      () => { setGpsState('error'); setTimeout(() => setGpsState('idle'), 3000); },
+      { enableHighAccuracy: false, timeout: 8000, maximumAge: 60000 }
+    );
+  }
 
   return (
     <div className="v1">
@@ -847,7 +905,26 @@ function CityApp() {
           }}>⇅</button>
           <div style={{flex:1, minWidth:0}}>
             <div style={{padding:"10px 12px 8px"}}>
-              <label className="city-stop-label" htmlFor="from-stop" style={{display:"block"}}>{t.fromLabel}</label>
+              <div style={{display:"flex", alignItems:"center", justifyContent:"space-between", gap:6, marginBottom:6}}>
+                <label className="city-stop-label" htmlFor="from-stop" style={{display:"block"}}>{t.fromLabel}</label>
+                {gpsSupported && (
+                  <button type="button" onClick={handleGps}
+                    disabled={!toStop || gpsState === 'loading'}
+                    title={!toStop ? t.gpsNeedsDestination : (gpsState === 'error' ? t.gpsError : t.gpsButtonTooltip)}
+                    aria-label={!toStop ? t.gpsNeedsDestination : (gpsState === 'error' ? t.gpsError : t.gpsButtonTooltip)}
+                    style={{
+                      display:"flex", alignItems:"center", gap:5,
+                      background:"none", border:"none", padding:"2px 4px",
+                      cursor: (!toStop || gpsState === 'loading') ? "default" : "pointer",
+                      opacity: (!toStop || gpsState === 'loading') ? 0.35 : 1,
+                      color: gpsState === 'error' ? '#e53935' : 'var(--ink-soft)',
+                    }}
+                  >
+                    <span style={{ fontSize: 19, lineHeight: 1 }}>{gpsState === 'loading' ? '⏳' : '🛰️'}</span>
+                    <span style={{ fontSize: 11, fontWeight: 800, fontFamily: "Nunito,sans-serif", textTransform: "uppercase", letterSpacing: "0.06em" }}>{t.gpsLabel || "GPS"}</span>
+                  </button>
+                )}
+              </div>
               <window.StopSearch id="from-stop" value={fromStop}
                 onChange={v => { setFromStop(v); localStorage.setItem("city_from", v); setResults(null); setFormCollapsed(false); }}
                 placeholder={t.stopPlaceholder} />

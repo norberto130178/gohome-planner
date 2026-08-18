@@ -5,6 +5,194 @@
 // Counter to safely manage body scroll lock with multiple potential modals
 let _modalOpenCount = 0;
 
+/* ── StopSearch — kereshető megálló-választó (közös: city.html + index.html) ── */
+const STOP_LINES = (() => {
+  const map = {};
+  for (const bus of window.CITY_BUSES_FULL) {
+    for (const s of bus.stops) {
+      if (!map[s.name]) map[s.name] = [];
+      if (!map[s.name].some(b => b.id === bus.id))
+        map[s.name].push({ id: bus.id, color: bus.color });
+    }
+  }
+  return map;
+})();
+
+const ALL_STOPS = window.getCityStops();
+
+// ── StopSearch ───────────────────────────────────────────────────────
+function StopSearch({ value, onChange, placeholder, id }) {
+  const [query, setQuery] = React.useState(value || "");
+  const [open, setOpen] = React.useState(false);
+  const [dropdownStyle, setDropdownStyle] = React.useState({});
+  const ref = React.useRef(null);
+  const skipNextOpenRef = React.useRef(false);
+  const pendingFocusFirstRef = React.useRef(false);
+
+  React.useEffect(() => { setQuery(value || ""); }, [value]);
+
+  function calcAndOpen() {
+    if (skipNextOpenRef.current) { skipNextOpenRef.current = false; return; }
+    if (ref.current) {
+      const rect = ref.current.getBoundingClientRect();
+      setDropdownStyle({ position: 'fixed', top: rect.bottom + 4, left: rect.left, width: rect.width, maxHeight: 280 });
+    }
+    setOpen(true);
+  }
+
+  React.useEffect(() => {
+    function outside(e) {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    }
+    document.addEventListener("mousedown", outside);
+    return () => document.removeEventListener("mousedown", outside);
+  }, []);
+
+  React.useEffect(() => {
+    if (open && pendingFocusFirstRef.current) {
+      pendingFocusFirstRef.current = false;
+      ref.current?.querySelectorAll('[role="option"]')?.[0]?.focus();
+    }
+  }, [open]);
+
+  const filtered = React.useMemo(() => {
+    if (!query) return ALL_STOPS;
+    const norm = str => str.normalize("NFD").replace(/[̀-ͯ]/g, "");
+    const queryWords = norm(query.toLowerCase().trim()).split(/\s+/);
+    return ALL_STOPS.filter(s => {
+      const stopWords = norm(s.toLowerCase()).split(/[\s/\-,()+]+/).filter(Boolean);
+      return queryWords.every(qw => stopWords.some(sw => sw.startsWith(qw)));
+    });
+  }, [query]);
+
+  function select(stop) {
+    onChange(stop);
+    setQuery(stop);
+    setOpen(false);
+    skipNextOpenRef.current = true;
+    ref.current?.querySelector('input')?.focus();
+  }
+
+  function handleChange(e) {
+    setQuery(e.target.value);
+    calcAndOpen();
+    if (!e.target.value) onChange("");
+  }
+
+  function handleBlur(e) {
+    const relatedTarget = e.relatedTarget;
+    setTimeout(() => {
+      if (!ref.current?.contains(relatedTarget)) {
+        setOpen(false);
+        setQuery(value || "");
+      }
+    }, 200);
+  }
+
+  return (
+    <div ref={ref} style={{ position: "relative" }}>
+      <input
+        id={id}
+        type="text"
+        role="combobox"
+        aria-expanded={open}
+        aria-haspopup="listbox"
+        value={query}
+        onChange={handleChange}
+        onClick={calcAndOpen}
+        onBlur={handleBlur}
+        onKeyDown={e => {
+          if (e.key === "Escape") { setOpen(false); e.target.blur(); }
+          else if (e.key === "Tab") { setOpen(false); }
+          else if (e.key === "ArrowDown") {
+            e.preventDefault();
+            if (open) { ref.current?.querySelectorAll('[role="option"]')?.[0]?.focus(); }
+            else { pendingFocusFirstRef.current = true; calcAndOpen(); }
+          }
+          else if (e.key === "ArrowUp") {
+            e.preventDefault();
+            if (open) {
+              const items = ref.current?.querySelectorAll('[role="option"]');
+              items?.[items.length - 1]?.focus();
+            }
+          }
+        }}
+        placeholder={placeholder}
+        autoComplete="off"
+        className="v1-time-input"
+        style={{ width: "100%", fontSize: 14, paddingRight: query ? 32 : undefined }}
+      />
+      {query && (
+        <button
+          onMouseDown={e => e.preventDefault()}
+          onClick={() => { setQuery(""); onChange(""); ref.current?.querySelector('input')?.focus(); }}
+          onBlur={handleBlur}
+          style={{
+            position: "absolute", right: 4, top: "50%", transform: "translateY(-50%)",
+            background: "none", border: "none", cursor: "pointer",
+            fontSize: 18, color: "var(--ink-soft)", padding: 0, lineHeight: 1,
+            minWidth: 44, minHeight: 44, display: "flex", alignItems: "center", justifyContent: "center",
+          }}
+        >×</button>
+      )}
+      {open && filtered.length > 0 && (
+        <div style={{
+          ...dropdownStyle,
+          zIndex: 9999, background: "white", border: "2px solid var(--line)",
+          borderRadius: 12, boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
+          overflowY: "auto"
+        }}>
+          {filtered.map(stop => (
+            <div
+              key={stop}
+              className="stop-option"
+              role="option"
+              tabIndex={-1}
+              onMouseDown={e => e.preventDefault()}
+              onClick={() => select(stop)}
+              onKeyDown={(e, idx2 = filtered.indexOf(stop)) => {
+                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); select(stop); }
+                else if (e.key === 'Escape') { skipNextOpenRef.current = true; setOpen(false); ref.current?.querySelector('input')?.focus(); }
+                else if (e.key === 'Tab') { setOpen(false); }
+                else if (e.key === 'ArrowDown') {
+                  e.preventDefault();
+                  const items = ref.current?.querySelectorAll('[role="option"]');
+                  if (items && idx2 < items.length - 1) items[idx2 + 1].focus();
+                }
+                else if (e.key === 'ArrowUp') {
+                  e.preventDefault();
+                  const items = ref.current?.querySelectorAll('[role="option"]');
+                  if (idx2 > 0) items[idx2 - 1].focus();
+                  else ref.current?.querySelector('input')?.focus();
+                }
+              }}
+              style={{
+                padding: "9px 14px", cursor: "pointer",
+                borderBottom: "1px solid var(--line)",
+                display: "flex", alignItems: "center", gap: 8,
+                fontSize: 13, fontWeight: 700
+              }}
+            >
+              <span style={{ flex: 1 }}>{stop}</span>
+              <span style={{ display: "flex", gap: 3, flexWrap: "wrap", justifyContent: "flex-end" }}>
+                {(STOP_LINES[stop] || []).slice(0, 5).map(b => (
+                  <span key={b.id} style={{
+                    background: b.color, color: "white", borderRadius: 6,
+                    padding: "1px 6px", fontSize: 11, fontWeight: 800,
+                    lineHeight: "16px"
+                  }}>{b.id}</span>
+                ))}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+window.StopSearch = StopSearch;
+
+
 // dayType: "workday" | "schoolholiday" | "weekend"  (isWeekend kept for backward compat)
 function BusTimetableModal({ busId, onClose, fromStop, isWeekend: isWeekendProp, dayType: dayTypeProp, nowMins: nowMinsProp, initialDep, lang }) {
   const U = window.BUS_UTILS;
@@ -25,6 +213,9 @@ function BusTimetableModal({ busId, onClose, fromStop, isWeekend: isWeekendProp,
     history.pushState({ timetableModal: true }, "");
     didPushRef.current = true;
     function onPop() {
+      // Ha felettünk nyitva van a megálló-néző, ez a popstate az övé (az ő
+      // pushState-jét zárja) — a mi state-ünk marad, ne záródjunk be vele.
+      if (window.__stopViewerOpen) return;
       didPushRef.current = false;
       onClose();
     }
@@ -120,7 +311,7 @@ function BusTimetableModal({ busId, onClose, fromStop, isWeekend: isWeekendProp,
   }, []);
 
   React.useEffect(() => {
-    const handler = (e) => { if (e.key === 'Escape') handleClose(); };
+    const handler = (e) => { if (e.key === 'Escape' && !window.__stopViewerOpen && Date.now() > (window.__escGuardUntil || 0)) handleClose(); };
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
   }, []);
@@ -457,10 +648,14 @@ function BusRouteMap({ bus, color, selectedDep, nowMins, fmt, modalRef, lang }) 
   const t = (window.I18N && window.I18N[lang || "hu"]) || window.I18N?.hu || {};
   const mapRef = React.useRef(null);
   const instanceRef = React.useRef(null);
+  const fitCoordsRef = React.useRef(null);
   const busKey = `${bus.id}-${bus.direction}-${selectedDep ?? 'none'}`;
 
   React.useEffect(() => {
-    const handler = () => setTimeout(() => instanceRef.current?.invalidateSize(), 100);
+    const handler = () => setTimeout(() => {
+      instanceRef.current?.invalidateSize();
+      if (fitCoordsRef.current) instanceRef.current?.fitBounds(fitCoordsRef.current, { padding: [30, 30] });
+    }, 100);
     document.addEventListener('fullscreenchange', handler);
     return () => document.removeEventListener('fullscreenchange', handler);
   }, []);
@@ -591,7 +786,7 @@ function BusRouteMap({ bus, color, selectedDep, nowMins, fmt, modalRef, lang }) 
       L.circleMarker([stop.lat, stop.lon], {
         radius: r, color: 'white', weight: 2,
         fillColor: isPast ? '#bbb' : color, fillOpacity: 0.95,
-      }).addTo(map).bindPopup(`<b>${stop.name}</b>${time !== null ? `<br>${fmt(time)}` : ''}`);
+      }).addTo(map).bindPopup(() => window.stopPopupContent(stop.name, time !== null ? fmt(time) : null));
 
       if (time !== null) {
         const borderColor = isPast ? '#bbb' : color;
@@ -621,6 +816,7 @@ function BusRouteMap({ bus, color, selectedDep, nowMins, fmt, modalRef, lang }) 
     });
 
     instanceRef.current = map;
+    fitCoordsRef.current = allStopCoords;
     setTimeout(() => {
       map.invalidateSize();
       map.fitBounds(allStopCoords, { padding: [30, 30] });
@@ -646,7 +842,7 @@ function BusRouteMap({ bus, color, selectedDep, nowMins, fmt, modalRef, lang }) 
     return () => document.removeEventListener('fullscreenchange', h);
   }, []);
   React.useEffect(() => {
-    const h = (e) => { if (e.key === 'Escape' && document.fullscreenElement) document.exitFullscreen(); };
+    const h = (e) => { if (e.key === 'Escape' && !window.__stopViewerOpen && Date.now() > (window.__escGuardUntil || 0) && document.fullscreenElement) document.exitFullscreen(); };
     document.addEventListener('keydown', h);
     return () => document.removeEventListener('keydown', h);
   }, []);
@@ -796,7 +992,7 @@ window.TimetableDropdown = TimetableDropdown;
    (window.StopSearch) — ezért egyelőre csak a city.html oldalon
    használható.
    ============================================================ */
-function StopTimetableModal({ onClose, dayType, lang }) {
+function StopTimetableModal({ onClose, dayType, lang, initialStop }) {
   const U = window.BUS_UTILS;
   const fmt = (m) => U.fmtTime(m);
   const t = (window.I18N && window.I18N[lang || "hu"]) || window.I18N?.hu || {};
@@ -804,7 +1000,65 @@ function StopTimetableModal({ onClose, dayType, lang }) {
   const _now = new Date();
   const nowMins = _now.getHours() * 60 + _now.getMinutes();
 
-  const [selectedStop, setSelectedStop] = React.useState(null);
+  // initialStop: pl. térképi megállóra kattintva rögtön a listanézet nyílik, kereső nélkül
+  const [selectedStop, setSelectedStop] = React.useState(initialStop || null);
+
+  // Fullscreen térképnézetből nyitva a body-ba portalozott modal a fullscreen elem
+  // mögé kerülne (a böngésző csak a fullscreen-elem leszármazottait mutatja) —
+  // ezért a modalt magába a fullscreen elembe portalozzuk, így a térkép fullscreen
+  // marad és a modal felette nyílik (✕-szel zárva fullscreen is marad).
+  // ESC-re viszont a böngésző mindenképp kilép a fullscreenből (nem előzhető meg,
+  // és az ESC keydown-t gyakran el is nyeli) — ilyenkor a modalt is bezárjuk, hogy
+  // egyetlen ESC egyszerre zárja mindkettőt, ne maradjon ott a modal egy második
+  // ESC-ig a térkép-konténerben ragadva (villódzás).
+  const [portalTarget, setPortalTarget] = React.useState(() => document.fullscreenElement || document.body);
+  const openedInFullscreenRef = React.useRef(!!document.fullscreenElement);
+  React.useEffect(() => {
+    const h = () => {
+      if (openedInFullscreenRef.current && !document.fullscreenElement) {
+        setPortalTarget(document.body);
+        handleClose();
+        return;
+      }
+      setPortalTarget(document.fullscreenElement || document.body);
+    };
+    document.addEventListener('fullscreenchange', h);
+    return () => document.removeEventListener('fullscreenchange', h);
+  }, []);
+
+  // Globális jelző: amíg a megálló-néző nyitva van, az alatta lévő rétegek
+  // (térkép-komponensek fullscreen-ESC kezelői, BusTimetableModal ESC-je)
+  // ne reagáljanak az ESC-re — rétegzett zárás, mindig a legfelső záródik.
+  React.useEffect(() => {
+    window.__stopViewerOpen = true;
+    return () => { window.__stopViewerOpen = false; };
+  }, []);
+
+  // Chromium Keyboard Lock: fullscreenből nyitva lefoglaljuk az ESC-et, így az
+  // NEM lépteti ki a böngészőt a fullscreenből, hanem eljut a mi kezelőnkhöz és
+  // csak a modalt zárja — a térkép fullscreenben marad. (Hosszan nyomott ESC
+  // böngésző-garanciaként továbbra is kilép — arra a fullscreenchange ág zár.)
+  // Nem támogatott böngészőben (Firefox/Safari) marad a fallback: egy ESC a
+  // fullscreent és a modalt együtt zárja.
+  React.useEffect(() => {
+    if (openedInFullscreenRef.current && navigator.keyboard && navigator.keyboard.lock) {
+      navigator.keyboard.lock(['Escape']).catch(() => {});
+      return () => {
+        // A lock feloldását megvárakoztatjuk az ESC felengedéséig (+ rövid ráhagyás):
+        // ha a modal záró ESC-je közben oldanánk fel, a böngésző a keyup-ot / az
+        // ismétlődő keydown-t már lock nélkül látná, és kiléptetné a fullscreent is.
+        let done = false;
+        const doUnlock = () => {
+          if (done) return; done = true;
+          window.removeEventListener('keyup', onUp);
+          try { navigator.keyboard.unlock(); } catch (e) {}
+        };
+        const onUp = (e) => { if (e.key === 'Escape') setTimeout(doUnlock, 100); };
+        window.addEventListener('keyup', onUp);
+        setTimeout(doUnlock, 1200); // fallback, ha nem ESC zárta a modalt
+      };
+    }
+  }, []);
   const [activeDayType, setActiveDayType] = React.useState(dayType || "workday");
   const [activeIds, setActiveIds] = React.useState(null); // null = minden vonal aktív
 
@@ -833,7 +1087,7 @@ function StopTimetableModal({ onClose, dayType, lang }) {
   }, []);
 
   React.useEffect(() => {
-    const handler = (e) => { if (e.key === 'Escape') handleClose(); };
+    const handler = (e) => { if (e.key === 'Escape') { window.__escGuardUntil = Date.now() + 600; handleClose(); } };
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
   }, []);
@@ -1141,6 +1395,6 @@ function StopTimetableModal({ onClose, dayType, lang }) {
     </div>
   );
 
-  return ReactDOM.createPortal(modal, document.body);
+  return ReactDOM.createPortal(modal, portalTarget);
 }
 window.StopTimetableModal = StopTimetableModal;

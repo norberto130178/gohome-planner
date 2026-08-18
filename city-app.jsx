@@ -1,188 +1,5 @@
-const STOP_LINES = (() => {
-  const map = {};
-  for (const bus of window.CITY_BUSES_FULL) {
-    for (const s of bus.stops) {
-      if (!map[s.name]) map[s.name] = [];
-      if (!map[s.name].some(b => b.id === bus.id))
-        map[s.name].push({ id: bus.id, color: bus.color });
-    }
-  }
-  return map;
-})();
-
-const ALL_STOPS = window.getCityStops();
-
-// ── StopSearch ───────────────────────────────────────────────────────
-function StopSearch({ value, onChange, placeholder, id }) {
-  const [query, setQuery] = React.useState(value || "");
-  const [open, setOpen] = React.useState(false);
-  const [dropdownStyle, setDropdownStyle] = React.useState({});
-  const ref = React.useRef(null);
-  const skipNextOpenRef = React.useRef(false);
-  const pendingFocusFirstRef = React.useRef(false);
-
-  React.useEffect(() => { setQuery(value || ""); }, [value]);
-
-  function calcAndOpen() {
-    if (skipNextOpenRef.current) { skipNextOpenRef.current = false; return; }
-    if (ref.current) {
-      const rect = ref.current.getBoundingClientRect();
-      setDropdownStyle({ position: 'fixed', top: rect.bottom + 4, left: rect.left, width: rect.width, maxHeight: 280 });
-    }
-    setOpen(true);
-  }
-
-  React.useEffect(() => {
-    function outside(e) {
-      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
-    }
-    document.addEventListener("mousedown", outside);
-    return () => document.removeEventListener("mousedown", outside);
-  }, []);
-
-  React.useEffect(() => {
-    if (open && pendingFocusFirstRef.current) {
-      pendingFocusFirstRef.current = false;
-      ref.current?.querySelectorAll('[role="option"]')?.[0]?.focus();
-    }
-  }, [open]);
-
-  const filtered = React.useMemo(() => {
-    if (!query) return ALL_STOPS;
-    const norm = str => str.normalize("NFD").replace(/[̀-ͯ]/g, "");
-    const queryWords = norm(query.toLowerCase().trim()).split(/\s+/);
-    return ALL_STOPS.filter(s => {
-      const stopWords = norm(s.toLowerCase()).split(/[\s/\-,()+]+/).filter(Boolean);
-      return queryWords.every(qw => stopWords.some(sw => sw.startsWith(qw)));
-    });
-  }, [query]);
-
-  function select(stop) {
-    onChange(stop);
-    setQuery(stop);
-    setOpen(false);
-    skipNextOpenRef.current = true;
-    ref.current?.querySelector('input')?.focus();
-  }
-
-  function handleChange(e) {
-    setQuery(e.target.value);
-    calcAndOpen();
-    if (!e.target.value) onChange("");
-  }
-
-  function handleBlur(e) {
-    const relatedTarget = e.relatedTarget;
-    setTimeout(() => {
-      if (!ref.current?.contains(relatedTarget)) {
-        setOpen(false);
-        setQuery(value || "");
-      }
-    }, 200);
-  }
-
-  return (
-    <div ref={ref} style={{ position: "relative" }}>
-      <input
-        id={id}
-        type="text"
-        role="combobox"
-        aria-expanded={open}
-        aria-haspopup="listbox"
-        value={query}
-        onChange={handleChange}
-        onClick={calcAndOpen}
-        onBlur={handleBlur}
-        onKeyDown={e => {
-          if (e.key === "Escape") { setOpen(false); e.target.blur(); }
-          else if (e.key === "Tab") { setOpen(false); }
-          else if (e.key === "ArrowDown") {
-            e.preventDefault();
-            if (open) { ref.current?.querySelectorAll('[role="option"]')?.[0]?.focus(); }
-            else { pendingFocusFirstRef.current = true; calcAndOpen(); }
-          }
-          else if (e.key === "ArrowUp") {
-            e.preventDefault();
-            if (open) {
-              const items = ref.current?.querySelectorAll('[role="option"]');
-              items?.[items.length - 1]?.focus();
-            }
-          }
-        }}
-        placeholder={placeholder}
-        autoComplete="off"
-        className="v1-time-input"
-        style={{ width: "100%", fontSize: 14, paddingRight: query ? 32 : undefined }}
-      />
-      {query && (
-        <button
-          onMouseDown={e => e.preventDefault()}
-          onClick={() => { setQuery(""); onChange(""); ref.current?.querySelector('input')?.focus(); }}
-          onBlur={handleBlur}
-          style={{
-            position: "absolute", right: 4, top: "50%", transform: "translateY(-50%)",
-            background: "none", border: "none", cursor: "pointer",
-            fontSize: 18, color: "var(--ink-soft)", padding: 0, lineHeight: 1,
-            minWidth: 44, minHeight: 44, display: "flex", alignItems: "center", justifyContent: "center",
-          }}
-        >×</button>
-      )}
-      {open && filtered.length > 0 && (
-        <div style={{
-          ...dropdownStyle,
-          zIndex: 9999, background: "white", border: "2px solid var(--line)",
-          borderRadius: 12, boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
-          overflowY: "auto"
-        }}>
-          {filtered.map(stop => (
-            <div
-              key={stop}
-              className="stop-option"
-              role="option"
-              tabIndex={-1}
-              onMouseDown={e => e.preventDefault()}
-              onClick={() => select(stop)}
-              onKeyDown={(e, idx2 = filtered.indexOf(stop)) => {
-                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); select(stop); }
-                else if (e.key === 'Escape') { skipNextOpenRef.current = true; setOpen(false); ref.current?.querySelector('input')?.focus(); }
-                else if (e.key === 'Tab') { setOpen(false); }
-                else if (e.key === 'ArrowDown') {
-                  e.preventDefault();
-                  const items = ref.current?.querySelectorAll('[role="option"]');
-                  if (items && idx2 < items.length - 1) items[idx2 + 1].focus();
-                }
-                else if (e.key === 'ArrowUp') {
-                  e.preventDefault();
-                  const items = ref.current?.querySelectorAll('[role="option"]');
-                  if (idx2 > 0) items[idx2 - 1].focus();
-                  else ref.current?.querySelector('input')?.focus();
-                }
-              }}
-              style={{
-                padding: "9px 14px", cursor: "pointer",
-                borderBottom: "1px solid var(--line)",
-                display: "flex", alignItems: "center", gap: 8,
-                fontSize: 13, fontWeight: 700
-              }}
-            >
-              <span style={{ flex: 1 }}>{stop}</span>
-              <span style={{ display: "flex", gap: 3, flexWrap: "wrap", justifyContent: "flex-end" }}>
-                {(STOP_LINES[stop] || []).slice(0, 5).map(b => (
-                  <span key={b.id} style={{
-                    background: b.color, color: "white", borderRadius: 6,
-                    padding: "1px 6px", fontSize: 11, fontWeight: 800,
-                    lineHeight: "16px"
-                  }}>{b.id}</span>
-                ))}
-              </span>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-window.StopSearch = StopSearch;
+// A VeszprémBusz oldal aktuális nyelve — a lazy térképi popupok (stopPopupContent) olvassák
+window.currentLang = () => localStorage.getItem("lang") || "hu";
 
 // ── CityRouteCard ────────────────────────────────────────────────────
 // Kiválasztja a helyes GTFS shape-et és kiszeli a fromStop–toStop szakaszt
@@ -212,6 +29,7 @@ function CityRouteMap({ route, fromStop, toStop, lang }) {
   const mapRef = React.useRef(null);
   const containerRef = React.useRef(null);
   const instanceRef = React.useRef(null);
+  const fitCoordsRef = React.useRef(null);
   const routeKey = `${route.type}-${route.bus1?.id}-${route.boardAt}-${fromStop}-${toStop}`;
 
   React.useEffect(() => {
@@ -256,7 +74,7 @@ function CityRouteMap({ route, fromStop, toStop, lang }) {
         L.circleMarker([stop.lat, stop.lon], {
           radius: r, color: 'white', weight: 2,
           fillColor: color, fillOpacity: 0.95,
-        }).addTo(map).bindPopup(`<b>${stop.name}</b>${time !== null ? `<br>${fmt(time)}` : ''}`);
+        }).addTo(map).bindPopup(() => window.stopPopupContent(stop.name, time !== null ? fmt(time) : null));
         if (time !== null) {
           const labelHtml = `<div style="position:absolute;left:${r + 5}px;top:-10px;background:white;border:1.5px solid ${color};border-radius:4px;padding:1px 6px;font-size:11px;font-weight:700;color:#222;white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,0.15);">${fmt(time)}</div>`;
           L.marker([stop.lat, stop.lon], {
@@ -306,6 +124,7 @@ function CityRouteMap({ route, fromStop, toStop, lang }) {
 
     if (allCoords.length >= 2) map.fitBounds(allCoords, { padding: [16, 16] });
     else if (allCoords.length === 1) map.setView(allCoords[0], 15);
+    fitCoordsRef.current = allCoords.length >= 2 ? allCoords.slice() : null;
 
     instanceRef.current = map;
     return () => { map.remove(); instanceRef.current = null; };
@@ -313,12 +132,18 @@ function CityRouteMap({ route, fromStop, toStop, lang }) {
 
   const [fsState, setFsState] = React.useState(false);
   React.useEffect(() => {
-    const h = () => { setFsState(!!document.fullscreenElement); setTimeout(() => instanceRef.current?.invalidateSize(), 100); };
+    const h = () => {
+      setFsState(!!document.fullscreenElement);
+      setTimeout(() => {
+        instanceRef.current?.invalidateSize();
+        if (fitCoordsRef.current) instanceRef.current?.fitBounds(fitCoordsRef.current, { padding: [16, 16] });
+      }, 100);
+    };
     document.addEventListener('fullscreenchange', h);
     return () => document.removeEventListener('fullscreenchange', h);
   }, []);
   React.useEffect(() => {
-    const h = (e) => { if (e.key === 'Escape' && document.fullscreenElement) document.exitFullscreen(); };
+    const h = (e) => { if (e.key === 'Escape' && !window.__stopViewerOpen && Date.now() > (window.__escGuardUntil || 0) && document.fullscreenElement) document.exitFullscreen(); };
     document.addEventListener('keydown', h);
     return () => document.removeEventListener('keydown', h);
   }, []);
@@ -809,7 +634,10 @@ function CityApp() {
   const U = window.BUS_UTILS;
   const [lang, setLang] = React.useState(() => localStorage.getItem("lang") || "hu");
   const t = window.I18N[lang] || window.I18N.hu;
-  function switchLang(l) { setLang(l); localStorage.setItem("lang", l); }
+  function switchLang(l) {
+    setLang(l); localStorage.setItem("lang", l);
+    window.dispatchEvent(new Event('gohome:langchange')); // nyitott térképi popupok élő frissítése
+  }
 
   const [isMobile, setIsMobile] = React.useState(() => window.matchMedia("(max-width: 640px)").matches);
   React.useEffect(() => {
@@ -842,6 +670,13 @@ function CityApp() {
   const [formCollapsed, setFormCollapsed] = React.useState(false);
   const [timetableBusId, setTimetableBusId] = React.useState(null);
   const [stopViewerOpen, setStopViewerOpen] = React.useState(false);
+  const [stopViewerStop, setStopViewerStop] = React.useState(null);
+
+  // Térképi popupok "Indulások" gombja ezen keresztül nyitja a megálló-nézőt
+  React.useEffect(() => {
+    window.__openStopViewer = (stopName) => { setStopViewerStop(stopName || null); setStopViewerOpen(true); };
+    return () => { window.__openStopViewer = undefined; };
+  }, []);
   const [sheetOpen, setSheetOpen] = React.useState(false);
   const didPushHistory = React.useRef(false);
 
@@ -933,7 +768,9 @@ function CityApp() {
         <window.BusTimetableModal busId={timetableBusId} onClose={() => setTimetableBusId(null)} isWeekend={planIsWeekend} nowMins={planNowMins} lang={lang} />
       )}
       {stopViewerOpen && window.StopTimetableModal && (
-        <window.StopTimetableModal onClose={() => setStopViewerOpen(false)} dayType={U.dayType(now, schoolHoliday)} lang={lang} />
+        <window.StopTimetableModal key={stopViewerStop || 'search'} initialStop={stopViewerStop}
+          onClose={() => { setStopViewerOpen(false); setStopViewerStop(null); }}
+          dayType={U.dayType(now, schoolHoliday)} lang={lang} />
       )}
       {/* Header */}
       <div className="v1-header" style={isMobile ? {flexDirection:"row", alignItems:"center", justifyContent:"space-between", gap:8} : {}}>
@@ -1011,13 +848,13 @@ function CityApp() {
           <div style={{flex:1, minWidth:0}}>
             <div style={{padding:"10px 12px 8px"}}>
               <label className="city-stop-label" htmlFor="from-stop" style={{display:"block"}}>{t.fromLabel}</label>
-              <StopSearch id="from-stop" value={fromStop}
+              <window.StopSearch id="from-stop" value={fromStop}
                 onChange={v => { setFromStop(v); localStorage.setItem("city_from", v); setResults(null); setFormCollapsed(false); }}
                 placeholder={t.stopPlaceholder} />
             </div>
             <div style={{padding:"8px 12px 8px"}}>
               <label className="city-stop-label" htmlFor="to-stop" style={{display:"block"}}>{t.toLabel}</label>
-              <StopSearch id="to-stop" value={toStop}
+              <window.StopSearch id="to-stop" value={toStop}
                 onChange={v => { setToStop(v); localStorage.setItem("city_to", v); setResults(null); setFormCollapsed(false); }}
                 placeholder={t.stopPlaceholder} />
             </div>
@@ -1120,7 +957,7 @@ function CityApp() {
         schoolHolidayRange={schoolHolidayRange} setSchoolHolidayRange={setSchoolHolidayRange}
         canPlan={canPlan} plan={plan} lang={lang}
         onTimetable={id => setTimetableBusId(id)}
-        onStopViewer={() => setStopViewerOpen(true)}
+        onStopViewer={() => { setStopViewerStop(null); setStopViewerOpen(true); }}
         open={sheetOpen} openSheet={openSheet} onClose={closeSheet}
       />
 

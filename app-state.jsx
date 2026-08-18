@@ -5,6 +5,9 @@
 
 const { useState, useEffect, useMemo } = React;
 
+// A HazaÚt oldal aktuális nyelve — a lazy térképi popupok (stopPopupContent) olvassák
+window.currentLang = () => localStorage.getItem("hazaut.lang") || "hu";
+
 // ── DestinationPickerWidget — önálló, stabil komponens ──────────────
 // Azért van a hook-on kívül definiálva, hogy ne mountolódjon újra
 // minden hook re-rendernél (ami az input fókuszt elvesztette volna).
@@ -178,7 +181,10 @@ function useAppState(options = {}) {
   }, []);
 
   // --- localStorage save ---
-  useEffect(() => { localStorage.setItem("hazaut.lang", lang); }, [lang]);
+  useEffect(() => {
+    localStorage.setItem("hazaut.lang", lang);
+    window.dispatchEvent(new Event('gohome:langchange')); // nyitott térképi popupok élő frissítése
+  }, [lang]);
   useEffect(() => { localStorage.setItem("hazaut.compact", compactMode ? "1" : "0"); }, [compactMode]);
   useEffect(() => { localStorage.setItem("hazaut.direction", direction); }, [direction]);
   useEffect(() => { localStorage.setItem("hazaut.schoolholiday.mode", schoolHolidayMode); }, [schoolHolidayMode]);

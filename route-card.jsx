@@ -37,7 +37,7 @@ function RouteCard({ route, index, isPrimary, t, style, isWeekend, dayType, nowM
   return (
     <div ref={cardRef} className={`route-card ${style} ${isPrimary ? "primary" : ""}`}>
       {timetableInfo && (
-        <window.BusTimetableModal busId={timetableInfo.busId} fromStop={timetableInfo.fromStop} initialDep={timetableInfo.initialDep} onClose={() => setTimetableInfo(null)} isWeekend={isWeekend} dayType={dayType} nowMins={nowMins} />
+        <window.BusTimetableModal busId={timetableInfo.busId} fromStop={timetableInfo.fromStop} initialDep={timetableInfo.initialDep} onClose={() => setTimetableInfo(null)} isWeekend={isWeekend} dayType={dayType} nowMins={nowMins} lang={t._lang} />
       )}
 
       <div className="route-card-header">
@@ -211,10 +211,11 @@ function normStop(name) {
 }
 
 function HomeRouteMap({ route }) {
-  const _t = (window.I18N?.[localStorage.getItem("lang") || "hu"]) || window.I18N?.hu || {};
+  const _t = (window.I18N?.[localStorage.getItem("hazaut.lang") || "hu"]) || window.I18N?.hu || {};
   const mapRef = React.useRef(null);
   const containerRef = React.useRef(null);
   const instanceRef = React.useRef(null);
+  const fitCoordsRef = React.useRef(null);
   const routeKey = `${route.helykoziLine}-${route.helykoziDep}-${route.transferStop}`;
 
   React.useEffect(() => {
@@ -247,7 +248,7 @@ function HomeRouteMap({ route }) {
      [volanLat, volanLon, route.transferStop, route.helykoziArrive]].forEach(([lat, lon, name, time]) => {
       if (!lat || !lon) return;
       L.circleMarker([lat, lon], { radius: 9, color: 'white', weight: 2, fillColor: hkColor, fillOpacity: 0.95 })
-        .addTo(map).bindPopup(`<b>${name}</b>${time != null ? `<br>${fmt(time)}` : ''}`);
+        .addTo(map).bindPopup(() => window.stopPopupContent(name, time != null ? fmt(time) : null));
       if (time != null) {
         const labelHtml = `<div style="position:absolute;left:14px;top:-10px;background:white;border:1.5px solid ${hkColor};border-radius:4px;padding:1px 6px;font-size:11px;font-weight:700;color:#222;white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,0.15);">${fmt(time)}</div>`;
         L.marker([lat, lon], { icon: L.divIcon({ className: '', html: labelHtml, iconSize: [0, 0], iconAnchor: [0, 0] }), interactive: false, zIndexOffset: 200 }).addTo(map);
@@ -295,7 +296,7 @@ function HomeRouteMap({ route }) {
         L.circleMarker([stop.lat, stop.lon], {
           radius: r, color: 'white', weight: 2,
           fillColor: localBus.color, fillOpacity: 0.95,
-        }).addTo(map).bindPopup(`<b>${stop.name}</b>${time !== null ? `<br>${fmt(time)}` : ''}`);
+        }).addTo(map).bindPopup(() => window.stopPopupContent(stop.name, time !== null ? fmt(time) : null));
         if (time !== null) {
           const labelHtml = `<div style="position:absolute;left:${r + 5}px;top:-10px;background:white;border:1.5px solid ${localBus.color};border-radius:4px;padding:1px 6px;font-size:11px;font-weight:700;color:#222;white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,0.15);">${fmt(time)}</div>`;
           L.marker([stop.lat, stop.lon], {
@@ -317,6 +318,7 @@ function HomeRouteMap({ route }) {
     }
 
     instanceRef.current = map;
+    fitCoordsRef.current = allCoords.length >= 2 ? allCoords.slice() : null;
     setTimeout(() => {
       map.invalidateSize();
       if (allCoords.length >= 2) map.fitBounds(allCoords, { padding: [24, 24] });
@@ -328,12 +330,18 @@ function HomeRouteMap({ route }) {
 
   const [fsState, setFsState] = React.useState(false);
   React.useEffect(() => {
-    const h = () => { setFsState(!!document.fullscreenElement); setTimeout(() => instanceRef.current?.invalidateSize(), 100); };
+    const h = () => {
+      setFsState(!!document.fullscreenElement);
+      setTimeout(() => {
+        instanceRef.current?.invalidateSize();
+        if (fitCoordsRef.current) instanceRef.current?.fitBounds(fitCoordsRef.current, { padding: [24, 24] });
+      }, 100);
+    };
     document.addEventListener('fullscreenchange', h);
     return () => document.removeEventListener('fullscreenchange', h);
   }, []);
   React.useEffect(() => {
-    const h = (e) => { if (e.key === 'Escape' && document.fullscreenElement) document.exitFullscreen(); };
+    const h = (e) => { if (e.key === 'Escape' && !window.__stopViewerOpen && Date.now() > (window.__escGuardUntil || 0) && document.fullscreenElement) document.exitFullscreen(); };
     document.addEventListener('keydown', h);
     return () => document.removeEventListener('keydown', h);
   }, []);
@@ -380,10 +388,11 @@ function walkArc(lat1, lon1, lat2, lon2, steps = 24) {
 
 // ── CitySchoolRouteMap — Leaflet térkép a városi iskolás útvonalhoz ──
 function CitySchoolRouteMap({ route, direction, schoolData }) {
-  const _t = (window.I18N?.[localStorage.getItem("lang") || "hu"]) || window.I18N?.hu || {};
+  const _t = (window.I18N?.[localStorage.getItem("hazaut.lang") || "hu"]) || window.I18N?.hu || {};
   const mapRef = React.useRef(null);
   const containerRef = React.useRef(null);
   const instanceRef = React.useRef(null);
+  const fitCoordsRef = React.useRef(null);
   const routeKey = `${route.type}-${route.bus1?.id}-${route.boardAt}`;
 
   React.useEffect(() => {
@@ -425,7 +434,7 @@ function CitySchoolRouteMap({ route, direction, schoolData }) {
         const r = isTerminal ? 9 : 6;
         const time = busStart + stop.offset;
         L.circleMarker([stop.lat, stop.lon], { radius: r, color: 'white', weight: 2, fillColor: bus.color, fillOpacity: 0.95 })
-          .addTo(map).bindPopup(`<b>${stop.name}</b><br>${fmt(time)}`);
+          .addTo(map).bindPopup(() => window.stopPopupContent(stop.name, fmt(time)));
         if (isTerminal) {
           const labelHtml = `<div style="position:absolute;left:${r + 5}px;top:-10px;background:white;border:1.5px solid ${bus.color};border-radius:4px;padding:1px 6px;font-size:11px;font-weight:700;color:#222;white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,0.15);">${fmt(time)}</div>`;
           L.marker([stop.lat, stop.lon], { icon: L.divIcon({ className: '', html: labelHtml, iconSize: [0, 0], iconAnchor: [0, 0] }), interactive: false, zIndexOffset: 200 }).addTo(map);
@@ -489,6 +498,7 @@ function CitySchoolRouteMap({ route, direction, schoolData }) {
     }
 
     instanceRef.current = map;
+    fitCoordsRef.current = allCoords.length >= 2 ? allCoords.slice() : null;
     setTimeout(() => {
       map.invalidateSize();
       if (allCoords.length >= 2) map.fitBounds(allCoords, { padding: [24, 24] });
@@ -500,12 +510,18 @@ function CitySchoolRouteMap({ route, direction, schoolData }) {
 
   const [fsState, setFsState] = React.useState(false);
   React.useEffect(() => {
-    const h = () => { setFsState(!!document.fullscreenElement); setTimeout(() => instanceRef.current?.invalidateSize(), 100); };
+    const h = () => {
+      setFsState(!!document.fullscreenElement);
+      setTimeout(() => {
+        instanceRef.current?.invalidateSize();
+        if (fitCoordsRef.current) instanceRef.current?.fitBounds(fitCoordsRef.current, { padding: [24, 24] });
+      }, 100);
+    };
     document.addEventListener('fullscreenchange', h);
     return () => document.removeEventListener('fullscreenchange', h);
   }, []);
   React.useEffect(() => {
-    const h = e => { if (e.key === 'Escape' && document.fullscreenElement) document.exitFullscreen(); };
+    const h = e => { if (e.key === 'Escape' && !window.__stopViewerOpen && Date.now() > (window.__escGuardUntil || 0) && document.fullscreenElement) document.exitFullscreen(); };
     document.addEventListener('keydown', h);
     return () => document.removeEventListener('keydown', h);
   }, []);
@@ -588,7 +604,7 @@ function CitySchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, n
   return (
     <div ref={cardRef} className={`route-card ${isPrimary ? "primary" : ""}`}>
       {timetableInfo && (
-        <window.BusTimetableModal busId={timetableInfo.busId} fromStop={timetableInfo.fromStop} initialDep={timetableInfo.initialDep} onClose={() => setTimetableInfo(null)} isWeekend={isWeekend} dayType={dayType} nowMins={nowMins} />
+        <window.BusTimetableModal busId={timetableInfo.busId} fromStop={timetableInfo.fromStop} initialDep={timetableInfo.initialDep} onClose={() => setTimetableInfo(null)} isWeekend={isWeekend} dayType={dayType} nowMins={nowMins} lang={t._lang} />
       )}
       <div className="route-card-header">
         <span className="route-card-badge">
@@ -1396,7 +1412,7 @@ function SchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, nowMi
   return (
     <div ref={cardRef} className={`route-card ${isPrimary ? "primary" : ""}`}>
       {timetableInfo && (
-        <window.BusTimetableModal busId={timetableInfo.busId} fromStop={timetableInfo.fromStop} initialDep={timetableInfo.initialDep} onClose={() => setTimetableInfo(null)} isWeekend={isWeekend} dayType={dayType} nowMins={nowMins} />
+        <window.BusTimetableModal busId={timetableInfo.busId} fromStop={timetableInfo.fromStop} initialDep={timetableInfo.initialDep} onClose={() => setTimetableInfo(null)} isWeekend={isWeekend} dayType={dayType} nowMins={nowMins} lang={t._lang} />
       )}
 
       <div className="route-card-header">
@@ -1577,10 +1593,11 @@ function SchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, nowMi
 }
 
 function SchoolRouteMap({ route, schoolData }) {
-  const _t = (window.I18N?.[localStorage.getItem("lang") || "hu"]) || window.I18N?.hu || {};
+  const _t = (window.I18N?.[localStorage.getItem("hazaut.lang") || "hu"]) || window.I18N?.hu || {};
   const mapRef = React.useRef(null);
   const containerRef = React.useRef(null);
   const instanceRef = React.useRef(null);
+  const fitCoordsRef = React.useRef(null);
   const routeKey = `${route.helykoziLine}-${route.helykoziDep}-${route.transferStop}-${schoolData?.id}`;
 
   React.useEffect(() => {
@@ -1623,7 +1640,7 @@ function SchoolRouteMap({ route, schoolData }) {
         const r = isTerminal ? 9 : 6;
         const time = localDep !== null ? localDep + stop.offset : null;
         L.circleMarker([stop.lat, stop.lon], { radius: r, color: 'white', weight: 2, fillColor: localBus.color, fillOpacity: 0.95 })
-          .addTo(map).bindPopup(`<b>${stop.name}</b>${time !== null ? `<br>${fmt(time)}` : ''}`);
+          .addTo(map).bindPopup(() => window.stopPopupContent(stop.name, time !== null ? fmt(time) : null));
         if (time !== null) {
           const labelHtml = `<div style="position:absolute;left:${r + 5}px;top:-10px;background:white;border:1.5px solid ${localBus.color};border-radius:4px;padding:1px 6px;font-size:11px;font-weight:700;color:#222;white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,0.15);">${fmt(time)}</div>`;
           L.marker([stop.lat, stop.lon], { icon: L.divIcon({ className: '', html: labelHtml, iconSize: [0, 0], iconAnchor: [0, 0] }), interactive: false, zIndexOffset: 200 }).addTo(map);
@@ -1665,7 +1682,7 @@ function SchoolRouteMap({ route, schoolData }) {
      [nemoLat, nemoLon, 'Nemesvámos, autóbusz-váróterem', route.helykoziArrive]].forEach(([lat, lon, name, time]) => {
       if (!lat || !lon) return;
       L.circleMarker([lat, lon], { radius: 9, color: 'white', weight: 2, fillColor: hkColor, fillOpacity: 0.95 })
-        .addTo(map).bindPopup(`<b>${name}</b>${time != null ? `<br>${fmt(time)}` : ''}`);
+        .addTo(map).bindPopup(() => window.stopPopupContent(name, time != null ? fmt(time) : null));
       if (time != null) {
         const labelHtml = `<div style="position:absolute;left:14px;top:-10px;background:white;border:1.5px solid ${hkColor};border-radius:4px;padding:1px 6px;font-size:11px;font-weight:700;color:#222;white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,0.15);">${fmt(time)}</div>`;
         L.marker([lat, lon], { icon: L.divIcon({ className: '', html: labelHtml, iconSize: [0, 0], iconAnchor: [0, 0] }), interactive: false, zIndexOffset: 200 }).addTo(map);
@@ -1693,6 +1710,7 @@ function SchoolRouteMap({ route, schoolData }) {
     }
 
     instanceRef.current = map;
+    fitCoordsRef.current = allCoords.length >= 2 ? allCoords.slice() : null;
     setTimeout(() => {
       map.invalidateSize();
       if (allCoords.length >= 2) map.fitBounds(allCoords, { padding: [24, 24] });
@@ -1704,12 +1722,18 @@ function SchoolRouteMap({ route, schoolData }) {
 
   const [fsState, setFsState] = React.useState(false);
   React.useEffect(() => {
-    const h = () => { setFsState(!!document.fullscreenElement); setTimeout(() => instanceRef.current?.invalidateSize(), 100); };
+    const h = () => {
+      setFsState(!!document.fullscreenElement);
+      setTimeout(() => {
+        instanceRef.current?.invalidateSize();
+        if (fitCoordsRef.current) instanceRef.current?.fitBounds(fitCoordsRef.current, { padding: [24, 24] });
+      }, 100);
+    };
     document.addEventListener('fullscreenchange', h);
     return () => document.removeEventListener('fullscreenchange', h);
   }, []);
   React.useEffect(() => {
-    const h = (e) => { if (e.key === 'Escape' && document.fullscreenElement) document.exitFullscreen(); };
+    const h = (e) => { if (e.key === 'Escape' && !window.__stopViewerOpen && Date.now() > (window.__escGuardUntil || 0) && document.fullscreenElement) document.exitFullscreen(); };
     document.addEventListener('keydown', h);
     return () => document.removeEventListener('keydown', h);
   }, []);

@@ -39,6 +39,59 @@ window.fetchWalkingRoute = async function (lat1, lon1, lat2, lon2) {
   return rev.coords.slice().reverse();
 };
 
+// ESC-rétegzés segédje: amikor a megálló-néző modal egy ESC-lenyomásra záródik,
+// __escGuardUntil védőidőt állít, hogy ugyanannak a lenyomásnak az ismétlődő
+// keydown-jai ne érjék el az alatta lévő rétegeket (fullscreen-kilépés, másik
+// modal). A billentyű felengedése azonnal törli a védelmet, így egy szándékos
+// következő ESC már normálisan működik.
+window.addEventListener('keyup', (e) => {
+  if (e.key === 'Escape') window.__escGuardUntil = 0;
+});
+
+// Leaflet popup-tartalom egy megállóhoz: név + opcionális időcímke, és ha a megálló
+// szerepel a városi hálózatban, egy "Indulások" gomb ami a megálló-nézőt nyitja meg
+// (window.__openStopViewer — az aktuális oldal app-ja regisztrálja). DOM elemet ad
+// vissza (nem HTML stringet), így a megállónevek escapelése nem probléma.
+window.stopPopupContent = function (stopName, timeText, lang) {
+  // lang nélkül hívva az oldal aktuális nyelvét használja (window.currentLang —
+  // az app-state.jsx / city-app.jsx regisztrálja a saját localStorage-kulcsával).
+  // A hívók `bindPopup(() => ...)` formában, lazy-n hívják, így a popup minden
+  // megnyitáskor a friss nyelvvel épül fel.
+  if (!lang) lang = (window.currentLang && window.currentLang()) || "hu";
+  const t = (window.I18N && window.I18N[lang]) || (window.I18N && window.I18N.hu) || {};
+  const wrap = document.createElement('div');
+  wrap.style.fontFamily = 'Nunito, sans-serif';
+  const title = document.createElement('b');
+  title.textContent = stopName;
+  wrap.appendChild(title);
+  if (timeText) {
+    const time = document.createElement('div');
+    time.textContent = timeText;
+    time.style.cssText = 'font-size:12px;font-weight:700;margin-top:2px;';
+    wrap.appendChild(time);
+  }
+  const isCityStop = (window.CITY_BUSES_FULL || []).some(b => b.stops.some(s => s.name === stopName));
+  if (isCityStop) {
+    const btn = document.createElement('button');
+    btn.textContent = '🚏 ' + (t.stopViewerDepartures || 'Indulások');
+    btn.style.cssText = 'display:block;margin-top:6px;background:#1a2a3a;color:white;border:none;border-radius:8px;padding:4px 10px;font-size:11px;font-weight:800;cursor:pointer;font-family:Nunito,sans-serif;';
+    btn.onclick = () => { if (window.__openStopViewer) window.__openStopViewer(stopName); };
+    wrap.appendChild(btn);
+
+    // Nyitott popup élő nyelvváltása: a nyelvváltók 'gohome:langchange' eseményt
+    // küldenek, erre a gomb felirata helyben frissül. Ha a popup már bezárult
+    // (az elem kikerült a DOM-ból), a listener leiratkozik.
+    const onLangChange = () => {
+      if (!wrap.isConnected) { window.removeEventListener('gohome:langchange', onLangChange); return; }
+      const l2 = (window.currentLang && window.currentLang()) || "hu";
+      const t2 = (window.I18N && window.I18N[l2]) || (window.I18N && window.I18N.hu) || {};
+      btn.textContent = '🚏 ' + (t2.stopViewerDepartures || 'Indulások');
+    };
+    window.addEventListener('gohome:langchange', onLangChange);
+  }
+  return wrap;
+};
+
 // Helyi buszok amik Csererdőt érintik (hazaút + iskolába tervező)
 const HOME_BUS_IDS = ["3", "8", "8Y", "28"];
 

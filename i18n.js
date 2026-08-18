@@ -102,6 +102,7 @@ window.I18N = {
     stopViewerPick: "Melyik megálló indulásait nézzük?",
     stopViewerNoLine: "Válassz legalább egy vonalat",
     stopViewerNoDeps: "Ezen a napon nincs indulás erről a megállóról",
+    stopViewerDepartures: "Indulások",
     changeStop: "Megálló váltása",
     // SchoolSettingsModal
     schoolQuestion: "Melyik iskolába jársz?",
@@ -258,6 +259,7 @@ window.I18N = {
     stopViewerPick: "Which stop's departures shall we check?",
     stopViewerNoLine: "Select at least one line",
     stopViewerNoDeps: "No departures from this stop on this day",
+    stopViewerDepartures: "Departures",
     changeStop: "Change stop",
     // SchoolSettingsModal
     schoolQuestion: "Which school do you attend?",

@@ -119,6 +119,10 @@ function MobileSettingsPill({ state, setState, open, setOpen, onTimetable }) {
             <window.TimetableDropdown onSelect={onTimetable} upward fabStyle lang={state.lang} />
           </div>
         )}
+        <button className="fab-action" onClick={() => window.__openStopViewer && window.__openStopViewer(null)}
+          data-tooltip={state.lang === "hu" ? "Megállók" : "Stops"}
+          data-tooltip-dir="left"
+          aria-label={state.lang === "hu" ? "Megállók" : "Stops"}>🚏</button>
         <div className="mobile-pill" role="button" tabIndex={0} onClick={() => setOpen(true)} onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setOpen(true); } }} style={{cursor:"pointer"}}>
           <span style={{fontSize:15, padding:"5px 9px", opacity:0.8}}>⚙️</span>
           <span className="pill-sep-mid" />
@@ -273,6 +277,13 @@ function V1Variation({ state, setState, t, langSwitcher, navLinks, onTimetable }
   const [clockHovered, setClockHovered] = React.useState(false);
   const [settingsOpen, setSettingsOpen] = React.useState(false);
   const [sheetOpen, setSheetOpen] = React.useState(false);
+  const [stopViewer, setStopViewer] = React.useState(null); // null = zárva, { stop: string|null } = nyitva
+
+  // Térképi popupok "Indulások" gombja + a 🚏 FAB ezen keresztül nyitja a megálló-nézőt
+  React.useEffect(() => {
+    window.__openStopViewer = (stopName) => setStopViewer({ stop: stopName || null });
+    return () => { window.__openStopViewer = undefined; };
+  }, []);
   const didPushHistory = React.useRef(false);
   const didPushSettingsHistory = React.useRef(false);
   const isNowMode = state.mode === "now";
@@ -399,6 +410,12 @@ function V1Variation({ state, setState, t, langSwitcher, navLinks, onTimetable }
       )}
 
       <MobileSettingsPill state={state} setState={setState} open={sheetOpen} setOpen={v => v ? openSheet() : closeSheet()} onTimetable={onTimetable} />
+
+      {stopViewer && window.StopTimetableModal && (
+        <window.StopTimetableModal key={stopViewer.stop || 'search'} initialStop={stopViewer.stop}
+          onClose={() => setStopViewer(null)}
+          dayType={U.dayType(now, state.schoolHoliday)} lang={state.lang} />
+      )}
 
       {hero && heroInfo && (
         <div className="v1-hero-banner">

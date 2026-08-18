@@ -288,8 +288,13 @@ function CityRouteMap({ route, fromStop, toStop, lang }) {
         const sA = route.bus1.stops.find(s => s.name === route.transferStopName);
         const sB = route.bus2.stops.find(s => s.name === bus2DepStop);
         if (sA?.lat && sB?.lat) {
-          L.polyline([[sA.lat, sA.lon], [sB.lat, sB.lon]], { color: '#555', weight: 3, opacity: 0.7, dashArray: '6,5' }).addTo(map);
+          const walkLine = L.polyline([[sA.lat, sA.lon], [sB.lat, sB.lon]], { color: '#555', weight: 3, opacity: 0.7, dashArray: '6,5' }).addTo(map);
           allCoords.push([sA.lat, sA.lon], [sB.lat, sB.lon]);
+          window.fetchWalkingRoute(sA.lat, sA.lon, sB.lat, sB.lon).then(coords => {
+            if (!coords || !instanceRef.current) return;
+            walkLine.remove();
+            L.polyline(coords, { color: '#555', weight: 3, opacity: 0.7, dashArray: '6,5' }).addTo(map);
+          });
         }
       }
       const fromOff1 = route.bus1.stops.find(s => s.name === fromStop)?.offset ?? 0;

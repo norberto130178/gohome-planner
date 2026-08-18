@@ -266,10 +266,15 @@ function HomeRouteMap({ route }) {
     const localDep  = boardStop ? route.localBoardAt - boardStop.offset : null;
 
     if (route.walkAtTransfer && volanLat && boardStop?.lat) {
-      L.polyline([[volanLat, volanLon], [boardStop.lat, boardStop.lon]], {
+      const walkLine = L.polyline([[volanLat, volanLon], [boardStop.lat, boardStop.lon]], {
         color: '#555', weight: 3, opacity: 0.7, dashArray: '6,5'
       }).addTo(map);
       allCoords.push([volanLat, volanLon], [boardStop.lat, boardStop.lon]);
+      window.fetchWalkingRoute(volanLat, volanLon, boardStop.lat, boardStop.lon).then(coords => {
+        if (!coords || !instanceRef.current) return;
+        walkLine.remove();
+        L.polyline(coords, { color: '#555', weight: 3, opacity: 0.7, dashArray: '6,5' }).addTo(map);
+      });
     }
 
     if (boardStop?.lat && homeStop?.lat && cityShapes.length) {
@@ -443,10 +448,15 @@ function CitySchoolRouteMap({ route, direction, schoolData }) {
         const sA = route.bus1.stops.find(s => s.name === route.transferStopName);
         const sB = route.bus2.stops.find(s => s.name === bus2StartName);
         if (sA?.lat && sB?.lat) {
-          L.polyline([[sA.lat, sA.lon], [sB.lat, sB.lon]], {
+          const walkLine = L.polyline([[sA.lat, sA.lon], [sB.lat, sB.lon]], {
             color: '#555', weight: 3, opacity: 0.7, dashArray: '6,5'
           }).addTo(map);
           allCoords.push([sA.lat, sA.lon], [sB.lat, sB.lon]);
+          window.fetchWalkingRoute(sA.lat, sA.lon, sB.lat, sB.lon).then(coords => {
+            if (!coords || !instanceRef.current) return;
+            walkLine.remove();
+            L.polyline(coords, { color: '#555', weight: 3, opacity: 0.7, dashArray: '6,5' }).addTo(map);
+          });
         }
       }
     }
@@ -458,9 +468,14 @@ function CitySchoolRouteMap({ route, direction, schoolData }) {
       const dropoffLat = dropoffBusStop?.lat || dropoff?.lat;
       const dropoffLon = dropoffBusStop?.lon || dropoff?.lon;
       if (dropoffLat && dropoffLon) {
-        L.polyline(walkArc(dropoffLat, dropoffLon, schoolData.lat, schoolData.lon), {
+        const arcLine = L.polyline(walkArc(dropoffLat, dropoffLon, schoolData.lat, schoolData.lon), {
           color: '#333', weight: 2.5, opacity: 0.85, dashArray: '6 8',
         }).addTo(map);
+        window.fetchWalkingRoute(dropoffLat, dropoffLon, schoolData.lat, schoolData.lon).then(coords => {
+          if (!coords || !instanceRef.current) return;
+          arcLine.remove();
+          L.polyline(coords, { color: '#333', weight: 2.5, opacity: 0.85, dashArray: '6 8' }).addTo(map);
+        });
       }
       L.marker([schoolData.lat, schoolData.lon], {
         icon: L.divIcon({ className: '', html: '<div style="font-size:22px;line-height:1;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.35));">🏫</div>', iconSize: [22, 22], iconAnchor: [11, 11] }),
@@ -1625,10 +1640,15 @@ function SchoolRouteMap({ route, schoolData }) {
 
     // 1b. Gyalogos átszállás: helyi busz megálló → helyközi felszállóhely
     if ((route.walkAfterBus > 0 || route.walkAtTransfer) && transferStop?.lat && volanLat) {
-      L.polyline([[transferStop.lat, transferStop.lon], [volanLat, volanLon]], {
+      const walkLine = L.polyline([[transferStop.lat, transferStop.lon], [volanLat, volanLon]], {
         color: '#555', weight: 3, opacity: 0.7, dashArray: '6,5'
       }).addTo(map);
       allCoords.push([transferStop.lat, transferStop.lon], [volanLat, volanLon]);
+      window.fetchWalkingRoute(transferStop.lat, transferStop.lon, volanLat, volanLon).then(coords => {
+        if (!coords || !instanceRef.current) return;
+        walkLine.remove();
+        L.polyline(coords, { color: '#555', weight: 3, opacity: 0.7, dashArray: '6,5' }).addTo(map);
+      });
     }
 
     // 2. Helyközi: transferStop → Nemesvámos
@@ -1653,9 +1673,14 @@ function SchoolRouteMap({ route, schoolData }) {
     });
 
     if (schoolData?.lat && schoolData?.lon) {
-      L.polyline(walkArc(nemoLat, nemoLon, schoolData.lat, schoolData.lon), {
+      const arcLine = L.polyline(walkArc(nemoLat, nemoLon, schoolData.lat, schoolData.lon), {
         color: '#333', weight: 2.5, opacity: 0.85, dashArray: '6 8',
       }).addTo(map);
+      window.fetchWalkingRoute(nemoLat, nemoLon, schoolData.lat, schoolData.lon).then(coords => {
+        if (!coords || !instanceRef.current) return;
+        arcLine.remove();
+        L.polyline(coords, { color: '#333', weight: 2.5, opacity: 0.85, dashArray: '6 8' }).addTo(map);
+      });
       L.marker([schoolData.lat, schoolData.lon], {
         icon: L.divIcon({ className: '', html: '<div style="font-size:22px;line-height:1;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.35));">🏫</div>', iconSize: [22, 22], iconAnchor: [11, 11] }),
         zIndexOffset: 500,

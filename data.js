@@ -7,6 +7,38 @@
 
 // APP_VERSION az index.html-ben van definiálva (ott állítja be a cache bustert is)
 
+// Valós gyalogos útvonal lekérése az OSRM ingyenes demo szerveréről (kulcs nélkül).
+// Visszaad egy [lat,lon] koordinátatömböt Leafletnek, vagy null-t ha a lekérés
+// sikertelen/időtúllépés (ilyenkor a hívó fél essen vissza légvonalra).
+async function _osrmFoot(lat1, lon1, lat2, lon2) {
+  try {
+    const url = `https://router.project-osrm.org/route/v1/foot/${lon1},${lat1};${lon2},${lat2}?overview=full&geometries=geojson`;
+    const res = await fetch(url, { signal: AbortSignal.timeout(5000) });
+    if (!res.ok) return null;
+    const data = await res.json();
+    const route = data?.routes?.[0];
+    const coords = route?.geometry?.coordinates;
+    if (!coords || coords.length < 2) return null;
+    return { distance: route.distance, coords: coords.map(([lon, lat]) => [lat, lon]) };
+  } catch (e) {
+    return null;
+  }
+}
+
+// Az OSRM gyalogos útvonala nem mindig szimmetrikus (pl. irányított gyalogút-jelölés
+// miatt A→B és B→A eltérő hosszú utat adhat — valós, megfigyelt eset egy veszprémi
+// park ösvényénél). Mivel a térképen csak megjelenítjük a vonalat (nem navigálunk),
+// mindkét irányt lekérjük párhuzamosan, és a rövidebbet rajzoljuk ki.
+window.fetchWalkingRoute = async function (lat1, lon1, lat2, lon2) {
+  const [fwd, rev] = await Promise.all([
+    _osrmFoot(lat1, lon1, lat2, lon2),
+    _osrmFoot(lat2, lon2, lat1, lon1),
+  ]);
+  if (!fwd && !rev) return null;
+  if (!rev || (fwd && fwd.distance <= rev.distance)) return fwd.coords;
+  return rev.coords.slice().reverse();
+};
+
 // Helyi buszok amik Csererdőt érintik (hazaút + iskolába tervező)
 const HOME_BUS_IDS = ["3", "8", "8Y", "28"];
 

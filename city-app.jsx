@@ -816,7 +816,7 @@ function CityApp() {
         setGpsState('idle');
       },
       () => { setGpsState('error'); setTimeout(() => setGpsState('idle'), 3000); },
-      { enableHighAccuracy: false, timeout: 8000, maximumAge: 60000 }
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
   }
 

@@ -147,6 +147,12 @@
         <p>A <span class="help-chip">⇅</span> gombbal felcserélhetők a megállók – az app automatikusan újratervez.</p>
       </div>
       <div class="help-block">
+        <div class="help-block-title">🛰️ GPS – legközelebbi megálló</div>
+        <p>A <strong>Honnan</strong> mező mellett lévő <span class="help-chip">🛰️ GPS</span> gomb a telefon helyzete alapján automatikusan beállítja az induló megállót. A gomb csak akkor aktív, ha a <strong>Hova</strong> mező már ki van töltve.</p>
+        <p>Nem feltétlenül a légvonalban legközelebbi megállót választja: a néhány legközelebbi jelölt közül azt, amelyik ténylegesen a <strong>leggyorsabb útvonalat</strong> adja a célig.</p>
+        <div class="help-tip">💡 A böngésző első használatkor engedélyt kér a helymeghatározáshoz. Ha nem engedélyezed, a megálló továbbra is kézzel kereshető.</div>
+      </div>
+      <div class="help-block">
         <div class="help-block-title">Eredmények</div>
         <p>Minden kártya egy lehetséges útvonalat mutat: indulási idő, érkezési idő, menetidő, szükséges járatok. A legjobb opció a zöld bannerben is kiemelve jelenik meg.</p>
         <p>Egy kártyára kattintva megjelenik a <strong>térképes nézet</strong> az útvonallal.</p>
@@ -174,7 +180,18 @@
           <li><span class="help-chip">🏠</span> – átváltás a HazaÚt oldalra</li>
           <li><span class="help-chip">🚌</span> – átváltás a VeszprémBusz oldalra</li>
           <li><span class="help-chip">🗓</span> – menetrend: válassz járatot, megjelenik a teljes napi menetrend</li>
+          <li><span class="help-chip">🚏</span> – megálló-néző: válassz megállót, megjelennek az onnan induló összes járat</li>
         </ul>
+      </div>
+      <div class="help-block">
+        <div class="help-block-title">🚏 Megálló-néző</div>
+        <p>A <span class="help-chip">🚏</span> gombra kattintva egy kereshető listából kiválasztható bármelyik megálló, és megjelenik onnan a <strong>teljes napi indulási menetrend</strong>, automatikusan a mostani időponthoz görgetve.</p>
+        <p>Ha több busz is érinti a megállót, azok között színes <strong>vonal-chipekkel</strong> lehet szűrni, és fent a <span class="help-chip">Munkanap</span> / <span class="help-chip">Tanszünet</span> / <span class="help-chip">Hétvége</span> fülekkel a napszak is átváltható.</p>
+        <p>A térképen egy megálló-jelölőre kattintva a felugró buborékban lévő <strong>Indulások</strong> gombbal is közvetlenül megnyitható ugyanez a nézet, az adott megállóra rögtön beállítva.</p>
+      </div>
+      <div class="help-block">
+        <div class="help-block-title">🏖️ Nyári / tanítási szünet</div>
+        <p>A beállítások panelben három mód közül lehet választani: <span class="help-chip">Automatikus</span>, <span class="help-chip">Mindig</span>, <span class="help-chip">Soha</span>. Automatikus módban egy megadható dátumtartomány (kezdő és záró nap) dönti el, hogy az adott napon szünidei menetrend érvényes-e — de a mód bármikor kézzel is átváltható, függetlenül a naptártól.</p>
       </div>
       <div class="help-block">
         <div class="help-block-title">Beállítások pill (mobilon)</div>
@@ -265,6 +282,12 @@
         <p>Use the <span class="help-chip">⇅</span> button to swap stops — the app automatically re-plans.</p>
       </div>
       <div class="help-block">
+        <div class="help-block-title">🛰️ GPS – nearest stop</div>
+        <p>The <span class="help-chip">🛰️ GPS</span> button next to the <strong>From</strong> field sets your departure stop automatically based on your phone's location. It's only active once the <strong>To</strong> field is filled in.</p>
+        <p>It doesn't necessarily pick the closest stop as the crow flies: among the nearest few candidates, it picks whichever one actually gives the <strong>fastest route</strong> to your destination.</p>
+        <div class="help-tip">💡 Your browser will ask for location permission the first time. If you don't grant it, you can still search for a stop manually.</div>
+      </div>
+      <div class="help-block">
         <div class="help-block-title">Results</div>
         <p>Each card shows one possible route: departure time, arrival time, duration, and required bus lines. The best option is also highlighted in the green banner at the top.</p>
         <p>Tap a card to see the <strong>map view</strong> of the route.</p>
@@ -292,7 +315,18 @@
           <li><span class="help-chip">🏠</span> – switch to the HazaÚt page</li>
           <li><span class="help-chip">🚌</span> – switch to the VeszprémBusz page</li>
           <li><span class="help-chip">🗓</span> – timetable: select a bus line to see its full daily schedule</li>
+          <li><span class="help-chip">🚏</span> – stop viewer: pick a stop to see every departure from it</li>
         </ul>
+      </div>
+      <div class="help-block">
+        <div class="help-block-title">🚏 Stop viewer</div>
+        <p>Tapping <span class="help-chip">🚏</span> opens a searchable list of every stop. Pick one and you'll see its <strong>full daily departure schedule</strong>, automatically scrolled to the current time.</p>
+        <p>If several bus lines serve the stop, filter between them with colored <strong>line chips</strong>, and switch the day type up top with the <span class="help-chip">Workday</span> / <span class="help-chip">Holiday</span> / <span class="help-chip">Weekend</span> tabs.</p>
+        <p>You can also open this same view straight from the map: tap a stop marker, then tap <strong>Departures</strong> in the popup — it opens with that stop already selected.</p>
+      </div>
+      <div class="help-block">
+        <div class="help-block-title">🏖️ Summer / school holiday</div>
+        <p>The settings panel offers three modes: <span class="help-chip">Automatic</span>, <span class="help-chip">Always</span>, <span class="help-chip">Never</span>. In Automatic mode, a configurable date range (start and end day) decides whether holiday schedules apply on a given day — but you can still switch the mode manually at any time, regardless of the calendar.</p>
       </div>
       <div class="help-block">
         <div class="help-block-title">Settings pill (mobile)</div>

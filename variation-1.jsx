@@ -281,7 +281,7 @@ function V1Variation({ state, setState, t, langSwitcher, navLinks, onTimetable }
 
   // Térképi popupok "Indulások" gombja + a 🚏 FAB ezen keresztül nyitja a megálló-nézőt
   React.useEffect(() => {
-    window.__openStopViewer = (stopName) => setStopViewer({ stop: stopName || null });
+    window.__openStopViewer = (stopName, mode) => setStopViewer({ stop: stopName || null, mode: mode || 'city' });
     return () => { window.__openStopViewer = undefined; };
   }, []);
   const didPushHistory = React.useRef(false);
@@ -412,7 +412,7 @@ function V1Variation({ state, setState, t, langSwitcher, navLinks, onTimetable }
       <MobileSettingsPill state={state} setState={setState} open={sheetOpen} setOpen={v => v ? openSheet() : closeSheet()} onTimetable={onTimetable} />
 
       {stopViewer && window.StopTimetableModal && (
-        <window.StopTimetableModal key={stopViewer.stop || 'search'} initialStop={stopViewer.stop}
+        <window.StopTimetableModal key={stopViewer.stop || 'search'} initialStop={stopViewer.stop} initialMode={stopViewer.mode}
           onClose={() => setStopViewer(null)}
           dayType={U.dayType(now, state.schoolHoliday)} lang={state.lang} />
       )}

@@ -27,6 +27,10 @@ function RouteCard({ route, index, isPrimary, t, style, isWeekend, dayType, nowM
   const totalStr = totalH > 0 ? `${totalH}${t.hour} ${totalM}${t.min}` : `${totalM} ${t.min}`;
 
   const busColor = route.localBus.color;
+  // Mikor indult ez a konkrét helyi járat a saját (útvonal szerinti) kiindulópontjáról --
+  // ugyanaz a "recept" mint a helyközi busznál a `helykoziDepBuszall`.
+  const localBoardOffset = U.stopOffset(route.localBus, route.transferLocalStop);
+  const localOriginDep = localBoardOffset != null ? route.localBoardAt - localBoardOffset : null;
 
   const localTransferStop = route.localBus.stops.find(ss => ss.name === route.transferLocalStop);
   const fromBoard = route.localBoardAt - (localTransferStop?.offset || 0);
@@ -85,8 +89,17 @@ function RouteCard({ route, index, isPrimary, t, style, isWeekend, dayType, nowM
           <div className="step-time">{fmt(route.helykoziDep)}</div>
           <div className="step-icon bus-icon-regional">🚌</div>
           <div className="step-body">
-            <div className="step-title">{t.catchBus} {route.helykoziLine && <span style={{background:'#2B1E3F',color:'#FFF7EC',padding:'2px 8px',borderRadius:8,fontSize:12,marginLeft:6}}>#{route.helykoziLine}</span>}</div>
+            <div className="step-title">
+              {t.catchBus}
+              {route.helykoziLine && <span style={{background:'#2B1E3F',color:'#FFF7EC',padding:'2px 8px',borderRadius:8,fontSize:12,marginLeft:6}}>#{route.helykoziLine}</span>}
+              {route.helykoziOriginDep != null && <span style={{fontSize:12,marginLeft:6,opacity:0.7}}>({fmt(route.helykoziOriginDep)})</span>}
+            </div>
             <div className="step-sub">Nemesvámos, autóbusz-váróterem → {route.transferStopShort || route.transferStop}</div>
+            {route.helykoziOrigin && route.helykoziTerminus && (
+              <div style={{color:'var(--accent)',fontWeight:700,fontSize:12,marginTop:2}}>
+                {route.helykoziOrigin} → {route.helykoziTerminus}
+              </div>
+            )}
           </div>
         </div>
 
@@ -145,6 +158,7 @@ function RouteCard({ route, index, isPrimary, t, style, isWeekend, dayType, nowM
               <span style={{ color: busColor, fontWeight: 800 }}>
                 {window.busLabel(route.localBus, t)}
               </span>
+              {localOriginDep != null && <span style={{fontSize:12,marginLeft:6,opacity:0.7}}>({fmt(localOriginDep)})</span>}
             </div>
             <div className="step-sub">{window.busDirection(route.localBus, t)}</div>
           </div>
@@ -229,11 +243,23 @@ function HomeRouteMap({ route }) {
     const allCoords = [];
     const fmt = m => window.BUS_UTILS.fmtTime(m);
 
-    // 1. Helyközi szakasz: Nemesvámos → transferStop
-    const nemoLat = 47.056110, nemoLon = 17.870028;
+    // 1. Helyközi szakasz: Nemesvámos → transferStop -- MINDEN köztes megálló kirajzolva
+    // (nem csak a két végpont), ugyanaz a "recept" mint a helyi busz megállóinál lentebb:
+    // minden ponthoz karika + időcímke + "Indulások" gomb a konkrét platform-címkével.
+    const icRoute = (window.INTERCITY_BUSES_FULL || []).find(r => r.id === route.helykoziLine && r.dir === 'haza');
+    let boardIdx = -1, alightIdx = -1, icStopsSeg = [];
+    if (icRoute) {
+      boardIdx = icRoute.stops.findIndex(s => s.name === "Nemesvámos, autóbusz-váróterem");
+      alightIdx = icRoute.stops.findIndex(s => s.lat === route.transferLat && s.lon === route.transferLon);
+      if (boardIdx !== -1 && alightIdx !== -1 && alightIdx >= boardIdx) {
+        icStopsSeg = icRoute.stops.slice(boardIdx, alightIdx + 1);
+      }
+    }
+    const nemoLat = icStopsSeg[0]?.lat ?? 47.056110, nemoLon = icStopsSeg[0]?.lon ?? 17.870028;
     const homeShapes = (window.HOME_SHAPES || {})[route.helykoziLine] || [];
     const volanLat = route.transferLat, volanLon = route.transferLon;
     const hkColor = '#2B1E3F';
+    const allPlatforms = (window._intercityPlatforms && window._intercityPlatforms()) || [];
 
     if (volanLat && homeShapes.length) {
       const b = window.BUS_UTILS.bestShape(homeShapes, nemoLat, nemoLon, volanLat, volanLon);
@@ -243,17 +269,34 @@ function HomeRouteMap({ route }) {
         allCoords.push(...seg);
       }
     }
-    // Helyközi terminál jelölők időcímkével
-    [[nemoLat, nemoLon, 'Nemesvámos, autóbusz-váróterem', route.helykoziDep],
-     [volanLat, volanLon, route.transferStop, route.helykoziArrive]].forEach(([lat, lon, name, time]) => {
-      if (!lat || !lon) return;
-      L.circleMarker([lat, lon], { radius: 9, color: 'white', weight: 2, fillColor: hkColor, fillOpacity: 0.95 })
-        .addTo(map).bindPopup(() => window.stopPopupContent(name, time != null ? fmt(time) : null));
-      if (time != null) {
-        const labelHtml = `<div style="position:absolute;left:14px;top:-10px;background:white;border:1.5px solid ${hkColor};border-radius:4px;padding:1px 6px;font-size:11px;font-weight:700;color:#222;white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,0.15);">${fmt(time)}</div>`;
-        L.marker([lat, lon], { icon: L.divIcon({ className: '', html: labelHtml, iconSize: [0, 0], iconAnchor: [0, 0] }), interactive: false, zIndexOffset: 200 }).addTo(map);
-      }
-    });
+    // Helyközi megállók karikákkal, minden köztes ponttal, időcímkével
+    if (icStopsSeg.length) {
+      icStopsSeg.forEach((stop, i) => {
+        if (!stop.lat || !stop.lon) return;
+        const fullIdx = boardIdx + i;
+        const time = route.helykoziTripDeps ? route.helykoziTripDeps[fullIdx] : (i === 0 ? route.helykoziDep : i === icStopsSeg.length - 1 ? route.helykoziArrive : null);
+        const isTerminal = i === 0 || i === icStopsSeg.length - 1;
+        const r = isTerminal ? 9 : 6;
+        const platform = allPlatforms.find(p => p.spId === stop.spId);
+        L.circleMarker([stop.lat, stop.lon], { radius: r, color: 'white', weight: 2, fillColor: hkColor, fillOpacity: 0.95 })
+          .addTo(map).bindPopup(() => window.stopPopupContent(stop.name, time != null ? fmt(time) : null, null, platform ? platform.label : stop.name));
+        if (time != null) {
+          const labelHtml = `<div style="position:absolute;left:${r + 5}px;top:-10px;background:white;border:1.5px solid ${hkColor};border-radius:4px;padding:1px 6px;font-size:11px;font-weight:700;color:#222;white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,0.15);">${fmt(time)}</div>`;
+          L.marker([stop.lat, stop.lon], { icon: L.divIcon({ className: '', html: labelHtml, iconSize: [0, 0], iconAnchor: [0, 0] }), interactive: false, zIndexOffset: 200 }).addTo(map);
+        }
+        allCoords.push([stop.lat, stop.lon]);
+      });
+    } else {
+      // Fallback, ha az icRoute/index-keresés valamiért nem talál semmit -- a régi,
+      // két-végpontos megjelenítés, hogy legalább ne maradjon üres a térkép.
+      [[nemoLat, nemoLon, 'Nemesvámos, autóbusz-váróterem', route.helykoziDep],
+       [volanLat, volanLon, route.transferStop, route.helykoziArrive]].forEach(([lat, lon, name, time]) => {
+        if (!lat || !lon) return;
+        L.circleMarker([lat, lon], { radius: 9, color: 'white', weight: 2, fillColor: hkColor, fillOpacity: 0.95 })
+          .addTo(map).bindPopup(() => window.stopPopupContent(name, time != null ? fmt(time) : null));
+        allCoords.push([lat, lon]);
+      });
+    }
 
     // 1b. Gyalogos átszállás: helyközi érkezési pont → helyi busz peronra
     // 2. Helyi busz szakasz: transferStop → homeStop
@@ -1458,6 +1501,7 @@ function SchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, nowMi
               <span style={{ color: busColor, fontWeight: 800 }}>
                 {window.busLabel(route.localBus, t)}
               </span>
+              {schoolFromBoard != null && <span style={{fontSize:12,marginLeft:6,opacity:0.7}}>({fmt(schoolFromBoard)})</span>}
             </div>
             <div className="step-sub">{route.boardingStopName || "Csererdő"} → {hasWalk ? route.transferLocalStop : route.transferStopShort}</div>
           </div>
@@ -1523,11 +1567,9 @@ function SchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, nowMi
               {route.helykoziDepBuszall != null && <span style={{fontSize:12,marginLeft:6,opacity:0.7}}>({fmt(route.helykoziDepBuszall)})</span>}
             </div>
             <div className="step-sub">{route.transferStopShort} → Nemesvámos</div>
-            {route.helykoziTerminus && (
+            {route.helykoziOrigin && route.helykoziTerminus && (
               <div style={{color:'var(--accent)',fontWeight:700,fontSize:12,marginTop:2}}>
-                {t._lang === "en"
-                  ? `${t.continuesTowards} ${route.helykoziTerminus.split(',')[0]}`
-                  : `${t.continuesTowards} ${route.helykoziTerminus.split(',')[0]} felé`}
+                {route.helykoziOrigin} → {route.helykoziTerminus}
               </div>
             )}
           </div>
@@ -1545,7 +1587,6 @@ function SchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, nowMi
           <div className="step-icon">🚏</div>
           <div className="step-body">
             <div className="step-title">{t.schoolStop}</div>
-            <div className="step-sub">Nemesvámos, autóbusz-váróterem</div>
           </div>
         </div>
 
@@ -1618,9 +1659,19 @@ function SchoolRouteMap({ route, schoolData }) {
     const allCoords = [];
     const fmt = m => window.BUS_UTILS.fmtTime(m);
 
-    const nemoLat = 47.056110, nemoLon = 17.870028;
     const volanLat = route.transferLat, volanLon = route.transferLon;
     const hkColor = '#2B1E3F';
+    const allPlatforms = (window._intercityPlatforms && window._intercityPlatforms()) || [];
+    const icRoute = (window.INTERCITY_BUSES_FULL || []).find(r => r.id === route.helykoziLine && r.dir === 'iskola');
+    let icBoardIdx = -1, icAlightIdx = -1, icStopsSeg = [];
+    if (icRoute) {
+      icBoardIdx = icRoute.stops.findIndex(s => s.lat === route.transferLat && s.lon === route.transferLon);
+      icAlightIdx = icRoute.stops.findIndex(s => s.name === "Nemesvámos, autóbusz-váróterem");
+      if (icBoardIdx !== -1 && icAlightIdx !== -1 && icAlightIdx >= icBoardIdx) {
+        icStopsSeg = icRoute.stops.slice(icBoardIdx, icAlightIdx + 1);
+      }
+    }
+    const nemoLat = icStopsSeg[icStopsSeg.length - 1]?.lat ?? 47.056110, nemoLon = icStopsSeg[icStopsSeg.length - 1]?.lon ?? 17.870028;
 
     // 1. Helyi busz: boardingStop → transferStop
     const localBus = route.localBus;
@@ -1675,7 +1726,7 @@ function SchoolRouteMap({ route, schoolData }) {
       });
     }
 
-    // 2. Helyközi: transferStop → Nemesvámos
+    // 2. Helyközi: transferStop → Nemesvámos -- MINDEN köztes megálló kirajzolva
     const homeShapes = (window.HOME_SHAPES || {})[route.helykoziLine] || [];
     if (volanLat && homeShapes.length) {
       const b = window.BUS_UTILS.bestShape(homeShapes, volanLat, volanLon, nemoLat, nemoLon);
@@ -1685,16 +1736,31 @@ function SchoolRouteMap({ route, schoolData }) {
         allCoords.push(...seg);
       }
     }
-    [[volanLat, volanLon, route.transferStop, route.helykoziDep],
-     [nemoLat, nemoLon, 'Nemesvámos, autóbusz-váróterem', route.helykoziArrive]].forEach(([lat, lon, name, time]) => {
-      if (!lat || !lon) return;
-      L.circleMarker([lat, lon], { radius: 9, color: 'white', weight: 2, fillColor: hkColor, fillOpacity: 0.95 })
-        .addTo(map).bindPopup(() => window.stopPopupContent(name, time != null ? fmt(time) : null));
-      if (time != null) {
-        const labelHtml = `<div style="position:absolute;left:14px;top:-10px;background:white;border:1.5px solid ${hkColor};border-radius:4px;padding:1px 6px;font-size:11px;font-weight:700;color:#222;white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,0.15);">${fmt(time)}</div>`;
-        L.marker([lat, lon], { icon: L.divIcon({ className: '', html: labelHtml, iconSize: [0, 0], iconAnchor: [0, 0] }), interactive: false, zIndexOffset: 200 }).addTo(map);
-      }
-    });
+    if (icStopsSeg.length) {
+      icStopsSeg.forEach((stop, i) => {
+        if (!stop.lat || !stop.lon) return;
+        const fullIdx = icBoardIdx + i;
+        const time = route.helykoziTripDeps ? route.helykoziTripDeps[fullIdx] : (i === 0 ? route.helykoziDep : i === icStopsSeg.length - 1 ? route.helykoziArrive : null);
+        const isTerminal = i === 0 || i === icStopsSeg.length - 1;
+        const r = isTerminal ? 9 : 6;
+        const platform = allPlatforms.find(p => p.spId === stop.spId);
+        L.circleMarker([stop.lat, stop.lon], { radius: r, color: 'white', weight: 2, fillColor: hkColor, fillOpacity: 0.95 })
+          .addTo(map).bindPopup(() => window.stopPopupContent(stop.name, time != null ? fmt(time) : null, null, platform ? platform.label : stop.name));
+        if (time != null) {
+          const labelHtml = `<div style="position:absolute;left:${r + 5}px;top:-10px;background:white;border:1.5px solid ${hkColor};border-radius:4px;padding:1px 6px;font-size:11px;font-weight:700;color:#222;white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,0.15);">${fmt(time)}</div>`;
+          L.marker([stop.lat, stop.lon], { icon: L.divIcon({ className: '', html: labelHtml, iconSize: [0, 0], iconAnchor: [0, 0] }), interactive: false, zIndexOffset: 200 }).addTo(map);
+        }
+        allCoords.push([stop.lat, stop.lon]);
+      });
+    } else {
+      [[volanLat, volanLon, route.transferStop, route.helykoziDep],
+       [nemoLat, nemoLon, 'Nemesvámos, autóbusz-váróterem', route.helykoziArrive]].forEach(([lat, lon, name, time]) => {
+        if (!lat || !lon) return;
+        L.circleMarker([lat, lon], { radius: 9, color: 'white', weight: 2, fillColor: hkColor, fillOpacity: 0.95 })
+          .addTo(map).bindPopup(() => window.stopPopupContent(name, time != null ? fmt(time) : null));
+        allCoords.push([lat, lon]);
+      });
+    }
 
     if (schoolData?.lat && schoolData?.lon) {
       const arcLine = L.polyline(walkArc(nemoLat, nemoLon, schoolData.lat, schoolData.lon), {

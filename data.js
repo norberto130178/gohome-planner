@@ -52,7 +52,11 @@ window.addEventListener('keyup', (e) => {
 // szerepel a városi hálózatban, egy "Indulások" gomb ami a megálló-nézőt nyitja meg
 // (window.__openStopViewer — az aktuális oldal app-ja regisztrálja). DOM elemet ad
 // vissza (nem HTML stringet), így a megállónevek escapelése nem probléma.
-window.stopPopupContent = function (stopName, timeText, lang) {
+// `intercityLabel`: ha a hívó (pl. route-card.jsx egy helyközi térképi pontja) tudja a
+// konkrét platform pontos (irány-specifikus) címkéjét, adja át itt -- egy megálló-NÉV
+// (pl. "Nemesvámos, autóbusz-váróterem") ugyanis 2-3 külön fizikai platformot is
+// jelenthet, ezt névből egyértelműen nem lehet visszafejteni.
+window.stopPopupContent = function (stopName, timeText, lang, intercityLabel) {
   // lang nélkül hívva az oldal aktuális nyelvét használja (window.currentLang —
   // az app-state.jsx / city-app.jsx regisztrálja a saját localStorage-kulcsával).
   // A hívók `bindPopup(() => ...)` formában, lazy-n hívják, így a popup minden
@@ -70,12 +74,12 @@ window.stopPopupContent = function (stopName, timeText, lang) {
     time.style.cssText = 'font-size:12px;font-weight:700;margin-top:2px;';
     wrap.appendChild(time);
   }
-  const isCityStop = (window.CITY_BUSES_FULL || []).some(b => b.stops.some(s => s.name === stopName));
-  if (isCityStop) {
+  const isCityStop = !intercityLabel && (window.CITY_BUSES_FULL || []).some(b => b.stops.some(s => s.name === stopName));
+  if (isCityStop || intercityLabel) {
     const btn = document.createElement('button');
     btn.textContent = '🚏 ' + (t.stopViewerDepartures || 'Indulások');
     btn.style.cssText = 'display:block;margin-top:6px;background:#1a2a3a;color:white;border:none;border-radius:8px;padding:4px 10px;font-size:11px;font-weight:800;cursor:pointer;font-family:Nunito,sans-serif;';
-    btn.onclick = () => { if (window.__openStopViewer) window.__openStopViewer(stopName); };
+    btn.onclick = () => { if (window.__openStopViewer) window.__openStopViewer(intercityLabel || stopName, intercityLabel ? 'intercity' : 'city'); };
     wrap.appendChild(btn);
 
     // Nyitott popup élő nyelvváltása: a nyelvváltók 'gohome:langchange' eseményt
@@ -400,6 +404,10 @@ window.getIntercityDeparturesForPlatformLabel = function (label, dayType) {
         mins, note: null, bus: route,
         from: trip.origin || route.stops[0].name,
         to: toIdx === -1 ? null : route.stops[toIdx].name,
+        // A VALÓDI GTFS-végállomás (nem a mi kurált szakaszunk vége) -- "iskola" irányban a
+        // `to` gyakran csak a modellezett Nemesvámos-i szakasz határa (pl. "autóbusz-forduló"),
+        // nem a busz tényleges célja (pl. Balatonfüred, Nagyvázsony) -- ez adja a teljes képet.
+        terminus: trip.terminus || null,
       });
     }
   }
@@ -483,6 +491,10 @@ window.planRoutes = function planRoutes({
               helykoziDep: boardAtVaroterem,
               helykoziArrive: icArriveAtVeszp,
               helykoziLine: icRoute.id,
+              helykoziTripDeps: trip.deps,
+              helykoziOrigin: trip.origin || null,
+              helykoziOriginDep: trip.originDep ?? null,
+              helykoziTerminus: trip.terminus || null,
               transferStop: cityStopName,
               transferStopShort: _TRANSFER_SHORT[icVeszpStop.name] || icVeszpStop.name.replace('Veszprém, ', ''),
               transferStopId: icVeszpStop.name,
@@ -562,7 +574,6 @@ window.planSchoolRoutes = function planSchoolRoutes({
     // bővülhet a váróterem UTÁN is (pl. ABC, autóbusz-forduló) — ezek nem érintik a "hazaérkezés"
     // (Nemesvámos, autóbusz-váróterem) tényleges pontját, csak eltolnák a puszta index-alapú hivatkozást.
     const lastStopIdx = icRoute.stops.findIndex(s => s.name === "Nemesvámos, autóbusz-váróterem");
-    const buszallIdx = icRoute.stops.findIndex(s => s.name === "Veszprém, autóbusz-állomás");
 
     // Veszprémi felszállási megállók indexei (a hazaérkezési megálló előtt)
     const veszpremBoardIdxs = icRoute.stops
@@ -610,7 +621,12 @@ window.planSchoolRoutes = function planSchoolRoutes({
           if (icArriveSchool == null) continue;
           if (schoolStartMin != null && icArriveSchool > schoolStartMin) continue;
 
-          const helykoziDepBuszall = buszallIdx !== -1 ? (matchingTrip.deps[buszallIdx] ?? icDepAtStop) : icDepAtStop;
+          // A trip VALÓDI kiindulópontjának idejét használjuk (nem egy fix "Veszprém,
+          // autóbusz-állomás" index-lookupot) -- utóbbi néma hibát okozott rövidített
+          // (pl. Komakút térről induló) trip-eknél: mivel azok sose érintik ténylegesen
+          // az autóbusz-állomást, a régi kód a felszállási időre esett vissza, és úgy
+          // tűnt mintha a busz "nulla perc alatt" ért volna oda -- ld. user screenshot.
+          const helykoziDepBuszall = matchingTrip.originDep ?? icDepAtStop;
 
           const key = `${icBoardStop.name}-${bus.id}-${bus.direction}-${boardAt}-${icDepAtStop}`;
           if (seen.has(key)) continue;
@@ -631,7 +647,9 @@ window.planSchoolRoutes = function planSchoolRoutes({
             helykoziArrive: icArriveSchool,
             helykoziLine: icRoute.id,
             helykoziDepBuszall,
+            helykoziOrigin: matchingTrip.origin || null,
             helykoziTerminus: matchingTrip.terminus || null,
+            helykoziTripDeps: matchingTrip.deps,
             transferStop: cityStopName,
             transferStopShort: _TRANSFER_SHORT[icBoardStop.name] || icBoardStop.name.replace('Veszprém, ', ''),
             transferStopId: icBoardStop.name,
@@ -659,7 +677,6 @@ window.planSchoolRoutes = function planSchoolRoutes({
     for (const icRoute of icRoutes) {
       // Ld. a fenti indoklást: név szerinti horgony, nem tömb-index.
       const lastStopIdx2 = icRoute.stops.findIndex(s => s.name === "Nemesvámos, autóbusz-váróterem");
-      const buszallIdx2 = icRoute.stops.findIndex(s => s.name === "Veszprém, autóbusz-állomás");
 
       for (let boardStopIdx2 = 0; boardStopIdx2 < lastStopIdx2; boardStopIdx2++) {
         const icBoardStop = icRoute.stops[boardStopIdx2];
@@ -703,7 +720,8 @@ window.planSchoolRoutes = function planSchoolRoutes({
             if (icArriveSchool == null) continue;
             if (schoolStartMin != null && icArriveSchool > schoolStartMin) continue;
 
-            const helykoziDepBuszall = buszallIdx2 !== -1 ? (matchingTrip2.deps[buszallIdx2] ?? icDepAtStop) : icDepAtStop;
+            // Ld. a fenti indoklást: a trip valódi kiindulópontjának ideje, nem fix index-lookup.
+            const helykoziDepBuszall = matchingTrip2.originDep ?? icDepAtStop;
             const walkKey = `${icBoardStop.name}-${bus.id}-${bus.direction}-${boardAt}-${icDepAtStop}`;
             const candidate = {
               departLeaveHome: boardAt - walkMin,
@@ -719,7 +737,9 @@ window.planSchoolRoutes = function planSchoolRoutes({
               helykoziArrive: icArriveSchool,
               helykoziLine: icRoute.id,
               helykoziDepBuszall,
+              helykoziOrigin: matchingTrip2.origin || null,
               helykoziTerminus: matchingTrip2.terminus || null,
+              helykoziTripDeps: matchingTrip2.deps,
               transferStop: cityStopName,
               transferStopShort: _TRANSFER_SHORT[icBoardStop.name] || icBoardStop.name.replace('Veszprém, ', ''),
               transferStopId: icBoardStop.name + "_walk",

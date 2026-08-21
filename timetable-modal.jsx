@@ -1027,7 +1027,7 @@ window.TimetableDropdown = TimetableDropdown;
    (window.StopSearch) — ezért egyelőre csak a city.html oldalon
    használható.
    ============================================================ */
-function StopTimetableModal({ onClose, dayType, lang, initialStop }) {
+function StopTimetableModal({ onClose, dayType, lang, initialStop, initialMode }) {
   const U = window.BUS_UTILS;
   const fmt = (m) => U.fmtTime(m);
   const t = (window.I18N && window.I18N[lang || "hu"]) || window.I18N?.hu || {};
@@ -1096,7 +1096,7 @@ function StopTimetableModal({ onClose, dayType, lang, initialStop }) {
   }, []);
   const [activeDayType, setActiveDayType] = React.useState(dayType || "workday");
   const [activeIds, setActiveIds] = React.useState(null); // null = minden vonal aktív
-  const [viewMode, setViewMode] = React.useState('city'); // 'city' | 'intercity'
+  const [viewMode, setViewMode] = React.useState(initialMode === 'intercity' ? 'intercity' : 'city'); // 'city' | 'intercity'
   const intercitySupported = !!window.INTERCITY_BUSES_FULL;
 
   // --- Modal boilerplate (history back, ESC, scroll-lock, fókusz) ---
@@ -1437,7 +1437,7 @@ function StopTimetableModal({ onClose, dayType, lang, initialStop }) {
                       fontSize: 11, fontWeight: 900,
                     }}>{d.bus.id}</span>
                     <span style={{ flex: 1, minWidth: 0, fontSize: 12, fontWeight: 600, color: 'var(--ink-soft)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {d.from && d.to ? `${d.from} ▸ ${d.to}` : window.busDirection(d.bus, t)}
+                      {d.from && (d.terminus || d.to) ? `${d.from} ▸ ${d.terminus || d.to}` : window.busDirection(d.bus, t)}
                     </span>
                   </div>
                 );

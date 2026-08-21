@@ -85,6 +85,7 @@ window.INTERCITY_BUSES_FULL = [
           1241
         ],
         "origin": "Veszprém, autóbusz-állomás",
+        "originDep": 1230,
         "terminus": "Zalaegerszeg, autóbusz-állomás",
         "continuesBeyondModel": true
       },
@@ -104,6 +105,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Veszprém, autóbusz-állomás",
+        "originDep": 450,
         "terminus": "Keszthely, autóbusz-állomás",
         "continuesBeyondModel": false
       },
@@ -123,6 +125,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Veszprém, autóbusz-állomás",
+        "originDep": 510,
         "terminus": "Zalaegerszeg, autóbusz-állomás",
         "continuesBeyondModel": false
       },
@@ -142,6 +145,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Veszprém, autóbusz-állomás",
+        "originDep": 630,
         "terminus": "Zalaegerszeg, autóbusz-állomás",
         "continuesBeyondModel": false
       },
@@ -161,6 +165,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Veszprém, autóbusz-állomás",
+        "originDep": 870,
         "terminus": "Lenti, autóbusz-állomás",
         "continuesBeyondModel": false
       },
@@ -180,6 +185,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Veszprém, autóbusz-állomás",
+        "originDep": 1110,
         "terminus": "Zalaegerszeg, autóbusz-állomás",
         "continuesBeyondModel": false
       },
@@ -199,6 +205,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Veszprém, autóbusz-állomás",
+        "originDep": 385,
         "terminus": "Zalaegerszeg, autóbusz-állomás",
         "continuesBeyondModel": false
       }
@@ -320,6 +327,7 @@ window.INTERCITY_BUSES_FULL = [
           399
         ],
         "origin": "Veszprém, autóbusz-állomás",
+        "originDep": 385,
         "terminus": "Pula, faluház",
         "continuesBeyondModel": true
       },
@@ -341,6 +349,7 @@ window.INTERCITY_BUSES_FULL = [
           399
         ],
         "origin": "Veszprém, autóbusz-állomás",
+        "originDep": 385,
         "terminus": "Tótvázsony, autóbusz-váróterem",
         "continuesBeyondModel": true
       },
@@ -362,6 +371,7 @@ window.INTERCITY_BUSES_FULL = [
           434
         ],
         "origin": "Veszprém, autóbusz-állomás",
+        "originDep": 420,
         "terminus": "Nagyvázsony, autóbusz-váróterem",
         "continuesBeyondModel": true
       },
@@ -385,6 +395,7 @@ window.INTERCITY_BUSES_FULL = [
           554
         ],
         "origin": "Veszprém, vasútállomás",
+        "originDep": 525,
         "terminus": "Nagyvázsony, autóbusz-váróterem",
         "continuesBeyondModel": true
       },
@@ -407,6 +418,7 @@ window.INTERCITY_BUSES_FULL = [
           754
         ],
         "origin": "Veszprém, autóbusz-állomás",
+        "originDep": 740,
         "terminus": "Nagyvázsony, autóbusz-váróterem",
         "continuesBeyondModel": true
       },
@@ -428,6 +440,7 @@ window.INTERCITY_BUSES_FULL = [
           794
         ],
         "origin": "Veszprém, vasútállomás",
+        "originDep": 765,
         "terminus": "Nagyvázsony, autóbusz-váróterem",
         "continuesBeyondModel": true
       },
@@ -451,6 +464,7 @@ window.INTERCITY_BUSES_FULL = [
           984
         ],
         "origin": "Veszprém, autóbusz-állomás",
+        "originDep": 970,
         "terminus": "Nagyvázsony, autóbusz-váróterem",
         "continuesBeyondModel": true
       },
@@ -473,6 +487,7 @@ window.INTERCITY_BUSES_FULL = [
           1029
         ],
         "origin": "Veszprém, vasútállomás",
+        "originDep": 1000,
         "terminus": "Nagyvázsony, autóbusz-váróterem",
         "continuesBeyondModel": true
       },
@@ -494,6 +509,7 @@ window.INTERCITY_BUSES_FULL = [
           1034
         ],
         "origin": "Veszprém, vasútállomás",
+        "originDep": 1005,
         "terminus": "Nagyvázsony, autóbusz-váróterem",
         "continuesBeyondModel": true
       },
@@ -517,6 +533,7 @@ window.INTERCITY_BUSES_FULL = [
           1124
         ],
         "origin": "Veszprém, autóbusz-állomás",
+        "originDep": 1110,
         "terminus": "Nagyvázsony, autóbusz-váróterem",
         "continuesBeyondModel": true
       },
@@ -538,6 +555,7 @@ window.INTERCITY_BUSES_FULL = [
           1254
         ],
         "origin": "Veszprém, vasútállomás",
+        "originDep": 1235,
         "terminus": "Nagyvázsony, autóbusz-váróterem",
         "continuesBeyondModel": true
       },
@@ -560,6 +578,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Veszprém, autóbusz-állomás",
+        "originDep": 1085,
         "terminus": "Nagyvázsony, autóbusz-váróterem",
         "continuesBeyondModel": false
       },
@@ -582,6 +601,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Veszprém, autóbusz-állomás",
+        "originDep": 850,
         "terminus": "Nagyvázsony, autóbusz-váróterem",
         "continuesBeyondModel": false
       },
@@ -604,6 +624,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Veszprém, autóbusz-állomás",
+        "originDep": 900,
         "terminus": "Nagyvázsony, autóbusz-váróterem",
         "continuesBeyondModel": false
       }
@@ -733,6 +754,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Nagyvázsony, autóbusz-váróterem",
+        "originDep": 270,
         "terminus": "Veszprém, autóbusz-állomás",
         "continuesBeyondModel": false
       },
@@ -755,6 +777,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Nagyvázsony, autóbusz-váróterem",
+        "originDep": 335,
         "terminus": "Veszprém, autóbusz-állomás",
         "continuesBeyondModel": false
       },
@@ -778,6 +801,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Pula, faluház",
+        "originDep": 345,
         "terminus": "Veszprém, autóbusz-állomás",
         "continuesBeyondModel": false
       },
@@ -801,6 +825,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Nagyvázsony, autóbusz-váróterem",
+        "originDep": 380,
         "terminus": "Veszprém, autóbusz-állomás",
         "continuesBeyondModel": false
       },
@@ -823,6 +848,7 @@ window.INTERCITY_BUSES_FULL = [
           610
         ],
         "origin": "Nagyvázsony, autóbusz-váróterem",
+        "originDep": 540,
         "terminus": "Veszprém, vasútállomás",
         "continuesBeyondModel": false
       },
@@ -847,6 +873,7 @@ window.INTERCITY_BUSES_FULL = [
           665
         ],
         "origin": "Nagyvázsony, autóbusz-váróterem",
+        "originDep": 595,
         "terminus": "Veszprém, vasútállomás",
         "continuesBeyondModel": false
       },
@@ -869,6 +896,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Nagyvázsony, autóbusz-váróterem",
+        "originDep": 755,
         "terminus": "Veszprém, autóbusz-állomás",
         "continuesBeyondModel": false
       },
@@ -892,6 +920,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Pula, faluház",
+        "originDep": 830,
         "terminus": "Veszprém, autóbusz-állomás",
         "continuesBeyondModel": false
       },
@@ -914,6 +943,7 @@ window.INTERCITY_BUSES_FULL = [
           950
         ],
         "origin": "Nagyvázsony, autóbusz-váróterem",
+        "originDep": 885,
         "terminus": "Veszprém, vasútállomás",
         "continuesBeyondModel": false
       },
@@ -937,6 +967,7 @@ window.INTERCITY_BUSES_FULL = [
           1083
         ],
         "origin": "Nagyvázsony, autóbusz-váróterem",
+        "originDep": 1015,
         "terminus": "Veszprém, vasútállomás",
         "continuesBeyondModel": false
       },
@@ -959,6 +990,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Nagyvázsony, autóbusz-váróterem",
+        "originDep": 1070,
         "terminus": "Veszprém, autóbusz-állomás",
         "continuesBeyondModel": false
       },
@@ -981,6 +1013,7 @@ window.INTERCITY_BUSES_FULL = [
           1160
         ],
         "origin": "Nagyvázsony, autóbusz-váróterem",
+        "originDep": 1095,
         "terminus": "Veszprém, vasútállomás",
         "continuesBeyondModel": false
       },
@@ -1004,6 +1037,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Nagyvázsony, pulai elágazás",
+        "originDep": 1202,
         "terminus": "Veszprém, autóbusz-állomás",
         "continuesBeyondModel": false
       },
@@ -1026,6 +1060,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Nagyvázsony, autóbusz-váróterem",
+        "originDep": 1230,
         "terminus": "Veszprém, autóbusz-állomás",
         "continuesBeyondModel": false
       },
@@ -1050,6 +1085,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Nagyvázsony, autóbusz-váróterem",
+        "originDep": 765,
         "terminus": "Veszprém, autóbusz-állomás",
         "continuesBeyondModel": false
       },
@@ -1073,6 +1109,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Nagyvázsony, autóbusz-váróterem",
+        "originDep": 420,
         "terminus": "Veszprém, autóbusz-állomás",
         "continuesBeyondModel": false
       },
@@ -1095,6 +1132,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Tótvázsony, autóbusz-váróterem",
+        "originDep": 420,
         "terminus": "Veszprém, autóbusz-állomás",
         "continuesBeyondModel": false
       },
@@ -1118,6 +1156,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Nagyvázsony, autóbusz-váróterem",
+        "originDep": 330,
         "terminus": "Veszprém, autóbusz-állomás",
         "continuesBeyondModel": false
       },
@@ -1141,6 +1180,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Nagyvázsony, autóbusz-váróterem",
+        "originDep": 255,
         "terminus": "Veszprém, autóbusz-állomás",
         "continuesBeyondModel": false
       },
@@ -1164,6 +1204,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Nagyvázsony, autóbusz-váróterem",
+        "originDep": 890,
         "terminus": "Veszprém, autóbusz-állomás",
         "continuesBeyondModel": false
       }
@@ -1275,6 +1316,7 @@ window.INTERCITY_BUSES_FULL = [
           344
         ],
         "origin": "Veszprém, autóbusz-állomás",
+        "originDep": 325,
         "terminus": "Nemesvámos, autóbusz-forduló",
         "continuesBeyondModel": false
       },
@@ -1296,6 +1338,7 @@ window.INTERCITY_BUSES_FULL = [
           349
         ],
         "origin": "Veszprém, autóbusz-állomás",
+        "originDep": 330,
         "terminus": "Veszprémfajsz, autóbusz-forduló",
         "continuesBeyondModel": true
       },
@@ -1316,6 +1359,7 @@ window.INTERCITY_BUSES_FULL = [
           354
         ],
         "origin": "Veszprém, autóbusz-állomás",
+        "originDep": 335,
         "terminus": "Veszprémfajsz, autóbusz-forduló",
         "continuesBeyondModel": true
       },
@@ -1337,6 +1381,7 @@ window.INTERCITY_BUSES_FULL = [
           369
         ],
         "origin": "Veszprém, autóbusz-állomás",
+        "originDep": 350,
         "terminus": "Nemesvámos, autóbusz-forduló",
         "continuesBeyondModel": false
       },
@@ -1358,6 +1403,7 @@ window.INTERCITY_BUSES_FULL = [
           379
         ],
         "origin": "Veszprém, autóbusz-állomás",
+        "originDep": 360,
         "terminus": "Veszprémfajsz, autóbusz-forduló",
         "continuesBeyondModel": true
       },
@@ -1379,6 +1425,7 @@ window.INTERCITY_BUSES_FULL = [
           407
         ],
         "origin": "Veszprém, autóbusz-állomás",
+        "originDep": 390,
         "terminus": "Veszprémfajsz, autóbusz-forduló",
         "continuesBeyondModel": true
       },
@@ -1399,6 +1446,7 @@ window.INTERCITY_BUSES_FULL = [
           419
         ],
         "origin": "Veszprém, autóbusz-állomás",
+        "originDep": 400,
         "terminus": "Veszprémfajsz, autóbusz-forduló",
         "continuesBeyondModel": true
       },
@@ -1420,6 +1468,7 @@ window.INTERCITY_BUSES_FULL = [
           424
         ],
         "origin": "Veszprém, autóbusz-állomás",
+        "originDep": 405,
         "terminus": "Nemesvámos, autóbusz-forduló",
         "continuesBeyondModel": false
       },
@@ -1441,6 +1490,7 @@ window.INTERCITY_BUSES_FULL = [
           434
         ],
         "origin": "Veszprém, autóbusz-állomás",
+        "originDep": 415,
         "terminus": "Veszprémfajsz, autóbusz-forduló",
         "continuesBeyondModel": true
       },
@@ -1462,6 +1512,7 @@ window.INTERCITY_BUSES_FULL = [
           439
         ],
         "origin": "Veszprém, autóbusz-állomás",
+        "originDep": 420,
         "terminus": "Nemesvámos, autóbusz-forduló",
         "continuesBeyondModel": false
       },
@@ -1482,6 +1533,7 @@ window.INTERCITY_BUSES_FULL = [
           444
         ],
         "origin": "Veszprém, autóbusz-állomás",
+        "originDep": 425,
         "terminus": "Veszprémfajsz, autóbusz-forduló",
         "continuesBeyondModel": true
       },
@@ -1502,6 +1554,7 @@ window.INTERCITY_BUSES_FULL = [
           469
         ],
         "origin": "Veszprém, autóbusz-állomás",
+        "originDep": 450,
         "terminus": "Nemesvámos, autóbusz-forduló",
         "continuesBeyondModel": false
       },
@@ -1524,6 +1577,7 @@ window.INTERCITY_BUSES_FULL = [
           504
         ],
         "origin": "Veszprém, autóbusz-állomás",
+        "originDep": 485,
         "terminus": "Veszprémfajsz, autóbusz-forduló",
         "continuesBeyondModel": true
       },
@@ -1546,6 +1600,7 @@ window.INTERCITY_BUSES_FULL = [
           559
         ],
         "origin": "Veszprém, autóbusz-állomás",
+        "originDep": 540,
         "terminus": "Veszprémfajsz, autóbusz-forduló",
         "continuesBeyondModel": true
       },
@@ -1566,6 +1621,7 @@ window.INTERCITY_BUSES_FULL = [
           649
         ],
         "origin": "Veszprém, autóbusz-állomás",
+        "originDep": 630,
         "terminus": "Veszprémfajsz, autóbusz-forduló",
         "continuesBeyondModel": true
       },
@@ -1588,6 +1644,7 @@ window.INTERCITY_BUSES_FULL = [
           649
         ],
         "origin": "Veszprém, autóbusz-állomás",
+        "originDep": 630,
         "terminus": "Veszprémfajsz, autóbusz-forduló",
         "continuesBeyondModel": true
       },
@@ -1609,6 +1666,7 @@ window.INTERCITY_BUSES_FULL = [
           704
         ],
         "origin": "Veszprém, autóbusz-állomás",
+        "originDep": 685,
         "terminus": "Veszprémfajsz, autóbusz-forduló",
         "continuesBeyondModel": true
       },
@@ -1631,6 +1689,7 @@ window.INTERCITY_BUSES_FULL = [
           764
         ],
         "origin": "Veszprém, autóbusz-állomás",
+        "originDep": 745,
         "terminus": "Veszprémfajsz, autóbusz-forduló",
         "continuesBeyondModel": true
       },
@@ -1652,6 +1711,7 @@ window.INTERCITY_BUSES_FULL = [
           814
         ],
         "origin": "Veszprém, autóbusz-állomás",
+        "originDep": 795,
         "terminus": "Nemesvámos, autóbusz-forduló",
         "continuesBeyondModel": false
       },
@@ -1674,6 +1734,7 @@ window.INTERCITY_BUSES_FULL = [
           824
         ],
         "origin": "Veszprém, autóbusz-állomás",
+        "originDep": 805,
         "terminus": "Veszprémfajsz, autóbusz-forduló",
         "continuesBeyondModel": true
       },
@@ -1695,6 +1756,7 @@ window.INTERCITY_BUSES_FULL = [
           869
         ],
         "origin": "Veszprém, autóbusz-állomás",
+        "originDep": 850,
         "terminus": "Veszprémfajsz, autóbusz-forduló",
         "continuesBeyondModel": true
       },
@@ -1715,6 +1777,7 @@ window.INTERCITY_BUSES_FULL = [
           869
         ],
         "origin": "Veszprém, autóbusz-állomás",
+        "originDep": 850,
         "terminus": "Veszprémfajsz, autóbusz-forduló",
         "continuesBeyondModel": true
       },
@@ -1736,6 +1799,7 @@ window.INTERCITY_BUSES_FULL = [
           889
         ],
         "origin": "Veszprém, autóbusz-állomás",
+        "originDep": 870,
         "terminus": "Veszprémfajsz, autóbusz-forduló",
         "continuesBeyondModel": true
       },
@@ -1756,6 +1820,7 @@ window.INTERCITY_BUSES_FULL = [
           904
         ],
         "origin": "Veszprém, autóbusz-állomás",
+        "originDep": 885,
         "terminus": "Veszprémfajsz, autóbusz-forduló",
         "continuesBeyondModel": true
       },
@@ -1777,6 +1842,7 @@ window.INTERCITY_BUSES_FULL = [
           919
         ],
         "origin": "Veszprém, autóbusz-állomás",
+        "originDep": 900,
         "terminus": "Veszprémfajsz, autóbusz-forduló",
         "continuesBeyondModel": true
       },
@@ -1797,6 +1863,7 @@ window.INTERCITY_BUSES_FULL = [
           949
         ],
         "origin": "Veszprém, autóbusz-állomás",
+        "originDep": 930,
         "terminus": "Veszprémfajsz, autóbusz-forduló",
         "continuesBeyondModel": true
       },
@@ -1818,6 +1885,7 @@ window.INTERCITY_BUSES_FULL = [
           959
         ],
         "origin": "Veszprém, autóbusz-állomás",
+        "originDep": 940,
         "terminus": "Veszprémfajsz, autóbusz-forduló",
         "continuesBeyondModel": true
       },
@@ -1839,6 +1907,7 @@ window.INTERCITY_BUSES_FULL = [
           984
         ],
         "origin": "Veszprém, autóbusz-állomás",
+        "originDep": 965,
         "terminus": "Veszprémfajsz, autóbusz-forduló",
         "continuesBeyondModel": true
       },
@@ -1860,6 +1929,7 @@ window.INTERCITY_BUSES_FULL = [
           1019
         ],
         "origin": "Veszprém, autóbusz-állomás",
+        "originDep": 1000,
         "terminus": "Veszprémfajsz, autóbusz-forduló",
         "continuesBeyondModel": true
       },
@@ -1880,6 +1950,7 @@ window.INTERCITY_BUSES_FULL = [
           1049
         ],
         "origin": "Veszprém, autóbusz-állomás",
+        "originDep": 1030,
         "terminus": "Veszprémfajsz, autóbusz-forduló",
         "continuesBeyondModel": true
       },
@@ -1901,6 +1972,7 @@ window.INTERCITY_BUSES_FULL = [
           1049
         ],
         "origin": "Veszprém, autóbusz-állomás",
+        "originDep": 1030,
         "terminus": "Veszprémfajsz, autóbusz-forduló",
         "continuesBeyondModel": true
       },
@@ -1922,6 +1994,7 @@ window.INTERCITY_BUSES_FULL = [
           1104
         ],
         "origin": "Veszprém, autóbusz-állomás",
+        "originDep": 1085,
         "terminus": "Veszprémfajsz, autóbusz-forduló",
         "continuesBeyondModel": true
       },
@@ -1943,6 +2016,7 @@ window.INTERCITY_BUSES_FULL = [
           1158
         ],
         "origin": "Veszprém, autóbusz-állomás",
+        "originDep": 1140,
         "terminus": "Nemesvámos, autóbusz-forduló",
         "continuesBeyondModel": false
       },
@@ -1963,6 +2037,7 @@ window.INTERCITY_BUSES_FULL = [
           1196
         ],
         "origin": "Veszprém, autóbusz-állomás",
+        "originDep": 1180,
         "terminus": "Veszprémfajsz, autóbusz-forduló",
         "continuesBeyondModel": true
       },
@@ -1984,6 +2059,7 @@ window.INTERCITY_BUSES_FULL = [
           1196
         ],
         "origin": "Veszprém, autóbusz-állomás",
+        "originDep": 1180,
         "terminus": "Veszprémfajsz, autóbusz-forduló",
         "continuesBeyondModel": true
       },
@@ -2006,6 +2082,7 @@ window.INTERCITY_BUSES_FULL = [
           1304
         ],
         "origin": "Veszprém, autóbusz-állomás",
+        "originDep": 1285,
         "terminus": "Veszprémfajsz, autóbusz-forduló",
         "continuesBeyondModel": true
       },
@@ -2026,6 +2103,7 @@ window.INTERCITY_BUSES_FULL = [
           334
         ],
         "origin": "Nemesvámos, autóbusz-forduló",
+        "originDep": 334,
         "terminus": "Veszprémfajsz, autóbusz-forduló",
         "continuesBeyondModel": true
       }
@@ -2174,6 +2252,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Nemesvámos, autóbusz-forduló",
+        "originDep": 290,
         "terminus": "Veszprém, autóbusz-állomás",
         "continuesBeyondModel": false
       },
@@ -2199,6 +2278,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Veszprémfajsz, autóbusz-forduló",
+        "originDep": 293,
         "terminus": "Veszprém, autóbusz-állomás",
         "continuesBeyondModel": false
       },
@@ -2223,6 +2303,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Veszprémfajsz, autóbusz-forduló",
+        "originDep": 337,
         "terminus": "Veszprém, autóbusz-állomás",
         "continuesBeyondModel": false
       },
@@ -2248,6 +2329,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Veszprémfajsz, autóbusz-forduló",
+        "originDep": 355,
         "terminus": "Veszprém, autóbusz-állomás",
         "continuesBeyondModel": false
       },
@@ -2272,6 +2354,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Veszprémfajsz, autóbusz-forduló",
+        "originDep": 365,
         "terminus": "Veszprém, autóbusz-állomás",
         "continuesBeyondModel": false
       },
@@ -2297,6 +2380,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Nemesvámos, autóbusz-forduló",
+        "originDep": 370,
         "terminus": "Veszprém, autóbusz-állomás",
         "continuesBeyondModel": false
       },
@@ -2321,6 +2405,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Nemesvámos, autóbusz-forduló",
+        "originDep": 385,
         "terminus": "Veszprém, autóbusz-állomás",
         "continuesBeyondModel": false
       },
@@ -2346,6 +2431,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Veszprémfajsz, autóbusz-forduló",
+        "originDep": 385,
         "terminus": "Veszprém, autóbusz-állomás",
         "continuesBeyondModel": false
       },
@@ -2371,6 +2457,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Veszprémfajsz, autóbusz-forduló",
+        "originDep": 410,
         "terminus": "Veszprém, autóbusz-állomás",
         "continuesBeyondModel": false
       },
@@ -2396,6 +2483,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Nemesvámos, autóbusz-forduló",
+        "originDep": 425,
         "terminus": "Veszprém, autóbusz-állomás",
         "continuesBeyondModel": false
       },
@@ -2420,6 +2508,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Veszprémfajsz, autóbusz-forduló",
+        "originDep": 425,
         "terminus": "Veszprém, autóbusz-állomás",
         "continuesBeyondModel": false
       },
@@ -2445,6 +2534,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Nemesvámos, autóbusz-forduló",
+        "originDep": 440,
         "terminus": "Veszprém, autóbusz-állomás",
         "continuesBeyondModel": false
       },
@@ -2470,6 +2560,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Veszprémfajsz, autóbusz-forduló",
+        "originDep": 440,
         "terminus": "Veszprém, autóbusz-állomás",
         "continuesBeyondModel": false
       },
@@ -2494,6 +2585,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Veszprémfajsz, autóbusz-forduló",
+        "originDep": 450,
         "terminus": "Veszprém, autóbusz-állomás",
         "continuesBeyondModel": false
       },
@@ -2518,6 +2610,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Nemesvámos, autóbusz-forduló",
+        "originDep": 470,
         "terminus": "Veszprém, autóbusz-állomás",
         "continuesBeyondModel": false
       },
@@ -2544,6 +2637,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Veszprémfajsz, autóbusz-forduló",
+        "originDep": 510,
         "terminus": "Veszprém, autóbusz-állomás",
         "continuesBeyondModel": false
       },
@@ -2570,6 +2664,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Veszprémfajsz, autóbusz-forduló",
+        "originDep": 565,
         "terminus": "Veszprém, autóbusz-állomás",
         "continuesBeyondModel": false
       },
@@ -2596,6 +2691,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Veszprémfajsz, autóbusz-forduló",
+        "originDep": 655,
         "terminus": "Veszprém, autóbusz-állomás",
         "continuesBeyondModel": false
       },
@@ -2620,6 +2716,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Veszprémfajsz, autóbusz-forduló",
+        "originDep": 680,
         "terminus": "Veszprém, autóbusz-állomás",
         "continuesBeyondModel": false
       },
@@ -2645,6 +2742,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Veszprémfajsz, autóbusz-forduló",
+        "originDep": 710,
         "terminus": "Veszprém, autóbusz-állomás",
         "continuesBeyondModel": false
       },
@@ -2671,6 +2769,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Veszprémfajsz, autóbusz-forduló",
+        "originDep": 770,
         "terminus": "Veszprém, autóbusz-állomás",
         "continuesBeyondModel": false
       },
@@ -2696,6 +2795,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Nemesvámos, autóbusz-forduló",
+        "originDep": 825,
         "terminus": "Veszprém, autóbusz-állomás",
         "continuesBeyondModel": false
       },
@@ -2722,6 +2822,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Veszprémfajsz, autóbusz-forduló",
+        "originDep": 845,
         "terminus": "Veszprém, autóbusz-állomás",
         "continuesBeyondModel": false
       },
@@ -2747,6 +2848,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Veszprémfajsz, autóbusz-forduló",
+        "originDep": 875,
         "terminus": "Veszprém, autóbusz-állomás",
         "continuesBeyondModel": false
       },
@@ -2771,6 +2873,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Veszprémfajsz, autóbusz-forduló",
+        "originDep": 875,
         "terminus": "Veszprém, autóbusz-állomás",
         "continuesBeyondModel": false
       },
@@ -2796,6 +2899,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Veszprémfajsz, autóbusz-forduló",
+        "originDep": 895,
         "terminus": "Veszprém, autóbusz-állomás",
         "continuesBeyondModel": false
       },
@@ -2820,6 +2924,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Veszprémfajsz, autóbusz-forduló",
+        "originDep": 917,
         "terminus": "Veszprém, autóbusz-állomás",
         "continuesBeyondModel": false
       },
@@ -2845,6 +2950,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Veszprémfajsz, autóbusz-forduló",
+        "originDep": 930,
         "terminus": "Veszprém, autóbusz-állomás",
         "continuesBeyondModel": false
       },
@@ -2869,6 +2975,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Veszprémfajsz, autóbusz-forduló",
+        "originDep": 955,
         "terminus": "Veszprém, autóbusz-állomás",
         "continuesBeyondModel": false
       },
@@ -2894,6 +3001,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Veszprémfajsz, autóbusz-forduló",
+        "originDep": 971,
         "terminus": "Veszprém, autóbusz-állomás",
         "continuesBeyondModel": false
       },
@@ -2919,6 +3027,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Veszprémfajsz, autóbusz-forduló",
+        "originDep": 990,
         "terminus": "Veszprém, autóbusz-állomás",
         "continuesBeyondModel": false
       },
@@ -2944,6 +3053,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Veszprémfajsz, autóbusz-forduló",
+        "originDep": 1060,
         "terminus": "Veszprém, autóbusz-állomás",
         "continuesBeyondModel": false
       },
@@ -2968,6 +3078,7 @@ window.INTERCITY_BUSES_FULL = [
           1092
         ],
         "origin": "Veszprémfajsz, autóbusz-forduló",
+        "originDep": 1060,
         "terminus": "Veszprém, vasútállomás",
         "continuesBeyondModel": false
       },
@@ -2993,6 +3104,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Veszprémfajsz, autóbusz-forduló",
+        "originDep": 1110,
         "terminus": "Veszprém, autóbusz-állomás",
         "continuesBeyondModel": false
       },
@@ -3018,6 +3130,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Veszprémfajsz, autóbusz-forduló",
+        "originDep": 1225,
         "terminus": "Veszprém, autóbusz-állomás",
         "continuesBeyondModel": false
       },
@@ -3044,6 +3157,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Veszprémfajsz, autóbusz-forduló",
+        "originDep": 1320,
         "terminus": "Veszprém, autóbusz-állomás",
         "continuesBeyondModel": false
       },
@@ -3069,6 +3183,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Nemesvámos, Köfém",
+        "originDep": 855,
         "terminus": "Veszprém, autóbusz-állomás",
         "continuesBeyondModel": false
       }
@@ -3182,6 +3297,7 @@ window.INTERCITY_BUSES_FULL = [
           455
         ],
         "origin": "Veszprém, autóbusz-állomás",
+        "originDep": 440,
         "terminus": "Balatonfüred, autóbusz-állomás",
         "continuesBeyondModel": true
       }
@@ -3303,6 +3419,7 @@ window.INTERCITY_BUSES_FULL = [
           625
         ],
         "origin": "Balatonfüred, autóbusz-állomás",
+        "originDep": 580,
         "terminus": "Veszprém, autóbusz-állomás",
         "continuesBeyondModel": false
       },
@@ -3326,6 +3443,7 @@ window.INTERCITY_BUSES_FULL = [
           1045
         ],
         "origin": "Balatonfüred, autóbusz-állomás",
+        "originDep": 1000,
         "terminus": "Veszprém, autóbusz-állomás",
         "continuesBeyondModel": false
       },
@@ -3347,6 +3465,7 @@ window.INTERCITY_BUSES_FULL = [
           1195
         ],
         "origin": "Balatonfüred, autóbusz-állomás",
+        "originDep": 1150,
         "terminus": "Veszprém, autóbusz-állomás",
         "continuesBeyondModel": false
       }
@@ -3468,6 +3587,7 @@ window.INTERCITY_BUSES_FULL = [
           794
         ],
         "origin": "Veszprém, vasútállomás",
+        "originDep": 765,
         "terminus": "Balatonfüred, autóbusz-állomás",
         "continuesBeyondModel": true
       },
@@ -3489,6 +3609,7 @@ window.INTERCITY_BUSES_FULL = [
           794
         ],
         "origin": "Veszprém, autóbusz-állomás",
+        "originDep": 780,
         "terminus": "Balatonfüred, autóbusz-állomás",
         "continuesBeyondModel": true
       }
@@ -3593,6 +3714,7 @@ window.INTERCITY_BUSES_FULL = [
           519
         ],
         "origin": "Balatonfüred, autóbusz-állomás",
+        "originDep": 445,
         "terminus": "Veszprém, autóbusz-állomás",
         "continuesBeyondModel": false
       }
@@ -3731,6 +3853,7 @@ window.INTERCITY_BUSES_FULL = [
           555
         ],
         "origin": "Veszprém, vasútállomás",
+        "originDep": 525,
         "terminus": "Nagyvázsony, autóbusz-váróterem",
         "continuesBeyondModel": true
       },
@@ -3756,6 +3879,7 @@ window.INTERCITY_BUSES_FULL = [
           1289
         ],
         "origin": "Veszprém, autóbusz-állomás",
+        "originDep": 1275,
         "terminus": "Nagyvázsony, autóbusz-váróterem",
         "continuesBeyondModel": true
       },
@@ -3780,6 +3904,7 @@ window.INTERCITY_BUSES_FULL = [
           1375
         ],
         "origin": "Veszprém, autóbusz-állomás",
+        "originDep": 1350,
         "terminus": "Nagyvázsony, autóbusz-váróterem",
         "continuesBeyondModel": true
       },
@@ -3803,6 +3928,7 @@ window.INTERCITY_BUSES_FULL = [
           1385
         ],
         "origin": "Veszprém, autóbusz-állomás",
+        "originDep": 1360,
         "terminus": "Nagyvázsony, autóbusz-váróterem",
         "continuesBeyondModel": true
       }
@@ -3924,6 +4050,7 @@ window.INTERCITY_BUSES_FULL = [
           327
         ],
         "origin": "Monostorapáti, községháza",
+        "originDep": 255,
         "terminus": "Veszprém, autóbusz-állomás",
         "continuesBeyondModel": false
       }
@@ -4045,6 +4172,7 @@ window.INTERCITY_BUSES_FULL = [
           339
         ],
         "origin": "Veszprém, autóbusz-állomás",
+        "originDep": 325,
         "terminus": "Tapolca, vasútállomás",
         "continuesBeyondModel": true
       },
@@ -4068,6 +4196,7 @@ window.INTERCITY_BUSES_FULL = [
           444
         ],
         "origin": "Veszprém, autóbusz-állomás",
+        "originDep": 430,
         "terminus": "Tapolca, autóbusz-állomás",
         "continuesBeyondModel": true
       },
@@ -4089,6 +4218,7 @@ window.INTERCITY_BUSES_FULL = [
           674
         ],
         "origin": "Veszprém, vasútállomás",
+        "originDep": 645,
         "terminus": "Tapolca, autóbusz-állomás",
         "continuesBeyondModel": true
       },
@@ -4111,6 +4241,7 @@ window.INTERCITY_BUSES_FULL = [
           674
         ],
         "origin": "Veszprém, vasútállomás",
+        "originDep": 645,
         "terminus": "Tapolca, Ipar utca",
         "continuesBeyondModel": true
       },
@@ -4134,6 +4265,7 @@ window.INTERCITY_BUSES_FULL = [
           884
         ],
         "origin": "Veszprém, autóbusz-állomás",
+        "originDep": 870,
         "terminus": "Taliándörögd, autóbusz-váróterem",
         "continuesBeyondModel": true
       },
@@ -4155,6 +4287,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Veszprém, autóbusz-állomás",
+        "originDep": 810,
         "terminus": "Tapolca, autóbusz-állomás",
         "continuesBeyondModel": false
       },
@@ -4177,6 +4310,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Veszprém, autóbusz-állomás",
+        "originDep": 930,
         "terminus": "Tapolca, autóbusz-állomás",
         "continuesBeyondModel": false
       },
@@ -4199,6 +4333,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Veszprém, autóbusz-állomás",
+        "originDep": 975,
         "terminus": "Tapolca, autóbusz-állomás",
         "continuesBeyondModel": false
       },
@@ -4222,6 +4357,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Veszprém, autóbusz-állomás",
+        "originDep": 1350,
         "terminus": "Tapolca, autóbusz-állomás",
         "continuesBeyondModel": false
       },
@@ -4244,6 +4380,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Veszprém, autóbusz-állomás",
+        "originDep": 855,
         "terminus": "Tapolca, autóbusz-állomás",
         "continuesBeyondModel": false
       },
@@ -4266,6 +4403,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Veszprém, autóbusz-állomás",
+        "originDep": 900,
         "terminus": "Tapolca, autóbusz-állomás",
         "continuesBeyondModel": false
       }
@@ -4395,6 +4533,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Monostorapáti, községháza",
+        "originDep": 245,
         "terminus": "Veszprém, autóbusz-állomás",
         "continuesBeyondModel": false
       },
@@ -4419,6 +4558,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Tapolca, vasútállomás",
+        "originDep": 645,
         "terminus": "Veszprém, autóbusz-állomás",
         "continuesBeyondModel": false
       },
@@ -4442,6 +4582,7 @@ window.INTERCITY_BUSES_FULL = [
           1083
         ],
         "origin": "Tapolca, autóbusz-állomás",
+        "originDep": 980,
         "terminus": "Veszprém, vasútállomás",
         "continuesBeyondModel": false
       },
@@ -4465,6 +4606,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Tapolca, autóbusz-állomás",
+        "originDep": 350,
         "terminus": "Veszprém, autóbusz-állomás",
         "continuesBeyondModel": false
       },
@@ -4489,6 +4631,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Tapolca, autóbusz-állomás",
+        "originDep": 715,
         "terminus": "Veszprém, autóbusz-állomás",
         "continuesBeyondModel": false
       },
@@ -4511,6 +4654,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Tapolca, vasútállomás",
+        "originDep": 855,
         "terminus": "Veszprém, autóbusz-állomás",
         "continuesBeyondModel": false
       },
@@ -4533,6 +4677,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Tapolca, autóbusz-állomás",
+        "originDep": 863,
         "terminus": "Veszprém, autóbusz-állomás",
         "continuesBeyondModel": false
       },
@@ -4556,6 +4701,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Tapolca, autóbusz-állomás",
+        "originDep": 863,
         "terminus": "Veszprém, autóbusz-állomás",
         "continuesBeyondModel": false
       },
@@ -4580,6 +4726,7 @@ window.INTERCITY_BUSES_FULL = [
           null
         ],
         "origin": "Tapolca, autóbusz-állomás",
+        "originDep": 285,
         "terminus": "Veszprém, autóbusz-állomás",
         "continuesBeyondModel": false
       }

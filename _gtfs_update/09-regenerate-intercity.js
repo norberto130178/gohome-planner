@@ -84,7 +84,7 @@ for (const bus of appBuses) {
       const posInTrip = t.seqStopIds.indexOf(lastCuratedStopId);
       continuesBeyondModel = posInTrip !== -1 && posInTrip < t.seqStopIds.length - 1;
     }
-    newTrips.push({ dayTypes: t.buckets.map(b => bucketToDayType[b]), deps, origin: t.originStopName || null, terminus: t.terminusStopName || null, continuesBeyondModel });
+    newTrips.push({ dayTypes: t.buckets.map(b => bucketToDayType[b]), deps, origin: t.originStopName || null, originDep: t.originDepMinutes ?? null, terminus: t.terminusStopName || null, continuesBeyondModel });
   }
   // sort by the Nemesvámos-stop time for readability, matching the original file's convention
   newTrips.sort((a, b) => (a.deps[nemesvamosIdx] ?? 1e9) - (b.deps[nemesvamosIdx] ?? 1e9));

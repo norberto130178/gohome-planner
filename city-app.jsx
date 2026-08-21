@@ -671,6 +671,7 @@ function CityApp() {
   const [timetableBusId, setTimetableBusId] = React.useState(null);
   const [stopViewerOpen, setStopViewerOpen] = React.useState(false);
   const [stopViewerStop, setStopViewerStop] = React.useState(null);
+  const [stopViewerMode, setStopViewerMode] = React.useState('city');
   const [gpsState, setGpsState] = React.useState('idle'); // 'idle' | 'loading' | 'error'
 
   // Minden fizikai megálló (spId szerint dedupelve) a GPS-alapú legközelebbi-megálló kereséshez
@@ -684,7 +685,7 @@ function CityApp() {
 
   // Térképi popupok "Indulások" gombja ezen keresztül nyitja a megálló-nézőt
   React.useEffect(() => {
-    window.__openStopViewer = (stopName) => { setStopViewerStop(stopName || null); setStopViewerOpen(true); };
+    window.__openStopViewer = (stopName, mode) => { setStopViewerStop(stopName || null); setStopViewerMode(mode || 'city'); setStopViewerOpen(true); };
     return () => { window.__openStopViewer = undefined; };
   }, []);
   const [sheetOpen, setSheetOpen] = React.useState(false);
@@ -826,7 +827,7 @@ function CityApp() {
         <window.BusTimetableModal busId={timetableBusId} onClose={() => setTimetableBusId(null)} isWeekend={planIsWeekend} nowMins={planNowMins} lang={lang} />
       )}
       {stopViewerOpen && window.StopTimetableModal && (
-        <window.StopTimetableModal key={stopViewerStop || 'search'} initialStop={stopViewerStop}
+        <window.StopTimetableModal key={stopViewerStop || 'search'} initialStop={stopViewerStop} initialMode={stopViewerMode}
           onClose={() => { setStopViewerOpen(false); setStopViewerStop(null); }}
           dayType={U.dayType(now, schoolHoliday)} lang={lang} />
       )}

@@ -76,10 +76,11 @@ for (const [tripId, seq] of byTrip) {
   // amik a közös szakaszon percre pontosan egybeeshetnek. A trip_headsign erre NEM jó, mert
   // az a célállomást jelöli, ami a rövidített és teljes trip-eknél gyakran megegyezik.
   const originStopName = stopById.get(seq[0].stop_id)?.stop_name || null;
+  const originDepMinutes = toMinutes(seq[0].departure_time);
   // seq[last] a trip VALÓDI végállomása (nem az app-modellezett szakasz vége) -- extra infóként
   // hasznos a UI-ban ("ez a busz valójában hova tart"), ld. route-card.jsx SchoolRouteCard.
   const terminusStopName = stopById.get(seq[seq.length - 1].stop_id)?.stop_name || null;
-  g.trips.push({ serviceId: trip.service_id, desc: cal ? cal.service_desc : '(unknown)', buckets, stopTimes: stMap, originStopName, terminusStopName, seqStopIds });
+  g.trips.push({ serviceId: trip.service_id, desc: cal ? cal.service_desc : '(unknown)', buckets, stopTimes: stMap, originStopName, originDepMinutes, terminusStopName, seqStopIds });
 }
 
 // A megálló-sorrendet NEM szabad a nyers `stop_sequence` trip-ek közötti összehasonlításával
@@ -122,6 +123,7 @@ for (const g of groups.values()) {
       serviceId: t.serviceId, desc: t.desc, buckets: t.buckets,
       deps: orderedStopIds.map(sid => t.stopTimes.has(sid) ? t.stopTimes.get(sid) : null),
       originStopName: t.originStopName,
+      originDepMinutes: t.originDepMinutes,
       terminusStopName: t.terminusStopName,
       seqStopIds: t.seqStopIds, // a trip SAJÁT valódi GTFS-sorrendje (nem a csoport-szintű kanonikus) — kell annak eldöntéséhez, hogy egy adott (app-kurált) végmegálló után a trip a valóságban folytatódik-e
     })),

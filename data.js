@@ -263,6 +263,148 @@ const _TRANSFER_SHORT = {
 function _dayTypeCat(dayType) {
   return { workday: 'munkanap', schoolholiday: 'tanszunet', weekend: 'szabadnap' }[dayType] || 'munkanap';
 }
+window._dayTypeCat = _dayTypeCat;
+
+// Megálló-néző (StopTimetableModal) "Helyközi" módjához: a Nemesvámos↔Veszprém korridor
+// megállói FIZIKAI PLATFORMONKÉNT (spId), nem összevont névre — mert a legtöbb megállónévnek
+// 2-4 ténylegesen külön fizikai pontja van (14-113 m egymástól, valódi külön tábla, nem
+// adatzaj), és a HazaÚt route-tervező is már ma konkrét spId-alapú koordinátákkal dolgozik
+// (transferLat/transferLon = icRoute.stops[idx].lat/lon) — egy jövőbeli térképi kattintás
+// eleve egy konkrét platformra fog mutatni, ezért itt is annak megfelelő granularitás kell.
+// Kézi címke-felülbírálás konkrét spId-kre — a debug-térképes (_debug-platforms.html)
+// egyenkénti ellenőrzés során, helyismeret alapján derült ki, hogy az automatikus
+// irány-alapú címke (iskola/haza -> Nemesvámos/Veszprém felé) félrevezető: a "Nemesvámos,
+// autóbusz-váróterem" platformjai közül az egyiket (_1) valójában a helyközi iskolai
+// vonalak (7361/7363/7366) használják, a másikat (_3) a Tapolca/Keszthely felé továbbmenő
+// távolsági járatok (1625/7360/7364/7370) — ezt a GTFS route_long_name-ekből nem lehet
+// tisztán, általánosan levezetni (a két csoport végpontjai is szórtak egymás között),
+// ezért kézi felülbírálás, nem algoritmikus szabály.
+const _INTERCITY_LABEL_OVERRIDES = {
+  'VOLAN_hkir_557858_1': 'Nemesvámos, autóbusz-váróterem (Nemesvámos felé)',
+  'VOLAN_hkir_557858_3': 'Nemesvámos, autóbusz-váróterem (Tapolca, Keszthely felé)',
+  // ABC: a _2-t több vonal (7361/7363) is használja rendes, nem-hurkos áthaladásként —
+  // ez a "rendes", Veszprém felé továbbhaladó platform. A _1-et kizárólag a 7366-os hurok
+  // befelé tartó (a fordulót még el nem érő) szakasza érinti — irány-jelzővel egyértelmű,
+  // sorszám ("1./2. előfordulás") helyett, ami félrevezető volt.
+  'VOLAN_hkir_557856_1': 'Nemesvámos, ABC (Nemesvámos felé)',
+  'VOLAN_hkir_557856_2': 'Nemesvámos, ABC (Veszprém felé)',
+  // forduló: a _2 (pad+tető, OSM-mel megerősítve) a valódi, rendes Veszprém felé induló
+  // platform (7361/7363/7366 haza-iránya mind innen indul) — hogy a 7366-os iskola-irányú
+  // hurokja átmenetileg ÉRINTI ugyanezt a fizikai pontot, az a user szerint nem teszi
+  // kétértelművé a platform funkcióját, ugyanaz a minta mint az ABC_2-nél.
+  'VOLAN_hkir_557862_2': 'Nemesvámos, autóbusz-forduló (Veszprém felé)',
+};
+
+function _intercityPlatforms() {
+  const bySpId = new Map();
+  for (const route of window.INTERCITY_BUSES_FULL || []) {
+    for (const s of route.stops) {
+      if (!bySpId.has(s.spId)) bySpId.set(s.spId, { ...s, dirs: new Set() });
+      bySpId.get(s.spId).dirs.add(route.dir);
+    }
+  }
+  const platforms = Array.from(bySpId.values());
+
+  // Címkézés, névvel csoportosítva:
+  //  1) egyetlen fizikai pont a névhez -> puszta név, nincs mit megkülönböztetni.
+  //  2) van GTFS platform_code -> azt használjuk (mindig egyedi egy néven belül).
+  //  3) a maradék (kód nélküli) testvérek iránnyal csoportosítva: ha egy irányhoz csak
+  //     egy platform tartozik, elég az irány-jelző; ha egy irányon (vagy a "vegyes"
+  //     csoporton) belül több platform is van — pl. a Nemesvámos-i hurok, ahol a busz
+  //     egy irányon belül kétszer érinti ugyanazt a nevet —, sorszámmal különböztetjük.
+  const byName = new Map();
+  for (const p of platforms) {
+    if (!byName.has(p.name)) byName.set(p.name, []);
+    byName.get(p.name).push(p);
+  }
+  for (const group of byName.values()) {
+    if (group.length === 1) { group[0].label = group[0].name; continue; }
+    const noCode = [];
+    for (const p of group) {
+      if (p.platformCode) p.label = `${p.name} – ${p.platformCode}. beálló`;
+      else noCode.push(p);
+    }
+    const byDirKey = new Map();
+    for (const p of noCode) {
+      const key = p.dirs.size === 1 ? [...p.dirs][0] : '(vegyes)';
+      if (!byDirKey.has(key)) byDirKey.set(key, []);
+      byDirKey.get(key).push(p);
+    }
+    for (const [key, arr] of byDirKey) {
+      const dirLabel = key === 'haza' ? 'Veszprém felé' : key === 'iskola' ? 'Nemesvámos felé' : null;
+      arr.forEach((p, i) => {
+        if (arr.length === 1) p.label = dirLabel ? `${p.name} (${dirLabel})` : p.name;
+        else p.label = dirLabel ? `${p.name} (${dirLabel}, ${i + 1}. előfordulás)` : `${p.name} (${i + 1}. előfordulás)`;
+      });
+    }
+  }
+  for (const p of platforms) {
+    if (_INTERCITY_LABEL_OVERRIDES[p.spId]) p.label = _INTERCITY_LABEL_OVERRIDES[p.spId];
+  }
+  return platforms;
+}
+window._intercityPlatforms = _intercityPlatforms; // debug/ellenőrzés céljából is elérhető
+
+window.getIntercityStops = function () {
+  return _intercityPlatforms().map(p => p.label).sort((a, b) => a.localeCompare(b, "hu"));
+};
+
+window.getIntercityRoutesForPlatformLabel = function (label) {
+  const platform = _intercityPlatforms().find(p => p.label === label);
+  if (!platform) return [];
+  const seen = new Map();
+  for (const route of window.INTERCITY_BUSES_FULL || []) {
+    route.stops.forEach((s, idx) => {
+      // "haza" irányban a tömb vége a valódi, szándékolt úticél (a busz ott
+      // "hazaér", nincs értelme indulásként számolni) — "iskola" irányban viszont
+      // a tömb vége SOHA nem valódi GTFS-végállomás, csak a modellezett szakasz
+      // határa (a busz a valóságban folytatja az útját) — ott a végén álló
+      // megálló is valódi érintett/felszállható pont.
+      if (idx === route.stops.length - 1 && route.dir === 'haza') return;
+      if (s.spId === platform.spId) seen.set(route.id, route);
+    });
+  }
+  return Array.from(seen.values());
+};
+
+window.getIntercityDeparturesForPlatformLabel = function (label, dayType) {
+  const platform = _intercityPlatforms().find(p => p.label === label);
+  if (!platform) return [];
+  const cat = _dayTypeCat(dayType);
+  const out = [];
+  for (const route of window.INTERCITY_BUSES_FULL || []) {
+    const idx = route.stops.findIndex(s => s.spId === platform.spId);
+    if (idx < 0) continue;
+    for (const trip of route.trips) {
+      if (!trip.dayTypes.includes(cat)) continue;
+      const mins = trip.deps[idx];
+      if (mins == null) continue;
+      // Csak akkor valódi "indulás" innen, ha EZ a konkrét trip a kiválasztott
+      // platform UTÁN is érint még (más fizikai pontú) megállót -- A MI SAJÁT
+      // modellezett listánkban. Ha nincs ilyen a mi listánkban:
+      // - "haza" irányban ez SZÁNDÉKOSAN azt jelenti, hogy megérkeztünk (Veszprém,
+      //   autóbusz-állomás/vasútállomás) -- nem érdekes, hogy a busz a valóságban
+      //   esetleg folytatja-e az útját Veszprémen belül, ez a mi szempontunkból a
+      //   végpont, nincs értelme indulásként mutatni.
+      // - "iskola" irányban viszont a tömb vége SOHA nem szándékolt végállomás,
+      //   csak a modellezett Nemesvámos-i szakasz határa -- itt trip-enként eldől
+      //   (a `continuesBeyondModel` mezővel, ld. 09-regenerate-intercity.js), hogy
+      //   a valóságban folytatódik-e (pl. Veszprémfajsz felé) vagy ez a konkrét
+      //   trip tényleg itt fordul meg.
+      let toIdx = -1;
+      for (let i = trip.deps.length - 1; i > idx; i--) {
+        if (trip.deps[i] != null && route.stops[i].spId !== platform.spId) { toIdx = i; break; }
+      }
+      if (toIdx === -1 && !(route.dir === 'iskola' && trip.continuesBeyondModel)) continue;
+      out.push({
+        mins, note: null, bus: route,
+        from: trip.origin || route.stops[0].name,
+        to: toIdx === -1 ? null : route.stops[toIdx].name,
+      });
+    }
+  }
+  return out;
+};
 
 // ============================================================
 // Útvonaltervező — haza irány: Nemesvámos → Veszprém → hazafelé
@@ -416,12 +558,15 @@ window.planSchoolRoutes = function planSchoolRoutes({
   const seen = new Set();
 
   for (const icRoute of icRoutes) {
-    const lastStopIdx = icRoute.stops.length - 1;
+    // NÉV szerint horgonyzunk (nem a tömb utolsó indexére), mert a stops lista a jövőben
+    // bővülhet a váróterem UTÁN is (pl. ABC, autóbusz-forduló) — ezek nem érintik a "hazaérkezés"
+    // (Nemesvámos, autóbusz-váróterem) tényleges pontját, csak eltolnák a puszta index-alapú hivatkozást.
+    const lastStopIdx = icRoute.stops.findIndex(s => s.name === "Nemesvámos, autóbusz-váróterem");
     const buszallIdx = icRoute.stops.findIndex(s => s.name === "Veszprém, autóbusz-állomás");
 
-    // Veszprémi felszállási megállók indexei (az utolsó/iskolai megálló előtt)
+    // Veszprémi felszállási megállók indexei (a hazaérkezési megálló előtt)
     const veszpremBoardIdxs = icRoute.stops
-      .map((s, i) => (i < icRoute.stops.length - 1 && s.name.startsWith('Veszprém,')) ? i : -1)
+      .map((s, i) => (i < lastStopIdx && s.name.startsWith('Veszprém,')) ? i : -1)
       .filter(i => i !== -1);
 
     for (const boardStopIdx of veszpremBoardIdxs) {
@@ -486,6 +631,7 @@ window.planSchoolRoutes = function planSchoolRoutes({
             helykoziArrive: icArriveSchool,
             helykoziLine: icRoute.id,
             helykoziDepBuszall,
+            helykoziTerminus: matchingTrip.terminus || null,
             transferStop: cityStopName,
             transferStopShort: _TRANSFER_SHORT[icBoardStop.name] || icBoardStop.name.replace('Veszprém, ', ''),
             transferStopId: icBoardStop.name,
@@ -511,10 +657,11 @@ window.planSchoolRoutes = function planSchoolRoutes({
     if (!walkFromStop) continue;
 
     for (const icRoute of icRoutes) {
-      const lastStopIdx2 = icRoute.stops.length - 1;
+      // Ld. a fenti indoklást: név szerinti horgony, nem tömb-index.
+      const lastStopIdx2 = icRoute.stops.findIndex(s => s.name === "Nemesvámos, autóbusz-váróterem");
       const buszallIdx2 = icRoute.stops.findIndex(s => s.name === "Veszprém, autóbusz-állomás");
 
-      for (let boardStopIdx2 = 0; boardStopIdx2 < icRoute.stops.length - 1; boardStopIdx2++) {
+      for (let boardStopIdx2 = 0; boardStopIdx2 < lastStopIdx2; boardStopIdx2++) {
         const icBoardStop = icRoute.stops[boardStopIdx2];
         if (!icBoardStop.name.startsWith('Veszprém,')) continue;
         const cityStopName = _GTFS_CITY_STOP[icBoardStop.name];
@@ -572,6 +719,7 @@ window.planSchoolRoutes = function planSchoolRoutes({
               helykoziArrive: icArriveSchool,
               helykoziLine: icRoute.id,
               helykoziDepBuszall,
+              helykoziTerminus: matchingTrip2.terminus || null,
               transferStop: cityStopName,
               transferStopShort: _TRANSFER_SHORT[icBoardStop.name] || icBoardStop.name.replace('Veszprém, ', ''),
               transferStopId: icBoardStop.name + "_walk",

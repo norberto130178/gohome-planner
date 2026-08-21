@@ -21,7 +21,7 @@ const STOP_LINES = (() => {
 const ALL_STOPS = window.getCityStops();
 
 // ── StopSearch ───────────────────────────────────────────────────────
-function StopSearch({ value, onChange, placeholder, id }) {
+function StopSearch({ value, onChange, placeholder, id, stopList }) {
   const [query, setQuery] = React.useState(value || "");
   const [open, setOpen] = React.useState(false);
   const [dropdownStyle, setDropdownStyle] = React.useState({});
@@ -90,14 +90,15 @@ function StopSearch({ value, onChange, placeholder, id }) {
   }, [open]);
 
   const filtered = React.useMemo(() => {
-    if (!query) return ALL_STOPS;
+    const source = stopList || ALL_STOPS;
+    if (!query) return source;
     const norm = str => str.normalize("NFD").replace(/[̀-ͯ]/g, "");
     const queryWords = norm(query.toLowerCase().trim()).split(/\s+/);
-    return ALL_STOPS.filter(s => {
+    return source.filter(s => {
       const stopWords = norm(s.toLowerCase()).split(/[\s/\-,()+]+/).filter(Boolean);
       return queryWords.every(qw => stopWords.some(sw => sw.startsWith(qw)));
     });
-  }, [query]);
+  }, [query, stopList]);
 
   function select(stop) {
     onChange(stop);
@@ -1095,6 +1096,8 @@ function StopTimetableModal({ onClose, dayType, lang, initialStop }) {
   }, []);
   const [activeDayType, setActiveDayType] = React.useState(dayType || "workday");
   const [activeIds, setActiveIds] = React.useState(null); // null = minden vonal aktív
+  const [viewMode, setViewMode] = React.useState('city'); // 'city' | 'intercity'
+  const intercitySupported = !!window.INTERCITY_BUSES_FULL;
 
   // --- Modal boilerplate (history back, ESC, scroll-lock, fókusz) ---
   const didPushRef = React.useRef(false);
@@ -1158,20 +1161,26 @@ function StopTimetableModal({ onClose, dayType, lang, initialStop }) {
 
   // --- Adatok ---
   const dirsAtStop = React.useMemo(() => {
-    if (!selectedStop) return [];
+    if (!selectedStop || viewMode !== 'city') return [];
     return (window.CITY_BUSES_FULL || []).filter(b => U.busVisits(b, selectedStop));
-  }, [selectedStop]);
+  }, [selectedStop, viewMode]);
+
+  const intercityDirsAtStop = React.useMemo(() => {
+    if (!selectedStop || viewMode !== 'intercity' || !window.getIntercityRoutesForPlatformLabel) return [];
+    return window.getIntercityRoutesForPlatformLabel(selectedStop);
+  }, [selectedStop, viewMode]);
 
   // Egyedi vonalak a chipekhez (id szerint dedupelve, numerikusan rendezve)
   const lines = React.useMemo(() => {
     const map = new Map();
     for (const b of dirsAtStop) if (!map.has(b.id)) map.set(b.id, b);
+    for (const b of intercityDirsAtStop) if (!map.has(b.id)) map.set(b.id, b);
     return [...map.values()].sort((a, b) => {
       const na = parseFloat(a.id), nb = parseFloat(b.id);
       if (na !== nb) return na - nb;
       return a.id.localeCompare(b.id);
     });
-  }, [dirsAtStop]);
+  }, [dirsAtStop, intercityDirsAtStop]);
 
   function isActive(id) {
     return activeIds === null ? true : activeIds.has(id);
@@ -1202,8 +1211,13 @@ function StopTimetableModal({ onClose, dayType, lang, initialStop }) {
         }
       }
     }
+    if (viewMode === 'intercity' && selectedStop && window.getIntercityDeparturesForPlatformLabel) {
+      for (const e of window.getIntercityDeparturesForPlatformLabel(selectedStop, activeDayType)) {
+        if (isActive(e.bus.id)) out.push(e);
+      }
+    }
     return out.sort((a, b) => a.mins - b.mins);
-  }, [dirsAtStop, activeIds, activeDayType, selectedStop]);
+  }, [dirsAtStop, activeIds, activeDayType, selectedStop, viewMode]);
 
   const nextIdx = mergedDeps.findIndex(d => d.mins >= nowMins);
 
@@ -1242,7 +1256,9 @@ function StopTimetableModal({ onClose, dayType, lang, initialStop }) {
 
   const dayTabs = (['workday', 'schoolholiday', 'weekend']).map(dt => {
     const label = dt === 'workday' ? (t.workday || 'Hétköznap') : dt === 'schoolholiday' ? (t.schoolHolidayLabel || 'Tanszünet') : (t.weekend || 'Hétvége');
-    const hasData = dirsAtStop.some(b => b.departures[dt] && Object.keys(b.departures[dt]).length > 0);
+    const hasData = viewMode === 'intercity'
+      ? intercityDirsAtStop.some(route => route.trips.some(tr => tr.dayTypes.includes(window._dayTypeCat(dt))))
+      : dirsAtStop.some(b => b.departures[dt] && Object.keys(b.departures[dt]).length > 0);
     if (selectedStop && !hasData && dt !== activeDayType) return null;
     return (
       <button key={dt} onClick={() => setActiveDayType(dt)} style={{
@@ -1331,6 +1347,21 @@ function StopTimetableModal({ onClose, dayType, lang, initialStop }) {
         {!selectedStop ? (
           /* Megálló-választó nézet */
           <div style={{ padding: '24px 20px 32px' }}>
+            {intercitySupported && (
+              <div role="radiogroup" style={{ display: 'flex', gap: 6, marginBottom: 14 }}>
+                {[['city', t.stopViewerCityMode || 'Helyi megállók'], ['intercity', t.stopViewerIntercityMode || 'Helyközi megállók']].map(([mode, label]) => (
+                  <button key={mode} type="button" role="radio" aria-checked={viewMode === mode}
+                    onClick={() => { setViewMode(mode); setActiveIds(null); }}
+                    style={{
+                      flex: 1, background: viewMode === mode ? 'var(--accent)' : 'var(--line)',
+                      color: viewMode === mode ? 'white' : 'var(--ink)',
+                      border: 'none', borderRadius: 10, padding: '8px 10px',
+                      fontFamily: 'Nunito,sans-serif', fontSize: 12, fontWeight: 800, cursor: 'pointer',
+                    }}
+                  >{label}</button>
+                ))}
+              </div>
+            )}
             <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--ink)', marginBottom: 12 }}>
               {t.stopViewerPick || "Melyik megálló indulásait nézzük?"}
             </div>
@@ -1340,6 +1371,7 @@ function StopTimetableModal({ onClose, dayType, lang, initialStop }) {
                 value=""
                 onChange={(s) => { if (s) { setSelectedStop(s); setActiveIds(null); } }}
                 placeholder={t.stopSearchPlaceholder || "— Keress megálló névre —"}
+                stopList={viewMode === 'intercity' && window.getIntercityStops ? window.getIntercityStops() : undefined}
               />
             ) : null}
           </div>
@@ -1405,7 +1437,7 @@ function StopTimetableModal({ onClose, dayType, lang, initialStop }) {
                       fontSize: 11, fontWeight: 900,
                     }}>{d.bus.id}</span>
                     <span style={{ flex: 1, minWidth: 0, fontSize: 12, fontWeight: 600, color: 'var(--ink-soft)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {window.busDirection(d.bus, t)}
+                      {d.from && d.to ? `${d.from} ▸ ${d.to}` : window.busDirection(d.bus, t)}
                     </span>
                   </div>
                 );

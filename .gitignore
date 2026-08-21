@@ -10,3 +10,12 @@ test-*.js
 
 # Claude Code lokális beállítások
 .claude/
+
+# GTFS-frissítő pipeline: nyers letöltött feed-ek és generált köztes fájlok
+# (újra letölthetők / a scriptekkel újra legenerálhatók, ld. _gtfs_update/README.md)
+_gtfs_update/veszprem/
+_gtfs_update/volanbusz/
+_gtfs_update/*.json
+
+# Node
+node_modules/

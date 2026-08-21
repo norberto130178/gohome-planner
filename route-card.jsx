@@ -1523,6 +1523,13 @@ function SchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, nowMi
               {route.helykoziDepBuszall != null && <span style={{fontSize:12,marginLeft:6,opacity:0.7}}>({fmt(route.helykoziDepBuszall)})</span>}
             </div>
             <div className="step-sub">{route.transferStopShort} → Nemesvámos</div>
+            {route.helykoziTerminus && (
+              <div style={{color:'var(--accent)',fontWeight:700,fontSize:12,marginTop:2}}>
+                {t._lang === "en"
+                  ? `${t.continuesTowards} ${route.helykoziTerminus.split(',')[0]}`
+                  : `${t.continuesTowards} ${route.helykoziTerminus.split(',')[0]} felé`}
+              </div>
+            )}
           </div>
         </div>
 

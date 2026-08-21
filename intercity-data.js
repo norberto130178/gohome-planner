@@ -1,7 +1,7 @@
 // intercity-data.js — AUTO-GENERÁLT, ne szerkeszd kézzel
 // Forrás: gtfs.menetbrand.com/download/volanbusz/ (VOLÁNBUSZ hivatalos GTFS-tükör)
 // Frissítés: _gtfs_update/ scriptek (09-regenerate-intercity.js + 10-apply-intercity.js)
-// Generálva: 2026-08-16
+// Generálva: 2026-08-21
 
 window.INTERCITY_BUSES_FULL = [
   {
@@ -16,49 +16,56 @@ window.INTERCITY_BUSES_FULL = [
         "lat": 47.09559,
         "lon": 17.91388,
         "spId": "VOLAN_hkir_558455_9",
-        "citySpId": "VBUSZ_SP1683"
+        "citySpId": "VBUSZ_SP1683",
+        "platformCode": "9"
       },
       {
         "name": "Veszprém, Komakút tér",
         "lat": 47.089692,
         "lon": 17.907227,
         "spId": "VOLAN_hkir_558516_1",
-        "citySpId": "VBUSZ_SP1621"
+        "citySpId": "VBUSZ_SP1621",
+        "platformCode": ""
       },
       {
         "name": "Veszprém, József Attila utca",
         "lat": 47.085252,
         "lon": 17.899099,
         "spId": "VOLAN_hkir_558503_1",
-        "citySpId": "VBUSZ_SP1620"
+        "citySpId": "VBUSZ_SP1620",
+        "platformCode": ""
       },
       {
         "name": "Nemesvámos, Haribo",
         "lat": 47.06477,
         "lon": 17.873877,
         "spId": "VOLAN_hkir_557863_1",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
       },
       {
         "name": "Nemesvámos, Köfém",
         "lat": 47.062377,
         "lon": 17.871959,
         "spId": "VOLAN_hkir_557864_1",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
       },
       {
         "name": "Nemesvámos, Dózsa György utca",
         "lat": 47.059056,
         "lon": 17.873308,
         "spId": "VOLAN_hkir_557860_1",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
       },
       {
         "name": "Nemesvámos, autóbusz-váróterem",
         "lat": 47.056432,
         "lon": 17.869564,
         "spId": "VOLAN_hkir_557858_3",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
       }
     ],
     "trips": [
@@ -76,7 +83,10 @@ window.INTERCITY_BUSES_FULL = [
           1239,
           1240,
           1241
-        ]
+        ],
+        "origin": "Veszprém, autóbusz-állomás",
+        "terminus": "Zalaegerszeg, autóbusz-állomás",
+        "continuesBeyondModel": true
       },
       {
         "dayTypes": [
@@ -92,7 +102,10 @@ window.INTERCITY_BUSES_FULL = [
           null,
           null,
           null
-        ]
+        ],
+        "origin": "Veszprém, autóbusz-állomás",
+        "terminus": "Keszthely, autóbusz-állomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -108,7 +121,10 @@ window.INTERCITY_BUSES_FULL = [
           null,
           null,
           null
-        ]
+        ],
+        "origin": "Veszprém, autóbusz-állomás",
+        "terminus": "Zalaegerszeg, autóbusz-állomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -124,7 +140,10 @@ window.INTERCITY_BUSES_FULL = [
           null,
           null,
           null
-        ]
+        ],
+        "origin": "Veszprém, autóbusz-állomás",
+        "terminus": "Zalaegerszeg, autóbusz-állomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -133,14 +152,17 @@ window.INTERCITY_BUSES_FULL = [
           "szabadnap"
         ],
         "deps": [
-          870,
+          null,
           872,
           873,
           null,
           null,
           null,
           null
-        ]
+        ],
+        "origin": "Veszprém, autóbusz-állomás",
+        "terminus": "Lenti, autóbusz-állomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -149,14 +171,17 @@ window.INTERCITY_BUSES_FULL = [
           "szabadnap"
         ],
         "deps": [
-          1110,
+          null,
           1112,
           1113,
           null,
           null,
           null,
           null
-        ]
+        ],
+        "origin": "Veszprém, autóbusz-állomás",
+        "terminus": "Zalaegerszeg, autóbusz-állomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -172,7 +197,10 @@ window.INTERCITY_BUSES_FULL = [
           null,
           null,
           null
-        ]
+        ],
+        "origin": "Veszprém, autóbusz-állomás",
+        "terminus": "Zalaegerszeg, autóbusz-állomás",
+        "continuesBeyondModel": false
       }
     ]
   },
@@ -188,77 +216,88 @@ window.INTERCITY_BUSES_FULL = [
         "lat": 47.118245,
         "lon": 17.911105,
         "spId": "VOLAN_hkir_558566_1",
-        "citySpId": "VBUSZ_SP1856"
+        "citySpId": "VBUSZ_SP1856",
+        "platformCode": "1"
       },
       {
         "name": "Veszprém, Jutasi úti lakótelep",
         "lat": 47.1074,
         "lon": 17.9113,
         "spId": "VOLAN_hkir_558506_2",
-        "citySpId": "VBUSZ_SP1644"
+        "citySpId": "VBUSZ_SP1644",
+        "platformCode": ""
       },
       {
         "name": "Veszprém, autóbusz-állomás",
         "lat": 47.095231,
         "lon": 17.913519,
         "spId": "VOLAN_hkir_558455_99",
-        "citySpId": "VBUSZ_SP1694"
+        "citySpId": "VBUSZ_SP1694",
+        "platformCode": ""
       },
       {
         "name": "Veszprém, autóbusz-állomás",
         "lat": 47.09559,
         "lon": 17.91388,
         "spId": "VOLAN_hkir_558455_9",
-        "citySpId": "VBUSZ_SP1683"
+        "citySpId": "VBUSZ_SP1683",
+        "platformCode": "9"
       },
       {
         "name": "Veszprém, Komakút tér",
         "lat": 47.089692,
         "lon": 17.907227,
         "spId": "VOLAN_hkir_558516_1",
-        "citySpId": "VBUSZ_SP1621"
+        "citySpId": "VBUSZ_SP1621",
+        "platformCode": ""
       },
       {
         "name": "Veszprém, József Attila utca",
         "lat": 47.085252,
         "lon": 17.899099,
         "spId": "VOLAN_hkir_558503_1",
-        "citySpId": "VBUSZ_SP1620"
+        "citySpId": "VBUSZ_SP1620",
+        "platformCode": ""
       },
       {
         "name": "Nemesvámos, Vilmapusztai elágazás",
         "lat": 47.070839,
         "lon": 17.880537,
         "spId": "VOLAN_hkir_557866_1",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
       },
       {
         "name": "Nemesvámos, Haribo",
         "lat": 47.06477,
         "lon": 17.873877,
         "spId": "VOLAN_hkir_557863_1",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
       },
       {
         "name": "Nemesvámos, Köfém",
         "lat": 47.062377,
         "lon": 17.871959,
         "spId": "VOLAN_hkir_557864_1",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
       },
       {
         "name": "Nemesvámos, Dózsa György utca",
         "lat": 47.059056,
         "lon": 17.873308,
         "spId": "VOLAN_hkir_557860_1",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
       },
       {
         "name": "Nemesvámos, autóbusz-váróterem",
         "lat": 47.056432,
         "lon": 17.869564,
         "spId": "VOLAN_hkir_557858_3",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
       }
     ],
     "trips": [
@@ -270,8 +309,8 @@ window.INTERCITY_BUSES_FULL = [
         "deps": [
           null,
           null,
-          385,
-          385,
+          null,
+          null,
           387,
           389,
           393,
@@ -279,7 +318,10 @@ window.INTERCITY_BUSES_FULL = [
           397,
           398,
           399
-        ]
+        ],
+        "origin": "Veszprém, autóbusz-állomás",
+        "terminus": "Pula, faluház",
+        "continuesBeyondModel": true
       },
       {
         "dayTypes": [
@@ -288,8 +330,8 @@ window.INTERCITY_BUSES_FULL = [
         "deps": [
           null,
           null,
-          385,
-          385,
+          null,
+          null,
           387,
           389,
           393,
@@ -297,7 +339,10 @@ window.INTERCITY_BUSES_FULL = [
           397,
           398,
           399
-        ]
+        ],
+        "origin": "Veszprém, autóbusz-állomás",
+        "terminus": "Tótvázsony, autóbusz-váróterem",
+        "continuesBeyondModel": true
       },
       {
         "dayTypes": [
@@ -306,8 +351,8 @@ window.INTERCITY_BUSES_FULL = [
         "deps": [
           null,
           null,
-          420,
-          420,
+          null,
+          null,
           424,
           426,
           429,
@@ -315,7 +360,10 @@ window.INTERCITY_BUSES_FULL = [
           432,
           433,
           434
-        ]
+        ],
+        "origin": "Veszprém, autóbusz-állomás",
+        "terminus": "Nagyvázsony, autóbusz-váróterem",
+        "continuesBeyondModel": true
       },
       {
         "dayTypes": [
@@ -326,7 +374,7 @@ window.INTERCITY_BUSES_FULL = [
         "deps": [
           525,
           529,
-          540,
+          533,
           540,
           542,
           544,
@@ -335,7 +383,10 @@ window.INTERCITY_BUSES_FULL = [
           552,
           553,
           554
-        ]
+        ],
+        "origin": "Veszprém, vasútállomás",
+        "terminus": "Nagyvázsony, autóbusz-váróterem",
+        "continuesBeyondModel": true
       },
       {
         "dayTypes": [
@@ -345,8 +396,8 @@ window.INTERCITY_BUSES_FULL = [
         "deps": [
           null,
           null,
-          740,
-          740,
+          null,
+          null,
           742,
           744,
           748,
@@ -354,7 +405,10 @@ window.INTERCITY_BUSES_FULL = [
           752,
           753,
           754
-        ]
+        ],
+        "origin": "Veszprém, autóbusz-állomás",
+        "terminus": "Nagyvázsony, autóbusz-váróterem",
+        "continuesBeyondModel": true
       },
       {
         "dayTypes": [
@@ -363,7 +417,7 @@ window.INTERCITY_BUSES_FULL = [
         "deps": [
           765,
           769,
-          780,
+          773,
           780,
           782,
           784,
@@ -372,7 +426,10 @@ window.INTERCITY_BUSES_FULL = [
           792,
           793,
           794
-        ]
+        ],
+        "origin": "Veszprém, vasútállomás",
+        "terminus": "Nagyvázsony, autóbusz-váróterem",
+        "continuesBeyondModel": true
       },
       {
         "dayTypes": [
@@ -383,7 +440,7 @@ window.INTERCITY_BUSES_FULL = [
         "deps": [
           null,
           null,
-          970,
+          null,
           970,
           972,
           974,
@@ -392,7 +449,10 @@ window.INTERCITY_BUSES_FULL = [
           982,
           983,
           984
-        ]
+        ],
+        "origin": "Veszprém, autóbusz-állomás",
+        "terminus": "Nagyvázsony, autóbusz-váróterem",
+        "continuesBeyondModel": true
       },
       {
         "dayTypes": [
@@ -402,7 +462,7 @@ window.INTERCITY_BUSES_FULL = [
         "deps": [
           1000,
           1004,
-          1015,
+          1008,
           1015,
           1017,
           1019,
@@ -411,7 +471,10 @@ window.INTERCITY_BUSES_FULL = [
           1027,
           1028,
           1029
-        ]
+        ],
+        "origin": "Veszprém, vasútállomás",
+        "terminus": "Nagyvázsony, autóbusz-váróterem",
+        "continuesBeyondModel": true
       },
       {
         "dayTypes": [
@@ -420,7 +483,7 @@ window.INTERCITY_BUSES_FULL = [
         "deps": [
           1005,
           1009,
-          1020,
+          1013,
           1020,
           1022,
           1024,
@@ -429,7 +492,10 @@ window.INTERCITY_BUSES_FULL = [
           1032,
           1033,
           1034
-        ]
+        ],
+        "origin": "Veszprém, vasútállomás",
+        "terminus": "Nagyvázsony, autóbusz-váróterem",
+        "continuesBeyondModel": true
       },
       {
         "dayTypes": [
@@ -440,7 +506,7 @@ window.INTERCITY_BUSES_FULL = [
         "deps": [
           null,
           null,
-          1110,
+          null,
           1110,
           1112,
           1114,
@@ -449,7 +515,10 @@ window.INTERCITY_BUSES_FULL = [
           1122,
           1123,
           1124
-        ]
+        ],
+        "origin": "Veszprém, autóbusz-állomás",
+        "terminus": "Nagyvázsony, autóbusz-váróterem",
+        "continuesBeyondModel": true
       },
       {
         "dayTypes": [
@@ -467,7 +536,10 @@ window.INTERCITY_BUSES_FULL = [
           1252,
           1253,
           1254
-        ]
+        ],
+        "origin": "Veszprém, vasútállomás",
+        "terminus": "Nagyvázsony, autóbusz-váróterem",
+        "continuesBeyondModel": true
       },
       {
         "dayTypes": [
@@ -477,7 +549,7 @@ window.INTERCITY_BUSES_FULL = [
         "deps": [
           null,
           null,
-          1085,
+          null,
           1085,
           1087,
           1088,
@@ -486,7 +558,10 @@ window.INTERCITY_BUSES_FULL = [
           null,
           null,
           null
-        ]
+        ],
+        "origin": "Veszprém, autóbusz-állomás",
+        "terminus": "Nagyvázsony, autóbusz-váróterem",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -496,8 +571,8 @@ window.INTERCITY_BUSES_FULL = [
         "deps": [
           null,
           null,
-          850,
-          850,
+          null,
+          null,
           852,
           854,
           858,
@@ -505,7 +580,10 @@ window.INTERCITY_BUSES_FULL = [
           null,
           null,
           null
-        ]
+        ],
+        "origin": "Veszprém, autóbusz-állomás",
+        "terminus": "Nagyvázsony, autóbusz-váróterem",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -515,7 +593,7 @@ window.INTERCITY_BUSES_FULL = [
         "deps": [
           null,
           null,
-          900,
+          null,
           900,
           902,
           904,
@@ -524,7 +602,10 @@ window.INTERCITY_BUSES_FULL = [
           null,
           null,
           null
-        ]
+        ],
+        "origin": "Veszprém, autóbusz-állomás",
+        "terminus": "Nagyvázsony, autóbusz-váróterem",
+        "continuesBeyondModel": false
       }
     ]
   },
@@ -540,84 +621,96 @@ window.INTERCITY_BUSES_FULL = [
         "lat": 47.056285,
         "lon": 17.870066,
         "spId": "VOLAN_hkir_557858_2",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
       },
       {
         "name": "Nemesvámos, Dózsa György utca",
         "lat": 47.059123,
         "lon": 17.873483,
         "spId": "VOLAN_hkir_557860_2",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
       },
       {
         "name": "Nemesvámos, Köfém",
         "lat": 47.062506,
         "lon": 17.87195,
         "spId": "VOLAN_hkir_557864_2",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
       },
       {
         "name": "Nemesvámos, Haribo",
         "lat": 47.06477,
         "lon": 17.873885,
         "spId": "VOLAN_hkir_557863_2",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
       },
       {
         "name": "Nemesvámos, Vilmapusztai elágazás",
         "lat": 47.071187,
         "lon": 17.881172,
         "spId": "VOLAN_hkir_557866_2",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
       },
       {
         "name": "Veszprém, József Attila utca",
         "lat": 47.085557,
         "lon": 17.899385,
         "spId": "VOLAN_hkir_558503_2",
-        "citySpId": "VBUSZ_SP1667"
+        "citySpId": "VBUSZ_SP1667",
+        "platformCode": ""
       },
       {
         "name": "Veszprém, Komakút tér",
         "lat": 47.089356,
         "lon": 17.907503,
         "spId": "VOLAN_hkir_558516_2",
-        "citySpId": "VBUSZ_SP1668"
+        "citySpId": "VBUSZ_SP1668",
+        "platformCode": ""
       },
       {
         "name": "Veszprém, Színház",
         "lat": 47.09187,
         "lon": 17.9061,
         "spId": "VOLAN_hkir_558558_2",
-        "citySpId": "VBUSZ_SP1670"
+        "citySpId": "VBUSZ_SP1670",
+        "platformCode": ""
       },
       {
         "name": "Veszprém, autóbusz-állomás",
         "lat": 47.095231,
         "lon": 17.913519,
         "spId": "VOLAN_hkir_558455_99",
-        "citySpId": "VBUSZ_SP1694"
+        "citySpId": "VBUSZ_SP1694",
+        "platformCode": ""
       },
       {
         "name": "Veszprém, autóbusz-állomás",
         "lat": 47.09545,
         "lon": 17.9132,
         "spId": "VOLAN_hkir_558455_16",
-        "citySpId": "VBUSZ_SP1694"
+        "citySpId": "VBUSZ_SP1694",
+        "platformCode": "16"
       },
       {
         "name": "Veszprém, Jutasi úti lakótelep",
         "lat": 47.107,
         "lon": 17.9116,
         "spId": "VOLAN_hkir_558506_1",
-        "citySpId": "VBUSZ_SP1619"
+        "citySpId": "VBUSZ_SP1619",
+        "platformCode": ""
       },
       {
         "name": "Veszprém, vasútállomás",
         "lat": 47.118012,
         "lon": 17.911086,
         "spId": "VOLAN_hkir_558566_99",
-        "citySpId": "VBUSZ_SP1856"
+        "citySpId": "VBUSZ_SP1856",
+        "platformCode": ""
       }
     ],
     "trips": [
@@ -635,10 +728,13 @@ window.INTERCITY_BUSES_FULL = [
           317,
           318,
           320,
-          320,
+          null,
           null,
           null
-        ]
+        ],
+        "origin": "Nagyvázsony, autóbusz-váróterem",
+        "terminus": "Veszprém, autóbusz-állomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -654,10 +750,13 @@ window.INTERCITY_BUSES_FULL = [
           395,
           396,
           397,
-          397,
+          null,
           null,
           null
-        ]
+        ],
+        "origin": "Nagyvázsony, autóbusz-váróterem",
+        "terminus": "Veszprém, autóbusz-állomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -674,10 +773,13 @@ window.INTERCITY_BUSES_FULL = [
           413,
           414,
           415,
-          415,
+          null,
           null,
           null
-        ]
+        ],
+        "origin": "Pula, faluház",
+        "terminus": "Veszprém, autóbusz-állomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -694,10 +796,13 @@ window.INTERCITY_BUSES_FULL = [
           443,
           444,
           447,
-          447,
+          null,
           null,
           null
-        ]
+        ],
+        "origin": "Nagyvázsony, autóbusz-váróterem",
+        "terminus": "Veszprém, autóbusz-állomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -716,7 +821,10 @@ window.INTERCITY_BUSES_FULL = [
           602,
           604,
           610
-        ]
+        ],
+        "origin": "Nagyvázsony, autóbusz-váróterem",
+        "terminus": "Veszprém, vasútállomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -737,7 +845,10 @@ window.INTERCITY_BUSES_FULL = [
           657,
           659,
           665
-        ]
+        ],
+        "origin": "Nagyvázsony, autóbusz-váróterem",
+        "terminus": "Veszprém, vasútállomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -753,10 +864,13 @@ window.INTERCITY_BUSES_FULL = [
           807,
           808,
           809,
-          809,
+          null,
           null,
           null
-        ]
+        ],
+        "origin": "Nagyvázsony, autóbusz-váróterem",
+        "terminus": "Veszprém, autóbusz-állomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -773,10 +887,13 @@ window.INTERCITY_BUSES_FULL = [
           887,
           888,
           890,
-          890,
+          null,
           null,
           null
-        ]
+        ],
+        "origin": "Pula, faluház",
+        "terminus": "Veszprém, autóbusz-állomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -795,7 +912,10 @@ window.INTERCITY_BUSES_FULL = [
           945,
           947,
           950
-        ]
+        ],
+        "origin": "Nagyvázsony, autóbusz-váróterem",
+        "terminus": "Veszprém, vasútállomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -815,7 +935,10 @@ window.INTERCITY_BUSES_FULL = [
           1075,
           1077,
           1083
-        ]
+        ],
+        "origin": "Nagyvázsony, autóbusz-váróterem",
+        "terminus": "Veszprém, vasútállomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -831,10 +954,13 @@ window.INTERCITY_BUSES_FULL = [
           1114,
           1115,
           1116,
-          1116,
+          null,
           null,
           null
-        ]
+        ],
+        "origin": "Nagyvázsony, autóbusz-váróterem",
+        "terminus": "Veszprém, autóbusz-állomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -853,7 +979,10 @@ window.INTERCITY_BUSES_FULL = [
           1155,
           1157,
           1160
-        ]
+        ],
+        "origin": "Nagyvázsony, autóbusz-váróterem",
+        "terminus": "Veszprém, vasútállomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -870,10 +999,13 @@ window.INTERCITY_BUSES_FULL = [
           null,
           1259,
           1260,
-          1260,
+          null,
           null,
           null
-        ]
+        ],
+        "origin": "Nagyvázsony, pulai elágazás",
+        "terminus": "Veszprém, autóbusz-állomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -889,10 +1021,13 @@ window.INTERCITY_BUSES_FULL = [
           null,
           1284,
           1285,
-          1285,
+          null,
           null,
           null
-        ]
+        ],
+        "origin": "Nagyvázsony, autóbusz-váróterem",
+        "terminus": "Veszprém, autóbusz-állomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -910,10 +1045,13 @@ window.INTERCITY_BUSES_FULL = [
           817,
           818,
           819,
-          819,
+          null,
           null,
           null
-        ]
+        ],
+        "origin": "Nagyvázsony, autóbusz-váróterem",
+        "terminus": "Veszprém, autóbusz-állomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -930,10 +1068,13 @@ window.INTERCITY_BUSES_FULL = [
           452,
           453,
           457,
-          457,
+          null,
           null,
           null
-        ]
+        ],
+        "origin": "Nagyvázsony, autóbusz-váróterem",
+        "terminus": "Veszprém, autóbusz-állomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -949,10 +1090,13 @@ window.INTERCITY_BUSES_FULL = [
           450,
           451,
           452,
-          452,
+          null,
           null,
           null
-        ]
+        ],
+        "origin": "Tótvázsony, autóbusz-váróterem",
+        "terminus": "Veszprém, autóbusz-állomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -969,10 +1113,13 @@ window.INTERCITY_BUSES_FULL = [
           384,
           386,
           389,
-          389,
+          null,
           null,
           null
-        ]
+        ],
+        "origin": "Nagyvázsony, autóbusz-váróterem",
+        "terminus": "Veszprém, autóbusz-állomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -989,10 +1136,13 @@ window.INTERCITY_BUSES_FULL = [
           312,
           313,
           314,
-          314,
+          null,
           null,
           null
-        ]
+        ],
+        "origin": "Nagyvázsony, autóbusz-váróterem",
+        "terminus": "Veszprém, autóbusz-állomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -1009,10 +1159,13 @@ window.INTERCITY_BUSES_FULL = [
           920,
           921,
           922,
-          922,
+          null,
           null,
           null
-        ]
+        ],
+        "origin": "Nagyvázsony, autóbusz-váróterem",
+        "terminus": "Veszprém, autóbusz-állomás",
+        "continuesBeyondModel": false
       }
     ]
   },
@@ -1028,56 +1181,80 @@ window.INTERCITY_BUSES_FULL = [
         "lat": 47.09564,
         "lon": 17.91386,
         "spId": "VOLAN_hkir_558455_10",
-        "citySpId": "VBUSZ_SP1683"
+        "citySpId": "VBUSZ_SP1683",
+        "platformCode": "10"
       },
       {
         "name": "Veszprém, Komakút tér",
         "lat": 47.089692,
         "lon": 17.907227,
         "spId": "VOLAN_hkir_558516_1",
-        "citySpId": "VBUSZ_SP1621"
+        "citySpId": "VBUSZ_SP1621",
+        "platformCode": ""
       },
       {
         "name": "Veszprém, József Attila utca",
         "lat": 47.085252,
         "lon": 17.899099,
         "spId": "VOLAN_hkir_558503_1",
-        "citySpId": "VBUSZ_SP1620"
+        "citySpId": "VBUSZ_SP1620",
+        "platformCode": ""
       },
       {
         "name": "Nemesvámos, Vilmapusztai elágazás",
         "lat": 47.070839,
         "lon": 17.880537,
         "spId": "VOLAN_hkir_557866_1",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
       },
       {
         "name": "Nemesvámos, Haribo",
         "lat": 47.06477,
         "lon": 17.873877,
         "spId": "VOLAN_hkir_557863_1",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
       },
       {
         "name": "Nemesvámos, Köfém",
         "lat": 47.062377,
         "lon": 17.871959,
         "spId": "VOLAN_hkir_557864_1",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
       },
       {
         "name": "Nemesvámos, Dózsa György utca",
         "lat": 47.059056,
         "lon": 17.873308,
         "spId": "VOLAN_hkir_557860_1",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
       },
       {
         "name": "Nemesvámos, autóbusz-váróterem",
         "lat": 47.05565,
         "lon": 17.870511,
         "spId": "VOLAN_hkir_557858_1",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
+      },
+      {
+        "name": "Nemesvámos, ABC",
+        "lat": 47.054271,
+        "lon": 17.873443,
+        "spId": "VOLAN_hkir_557856_1",
+        "citySpId": null,
+        "platformCode": ""
+      },
+      {
+        "name": "Nemesvámos, autóbusz-forduló",
+        "lat": 47.050992,
+        "lon": 17.87649,
+        "spId": "VOLAN_hkir_557862_1",
+        "citySpId": null,
+        "platformCode": ""
       }
     ],
     "trips": [
@@ -1093,8 +1270,13 @@ window.INTERCITY_BUSES_FULL = [
           338,
           339,
           340,
-          342
-        ]
+          342,
+          343,
+          344
+        ],
+        "origin": "Veszprém, autóbusz-állomás",
+        "terminus": "Nemesvámos, autóbusz-forduló",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -1102,15 +1284,20 @@ window.INTERCITY_BUSES_FULL = [
           "tanszunet"
         ],
         "deps": [
-          330,
+          null,
           334,
           336,
           340,
           343,
           344,
           345,
-          347
-        ]
+          347,
+          348,
+          349
+        ],
+        "origin": "Veszprém, autóbusz-állomás",
+        "terminus": "Veszprémfajsz, autóbusz-forduló",
+        "continuesBeyondModel": true
       },
       {
         "dayTypes": [
@@ -1124,8 +1311,13 @@ window.INTERCITY_BUSES_FULL = [
           348,
           349,
           350,
-          352
-        ]
+          352,
+          353,
+          354
+        ],
+        "origin": "Veszprém, autóbusz-állomás",
+        "terminus": "Veszprémfajsz, autóbusz-forduló",
+        "continuesBeyondModel": true
       },
       {
         "dayTypes": [
@@ -1140,8 +1332,13 @@ window.INTERCITY_BUSES_FULL = [
           363,
           364,
           365,
-          367
-        ]
+          367,
+          368,
+          369
+        ],
+        "origin": "Veszprém, autóbusz-állomás",
+        "terminus": "Nemesvámos, autóbusz-forduló",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -1156,8 +1353,13 @@ window.INTERCITY_BUSES_FULL = [
           373,
           374,
           375,
-          377
-        ]
+          377,
+          378,
+          379
+        ],
+        "origin": "Veszprém, autóbusz-állomás",
+        "terminus": "Veszprémfajsz, autóbusz-forduló",
+        "continuesBeyondModel": true
       },
       {
         "dayTypes": [
@@ -1172,8 +1374,13 @@ window.INTERCITY_BUSES_FULL = [
           402,
           403,
           404,
-          405
-        ]
+          405,
+          406,
+          407
+        ],
+        "origin": "Veszprém, autóbusz-állomás",
+        "terminus": "Veszprémfajsz, autóbusz-forduló",
+        "continuesBeyondModel": true
       },
       {
         "dayTypes": [
@@ -1187,8 +1394,13 @@ window.INTERCITY_BUSES_FULL = [
           413,
           414,
           415,
-          417
-        ]
+          417,
+          418,
+          419
+        ],
+        "origin": "Veszprém, autóbusz-állomás",
+        "terminus": "Veszprémfajsz, autóbusz-forduló",
+        "continuesBeyondModel": true
       },
       {
         "dayTypes": [
@@ -1203,8 +1415,13 @@ window.INTERCITY_BUSES_FULL = [
           418,
           419,
           420,
-          422
-        ]
+          422,
+          423,
+          424
+        ],
+        "origin": "Veszprém, autóbusz-állomás",
+        "terminus": "Nemesvámos, autóbusz-forduló",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -1212,15 +1429,20 @@ window.INTERCITY_BUSES_FULL = [
           "tanszunet"
         ],
         "deps": [
-          415,
+          null,
           419,
           421,
           425,
           428,
           429,
           430,
-          432
-        ]
+          432,
+          433,
+          434
+        ],
+        "origin": "Veszprém, autóbusz-állomás",
+        "terminus": "Veszprémfajsz, autóbusz-forduló",
+        "continuesBeyondModel": true
       },
       {
         "dayTypes": [
@@ -1235,8 +1457,13 @@ window.INTERCITY_BUSES_FULL = [
           433,
           434,
           435,
-          437
-        ]
+          437,
+          438,
+          439
+        ],
+        "origin": "Veszprém, autóbusz-állomás",
+        "terminus": "Nemesvámos, autóbusz-forduló",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -1250,8 +1477,13 @@ window.INTERCITY_BUSES_FULL = [
           438,
           439,
           440,
-          442
-        ]
+          442,
+          443,
+          444
+        ],
+        "origin": "Veszprém, autóbusz-állomás",
+        "terminus": "Veszprémfajsz, autóbusz-forduló",
+        "continuesBeyondModel": true
       },
       {
         "dayTypes": [
@@ -1265,8 +1497,13 @@ window.INTERCITY_BUSES_FULL = [
           463,
           464,
           465,
-          467
-        ]
+          467,
+          468,
+          469
+        ],
+        "origin": "Veszprém, autóbusz-állomás",
+        "terminus": "Nemesvámos, autóbusz-forduló",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -1282,8 +1519,13 @@ window.INTERCITY_BUSES_FULL = [
           498,
           499,
           500,
-          502
-        ]
+          502,
+          503,
+          504
+        ],
+        "origin": "Veszprém, autóbusz-állomás",
+        "terminus": "Veszprémfajsz, autóbusz-forduló",
+        "continuesBeyondModel": true
       },
       {
         "dayTypes": [
@@ -1299,8 +1541,13 @@ window.INTERCITY_BUSES_FULL = [
           553,
           554,
           555,
-          557
-        ]
+          557,
+          558,
+          559
+        ],
+        "origin": "Veszprém, autóbusz-állomás",
+        "terminus": "Veszprémfajsz, autóbusz-forduló",
+        "continuesBeyondModel": true
       },
       {
         "dayTypes": [
@@ -1314,8 +1561,13 @@ window.INTERCITY_BUSES_FULL = [
           643,
           644,
           645,
-          647
-        ]
+          647,
+          648,
+          649
+        ],
+        "origin": "Veszprém, autóbusz-állomás",
+        "terminus": "Veszprémfajsz, autóbusz-forduló",
+        "continuesBeyondModel": true
       },
       {
         "dayTypes": [
@@ -1331,8 +1583,13 @@ window.INTERCITY_BUSES_FULL = [
           643,
           644,
           645,
-          647
-        ]
+          647,
+          648,
+          649
+        ],
+        "origin": "Veszprém, autóbusz-állomás",
+        "terminus": "Veszprémfajsz, autóbusz-forduló",
+        "continuesBeyondModel": true
       },
       {
         "dayTypes": [
@@ -1347,8 +1604,13 @@ window.INTERCITY_BUSES_FULL = [
           698,
           699,
           700,
-          702
-        ]
+          702,
+          703,
+          704
+        ],
+        "origin": "Veszprém, autóbusz-állomás",
+        "terminus": "Veszprémfajsz, autóbusz-forduló",
+        "continuesBeyondModel": true
       },
       {
         "dayTypes": [
@@ -1364,8 +1626,13 @@ window.INTERCITY_BUSES_FULL = [
           758,
           759,
           760,
-          762
-        ]
+          762,
+          763,
+          764
+        ],
+        "origin": "Veszprém, autóbusz-állomás",
+        "terminus": "Veszprémfajsz, autóbusz-forduló",
+        "continuesBeyondModel": true
       },
       {
         "dayTypes": [
@@ -1380,8 +1647,13 @@ window.INTERCITY_BUSES_FULL = [
           808,
           809,
           810,
-          812
-        ]
+          812,
+          813,
+          814
+        ],
+        "origin": "Veszprém, autóbusz-állomás",
+        "terminus": "Nemesvámos, autóbusz-forduló",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -1390,15 +1662,20 @@ window.INTERCITY_BUSES_FULL = [
           "szabadnap"
         ],
         "deps": [
-          805,
+          null,
           809,
           811,
           815,
           818,
           819,
           820,
-          822
-        ]
+          822,
+          823,
+          824
+        ],
+        "origin": "Veszprém, autóbusz-állomás",
+        "terminus": "Veszprémfajsz, autóbusz-forduló",
+        "continuesBeyondModel": true
       },
       {
         "dayTypes": [
@@ -1406,30 +1683,40 @@ window.INTERCITY_BUSES_FULL = [
           "tanszunet"
         ],
         "deps": [
-          850,
+          null,
           854,
           856,
           860,
           863,
           864,
           865,
-          867
-        ]
+          867,
+          868,
+          869
+        ],
+        "origin": "Veszprém, autóbusz-állomás",
+        "terminus": "Veszprémfajsz, autóbusz-forduló",
+        "continuesBeyondModel": true
       },
       {
         "dayTypes": [
           "szabadnap"
         ],
         "deps": [
-          850,
+          null,
           854,
           856,
           860,
           863,
           864,
           865,
-          867
-        ]
+          867,
+          868,
+          869
+        ],
+        "origin": "Veszprém, autóbusz-állomás",
+        "terminus": "Veszprémfajsz, autóbusz-forduló",
+        "continuesBeyondModel": true
       },
       {
         "dayTypes": [
@@ -1437,15 +1724,20 @@ window.INTERCITY_BUSES_FULL = [
           "tanszunet"
         ],
         "deps": [
-          870,
+          null,
           874,
           876,
           880,
           883,
           884,
           885,
-          887
-        ]
+          887,
+          888,
+          889
+        ],
+        "origin": "Veszprém, autóbusz-állomás",
+        "terminus": "Veszprémfajsz, autóbusz-forduló",
+        "continuesBeyondModel": true
       },
       {
         "dayTypes": [
@@ -1459,8 +1751,13 @@ window.INTERCITY_BUSES_FULL = [
           898,
           899,
           900,
-          902
-        ]
+          902,
+          903,
+          904
+        ],
+        "origin": "Veszprém, autóbusz-állomás",
+        "terminus": "Veszprémfajsz, autóbusz-forduló",
+        "continuesBeyondModel": true
       },
       {
         "dayTypes": [
@@ -1475,8 +1772,13 @@ window.INTERCITY_BUSES_FULL = [
           913,
           914,
           915,
-          917
-        ]
+          917,
+          918,
+          919
+        ],
+        "origin": "Veszprém, autóbusz-állomás",
+        "terminus": "Veszprémfajsz, autóbusz-forduló",
+        "continuesBeyondModel": true
       },
       {
         "dayTypes": [
@@ -1490,8 +1792,13 @@ window.INTERCITY_BUSES_FULL = [
           943,
           944,
           945,
-          947
-        ]
+          947,
+          948,
+          949
+        ],
+        "origin": "Veszprém, autóbusz-állomás",
+        "terminus": "Veszprémfajsz, autóbusz-forduló",
+        "continuesBeyondModel": true
       },
       {
         "dayTypes": [
@@ -1506,8 +1813,13 @@ window.INTERCITY_BUSES_FULL = [
           953,
           954,
           955,
-          957
-        ]
+          957,
+          958,
+          959
+        ],
+        "origin": "Veszprém, autóbusz-állomás",
+        "terminus": "Veszprémfajsz, autóbusz-forduló",
+        "continuesBeyondModel": true
       },
       {
         "dayTypes": [
@@ -1522,8 +1834,13 @@ window.INTERCITY_BUSES_FULL = [
           978,
           979,
           980,
-          982
-        ]
+          982,
+          983,
+          984
+        ],
+        "origin": "Veszprém, autóbusz-állomás",
+        "terminus": "Veszprémfajsz, autóbusz-forduló",
+        "continuesBeyondModel": true
       },
       {
         "dayTypes": [
@@ -1538,8 +1855,13 @@ window.INTERCITY_BUSES_FULL = [
           1013,
           1014,
           1015,
-          1017
-        ]
+          1017,
+          1018,
+          1019
+        ],
+        "origin": "Veszprém, autóbusz-állomás",
+        "terminus": "Veszprémfajsz, autóbusz-forduló",
+        "continuesBeyondModel": true
       },
       {
         "dayTypes": [
@@ -1553,8 +1875,13 @@ window.INTERCITY_BUSES_FULL = [
           1043,
           1044,
           1045,
-          1047
-        ]
+          1047,
+          1048,
+          1049
+        ],
+        "origin": "Veszprém, autóbusz-állomás",
+        "terminus": "Veszprémfajsz, autóbusz-forduló",
+        "continuesBeyondModel": true
       },
       {
         "dayTypes": [
@@ -1569,8 +1896,13 @@ window.INTERCITY_BUSES_FULL = [
           1043,
           1044,
           1045,
-          1047
-        ]
+          1047,
+          1048,
+          1049
+        ],
+        "origin": "Veszprém, autóbusz-állomás",
+        "terminus": "Veszprémfajsz, autóbusz-forduló",
+        "continuesBeyondModel": true
       },
       {
         "dayTypes": [
@@ -1585,8 +1917,13 @@ window.INTERCITY_BUSES_FULL = [
           1098,
           1099,
           1100,
-          1102
-        ]
+          1102,
+          1103,
+          1104
+        ],
+        "origin": "Veszprém, autóbusz-állomás",
+        "terminus": "Veszprémfajsz, autóbusz-forduló",
+        "continuesBeyondModel": true
       },
       {
         "dayTypes": [
@@ -1601,23 +1938,33 @@ window.INTERCITY_BUSES_FULL = [
           1153,
           1154,
           1155,
-          1156
-        ]
+          1156,
+          1157,
+          1158
+        ],
+        "origin": "Veszprém, autóbusz-állomás",
+        "terminus": "Nemesvámos, autóbusz-forduló",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
           "szabadnap"
         ],
         "deps": [
-          1180,
+          null,
           1184,
           1186,
           1189,
           1191,
           1192,
           1193,
-          1194
-        ]
+          1194,
+          1195,
+          1196
+        ],
+        "origin": "Veszprém, autóbusz-állomás",
+        "terminus": "Veszprémfajsz, autóbusz-forduló",
+        "continuesBeyondModel": true
       },
       {
         "dayTypes": [
@@ -1625,15 +1972,20 @@ window.INTERCITY_BUSES_FULL = [
           "tanszunet"
         ],
         "deps": [
-          1180,
+          null,
           1184,
           1186,
           1189,
           1191,
           1192,
           1193,
-          1194
-        ]
+          1194,
+          1195,
+          1196
+        ],
+        "origin": "Veszprém, autóbusz-állomás",
+        "terminus": "Veszprémfajsz, autóbusz-forduló",
+        "continuesBeyondModel": true
       },
       {
         "dayTypes": [
@@ -1649,8 +2001,33 @@ window.INTERCITY_BUSES_FULL = [
           1298,
           1299,
           1300,
-          1302
-        ]
+          1302,
+          1303,
+          1304
+        ],
+        "origin": "Veszprém, autóbusz-állomás",
+        "terminus": "Veszprémfajsz, autóbusz-forduló",
+        "continuesBeyondModel": true
+      },
+      {
+        "dayTypes": [
+          "szabadnap"
+        ],
+        "deps": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          334
+        ],
+        "origin": "Nemesvámos, autóbusz-forduló",
+        "terminus": "Veszprémfajsz, autóbusz-forduló",
+        "continuesBeyondModel": true
       }
     ]
   },
@@ -1666,98 +2043,112 @@ window.INTERCITY_BUSES_FULL = [
         "lat": 47.051129,
         "lon": 17.876599,
         "spId": "VOLAN_hkir_557862_2",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
       },
       {
         "name": "Nemesvámos, ABC",
         "lat": 47.053806,
         "lon": 17.874041,
         "spId": "VOLAN_hkir_557856_2",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
       },
       {
         "name": "Nemesvámos, autóbusz-váróterem",
         "lat": 47.056285,
         "lon": 17.870066,
         "spId": "VOLAN_hkir_557858_2",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
       },
       {
         "name": "Nemesvámos, Dózsa György utca",
         "lat": 47.059123,
         "lon": 17.873483,
         "spId": "VOLAN_hkir_557860_2",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
       },
       {
         "name": "Nemesvámos, Köfém",
         "lat": 47.062506,
         "lon": 17.87195,
         "spId": "VOLAN_hkir_557864_2",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
       },
       {
         "name": "Nemesvámos, Haribo",
         "lat": 47.06477,
         "lon": 17.873885,
         "spId": "VOLAN_hkir_557863_2",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
       },
       {
         "name": "Nemesvámos, Vilmapusztai elágazás",
         "lat": 47.071187,
         "lon": 17.881172,
         "spId": "VOLAN_hkir_557866_2",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
       },
       {
         "name": "Veszprém, József Attila utca",
         "lat": 47.085557,
         "lon": 17.899385,
         "spId": "VOLAN_hkir_558503_2",
-        "citySpId": "VBUSZ_SP1667"
+        "citySpId": "VBUSZ_SP1667",
+        "platformCode": ""
       },
       {
         "name": "Veszprém, Komakút tér",
         "lat": 47.089356,
         "lon": 17.907503,
         "spId": "VOLAN_hkir_558516_2",
-        "citySpId": "VBUSZ_SP1668"
+        "citySpId": "VBUSZ_SP1668",
+        "platformCode": ""
       },
       {
         "name": "Veszprém, Színház",
         "lat": 47.09187,
         "lon": 17.9061,
         "spId": "VOLAN_hkir_558558_2",
-        "citySpId": "VBUSZ_SP1670"
+        "citySpId": "VBUSZ_SP1670",
+        "platformCode": ""
       },
       {
         "name": "Veszprém, autóbusz-állomás",
         "lat": 47.095231,
         "lon": 17.913519,
         "spId": "VOLAN_hkir_558455_99",
-        "citySpId": "VBUSZ_SP1694"
+        "citySpId": "VBUSZ_SP1694",
+        "platformCode": ""
       },
       {
         "name": "Veszprém, autóbusz-állomás",
         "lat": 47.09545,
         "lon": 17.9132,
         "spId": "VOLAN_hkir_558455_16",
-        "citySpId": "VBUSZ_SP1694"
+        "citySpId": "VBUSZ_SP1694",
+        "platformCode": "16"
       },
       {
         "name": "Veszprém, Jutasi úti lakótelep",
         "lat": 47.107,
         "lon": 17.9116,
         "spId": "VOLAN_hkir_558506_1",
-        "citySpId": "VBUSZ_SP1619"
+        "citySpId": "VBUSZ_SP1619",
+        "platformCode": ""
       },
       {
         "name": "Veszprém, vasútállomás",
         "lat": 47.118012,
         "lon": 17.911086,
         "spId": "VOLAN_hkir_558566_99",
-        "citySpId": "VBUSZ_SP1856"
+        "citySpId": "VBUSZ_SP1856",
+        "platformCode": ""
       }
     ],
     "trips": [
@@ -1778,10 +2169,13 @@ window.INTERCITY_BUSES_FULL = [
           305,
           307,
           309,
-          309,
+          null,
           null,
           null
-        ]
+        ],
+        "origin": "Nemesvámos, autóbusz-forduló",
+        "terminus": "Veszprém, autóbusz-állomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -1800,10 +2194,13 @@ window.INTERCITY_BUSES_FULL = [
           313,
           315,
           317,
-          317,
+          null,
           null,
           null
-        ]
+        ],
+        "origin": "Veszprémfajsz, autóbusz-forduló",
+        "terminus": "Veszprém, autóbusz-állomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -1821,10 +2218,13 @@ window.INTERCITY_BUSES_FULL = [
           357,
           359,
           361,
-          361,
+          null,
           null,
           null
-        ]
+        ],
+        "origin": "Veszprémfajsz, autóbusz-forduló",
+        "terminus": "Veszprém, autóbusz-állomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -1843,10 +2243,13 @@ window.INTERCITY_BUSES_FULL = [
           375,
           377,
           379,
-          379,
+          null,
           null,
           null
-        ]
+        ],
+        "origin": "Veszprémfajsz, autóbusz-forduló",
+        "terminus": "Veszprém, autóbusz-állomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -1864,10 +2267,13 @@ window.INTERCITY_BUSES_FULL = [
           385,
           387,
           389,
-          389,
+          null,
           null,
           null
-        ]
+        ],
+        "origin": "Veszprémfajsz, autóbusz-forduló",
+        "terminus": "Veszprém, autóbusz-állomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -1886,10 +2292,13 @@ window.INTERCITY_BUSES_FULL = [
           385,
           387,
           389,
-          389,
+          null,
           null,
           null
-        ]
+        ],
+        "origin": "Nemesvámos, autóbusz-forduló",
+        "terminus": "Veszprém, autóbusz-állomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -1907,10 +2316,13 @@ window.INTERCITY_BUSES_FULL = [
           400,
           402,
           404,
-          404,
+          null,
           null,
           null
-        ]
+        ],
+        "origin": "Nemesvámos, autóbusz-forduló",
+        "terminus": "Veszprém, autóbusz-állomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -1929,10 +2341,13 @@ window.INTERCITY_BUSES_FULL = [
           405,
           407,
           409,
-          409,
+          null,
           null,
           null
-        ]
+        ],
+        "origin": "Veszprémfajsz, autóbusz-forduló",
+        "terminus": "Veszprém, autóbusz-állomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -1951,10 +2366,13 @@ window.INTERCITY_BUSES_FULL = [
           430,
           432,
           434,
-          434,
+          null,
           null,
           null
-        ]
+        ],
+        "origin": "Veszprémfajsz, autóbusz-forduló",
+        "terminus": "Veszprém, autóbusz-állomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -1973,10 +2391,13 @@ window.INTERCITY_BUSES_FULL = [
           440,
           442,
           444,
-          444,
+          null,
           null,
           null
-        ]
+        ],
+        "origin": "Nemesvámos, autóbusz-forduló",
+        "terminus": "Veszprém, autóbusz-állomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -1994,10 +2415,13 @@ window.INTERCITY_BUSES_FULL = [
           445,
           447,
           449,
-          449,
+          null,
           null,
           null
-        ]
+        ],
+        "origin": "Veszprémfajsz, autóbusz-forduló",
+        "terminus": "Veszprém, autóbusz-állomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -2016,10 +2440,13 @@ window.INTERCITY_BUSES_FULL = [
           455,
           457,
           459,
-          459,
+          null,
           null,
           null
-        ]
+        ],
+        "origin": "Nemesvámos, autóbusz-forduló",
+        "terminus": "Veszprém, autóbusz-állomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -2038,10 +2465,13 @@ window.INTERCITY_BUSES_FULL = [
           460,
           462,
           464,
-          464,
+          null,
           null,
           null
-        ]
+        ],
+        "origin": "Veszprémfajsz, autóbusz-forduló",
+        "terminus": "Veszprém, autóbusz-állomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -2059,10 +2489,13 @@ window.INTERCITY_BUSES_FULL = [
           470,
           472,
           474,
-          474,
+          null,
           null,
           null
-        ]
+        ],
+        "origin": "Veszprémfajsz, autóbusz-forduló",
+        "terminus": "Veszprém, autóbusz-állomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -2080,10 +2513,13 @@ window.INTERCITY_BUSES_FULL = [
           485,
           487,
           489,
-          489,
+          null,
           null,
           null
-        ]
+        ],
+        "origin": "Nemesvámos, autóbusz-forduló",
+        "terminus": "Veszprém, autóbusz-állomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -2103,10 +2539,13 @@ window.INTERCITY_BUSES_FULL = [
           530,
           532,
           534,
-          534,
+          null,
           null,
           null
-        ]
+        ],
+        "origin": "Veszprémfajsz, autóbusz-forduló",
+        "terminus": "Veszprém, autóbusz-állomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -2126,10 +2565,13 @@ window.INTERCITY_BUSES_FULL = [
           585,
           587,
           589,
-          589,
+          null,
           null,
           null
-        ]
+        ],
+        "origin": "Veszprémfajsz, autóbusz-forduló",
+        "terminus": "Veszprém, autóbusz-állomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -2149,10 +2591,13 @@ window.INTERCITY_BUSES_FULL = [
           675,
           677,
           679,
-          679,
+          null,
           null,
           null
-        ]
+        ],
+        "origin": "Veszprémfajsz, autóbusz-forduló",
+        "terminus": "Veszprém, autóbusz-állomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -2170,10 +2615,13 @@ window.INTERCITY_BUSES_FULL = [
           700,
           702,
           704,
-          704,
+          null,
           null,
           null
-        ]
+        ],
+        "origin": "Veszprémfajsz, autóbusz-forduló",
+        "terminus": "Veszprém, autóbusz-állomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -2192,10 +2640,13 @@ window.INTERCITY_BUSES_FULL = [
           730,
           732,
           734,
-          734,
+          null,
           null,
           null
-        ]
+        ],
+        "origin": "Veszprémfajsz, autóbusz-forduló",
+        "terminus": "Veszprém, autóbusz-állomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -2215,10 +2666,13 @@ window.INTERCITY_BUSES_FULL = [
           790,
           792,
           794,
-          794,
+          null,
           null,
           null
-        ]
+        ],
+        "origin": "Veszprémfajsz, autóbusz-forduló",
+        "terminus": "Veszprém, autóbusz-állomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -2237,10 +2691,13 @@ window.INTERCITY_BUSES_FULL = [
           840,
           842,
           844,
-          844,
+          null,
           null,
           null
-        ]
+        ],
+        "origin": "Nemesvámos, autóbusz-forduló",
+        "terminus": "Veszprém, autóbusz-állomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -2260,10 +2717,13 @@ window.INTERCITY_BUSES_FULL = [
           865,
           867,
           869,
-          869,
+          null,
           null,
           null
-        ]
+        ],
+        "origin": "Veszprémfajsz, autóbusz-forduló",
+        "terminus": "Veszprém, autóbusz-állomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -2282,10 +2742,13 @@ window.INTERCITY_BUSES_FULL = [
           895,
           897,
           899,
-          899,
+          null,
           null,
           null
-        ]
+        ],
+        "origin": "Veszprémfajsz, autóbusz-forduló",
+        "terminus": "Veszprém, autóbusz-állomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -2303,10 +2766,13 @@ window.INTERCITY_BUSES_FULL = [
           895,
           897,
           899,
-          899,
+          null,
           null,
           null
-        ]
+        ],
+        "origin": "Veszprémfajsz, autóbusz-forduló",
+        "terminus": "Veszprém, autóbusz-állomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -2325,10 +2791,13 @@ window.INTERCITY_BUSES_FULL = [
           915,
           917,
           919,
-          919,
+          null,
           null,
           null
-        ]
+        ],
+        "origin": "Veszprémfajsz, autóbusz-forduló",
+        "terminus": "Veszprém, autóbusz-állomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -2346,10 +2815,13 @@ window.INTERCITY_BUSES_FULL = [
           937,
           939,
           941,
-          941,
+          null,
           null,
           null
-        ]
+        ],
+        "origin": "Veszprémfajsz, autóbusz-forduló",
+        "terminus": "Veszprém, autóbusz-állomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -2368,10 +2840,13 @@ window.INTERCITY_BUSES_FULL = [
           950,
           952,
           954,
-          954,
+          null,
           null,
           null
-        ]
+        ],
+        "origin": "Veszprémfajsz, autóbusz-forduló",
+        "terminus": "Veszprém, autóbusz-állomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -2389,10 +2864,13 @@ window.INTERCITY_BUSES_FULL = [
           975,
           977,
           979,
-          979,
+          null,
           null,
           null
-        ]
+        ],
+        "origin": "Veszprémfajsz, autóbusz-forduló",
+        "terminus": "Veszprém, autóbusz-állomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -2411,10 +2889,13 @@ window.INTERCITY_BUSES_FULL = [
           991,
           993,
           995,
-          995,
+          null,
           null,
           null
-        ]
+        ],
+        "origin": "Veszprémfajsz, autóbusz-forduló",
+        "terminus": "Veszprém, autóbusz-állomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -2433,10 +2914,13 @@ window.INTERCITY_BUSES_FULL = [
           1010,
           1012,
           1014,
-          1014,
+          null,
           null,
           null
-        ]
+        ],
+        "origin": "Veszprémfajsz, autóbusz-forduló",
+        "terminus": "Veszprém, autóbusz-állomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -2455,10 +2939,13 @@ window.INTERCITY_BUSES_FULL = [
           1080,
           1082,
           1084,
-          1084,
+          null,
           null,
           null
-        ]
+        ],
+        "origin": "Veszprémfajsz, autóbusz-forduló",
+        "terminus": "Veszprém, autóbusz-állomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -2479,7 +2966,10 @@ window.INTERCITY_BUSES_FULL = [
           1084,
           1086,
           1092
-        ]
+        ],
+        "origin": "Veszprémfajsz, autóbusz-forduló",
+        "terminus": "Veszprém, vasútállomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -2498,10 +2988,13 @@ window.INTERCITY_BUSES_FULL = [
           1130,
           1132,
           1134,
-          1134,
+          null,
           null,
           null
-        ]
+        ],
+        "origin": "Veszprémfajsz, autóbusz-forduló",
+        "terminus": "Veszprém, autóbusz-állomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -2520,10 +3013,13 @@ window.INTERCITY_BUSES_FULL = [
           1245,
           1247,
           1249,
-          1249,
+          null,
           null,
           null
-        ]
+        ],
+        "origin": "Veszprémfajsz, autóbusz-forduló",
+        "terminus": "Veszprém, autóbusz-állomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -2543,10 +3039,13 @@ window.INTERCITY_BUSES_FULL = [
           1340,
           1342,
           1344,
-          1344,
+          null,
           null,
           null
-        ]
+        ],
+        "origin": "Veszprémfajsz, autóbusz-forduló",
+        "terminus": "Veszprém, autóbusz-állomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -2564,11 +3063,14 @@ window.INTERCITY_BUSES_FULL = [
           863,
           865,
           867,
-          870,
+          null,
           870,
           null,
           null
-        ]
+        ],
+        "origin": "Nemesvámos, Köfém",
+        "terminus": "Veszprém, autóbusz-állomás",
+        "continuesBeyondModel": false
       }
     ]
   },
@@ -2584,56 +3086,80 @@ window.INTERCITY_BUSES_FULL = [
         "lat": 47.09564,
         "lon": 17.91386,
         "spId": "VOLAN_hkir_558455_10",
-        "citySpId": "VBUSZ_SP1683"
+        "citySpId": "VBUSZ_SP1683",
+        "platformCode": "10"
       },
       {
         "name": "Veszprém, Komakút tér",
         "lat": 47.089692,
         "lon": 17.907227,
         "spId": "VOLAN_hkir_558516_1",
-        "citySpId": "VBUSZ_SP1621"
+        "citySpId": "VBUSZ_SP1621",
+        "platformCode": ""
       },
       {
         "name": "Veszprém, József Attila utca",
         "lat": 47.085252,
         "lon": 17.899099,
         "spId": "VOLAN_hkir_558503_1",
-        "citySpId": "VBUSZ_SP1620"
+        "citySpId": "VBUSZ_SP1620",
+        "platformCode": ""
       },
       {
         "name": "Nemesvámos, Vilmapusztai elágazás",
         "lat": 47.070839,
         "lon": 17.880537,
         "spId": "VOLAN_hkir_557866_1",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
       },
       {
         "name": "Nemesvámos, Haribo",
         "lat": 47.06477,
         "lon": 17.873877,
         "spId": "VOLAN_hkir_557863_1",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
       },
       {
         "name": "Nemesvámos, Köfém",
         "lat": 47.062377,
         "lon": 17.871959,
         "spId": "VOLAN_hkir_557864_1",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
       },
       {
         "name": "Nemesvámos, Dózsa György utca",
         "lat": 47.059056,
         "lon": 17.873308,
         "spId": "VOLAN_hkir_557860_1",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
       },
       {
         "name": "Nemesvámos, autóbusz-váróterem",
         "lat": 47.05565,
         "lon": 17.870511,
         "spId": "VOLAN_hkir_557858_1",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
+      },
+      {
+        "name": "Nemesvámos, ABC",
+        "lat": 47.054271,
+        "lon": 17.873443,
+        "spId": "VOLAN_hkir_557856_1",
+        "citySpId": null,
+        "platformCode": ""
+      },
+      {
+        "name": "Nemesvámos, autóbusz-forduló",
+        "lat": 47.050992,
+        "lon": 17.87649,
+        "spId": "VOLAN_hkir_557862_1",
+        "citySpId": null,
+        "platformCode": ""
       }
     ],
     "trips": [
@@ -2651,8 +3177,13 @@ window.INTERCITY_BUSES_FULL = [
           450,
           451,
           452,
-          453
-        ]
+          453,
+          454,
+          455
+        ],
+        "origin": "Veszprém, autóbusz-állomás",
+        "terminus": "Balatonfüred, autóbusz-állomás",
+        "continuesBeyondModel": true
       }
     ]
   },
@@ -2668,77 +3199,88 @@ window.INTERCITY_BUSES_FULL = [
         "lat": 47.051129,
         "lon": 17.876599,
         "spId": "VOLAN_hkir_557862_2",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
       },
       {
         "name": "Nemesvámos, ABC",
         "lat": 47.053806,
         "lon": 17.874041,
         "spId": "VOLAN_hkir_557856_2",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
       },
       {
         "name": "Nemesvámos, autóbusz-váróterem",
         "lat": 47.056285,
         "lon": 17.870066,
         "spId": "VOLAN_hkir_557858_2",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
       },
       {
         "name": "Nemesvámos, Dózsa György utca",
         "lat": 47.059123,
         "lon": 17.873483,
         "spId": "VOLAN_hkir_557860_2",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
       },
       {
         "name": "Nemesvámos, Köfém",
         "lat": 47.062506,
         "lon": 17.87195,
         "spId": "VOLAN_hkir_557864_2",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
       },
       {
         "name": "Nemesvámos, Haribo",
         "lat": 47.06477,
         "lon": 17.873885,
         "spId": "VOLAN_hkir_557863_2",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
       },
       {
         "name": "Nemesvámos, Vilmapusztai elágazás",
         "lat": 47.071187,
         "lon": 17.881172,
         "spId": "VOLAN_hkir_557866_2",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
       },
       {
         "name": "Veszprém, József Attila utca",
         "lat": 47.085557,
         "lon": 17.899385,
         "spId": "VOLAN_hkir_558503_2",
-        "citySpId": "VBUSZ_SP1667"
+        "citySpId": "VBUSZ_SP1667",
+        "platformCode": ""
       },
       {
         "name": "Veszprém, Komakút tér",
         "lat": 47.089356,
         "lon": 17.907503,
         "spId": "VOLAN_hkir_558516_2",
-        "citySpId": "VBUSZ_SP1668"
+        "citySpId": "VBUSZ_SP1668",
+        "platformCode": ""
       },
       {
         "name": "Veszprém, Színház",
         "lat": 47.09187,
         "lon": 17.9061,
         "spId": "VOLAN_hkir_558558_2",
-        "citySpId": "VBUSZ_SP1670"
+        "citySpId": "VBUSZ_SP1670",
+        "platformCode": ""
       },
       {
         "name": "Veszprém, autóbusz-állomás",
         "lat": 47.095231,
         "lon": 17.913519,
         "spId": "VOLAN_hkir_558455_99",
-        "citySpId": "VBUSZ_SP1694"
+        "citySpId": "VBUSZ_SP1694",
+        "platformCode": ""
       }
     ],
     "trips": [
@@ -2759,7 +3301,10 @@ window.INTERCITY_BUSES_FULL = [
           623,
           624,
           625
-        ]
+        ],
+        "origin": "Balatonfüred, autóbusz-állomás",
+        "terminus": "Veszprém, autóbusz-állomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -2779,7 +3324,10 @@ window.INTERCITY_BUSES_FULL = [
           1043,
           1044,
           1045
-        ]
+        ],
+        "origin": "Balatonfüred, autóbusz-állomás",
+        "terminus": "Veszprém, autóbusz-állomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -2797,7 +3345,10 @@ window.INTERCITY_BUSES_FULL = [
           1193,
           1194,
           1195
-        ]
+        ],
+        "origin": "Balatonfüred, autóbusz-állomás",
+        "terminus": "Veszprém, autóbusz-állomás",
+        "continuesBeyondModel": false
       }
     ]
   },
@@ -2813,77 +3364,88 @@ window.INTERCITY_BUSES_FULL = [
         "lat": 47.118245,
         "lon": 17.911105,
         "spId": "VOLAN_hkir_558566_1",
-        "citySpId": "VBUSZ_SP1856"
+        "citySpId": "VBUSZ_SP1856",
+        "platformCode": "1"
       },
       {
         "name": "Veszprém, Jutasi úti lakótelep",
         "lat": 47.1074,
         "lon": 17.9113,
         "spId": "VOLAN_hkir_558506_2",
-        "citySpId": "VBUSZ_SP1644"
+        "citySpId": "VBUSZ_SP1644",
+        "platformCode": ""
       },
       {
         "name": "Veszprém, autóbusz-állomás",
         "lat": 47.095231,
         "lon": 17.913519,
         "spId": "VOLAN_hkir_558455_99",
-        "citySpId": "VBUSZ_SP1694"
+        "citySpId": "VBUSZ_SP1694",
+        "platformCode": ""
       },
       {
         "name": "Veszprém, autóbusz-állomás",
         "lat": 47.09564,
         "lon": 17.91386,
         "spId": "VOLAN_hkir_558455_10",
-        "citySpId": "VBUSZ_SP1683"
+        "citySpId": "VBUSZ_SP1683",
+        "platformCode": "10"
       },
       {
         "name": "Veszprém, Komakút tér",
         "lat": 47.089692,
         "lon": 17.907227,
         "spId": "VOLAN_hkir_558516_1",
-        "citySpId": "VBUSZ_SP1621"
+        "citySpId": "VBUSZ_SP1621",
+        "platformCode": ""
       },
       {
         "name": "Veszprém, József Attila utca",
         "lat": 47.085252,
         "lon": 17.899099,
         "spId": "VOLAN_hkir_558503_1",
-        "citySpId": "VBUSZ_SP1620"
+        "citySpId": "VBUSZ_SP1620",
+        "platformCode": ""
       },
       {
         "name": "Nemesvámos, Vilmapusztai elágazás",
         "lat": 47.070839,
         "lon": 17.880537,
         "spId": "VOLAN_hkir_557866_1",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
       },
       {
         "name": "Nemesvámos, Haribo",
         "lat": 47.06477,
         "lon": 17.873877,
         "spId": "VOLAN_hkir_557863_1",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
       },
       {
         "name": "Nemesvámos, Köfém",
         "lat": 47.062377,
         "lon": 17.871959,
         "spId": "VOLAN_hkir_557864_1",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
       },
       {
         "name": "Nemesvámos, Dózsa György utca",
         "lat": 47.059056,
         "lon": 17.873308,
         "spId": "VOLAN_hkir_557860_1",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
       },
       {
         "name": "Nemesvámos, autóbusz-váróterem",
         "lat": 47.056432,
         "lon": 17.869564,
         "spId": "VOLAN_hkir_557858_3",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
       }
     ],
     "trips": [
@@ -2895,7 +3457,7 @@ window.INTERCITY_BUSES_FULL = [
         "deps": [
           765,
           769,
-          780,
+          773,
           780,
           782,
           784,
@@ -2904,7 +3466,10 @@ window.INTERCITY_BUSES_FULL = [
           792,
           793,
           794
-        ]
+        ],
+        "origin": "Veszprém, vasútállomás",
+        "terminus": "Balatonfüred, autóbusz-állomás",
+        "continuesBeyondModel": true
       },
       {
         "dayTypes": [
@@ -2913,7 +3478,7 @@ window.INTERCITY_BUSES_FULL = [
         "deps": [
           null,
           null,
-          780,
+          null,
           780,
           782,
           784,
@@ -2922,7 +3487,10 @@ window.INTERCITY_BUSES_FULL = [
           792,
           793,
           794
-        ]
+        ],
+        "origin": "Veszprém, autóbusz-állomás",
+        "terminus": "Balatonfüred, autóbusz-állomás",
+        "continuesBeyondModel": true
       }
     ]
   },
@@ -2938,63 +3506,72 @@ window.INTERCITY_BUSES_FULL = [
         "lat": 47.056285,
         "lon": 17.870066,
         "spId": "VOLAN_hkir_557858_2",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
       },
       {
         "name": "Nemesvámos, Dózsa György utca",
         "lat": 47.059123,
         "lon": 17.873483,
         "spId": "VOLAN_hkir_557860_2",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
       },
       {
         "name": "Nemesvámos, Köfém",
         "lat": 47.062506,
         "lon": 17.87195,
         "spId": "VOLAN_hkir_557864_2",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
       },
       {
         "name": "Nemesvámos, Haribo",
         "lat": 47.06477,
         "lon": 17.873885,
         "spId": "VOLAN_hkir_557863_2",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
       },
       {
         "name": "Nemesvámos, Vilmapusztai elágazás",
         "lat": 47.071187,
         "lon": 17.881172,
         "spId": "VOLAN_hkir_557866_2",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
       },
       {
         "name": "Veszprém, József Attila utca",
         "lat": 47.085557,
         "lon": 17.899385,
         "spId": "VOLAN_hkir_558503_2",
-        "citySpId": "VBUSZ_SP1667"
+        "citySpId": "VBUSZ_SP1667",
+        "platformCode": ""
       },
       {
         "name": "Veszprém, Komakút tér",
         "lat": 47.089356,
         "lon": 17.907503,
         "spId": "VOLAN_hkir_558516_2",
-        "citySpId": "VBUSZ_SP1668"
+        "citySpId": "VBUSZ_SP1668",
+        "platformCode": ""
       },
       {
         "name": "Veszprém, Színház",
         "lat": 47.09187,
         "lon": 17.9061,
         "spId": "VOLAN_hkir_558558_2",
-        "citySpId": "VBUSZ_SP1670"
+        "citySpId": "VBUSZ_SP1670",
+        "platformCode": ""
       },
       {
         "name": "Veszprém, autóbusz-állomás",
         "lat": 47.095231,
         "lon": 17.913519,
         "spId": "VOLAN_hkir_558455_99",
-        "citySpId": "VBUSZ_SP1694"
+        "citySpId": "VBUSZ_SP1694",
+        "platformCode": ""
       }
     ],
     "trips": [
@@ -3014,7 +3591,10 @@ window.INTERCITY_BUSES_FULL = [
           517,
           518,
           519
-        ]
+        ],
+        "origin": "Balatonfüred, autóbusz-állomás",
+        "terminus": "Veszprém, autóbusz-állomás",
+        "continuesBeyondModel": false
       }
     ]
   },
@@ -3030,77 +3610,104 @@ window.INTERCITY_BUSES_FULL = [
         "lat": 47.118245,
         "lon": 17.911105,
         "spId": "VOLAN_hkir_558566_1",
-        "citySpId": "VBUSZ_SP1856"
+        "citySpId": "VBUSZ_SP1856",
+        "platformCode": "1"
       },
       {
         "name": "Veszprém, Jutasi úti lakótelep",
         "lat": 47.1074,
         "lon": 17.9113,
         "spId": "VOLAN_hkir_558506_2",
-        "citySpId": "VBUSZ_SP1644"
+        "citySpId": "VBUSZ_SP1644",
+        "platformCode": ""
       },
       {
         "name": "Veszprém, autóbusz-állomás",
         "lat": 47.095231,
         "lon": 17.913519,
         "spId": "VOLAN_hkir_558455_99",
-        "citySpId": "VBUSZ_SP1694"
+        "citySpId": "VBUSZ_SP1694",
+        "platformCode": ""
       },
       {
         "name": "Veszprém, autóbusz-állomás",
         "lat": 47.09559,
         "lon": 17.91388,
         "spId": "VOLAN_hkir_558455_9",
-        "citySpId": "VBUSZ_SP1683"
+        "citySpId": "VBUSZ_SP1683",
+        "platformCode": "9"
       },
       {
         "name": "Veszprém, Komakút tér",
         "lat": 47.089692,
         "lon": 17.907227,
         "spId": "VOLAN_hkir_558516_1",
-        "citySpId": "VBUSZ_SP1621"
+        "citySpId": "VBUSZ_SP1621",
+        "platformCode": ""
       },
       {
         "name": "Veszprém, József Attila utca",
         "lat": 47.085252,
         "lon": 17.899099,
         "spId": "VOLAN_hkir_558503_1",
-        "citySpId": "VBUSZ_SP1620"
+        "citySpId": "VBUSZ_SP1620",
+        "platformCode": ""
       },
       {
         "name": "Nemesvámos, Vilmapusztai elágazás",
         "lat": 47.070839,
         "lon": 17.880537,
         "spId": "VOLAN_hkir_557866_1",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
       },
       {
         "name": "Nemesvámos, Haribo",
         "lat": 47.06477,
         "lon": 17.873877,
         "spId": "VOLAN_hkir_557863_1",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
       },
       {
         "name": "Nemesvámos, Köfém",
         "lat": 47.062377,
         "lon": 17.871959,
         "spId": "VOLAN_hkir_557864_1",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
       },
       {
         "name": "Nemesvámos, Dózsa György utca",
         "lat": 47.059056,
         "lon": 17.873308,
         "spId": "VOLAN_hkir_557860_1",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
       },
       {
         "name": "Nemesvámos, autóbusz-váróterem",
         "lat": 47.05565,
         "lon": 17.870511,
         "spId": "VOLAN_hkir_557858_1",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
+      },
+      {
+        "name": "Nemesvámos, ABC",
+        "lat": 47.054271,
+        "lon": 17.873443,
+        "spId": "VOLAN_hkir_557856_1",
+        "citySpId": null,
+        "platformCode": ""
+      },
+      {
+        "name": "Nemesvámos, autóbusz-forduló",
+        "lat": 47.051129,
+        "lon": 17.876599,
+        "spId": "VOLAN_hkir_557862_2",
+        "citySpId": null,
+        "platformCode": ""
       }
     ],
     "trips": [
@@ -3111,7 +3718,7 @@ window.INTERCITY_BUSES_FULL = [
         "deps": [
           525,
           529,
-          540,
+          533,
           540,
           542,
           544,
@@ -3119,8 +3726,13 @@ window.INTERCITY_BUSES_FULL = [
           550,
           551,
           552,
-          553
-        ]
+          553,
+          554,
+          555
+        ],
+        "origin": "Veszprém, vasútállomás",
+        "terminus": "Nagyvázsony, autóbusz-váróterem",
+        "continuesBeyondModel": true
       },
       {
         "dayTypes": [
@@ -3131,7 +3743,7 @@ window.INTERCITY_BUSES_FULL = [
         "deps": [
           null,
           null,
-          1275,
+          null,
           1275,
           1277,
           1278,
@@ -3139,8 +3751,13 @@ window.INTERCITY_BUSES_FULL = [
           1283,
           1284,
           1285,
-          1286
-        ]
+          1286,
+          1287,
+          1289
+        ],
+        "origin": "Veszprém, autóbusz-állomás",
+        "terminus": "Nagyvázsony, autóbusz-váróterem",
+        "continuesBeyondModel": true
       },
       {
         "dayTypes": [
@@ -3150,7 +3767,7 @@ window.INTERCITY_BUSES_FULL = [
         "deps": [
           null,
           null,
-          1350,
+          null,
           1350,
           1353,
           1354,
@@ -3158,8 +3775,13 @@ window.INTERCITY_BUSES_FULL = [
           1360,
           1361,
           1362,
-          1363
-        ]
+          1363,
+          1364,
+          1375
+        ],
+        "origin": "Veszprém, autóbusz-állomás",
+        "terminus": "Nagyvázsony, autóbusz-váróterem",
+        "continuesBeyondModel": true
       },
       {
         "dayTypes": [
@@ -3168,7 +3790,7 @@ window.INTERCITY_BUSES_FULL = [
         "deps": [
           null,
           null,
-          1360,
+          null,
           1360,
           1363,
           1364,
@@ -3176,8 +3798,13 @@ window.INTERCITY_BUSES_FULL = [
           1370,
           1371,
           1372,
-          1373
-        ]
+          1373,
+          1374,
+          1385
+        ],
+        "origin": "Veszprém, autóbusz-állomás",
+        "terminus": "Nagyvázsony, autóbusz-váróterem",
+        "continuesBeyondModel": true
       }
     ]
   },
@@ -3189,95 +3816,92 @@ window.INTERCITY_BUSES_FULL = [
     "dir": "haza",
     "stops": [
       {
-        "name": "Nemesvámos, autóbusz-váróterem",
-        "lat": 47.05565,
-        "lon": 17.870511,
-        "spId": "VOLAN_hkir_557858_1",
-        "citySpId": null
-      },
-      {
-        "name": "Nemesvámos, ABC",
-        "lat": 47.054271,
-        "lon": 17.873443,
-        "spId": "VOLAN_hkir_557856_1",
-        "citySpId": null
-      },
-      {
         "name": "Nemesvámos, autóbusz-forduló",
         "lat": 47.051129,
         "lon": 17.876599,
         "spId": "VOLAN_hkir_557862_2",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
       },
       {
         "name": "Nemesvámos, ABC",
         "lat": 47.053806,
         "lon": 17.874041,
         "spId": "VOLAN_hkir_557856_2",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
       },
       {
         "name": "Nemesvámos, autóbusz-váróterem",
         "lat": 47.056285,
         "lon": 17.870066,
         "spId": "VOLAN_hkir_557858_2",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
       },
       {
         "name": "Nemesvámos, Dózsa György utca",
         "lat": 47.059123,
         "lon": 17.873483,
         "spId": "VOLAN_hkir_557860_2",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
       },
       {
         "name": "Nemesvámos, Köfém",
         "lat": 47.062506,
         "lon": 17.87195,
         "spId": "VOLAN_hkir_557864_2",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
       },
       {
         "name": "Nemesvámos, Haribo",
         "lat": 47.06477,
         "lon": 17.873885,
         "spId": "VOLAN_hkir_557863_2",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
       },
       {
         "name": "Nemesvámos, Vilmapusztai elágazás",
         "lat": 47.071187,
         "lon": 17.881172,
         "spId": "VOLAN_hkir_557866_2",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
       },
       {
         "name": "Veszprém, József Attila utca",
         "lat": 47.085557,
         "lon": 17.899385,
         "spId": "VOLAN_hkir_558503_2",
-        "citySpId": "VBUSZ_SP1667"
+        "citySpId": "VBUSZ_SP1667",
+        "platformCode": ""
       },
       {
         "name": "Veszprém, Komakút tér",
         "lat": 47.089356,
         "lon": 17.907503,
         "spId": "VOLAN_hkir_558516_2",
-        "citySpId": "VBUSZ_SP1668"
+        "citySpId": "VBUSZ_SP1668",
+        "platformCode": ""
       },
       {
         "name": "Veszprém, Színház",
         "lat": 47.09187,
         "lon": 17.9061,
         "spId": "VOLAN_hkir_558558_2",
-        "citySpId": "VBUSZ_SP1670"
+        "citySpId": "VBUSZ_SP1670",
+        "platformCode": ""
       },
       {
         "name": "Veszprém, autóbusz-állomás",
         "lat": 47.095231,
         "lon": 17.913519,
         "spId": "VOLAN_hkir_558455_99",
-        "citySpId": "VBUSZ_SP1694"
+        "citySpId": "VBUSZ_SP1694",
+        "platformCode": ""
       }
     ],
     "trips": [
@@ -3287,11 +3911,9 @@ window.INTERCITY_BUSES_FULL = [
           "tanszunet"
         ],
         "deps": [
-          308,
-          309,
           310,
-          309,
-          308,
+          311,
+          312,
           313,
           314,
           315,
@@ -3300,7 +3922,10 @@ window.INTERCITY_BUSES_FULL = [
           324,
           326,
           327
-        ]
+        ],
+        "origin": "Monostorapáti, községháza",
+        "terminus": "Veszprém, autóbusz-állomás",
+        "continuesBeyondModel": false
       }
     ]
   },
@@ -3316,77 +3941,88 @@ window.INTERCITY_BUSES_FULL = [
         "lat": 47.118245,
         "lon": 17.911105,
         "spId": "VOLAN_hkir_558566_1",
-        "citySpId": "VBUSZ_SP1856"
+        "citySpId": "VBUSZ_SP1856",
+        "platformCode": "1"
       },
       {
         "name": "Veszprém, Jutasi úti lakótelep",
         "lat": 47.1074,
         "lon": 17.9113,
         "spId": "VOLAN_hkir_558506_2",
-        "citySpId": "VBUSZ_SP1644"
+        "citySpId": "VBUSZ_SP1644",
+        "platformCode": ""
       },
       {
         "name": "Veszprém, autóbusz-állomás",
         "lat": 47.095231,
         "lon": 17.913519,
         "spId": "VOLAN_hkir_558455_99",
-        "citySpId": "VBUSZ_SP1694"
+        "citySpId": "VBUSZ_SP1694",
+        "platformCode": ""
       },
       {
         "name": "Veszprém, autóbusz-állomás",
         "lat": 47.09559,
         "lon": 17.91388,
         "spId": "VOLAN_hkir_558455_9",
-        "citySpId": "VBUSZ_SP1683"
+        "citySpId": "VBUSZ_SP1683",
+        "platformCode": "9"
       },
       {
         "name": "Veszprém, Komakút tér",
         "lat": 47.089692,
         "lon": 17.907227,
         "spId": "VOLAN_hkir_558516_1",
-        "citySpId": "VBUSZ_SP1621"
+        "citySpId": "VBUSZ_SP1621",
+        "platformCode": ""
       },
       {
         "name": "Veszprém, József Attila utca",
         "lat": 47.085252,
         "lon": 17.899099,
         "spId": "VOLAN_hkir_558503_1",
-        "citySpId": "VBUSZ_SP1620"
+        "citySpId": "VBUSZ_SP1620",
+        "platformCode": ""
       },
       {
         "name": "Nemesvámos, Vilmapusztai elágazás",
         "lat": 47.070839,
         "lon": 17.880537,
         "spId": "VOLAN_hkir_557866_1",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
       },
       {
         "name": "Nemesvámos, Haribo",
         "lat": 47.06477,
         "lon": 17.873877,
         "spId": "VOLAN_hkir_557863_1",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
       },
       {
         "name": "Nemesvámos, Köfém",
         "lat": 47.062377,
         "lon": 17.871959,
         "spId": "VOLAN_hkir_557864_1",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
       },
       {
         "name": "Nemesvámos, Dózsa György utca",
         "lat": 47.059056,
         "lon": 17.873308,
         "spId": "VOLAN_hkir_557860_1",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
       },
       {
         "name": "Nemesvámos, autóbusz-váróterem",
         "lat": 47.056432,
         "lon": 17.869564,
         "spId": "VOLAN_hkir_557858_3",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
       }
     ],
     "trips": [
@@ -3398,7 +4034,7 @@ window.INTERCITY_BUSES_FULL = [
         "deps": [
           null,
           null,
-          325,
+          null,
           325,
           327,
           329,
@@ -3407,7 +4043,10 @@ window.INTERCITY_BUSES_FULL = [
           337,
           338,
           339
-        ]
+        ],
+        "origin": "Veszprém, autóbusz-állomás",
+        "terminus": "Tapolca, vasútállomás",
+        "continuesBeyondModel": true
       },
       {
         "dayTypes": [
@@ -3418,8 +4057,8 @@ window.INTERCITY_BUSES_FULL = [
         "deps": [
           null,
           null,
-          430,
-          430,
+          null,
+          null,
           434,
           436,
           439,
@@ -3427,7 +4066,10 @@ window.INTERCITY_BUSES_FULL = [
           442,
           443,
           444
-        ]
+        ],
+        "origin": "Veszprém, autóbusz-állomás",
+        "terminus": "Tapolca, autóbusz-állomás",
+        "continuesBeyondModel": true
       },
       {
         "dayTypes": [
@@ -3436,7 +4078,7 @@ window.INTERCITY_BUSES_FULL = [
         "deps": [
           645,
           649,
-          660,
+          653,
           660,
           662,
           664,
@@ -3445,7 +4087,10 @@ window.INTERCITY_BUSES_FULL = [
           672,
           673,
           674
-        ]
+        ],
+        "origin": "Veszprém, vasútállomás",
+        "terminus": "Tapolca, autóbusz-állomás",
+        "continuesBeyondModel": true
       },
       {
         "dayTypes": [
@@ -3455,7 +4100,7 @@ window.INTERCITY_BUSES_FULL = [
         "deps": [
           645,
           649,
-          660,
+          653,
           660,
           662,
           664,
@@ -3464,7 +4109,10 @@ window.INTERCITY_BUSES_FULL = [
           672,
           673,
           674
-        ]
+        ],
+        "origin": "Veszprém, vasútállomás",
+        "terminus": "Tapolca, Ipar utca",
+        "continuesBeyondModel": true
       },
       {
         "dayTypes": [
@@ -3475,7 +4123,7 @@ window.INTERCITY_BUSES_FULL = [
         "deps": [
           null,
           null,
-          870,
+          null,
           870,
           872,
           874,
@@ -3484,7 +4132,10 @@ window.INTERCITY_BUSES_FULL = [
           882,
           883,
           884
-        ]
+        ],
+        "origin": "Veszprém, autóbusz-állomás",
+        "terminus": "Taliándörögd, autóbusz-váróterem",
+        "continuesBeyondModel": true
       },
       {
         "dayTypes": [
@@ -3493,8 +4144,8 @@ window.INTERCITY_BUSES_FULL = [
         "deps": [
           null,
           null,
-          810,
-          810,
+          null,
+          null,
           812,
           814,
           null,
@@ -3502,7 +4153,10 @@ window.INTERCITY_BUSES_FULL = [
           null,
           null,
           null
-        ]
+        ],
+        "origin": "Veszprém, autóbusz-állomás",
+        "terminus": "Tapolca, autóbusz-állomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -3512,8 +4166,8 @@ window.INTERCITY_BUSES_FULL = [
         "deps": [
           null,
           null,
-          930,
-          930,
+          null,
+          null,
           932,
           934,
           null,
@@ -3521,7 +4175,10 @@ window.INTERCITY_BUSES_FULL = [
           null,
           null,
           null
-        ]
+        ],
+        "origin": "Veszprém, autóbusz-állomás",
+        "terminus": "Tapolca, autóbusz-állomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -3531,8 +4188,8 @@ window.INTERCITY_BUSES_FULL = [
         "deps": [
           null,
           null,
-          975,
-          975,
+          null,
+          null,
           977,
           978,
           984,
@@ -3540,7 +4197,10 @@ window.INTERCITY_BUSES_FULL = [
           null,
           null,
           null
-        ]
+        ],
+        "origin": "Veszprém, autóbusz-állomás",
+        "terminus": "Tapolca, autóbusz-állomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -3551,8 +4211,8 @@ window.INTERCITY_BUSES_FULL = [
         "deps": [
           null,
           null,
-          1350,
-          1350,
+          null,
+          null,
           1352,
           1353,
           null,
@@ -3560,7 +4220,10 @@ window.INTERCITY_BUSES_FULL = [
           null,
           null,
           null
-        ]
+        ],
+        "origin": "Veszprém, autóbusz-állomás",
+        "terminus": "Tapolca, autóbusz-állomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -3570,7 +4233,7 @@ window.INTERCITY_BUSES_FULL = [
         "deps": [
           null,
           null,
-          855,
+          null,
           855,
           857,
           859,
@@ -3579,7 +4242,10 @@ window.INTERCITY_BUSES_FULL = [
           null,
           null,
           null
-        ]
+        ],
+        "origin": "Veszprém, autóbusz-állomás",
+        "terminus": "Tapolca, autóbusz-állomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -3589,7 +4255,7 @@ window.INTERCITY_BUSES_FULL = [
         "deps": [
           null,
           null,
-          900,
+          null,
           900,
           902,
           904,
@@ -3598,7 +4264,10 @@ window.INTERCITY_BUSES_FULL = [
           null,
           null,
           null
-        ]
+        ],
+        "origin": "Veszprém, autóbusz-állomás",
+        "terminus": "Tapolca, autóbusz-állomás",
+        "continuesBeyondModel": false
       }
     ]
   },
@@ -3614,84 +4283,96 @@ window.INTERCITY_BUSES_FULL = [
         "lat": 47.056285,
         "lon": 17.870066,
         "spId": "VOLAN_hkir_557858_2",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
       },
       {
         "name": "Nemesvámos, Dózsa György utca",
         "lat": 47.059123,
         "lon": 17.873483,
         "spId": "VOLAN_hkir_557860_2",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
       },
       {
         "name": "Nemesvámos, Köfém",
         "lat": 47.062506,
         "lon": 17.87195,
         "spId": "VOLAN_hkir_557864_2",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
       },
       {
         "name": "Nemesvámos, Haribo",
         "lat": 47.06477,
         "lon": 17.873885,
         "spId": "VOLAN_hkir_557863_2",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
       },
       {
         "name": "Nemesvámos, Vilmapusztai elágazás",
         "lat": 47.071187,
         "lon": 17.881172,
         "spId": "VOLAN_hkir_557866_2",
-        "citySpId": null
+        "citySpId": null,
+        "platformCode": ""
       },
       {
         "name": "Veszprém, József Attila utca",
         "lat": 47.085557,
         "lon": 17.899385,
         "spId": "VOLAN_hkir_558503_2",
-        "citySpId": "VBUSZ_SP1667"
+        "citySpId": "VBUSZ_SP1667",
+        "platformCode": ""
       },
       {
         "name": "Veszprém, Komakút tér",
         "lat": 47.089356,
         "lon": 17.907503,
         "spId": "VOLAN_hkir_558516_2",
-        "citySpId": "VBUSZ_SP1668"
+        "citySpId": "VBUSZ_SP1668",
+        "platformCode": ""
       },
       {
         "name": "Veszprém, Színház",
         "lat": 47.09187,
         "lon": 17.9061,
         "spId": "VOLAN_hkir_558558_2",
-        "citySpId": "VBUSZ_SP1670"
+        "citySpId": "VBUSZ_SP1670",
+        "platformCode": ""
       },
       {
         "name": "Veszprém, autóbusz-állomás",
         "lat": 47.095231,
         "lon": 17.913519,
         "spId": "VOLAN_hkir_558455_99",
-        "citySpId": "VBUSZ_SP1694"
+        "citySpId": "VBUSZ_SP1694",
+        "platformCode": ""
       },
       {
         "name": "Veszprém, autóbusz-állomás",
         "lat": 47.09545,
         "lon": 17.9132,
         "spId": "VOLAN_hkir_558455_16",
-        "citySpId": "VBUSZ_SP1694"
+        "citySpId": "VBUSZ_SP1694",
+        "platformCode": "16"
       },
       {
         "name": "Veszprém, Jutasi úti lakótelep",
         "lat": 47.107,
         "lon": 17.9116,
         "spId": "VOLAN_hkir_558506_1",
-        "citySpId": "VBUSZ_SP1619"
+        "citySpId": "VBUSZ_SP1619",
+        "platformCode": ""
       },
       {
         "name": "Veszprém, vasútállomás",
         "lat": 47.118012,
         "lon": 17.911086,
         "spId": "VOLAN_hkir_558566_99",
-        "citySpId": "VBUSZ_SP1856"
+        "citySpId": "VBUSZ_SP1856",
+        "platformCode": ""
       }
     ],
     "trips": [
@@ -3709,10 +4390,13 @@ window.INTERCITY_BUSES_FULL = [
           328,
           330,
           331,
-          331,
+          null,
           null,
           null
-        ]
+        ],
+        "origin": "Monostorapáti, községháza",
+        "terminus": "Veszprém, autóbusz-állomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -3730,10 +4414,13 @@ window.INTERCITY_BUSES_FULL = [
           793,
           795,
           796,
-          796,
+          null,
           null,
           null
-        ]
+        ],
+        "origin": "Tapolca, vasútállomás",
+        "terminus": "Veszprém, autóbusz-állomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -3753,7 +4440,10 @@ window.INTERCITY_BUSES_FULL = [
           1075,
           1077,
           1083
-        ]
+        ],
+        "origin": "Tapolca, autóbusz-állomás",
+        "terminus": "Veszprém, vasútállomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -3770,10 +4460,13 @@ window.INTERCITY_BUSES_FULL = [
           407,
           408,
           410,
-          410,
+          null,
           null,
           null
-        ]
+        ],
+        "origin": "Tapolca, autóbusz-állomás",
+        "terminus": "Veszprém, autóbusz-állomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -3791,10 +4484,13 @@ window.INTERCITY_BUSES_FULL = [
           776,
           777,
           780,
-          780,
+          null,
           null,
           null
-        ]
+        ],
+        "origin": "Tapolca, autóbusz-állomás",
+        "terminus": "Veszprém, autóbusz-állomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -3810,10 +4506,13 @@ window.INTERCITY_BUSES_FULL = [
           962,
           963,
           964,
-          964,
+          null,
           null,
           null
-        ]
+        ],
+        "origin": "Tapolca, vasútállomás",
+        "terminus": "Veszprém, autóbusz-állomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -3829,10 +4528,13 @@ window.INTERCITY_BUSES_FULL = [
           1001,
           1002,
           1003,
-          1003,
+          null,
           null,
           null
-        ]
+        ],
+        "origin": "Tapolca, autóbusz-állomás",
+        "terminus": "Veszprém, autóbusz-állomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -3849,10 +4551,13 @@ window.INTERCITY_BUSES_FULL = [
           1000,
           1001,
           1002,
-          1002,
+          null,
           null,
           null
-        ]
+        ],
+        "origin": "Tapolca, autóbusz-állomás",
+        "terminus": "Veszprém, autóbusz-állomás",
+        "continuesBeyondModel": false
       },
       {
         "dayTypes": [
@@ -3870,10 +4575,13 @@ window.INTERCITY_BUSES_FULL = [
           377,
           378,
           379,
-          379,
+          null,
           null,
           null
-        ]
+        ],
+        "origin": "Tapolca, autóbusz-állomás",
+        "terminus": "Veszprém, autóbusz-állomás",
+        "continuesBeyondModel": false
       }
     ]
   }

@@ -65,6 +65,7 @@ window.I18N = {
     catchLocal: "Helyi busz",
     walkBetween: "5 perc gyalog Komakútra",
     catchRegional: "Helyközi busz",
+    continuesTowards: "tovább:",
     arriveSchool: "Megérkeztél az iskolába",
     schoolStop: "Nemesvámos, autóbusz-váróterem",
     transferShinhaz: "Színház→Komakút",
@@ -103,6 +104,8 @@ window.I18N = {
     timetables: "Menetrendek",
     // StopTimetableModal (megálló-néző)
     stopViewerTitle: "Megállók",
+    stopViewerCityMode: "Helyi megállók",
+    stopViewerIntercityMode: "Helyközi megállók",
     stopViewerPick: "Melyik megálló indulásait nézzük?",
     stopViewerNoLine: "Válassz legalább egy vonalat",
     stopViewerNoDeps: "Ezen a napon nincs indulás erről a megállóról",
@@ -226,6 +229,7 @@ window.I18N = {
     catchLocal: "Local bus",
     walkBetween: "5 min walk to Komakút",
     catchRegional: "Regional bus",
+    continuesTowards: "continues to:",
     arriveSchool: "You're at school!",
     schoolStop: "Nemesvámos, bus stop",
     transferShinhaz: "Theatre→Komakút",
@@ -264,6 +268,8 @@ window.I18N = {
     timetables: "Timetables",
     // StopTimetableModal (stop viewer)
     stopViewerTitle: "Stops",
+    stopViewerCityMode: "Local stops",
+    stopViewerIntercityMode: "Intercity stops",
     stopViewerPick: "Which stop's departures shall we check?",
     stopViewerNoLine: "Select at least one line",
     stopViewerNoDeps: "No departures from this stop on this day",

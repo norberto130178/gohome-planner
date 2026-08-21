@@ -67,14 +67,16 @@ function CityRouteMap({ route, fromStop, toStop, lang }) {
       const ti = stops.findIndex(s => s.name === to);
       if (fi < 0 || ti < 0) return;
       const seg = stops.slice(fi, ti + 1).filter(s => s.lat && s.lon);
+      const allPlatforms = (window._cityPlatforms && window._cityPlatforms()) || [];
       seg.forEach((stop, i) => {
         const isTerminal = i === 0 || i === seg.length - 1;
         const r = isTerminal ? 9 : 6;
         const time = dep !== null ? dep + stop.offset : null;
+        const platform = allPlatforms.find(p => p.spId === stop.spId);
         L.circleMarker([stop.lat, stop.lon], {
           radius: r, color: 'white', weight: 2,
           fillColor: color, fillOpacity: 0.95,
-        }).addTo(map).bindPopup(() => window.stopPopupContent(stop.name, time !== null ? fmt(time) : null));
+        }).addTo(map).bindPopup(() => window.stopPopupContent(stop.name, time !== null ? fmt(time) : null, null, null, platform ? platform.label : null));
         if (time !== null) {
           const labelHtml = `<div style="position:absolute;left:${r + 5}px;top:-10px;background:white;border:1.5px solid ${color};border-radius:4px;padding:1px 6px;font-size:11px;font-weight:700;color:#222;white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,0.15);">${fmt(time)}</div>`;
           L.marker([stop.lat, stop.lon], {

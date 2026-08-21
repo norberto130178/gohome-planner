@@ -11,14 +11,9 @@ function _haversineM(lat1, lon1, lat2, lon2) {
   return Math.round(R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
 }
 
-// Returns sorted array of all unique stop names from CITY_BUSES_FULL
-window.getCityStops = function getCityStops() {
-  const set = new Set();
-  for (const bus of window.CITY_BUSES_FULL) {
-    for (const s of bus.stops) set.add(s.name);
-  }
-  return Array.from(set).sort((a, b) => a.localeCompare(b, "hu"));
-};
+// window.getCityStops most a data.js-ben van (platform-/spId-alapú, ld.
+// _cityPlatforms() -- néhány körjáratos megálló, pl. 47-es "Hotel", két
+// külön fizikai ponton áll, ezt a puszta névre-Set-elő verzió elveszítette).
 
 // Plan direct and 1-transfer city routes between any two stops
 window.planCityRoutes = function planCityRoutes({

@@ -332,14 +332,16 @@ function HomeRouteMap({ route }) {
     // Helyi busz megállók karikákkal, nyilakkal, időcímkékkel
     if (boardStopIdx >= 0 && homeStopIdx >= 0) {
       const segStops = localBus.stops.slice(boardStopIdx, homeStopIdx + 1).filter(s => s.lat && s.lon);
+      const allCityPlatforms = (window._cityPlatforms && window._cityPlatforms()) || [];
       segStops.forEach((stop, i) => {
         const isTerminal = i === 0 || i === segStops.length - 1;
         const r = isTerminal ? 9 : 6;
         const time = localDep !== null ? localDep + stop.offset : null;
+        const cityPlatform = allCityPlatforms.find(p => p.spId === stop.spId);
         L.circleMarker([stop.lat, stop.lon], {
           radius: r, color: 'white', weight: 2,
           fillColor: localBus.color, fillOpacity: 0.95,
-        }).addTo(map).bindPopup(() => window.stopPopupContent(stop.name, time !== null ? fmt(time) : null));
+        }).addTo(map).bindPopup(() => window.stopPopupContent(stop.name, time !== null ? fmt(time) : null, null, null, cityPlatform ? cityPlatform.label : null));
         if (time !== null) {
           const labelHtml = `<div style="position:absolute;left:${r + 5}px;top:-10px;background:white;border:1.5px solid ${localBus.color};border-radius:4px;padding:1px 6px;font-size:11px;font-weight:700;color:#222;white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,0.15);">${fmt(time)}</div>`;
           L.marker([stop.lat, stop.lon], {
@@ -472,12 +474,14 @@ function CitySchoolRouteMap({ route, direction, schoolData }) {
       }
 
       const segStops = bus.stops.slice(fromIdx, toIdx + 1).filter(s => s.lat && s.lon);
+      const allCityPlatforms2 = (window._cityPlatforms && window._cityPlatforms()) || [];
       segStops.forEach((stop, i) => {
         const isTerminal = i === 0 || i === segStops.length - 1;
         const r = isTerminal ? 9 : 6;
         const time = busStart + stop.offset;
+        const cityPlatform = allCityPlatforms2.find(p => p.spId === stop.spId);
         L.circleMarker([stop.lat, stop.lon], { radius: r, color: 'white', weight: 2, fillColor: bus.color, fillOpacity: 0.95 })
-          .addTo(map).bindPopup(() => window.stopPopupContent(stop.name, fmt(time)));
+          .addTo(map).bindPopup(() => window.stopPopupContent(stop.name, fmt(time), null, null, cityPlatform ? cityPlatform.label : null));
         if (isTerminal) {
           const labelHtml = `<div style="position:absolute;left:${r + 5}px;top:-10px;background:white;border:1.5px solid ${bus.color};border-radius:4px;padding:1px 6px;font-size:11px;font-weight:700;color:#222;white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,0.15);">${fmt(time)}</div>`;
           L.marker([stop.lat, stop.lon], { icon: L.divIcon({ className: '', html: labelHtml, iconSize: [0, 0], iconAnchor: [0, 0] }), interactive: false, zIndexOffset: 200 }).addTo(map);
@@ -1693,12 +1697,14 @@ function SchoolRouteMap({ route, schoolData }) {
     if (transferStopIdx >= 0) {
       const fromIdx = boardingStopIdx >= 0 ? boardingStopIdx : 0;
       const segStops = localBus.stops.slice(fromIdx, transferStopIdx + 1).filter(s => s.lat && s.lon);
+      const allCityPlatforms3 = (window._cityPlatforms && window._cityPlatforms()) || [];
       segStops.forEach((stop, i) => {
         const isTerminal = i === 0 || i === segStops.length - 1;
         const r = isTerminal ? 9 : 6;
         const time = localDep !== null ? localDep + stop.offset : null;
+        const cityPlatform = allCityPlatforms3.find(p => p.spId === stop.spId);
         L.circleMarker([stop.lat, stop.lon], { radius: r, color: 'white', weight: 2, fillColor: localBus.color, fillOpacity: 0.95 })
-          .addTo(map).bindPopup(() => window.stopPopupContent(stop.name, time !== null ? fmt(time) : null));
+          .addTo(map).bindPopup(() => window.stopPopupContent(stop.name, time !== null ? fmt(time) : null, null, null, cityPlatform ? cityPlatform.label : null));
         if (time !== null) {
           const labelHtml = `<div style="position:absolute;left:${r + 5}px;top:-10px;background:white;border:1.5px solid ${localBus.color};border-radius:4px;padding:1px 6px;font-size:11px;font-weight:700;color:#222;white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,0.15);">${fmt(time)}</div>`;
           L.marker([stop.lat, stop.lon], { icon: L.divIcon({ className: '', html: labelHtml, iconSize: [0, 0], iconAnchor: [0, 0] }), interactive: false, zIndexOffset: 200 }).addTo(map);

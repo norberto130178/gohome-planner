@@ -52,11 +52,13 @@ window.addEventListener('keyup', (e) => {
 // szerepel a városi hálózatban, egy "Indulások" gomb ami a megálló-nézőt nyitja meg
 // (window.__openStopViewer — az aktuális oldal app-ja regisztrálja). DOM elemet ad
 // vissza (nem HTML stringet), így a megállónevek escapelése nem probléma.
-// `intercityLabel`: ha a hívó (pl. route-card.jsx egy helyközi térképi pontja) tudja a
-// konkrét platform pontos (irány-specifikus) címkéjét, adja át itt -- egy megálló-NÉV
-// (pl. "Nemesvámos, autóbusz-váróterem") ugyanis 2-3 külön fizikai platformot is
-// jelenthet, ezt névből egyértelműen nem lehet visszafejteni.
-window.stopPopupContent = function (stopName, timeText, lang, intercityLabel) {
+// `intercityLabel`/`cityLabel`: ha a hívó (pl. egy térképi pont) tudja a konkrét
+// platform pontos (irány-specifikus) címkéjét, adja át itt -- egy megálló-NÉV
+// (pl. "Nemesvámos, autóbusz-váróterem" vagy városi oldalon "Hotel") ugyanis
+// 2-3 külön fizikai platformot is jelenthet, ezt névből egyértelműen nem lehet
+// visszafejteni. A kettő kölcsönösen kizárja egymást (egy hívó vagy helyközi,
+// vagy helyi kontextusban van).
+window.stopPopupContent = function (stopName, timeText, lang, intercityLabel, cityLabel) {
   // lang nélkül hívva az oldal aktuális nyelvét használja (window.currentLang —
   // az app-state.jsx / city-app.jsx regisztrálja a saját localStorage-kulcsával).
   // A hívók `bindPopup(() => ...)` formában, lazy-n hívják, így a popup minden
@@ -74,12 +76,12 @@ window.stopPopupContent = function (stopName, timeText, lang, intercityLabel) {
     time.style.cssText = 'font-size:12px;font-weight:700;margin-top:2px;';
     wrap.appendChild(time);
   }
-  const isCityStop = !intercityLabel && (window.CITY_BUSES_FULL || []).some(b => b.stops.some(s => s.name === stopName));
-  if (isCityStop || intercityLabel) {
+  const isCityStop = !intercityLabel && !cityLabel && (window.CITY_BUSES_FULL || []).some(b => b.stops.some(s => s.name === stopName));
+  if (isCityStop || intercityLabel || cityLabel) {
     const btn = document.createElement('button');
     btn.textContent = '🚏 ' + (t.stopViewerDepartures || 'Indulások');
     btn.style.cssText = 'display:block;margin-top:6px;background:#1a2a3a;color:white;border:none;border-radius:8px;padding:4px 10px;font-size:11px;font-weight:800;cursor:pointer;font-family:Nunito,sans-serif;';
-    btn.onclick = () => { if (window.__openStopViewer) window.__openStopViewer(intercityLabel || stopName, intercityLabel ? 'intercity' : 'city'); };
+    btn.onclick = () => { if (window.__openStopViewer) window.__openStopViewer(intercityLabel || cityLabel || stopName, intercityLabel ? 'intercity' : 'city'); };
     wrap.appendChild(btn);
 
     // Nyitott popup élő nyelvváltása: a nyelvváltók 'gohome:langchange' eseményt
@@ -412,6 +414,103 @@ window.getIntercityDeparturesForPlatformLabel = function (label, dayType) {
     }
   }
   return out;
+};
+
+// ============================================================
+// Városi (helyi) megálló-néző — fizikai platformok (spId)
+// ============================================================
+// Ugyanaz a probléma mint a helyközinél, csak lényegesen szélesebb körben:
+// nem csak körjáratokon belül (pl. 47-es "Hotel"), hanem a teljes
+// hálózatban sok megállónév 2-3 KÜLÖNBÖZŐ VONAL között is 2-3 külön fizikai
+// pontot takar (valós, ~10-20m-es eltérésekkel, nem adatzaj). A
+// `_cityPlatforms()` spId-nkénti dedupét ad, fokozatosan bővülő
+// disambiguáló címkével, csak annyi kontextust adva hozzá, amennyi a
+// tényleges ütközés feloldásához szükséges:
+//   1. egyedi név -> puszta név (a hálózat többsége, nincs változás)
+//   2. ütköző név -> "{név} ({köv. megálló} felé)" -- ha ez már egyedi a
+//      csoporton belül, marad ennyi
+//   3. még mindig ütköző -> "{név} ({előző megálló} felől, {köv.} felé)"
+//   4. végső, ritka eset (csak akkor, ha 2 platform indulási/érkezési
+//      szomszédja is TELJESEN megegyezik) -> vonalszám(ok) hozzáfűzve
+function _cityPlatforms() {
+  const map = new Map();
+  for (const bus of window.CITY_BUSES_FULL || []) {
+    bus.stops.forEach((s, i) => {
+      const isTerminus = i === bus.stops.length - 1;
+      const prevName = i === 0 ? null : bus.stops[i - 1].name;
+      const nextName = isTerminus ? null : bus.stops[i + 1].name;
+      if (!map.has(s.spId)) map.set(s.spId, { ...s, prevName, nextName, routes: new Set() });
+      map.get(s.spId).routes.add(bus.id);
+    });
+  }
+  const platforms = Array.from(map.values());
+  const byName = new Map();
+  for (const p of platforms) {
+    if (!byName.has(p.name)) byName.set(p.name, []);
+    byName.get(p.name).push(p);
+  }
+  const dirText = (n) => n ? `${n} felé` : "végállomás";
+  for (const [name, group] of byName) {
+    if (group.length === 1) { group[0].label = name; continue; }
+    // 2. szint: csak a köv. megálló
+    const tryLabels = group.map(p => `${name} (${dirText(p.nextName)})`);
+    if (new Set(tryLabels).size === group.length) {
+      group.forEach((p, i) => p.label = tryLabels[i]);
+      continue;
+    }
+    // 3. szint: előző + köv. megálló együtt
+    const tryLabels2 = group.map(p => p.prevName
+      ? `${name} (${p.prevName} felől, ${dirText(p.nextName)})`
+      : `${name} (${dirText(p.nextName)})`);
+    if (new Set(tryLabels2).size === group.length) {
+      group.forEach((p, i) => p.label = tryLabels2[i]);
+      continue;
+    }
+    // 4. szint: vonalszám(ok) hozzáfűzve a 2. szintű címkéhez -- garantáltan
+    // egyedi, mert 2 külön spId-nek soha nem lehet pontosan ugyanaz a
+    // vonal-halmaza (különben nem lenne 2 külön fizikai platform).
+    group.forEach((p, i) => p.label = `${tryLabels[i]} – ${[...p.routes].sort((a, b) => a.localeCompare(b, "hu", { numeric: true })).join(", ")}. busz`);
+  }
+  return platforms;
+}
+window._cityPlatforms = _cityPlatforms;
+
+window.getCityStops = function () {
+  return _cityPlatforms().map(p => p.label).sort((a, b) => a.localeCompare(b, "hu"));
+};
+
+window.getCityRoutesForPlatformLabel = function (label) {
+  const platform = _cityPlatforms().find(p => p.label === label);
+  if (!platform) return [];
+  const seen = new Map();
+  for (const bus of window.CITY_BUSES_FULL || []) {
+    bus.stops.forEach((s, idx) => {
+      if (idx === bus.stops.length - 1) return; // végállomás, csak érkezés
+      if (s.spId === platform.spId) seen.set(bus.id + '|' + bus.direction, bus);
+    });
+  }
+  return Array.from(seen.values());
+};
+
+window.getCityDeparturesForPlatformLabel = function (label, dayType) {
+  const platform = _cityPlatforms().find(p => p.label === label);
+  if (!platform) return [];
+  const out = [];
+  for (const bus of window.CITY_BUSES_FULL || []) {
+    const idx = bus.stops.findIndex(s => s.spId === platform.spId);
+    if (idx < 0 || idx === bus.stops.length - 1) continue;
+    const off = bus.stops[idx].offset;
+    const sched = bus.departures[dayType] || {};
+    for (const [hStr, arr] of Object.entries(sched)) {
+      const h = Number(hStr);
+      for (const raw of arr) {
+        const m = typeof raw === "object" ? raw.t : raw;
+        const note = typeof raw === "object" ? raw.n : null;
+        out.push({ mins: h * 60 + m + off, note, bus });
+      }
+    }
+  }
+  return out.sort((a, b) => a.mins - b.mins);
 };
 
 // ============================================================

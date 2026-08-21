@@ -6,14 +6,20 @@
 let _modalOpenCount = 0;
 
 /* ── StopSearch — kereshető megálló-választó (közös: city.html + index.html) ── */
+// A dropdown-sorok mellett látszó színes vonal-chipeket adja, PLATFORM-CÍMKÉNKÉNT
+// (nem puszta néven, ld. _cityPlatforms() a data.js-ben) -- egy megállónév ugyanis
+// több külön fizikai platformot is jelenthet, ezeket külön kell számolni.
 const STOP_LINES = (() => {
   const map = {};
+  const platforms = window._cityPlatforms ? window._cityPlatforms() : [];
+  const labelBySpId = new Map(platforms.map(p => [p.spId, p.label]));
   for (const bus of window.CITY_BUSES_FULL) {
-    for (const s of bus.stops) {
-      if (!map[s.name]) map[s.name] = [];
-      if (!map[s.name].some(b => b.id === bus.id))
-        map[s.name].push({ id: bus.id, color: bus.color });
-    }
+    bus.stops.forEach((s, idx) => {
+      if (idx === bus.stops.length - 1) return; // végállomás, csak érkezés
+      const label = labelBySpId.get(s.spId) || s.name;
+      if (!map[label]) map[label] = [];
+      if (!map[label].some(b => b.id === bus.id)) map[label].push({ id: bus.id, color: bus.color });
+    });
   }
   return map;
 })();
@@ -818,10 +824,11 @@ function BusRouteMap({ bus, color, selectedDep, nowMins, fmt, modalRef, lang }) 
       const isPast = time !== null && time < nowMins;
       const r = isTerminal ? 9 : 6;
 
+      const platform = (window._cityPlatforms && window._cityPlatforms().find(p => p.spId === stop.spId)) || null;
       L.circleMarker([stop.lat, stop.lon], {
         radius: r, color: 'white', weight: 2,
         fillColor: isPast ? '#bbb' : color, fillOpacity: 0.95,
-      }).addTo(map).bindPopup(() => window.stopPopupContent(stop.name, time !== null ? fmt(time) : null));
+      }).addTo(map).bindPopup(() => window.stopPopupContent(stop.name, time !== null ? fmt(time) : null, null, null, platform ? platform.label : null));
 
       if (time !== null) {
         const borderColor = isPast ? '#bbb' : color;
@@ -1161,8 +1168,8 @@ function StopTimetableModal({ onClose, dayType, lang, initialStop, initialMode }
 
   // --- Adatok ---
   const dirsAtStop = React.useMemo(() => {
-    if (!selectedStop || viewMode !== 'city') return [];
-    return (window.CITY_BUSES_FULL || []).filter(b => U.busVisits(b, selectedStop));
+    if (!selectedStop || viewMode !== 'city' || !window.getCityRoutesForPlatformLabel) return [];
+    return window.getCityRoutesForPlatformLabel(selectedStop);
   }, [selectedStop, viewMode]);
 
   const intercityDirsAtStop = React.useMemo(() => {
@@ -1191,24 +1198,16 @@ function StopTimetableModal({ onClose, dayType, lang, initialStop, initialMode }
     setActiveIds(next);
   }
 
-  // Összefésült indulási lista. A csak végállomásként érintett irányokat kihagyjuk
-  // (oda csak érkezik a busz, nem indul tovább) — körjáratnál a megálló első
-  // előfordulása számít, így az indulási oldala megmarad.
+  // Összefésült indulási lista. Platform- (spId-) alapú lekérdezéssel, mind
+  // helyi, mind helyközi módban -- egy megállónév ugyanis több külön fizikai
+  // pontot is jelenthet (pl. körjáratos buszoknál, vagy különböző vonalak
+  // közös nevű, de más helyen lévő megállóinál), ezt a `selectedStop` platform-
+  // címke már egyértelműen azonosítja, nincs szükség név-alapú kereséshez.
   const mergedDeps = React.useMemo(() => {
     const out = [];
-    for (const bus of dirsAtStop) {
-      if (!isActive(bus.id)) continue;
-      const idx = bus.stops.findIndex(s => s.name === selectedStop);
-      if (idx < 0 || idx === bus.stops.length - 1) continue;
-      const off = bus.stops[idx].offset;
-      const sched = bus.departures[activeDayType] || {};
-      for (const [hStr, arr] of Object.entries(sched)) {
-        const h = Number(hStr);
-        for (const raw of arr) {
-          const m = typeof raw === "object" ? raw.t : raw;
-          const note = typeof raw === "object" ? raw.n : null;
-          out.push({ mins: h * 60 + m + off, note, bus });
-        }
+    if (viewMode === 'city' && selectedStop && window.getCityDeparturesForPlatformLabel) {
+      for (const e of window.getCityDeparturesForPlatformLabel(selectedStop, activeDayType)) {
+        if (isActive(e.bus.id)) out.push(e);
       }
     }
     if (viewMode === 'intercity' && selectedStop && window.getIntercityDeparturesForPlatformLabel) {

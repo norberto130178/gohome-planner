@@ -88,27 +88,16 @@ A 11A busznak van menetrendje a city-data.js-ben, de a VeszprémGO OTP rendszerb
 
 ## Menetrend frissítés (új VeszprémBusz menetrend esetén)
 
-Ha új menetrend lép érvénybe, a `city-data.js` teljes újraépítése szükséges:
+### ✅ 16. PDF parser csere — ELAVULT, NEM KELL (2026-08-22)
 
-### ⚠️ 16. PDF parser csere — pdfplumber alapú megoldás (magas prioritás)
-
-A jelenlegi `parse-menetrend.js` szöveg-alapú kinyerése (`pdftotext`-féle) megbízhatatlan:
-a három oszlopot nem tudja tisztán szétválasztani, főleg sűrűbb soroknál (pl. 13-17h).
-A 2026-os menetrend-ellenőrzés során **szinte minden járatnál** kellett kézi javítás.
-
-**Megoldás:** új parser `pdfplumber` alapon (Python), amely:
-- x-koordináta alapján választja szét a három oszlopot (Munkanap / Tanszünet / Hétvége)
-- superscript betűket méret alapján ismeri fel (pl. font size < 10 = annotáció)
-- automatikusan kezeli a két vonal egy oldalon problémát `busId` + irány alapján
-
-**Várható eredmény:** ~95% automatikus pontosság. A maradék ~5% (két járat egy oldalon)
-mindig manuális ellenőrzést igényel — ott a PDF sem jelöli melyik adat melyik járathoz tartozik.
-
-**Fájlok:** `_tmp_geocoding/parse-menetrend.js` lecserélendő, `update-from-pdf.py` bővítendő.
-- Megálló-sorrend forrása: nyomtatott/PDF menetrend (a VGO OTP scraper csak 1-2 megállót ad vissza járatonként, nem alkalmas erre)
-- SP platformok + koordináták: `stop-editor2.html` + `_tmp_geocoding/` eszközök újrafuttathatók
-- Néhány járatnál (pl. 18-as, 28-as) a Continental megálló kimaradt az eredeti adatból — új menetrendnél ellenőrizni, hogy minden megálló szerepel-e
-- A `fix-rightside.js` elemző/javító script újrafuttatható az irány-hozzárendelések ellenőrzéséhez
+Azóta megépült a `_gtfs_update/` pipeline (ld. `_gtfs_update/README.md`), ami a
+hivatalos GTFS-forrásból (`gtfs.menetbrand.com`) frissíti mind a `city-data.js`-t,
+mind az `intercity-data.js`-t — nincs többé szükség a nyomtatott PDF menetrend
+szöveg-alapú kiolvasására. A `03-extract-veszprem.js`/`04-diff-veszprem.js` adja
+a pontos, GTFS-forrású menetrend-adatot (kézi jóváhagyással beépítve), ez lecseréli
+az itt leírt `parse-menetrend.js`/`pdfplumber` tervet. A `_tmp_geocoding/`-beli
+PDF-alapú szkriptek (parse-menetrend.js, update-from-pdf.py/js, stb.) azóta
+egyszeri, lezárt eszközök, nem kell tovább fejleszteni őket.
 
 ## VeszprémBusz teljes hálózat (city.html)
 

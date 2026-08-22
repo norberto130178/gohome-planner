@@ -663,8 +663,8 @@ window.INTERCITY_BUSES_FULL = [
       },
       {
         "name": "Nemesvámos, Haribo",
-        "lat": 47.06477,
-        "lon": 17.873885,
+        "lat": 47.064766,
+        "lon": 17.87409,
         "spId": "VOLAN_hkir_557863_2",
         "citySpId": null,
         "platformCode": ""
@@ -2158,8 +2158,8 @@ window.INTERCITY_BUSES_FULL = [
       },
       {
         "name": "Nemesvámos, Haribo",
-        "lat": 47.06477,
-        "lon": 17.873885,
+        "lat": 47.064766,
+        "lon": 17.87409,
         "spId": "VOLAN_hkir_557863_2",
         "citySpId": null,
         "platformCode": ""
@@ -3352,8 +3352,8 @@ window.INTERCITY_BUSES_FULL = [
       },
       {
         "name": "Nemesvámos, Haribo",
-        "lat": 47.06477,
-        "lon": 17.873885,
+        "lat": 47.064766,
+        "lon": 17.87409,
         "spId": "VOLAN_hkir_557863_2",
         "citySpId": null,
         "platformCode": ""
@@ -3648,8 +3648,8 @@ window.INTERCITY_BUSES_FULL = [
       },
       {
         "name": "Nemesvámos, Haribo",
-        "lat": 47.06477,
-        "lon": 17.873885,
+        "lat": 47.064766,
+        "lon": 17.87409,
         "spId": "VOLAN_hkir_557863_2",
         "citySpId": null,
         "platformCode": ""
@@ -3983,8 +3983,8 @@ window.INTERCITY_BUSES_FULL = [
       },
       {
         "name": "Nemesvámos, Haribo",
-        "lat": 47.06477,
-        "lon": 17.873885,
+        "lat": 47.064766,
+        "lon": 17.87409,
         "spId": "VOLAN_hkir_557863_2",
         "citySpId": null,
         "platformCode": ""
@@ -4442,8 +4442,8 @@ window.INTERCITY_BUSES_FULL = [
       },
       {
         "name": "Nemesvámos, Haribo",
-        "lat": 47.06477,
-        "lon": 17.873885,
+        "lat": 47.064766,
+        "lon": 17.87409,
         "spId": "VOLAN_hkir_557863_2",
         "citySpId": null,
         "platformCode": ""

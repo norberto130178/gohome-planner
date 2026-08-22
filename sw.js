@@ -1,4 +1,4 @@
-const CACHE = 'hazaut-v3.29';
+const CACHE = 'hazaut-v3.30';
 
 const PRECACHE = [
   '/',

@@ -27,7 +27,17 @@ MenetBrand-tükör a praktikusabb út.
 3. `03-extract-veszprem.js` — kinyeri a helyi buszok menetrendjét
    workday/schoolholiday/weekend bontásban, `veszprem-extracted.json`-be.
 4. `04-diff-veszprem.js` — összeveti a jelenlegi `city-data.js`-t a friss
-   kinyert adattal, `veszprem-diff.json` riportot ír.
+   kinyert adattal, `veszprem-diff.json` riportot ír. **A konzol-összefoglaló
+   mostantól (2026-08-22 óta) hangosan kiírja a `matchScore < 4` (RÉSZLEGES)
+   párosításokat is** — ez a diffCount-tól FÜGGETLEN jelzés, mert az
+   időpont-összevetés csak az anchor megállónál történik, a végállomás/
+   megállólista helyességét nem garantálja. Ez fogta meg (utólag, kézi
+   nyomozással) hogy a 4A busz "vissza" iránya hónapokig a 4-es busz adatával
+   volt összekeverve (`city-data.js`), miközben minden korábbi futás
+   diffCount:0-t mutatott. Mindig nézd át kézzel ezeket a sorokat — némelyik
+   ártalmatlan (pl. egy vonalnak genuinely több, eltérő hosszúságú
+   route-variánsa van, mint a 2/5/47-es busznál), de előfordulhat köztük
+   valódi adathiba is, mint a 4A esetében volt.
 5. `05-filter-intercity-trips.js` — az országos VOLÁNBUSZ GTFS-ből kiszűri a
    Nemesvámos-i vonalakat (`WANTED_LINES` tömb — **ha új vonal kerül be, ezt
    kézzel bővíteni kell**).

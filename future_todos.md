@@ -56,17 +56,13 @@ Megvalósítva: `departures` szerkezet `{t, n}` alakban tárolja a jelölős id�
 
 ### ✅ 13. Munkaszüneti napok kezelése — KÉSZ
 
-## 14. 4-es és 4A busz — menetrend és útvonal tisztázása szükséges
+### ✅ 14. 4-es és 4A busz — KÉSZ (2026-08-22)
 
-A PDF menetrend a 4-es és 4A busznál értelmezhetetlen módon össze van vonva — a két irány táblái és valószínűleg a két járat adatai is keverednek. A `city-data.js`-ben jelenleg csak egy irány van a 4-esnél (Jutaspuszta → Vámosi úti forduló), a visszaút hiányzik.
-- **Teendő:** VGO oldalán és az eredeti PDF-ben manuálisan tisztázni a 4-es és 4A struktúráját (körjárat-e, hol a fordítópont, mik a helyes menetrendi idők)
-- A GTFS-ben két trip van (dir:0 és dir:1) — ez alapul szolgálhat a visszaút rekonstruálásához
+Megvalósítva/kijavítva: a 4-es busznak MÁR MINDKÉT iránya megvan, teljes adattal (ez a leírás elavult volt). A 4A busz "visszafelé" iránya viszont VALÓDI HIBÁT tartalmazott: a `city-data.js`-ben a 4-es busz saját visszaútjának adatával volt összekeverve/duplikálva (19 megálló, "Jutaspuszta"-ig, "Vámosi úti forduló ▸ Jutaspuszta felé" felirattal) — a `04-diff-veszprem.js` diff-riportja alapján kiderült, hogy a valódi GTFS `direction_id=1` trip-je "Vámosi úti forduló → Veszprém vasútállomás" (17 megálló, tükrözi a saját odairányát). Kijavítva a valódi GTFS-adatból kinyert megállólistával; a `departures` blokk már eleve helyes volt (csak a `stops` és a `direction` felirat volt rossz). A `04-diff-veszprem.js` mostantól hangosan jelzi a `matchScore < 4` részleges párosításokat a konzolon, hogy ez a fajta hiba ne maradhasson észrevétlen egy jövőbeli frissítésnél sem — ld. részletesen [[project-pending-issues]].
 
-## 15. 11A busz koordináták
+### 15. 11A busz koordináták — ELAVULT, A 11A NEM IS LÉTEZIK (2026-08-22-én ellenőrizve)
 
-A 11A busznak van menetrendje a city-data.js-ben, de a VeszprémGO OTP rendszerben nincs aktív menetrend hozzá (üres arrivals, nem jelenik meg route-details-for-stop válaszokban). Valószínűleg csúcsidős/iskolai járat.
-- Jelenleg directional algoritmust használ (menetirány-alapú SP választás) — ez elég pontos
-- Ha a VGO rendszerbe kerül: újrafuttatni a scrape-route-stops.js-t és inject-coords.js-t
+A `city-data.js`-ben jelenleg NINCS "11A" azonosítójú busz (ellenőrizve, 0 találat) — ez a tétel elavult, a busz azóta törölve/átnevezve lett. A sima "11-es" busznak mindkét iránya megvan, teljes adattal, nincs vele probléma.
 
 ## Menetrend frissítés (új VeszprémBusz menetrend esetén)
 

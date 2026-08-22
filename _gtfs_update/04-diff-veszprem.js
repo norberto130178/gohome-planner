@@ -137,6 +137,23 @@ if (anchorIssues.length) {
   for (const m of anchorIssues) console.log(' ', m.id, '|', m.direction, '| kihagyott trip:', m.noAnchorCount);
 }
 
+// FONTOS: a matchScore < 4 azt jelenti, hogy a párosítás csak RÉSZLEGES (pl. csak az
+// első vagy csak az utolsó megálló neve egyezett) -- ez a diffCount-ot NEM
+// befolyásolja (az időpont-összevetés csak az anchor megállónál történik, ami lehet
+// hogy pont egyezik, míg a VÉGÁLLOMÁS/megállólista mégis rossz). Ez okozta, hogy a 4A
+// busz "vissza" iránya hónapokig hibás (a 4-es busz adatával összekevert) maradt
+// észrevétlenül, miközben minden diffCount:0-t mutatott (2026-08-22-én javítva,
+// ld. project-pending-issues memória). MINDIG nézd át kézzel ezeket, ne csak a
+// diffCount-ra hagyatkozz.
+const partialMatches = report.matched.filter(m => m.matchScore < 4);
+if (partialMatches.length) {
+  console.log('\n!!! FIGYELEM: RÉSZLEGES párosítások (matchScore < 4) -- lehet hogy a megállólista/végállomás rossz, még ha diffCount:0 is !!!');
+  for (const m of partialMatches) {
+    console.log('  ', m.id, '|', m.direction, '| matchScore:', m.matchScore, '| GTFS szerinti valódi irány:', m.gtfsDirection, '| diffCount:', m.diffCount);
+  }
+  console.log('  Ellenőrizd kézzel: a fenti "GTFS szerinti valódi irány" végállomása egyezik-e az app irányával, vagy csak egy rövidebb/hosszabb valódi route-variánsról van szó (utóbbi ártalmatlan).');
+}
+
 console.log('\n--- Eltérő menetrendek (route id | irány | eltérések száma) ---');
 for (const m of withDiff.sort((a, b) => a.id.localeCompare(b.id, 'hu', { numeric: true }))) {
   console.log(' ', m.id, '|', m.direction, '| diffCount:', m.diffCount);

@@ -717,6 +717,8 @@ function BusRouteMap({ bus, color, selectedDep, selectedShapeId, nowMins, fmt, m
   const mapRef = React.useRef(null);
   const instanceRef = React.useRef(null);
   const fitCoordsRef = React.useRef(null);
+  const timeLabelMarkersRef = React.useRef([]);
+  const [showTimeLabels, setShowTimeLabels] = React.useState(true);
   const busKey = `${bus.id}-${bus.direction}-${selectedDep ?? 'none'}-${selectedShapeId ?? 'none'}`;
 
   React.useEffect(() => {
@@ -728,6 +730,12 @@ function BusRouteMap({ bus, color, selectedDep, selectedShapeId, nowMins, fmt, m
     return () => document.removeEventListener('fullscreenchange', handler);
   }, []);
 
+  // Időcímkék ki/be kapcsolása -- a meglévő marker-példányok opacity-jét állítjuk,
+  // NEM építjük újra a térképet (az elveszítené a zoom/pan állapotot).
+  React.useEffect(() => {
+    timeLabelMarkersRef.current.forEach(m => m.setOpacity(showTimeLabels ? 1 : 0));
+  }, [showTimeLabels, busKey]);
+
   React.useEffect(() => {
     if (!mapRef.current || instanceRef.current) return;
 
@@ -738,6 +746,7 @@ function BusRouteMap({ bus, color, selectedDep, selectedShapeId, nowMins, fmt, m
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap',
     }).addTo(map);
+    timeLabelMarkersRef.current = [];
 
     // Útvonal vonal — GTFS shape ha elérhető, fallback: légvonal
     const allStopCoords = stops.map(s => [s.lat, s.lon]);
@@ -881,10 +890,11 @@ function BusRouteMap({ bus, color, selectedDep, selectedShapeId, nowMins, fmt, m
         const borderColor = isPast ? '#bbb' : color;
         const textColor = isPast ? '#aaa' : '#222';
         const labelHtml = `<div style="position:absolute;left:${r + 5}px;top:-10px;background:white;border:1.5px solid ${borderColor};border-radius:4px;padding:1px 6px;font-size:11px;font-weight:700;color:${textColor};white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,0.15);">${fmt(time)}</div>`;
-        L.marker([stop.lat, stop.lon], {
+        const labelMarker = L.marker([stop.lat, stop.lon], {
           icon: L.divIcon({ className: '', html: labelHtml, iconSize: [0, 0], iconAnchor: [0, 0] }),
-          interactive: false, zIndexOffset: 200,
+          interactive: false, zIndexOffset: 200, opacity: showTimeLabels ? 1 : 0,
         }).addTo(map);
+        timeLabelMarkersRef.current.push(labelMarker);
       }
 
       // Irányjel a közbülső megállókon
@@ -915,6 +925,10 @@ function BusRouteMap({ bus, color, selectedDep, selectedShapeId, nowMins, fmt, m
     }, 50);
 
     return () => { map.remove(); instanceRef.current = null; };
+    // showTimeLabels szándékosan nincs a függőségek közt -- csak a KEZDETI opacity-t
+    // adja meg, a tényleges ki/be kapcsolást a fenti külön useEffect végzi (map-
+    // újraépítés nélkül, hogy ne vesszen el a zoom/pan).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [busKey]);
 
   function toggleFullscreen() {
@@ -942,6 +956,15 @@ function BusRouteMap({ bus, color, selectedDep, selectedShapeId, nowMins, fmt, m
   return (
     <div style={{ position: 'relative', flex: 1, display: 'flex', flexDirection: 'column' }}>
       <div ref={mapRef} style={{ flex: 1, width: '100%' }} />
+      <button onClick={() => setShowTimeLabels(v => !v)} title={showTimeLabels ? (t.hideTimeLabels || 'Időcímkék elrejtése') : (t.showTimeLabels || 'Időcímkék mutatása')} aria-label={showTimeLabels ? (t.hideTimeLabels || 'Időcímkék elrejtése') : (t.showTimeLabels || 'Időcímkék mutatása')} aria-pressed={showTimeLabels} style={{
+        position: 'absolute', top: fsState ? 28 : 10, right: fsState ? 76 : 56, zIndex: 1000,
+        background: showTimeLabels ? '#1a73e8' : 'white',
+        border: '2px solid #1a73e8',
+        borderRadius: 8, padding: '4px 8px', cursor: 'pointer',
+        fontSize: 16, lineHeight: 1, boxShadow: '0 2px 6px rgba(0,0,0,0.25)',
+        color: showTimeLabels ? 'white' : '#1a73e8',
+        opacity: showTimeLabels ? 1 : 0.7,
+      }}>🏷️</button>
       <button onClick={toggleFullscreen} title={fsState ? (t.exitFullscreen || 'Kilépés') : (t.fullscreen || 'Teljes képernyő')} aria-label={fsState ? (t.exitFullscreen || 'Kilépés') : (t.fullscreen || 'Teljes képernyő')} style={{
         position: 'absolute', top: fsState ? 28 : 10, right: fsState ? 28 : 10, zIndex: 1000,
         background: '#1a73e8',

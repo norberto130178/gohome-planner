@@ -1026,6 +1026,73 @@ function TimetableDropdown({ onSelect, upward, tabStyle, fabStyle, bgColor, lang
 }
 window.TimetableDropdown = TimetableDropdown;
 
+/* ── StopPickerMap — az összes megálló (helyi VAGY helyközi platform) egy térképen,
+   a megálló-néző saját, végleges nézete (nem ideiglenes debug-eszköz). Kattintásra
+   kiválasztja az adott platformot, ugyanúgy mintha a keresőből választották volna.
+   A fullscreen-állapotot (fsState/onToggleFullscreen) a SZÜLŐ (StopTimetableModal)
+   kezeli, a TELJES modalra alkalmazva -- nem csak erre a térkép-divre. Így amikor
+   fullscreenben megállót választasz, a modal nem lép ki a fullscreenből (csak a
+   belső nézet vált térképről listára ugyanazon a fullscreen elemen belül), nincs
+   szükség a korábbi exit-majd-újra-lépés trükkre. ── */
+function StopPickerMap({ platforms, onSelect, lang, fsState, onToggleFullscreen }) {
+  const mapRef = React.useRef(null);
+  const instanceRef = React.useRef(null);
+  const fitCoordsRef = React.useRef(null);
+  const t = (window.I18N && window.I18N[lang || "hu"]) || window.I18N?.hu || {};
+
+  React.useEffect(() => {
+    if (!mapRef.current || instanceRef.current || typeof L === 'undefined') return;
+    const map = L.map(mapRef.current, { zoomControl: true }).setView([47.09, 17.9], 12);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
+    const bounds = [];
+    platforms.forEach(p => {
+      if (p.lat == null || p.lon == null) return;
+      const marker = L.circleMarker([p.lat, p.lon], {
+        radius: 7, color: 'white', weight: 2, fillColor: '#7C4DFF', fillOpacity: 0.9,
+      }).addTo(map);
+      marker.bindTooltip(p.label, { direction: 'top', offset: [0, -8] });
+      marker.on('click', () => onSelect(p.label));
+      bounds.push([p.lat, p.lon]);
+    });
+    if (bounds.length) map.fitBounds(bounds, { padding: [24, 24] });
+    fitCoordsRef.current = bounds.length ? bounds : null;
+    instanceRef.current = map;
+
+    // A Leaflet nem érzékeli automatikusan, ha a saját konténere `display:none`-ból
+    // újra láthatóvá válik, vagy a szülő modal fullscreen-mérete változik --
+    // ResizeObserver-rel MINDEN valódi méretváltozásra frissítünk, ez az EGYETLEN
+    // forrás a méret-újraszámításra (ne versenyeztessük más handlerrel).
+    let ro = null;
+    if (typeof ResizeObserver !== 'undefined') {
+      ro = new ResizeObserver(() => {
+        instanceRef.current?.invalidateSize();
+      });
+      ro.observe(mapRef.current);
+    }
+
+    return () => { ro?.disconnect(); map.remove(); instanceRef.current = null; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [platforms]);
+
+  return (
+    <div style={fsState ? { display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, height: '100%' } : undefined}>
+      <div style={{ fontSize: 12, color: 'var(--ink-soft)', marginBottom: 8, flexShrink: 0 }}>
+        {t.stopPickerMapHint || "Kattints egy megállóra a térképen"}
+      </div>
+      <div style={fsState ? { position: 'relative', flex: 1, minHeight: 0 } : { position: 'relative' }}>
+        <div ref={mapRef} style={{ width: '100%', height: fsState ? '100%' : 380, borderRadius: fsState ? 0 : 12, overflow: 'hidden' }} />
+        <button onClick={onToggleFullscreen} title={fsState ? t.exitFullscreen : t.fullscreen} aria-label={fsState ? (t.exitFullscreen || "Kilépés") : (t.fullscreen || "Teljes képernyő")} style={{
+          position: 'absolute', top: 10, right: 10, zIndex: 1000,
+          background: '#1a73e8', border: '2px solid #1a73e8',
+          borderRadius: 8, padding: '4px 8px', cursor: 'pointer',
+          fontSize: 16, lineHeight: 1, boxShadow: '0 2px 6px rgba(0,0,0,0.25)',
+          color: 'white',
+        }}>{fsState ? '✕' : '⛶'}</button>
+      </div>
+    </div>
+  );
+}
+
 /* ============================================================
    StopTimetableModal — megálló-néző ("departure board")
    Egy kiválasztott megálló összes indulása, vonal-chipekkel
@@ -1045,6 +1112,14 @@ function StopTimetableModal({ onClose, dayType, lang, initialStop, initialMode }
   // initialStop: pl. térképi megállóra kattintva rögtön a listanézet nyílik, kereső nélkül
   const [selectedStop, setSelectedStop] = React.useState(initialStop || null);
 
+  const modalRef = React.useRef(null);
+
+  // A TELJES modal (nem csak a benne lévő StopPickerMap) megy fullscreenbe -- így
+  // amikor fullscreenben megállót választasz a térképen, a modal nem lép ki a
+  // fullscreenből (csak a belső nézet vált térképről listára UGYANAZON a
+  // fullscreen elemen belül), nincs "eltűnő térkép" / összefutó state-váltás.
+  const [modalFsState, setModalFsState] = React.useState(false);
+
   // Fullscreen térképnézetből nyitva a body-ba portalozott modal a fullscreen elem
   // mögé kerülne (a böngésző csak a fullscreen-elem leszármazottait mutatja) —
   // ezért a modalt magába a fullscreen elembe portalozzuk, így a térkép fullscreen
@@ -1057,6 +1132,18 @@ function StopTimetableModal({ onClose, dayType, lang, initialStop, initialMode }
   const openedInFullscreenRef = React.useRef(!!document.fullscreenElement);
   React.useEffect(() => {
     const h = () => {
+      // A modal saját fullscreen-állapota (setFsState a StopPickerMap ⛶ gombjához) --
+      // mindig frissül, függetlenül az alábbi ágaktól.
+      setModalFsState(!!document.fullscreenElement);
+      // Ha a most fullscreenbe/fullscreenből váltó elem MAGA a modal (vagy annak
+      // leszármazottja, pl. a `Node.contains` önmagára is igaz) -- ez a fenti, ÚJ,
+      // "a modal maga megy fullscreenbe" eset, NEM a "kívülről nyitott fullscreen
+      // térkép" eset -- nem szabad újra-portálni a modalt önmaga leszármazottjába
+      // (körkörös DOM-művelet lenne, ami miatt a böngésző azonnal, néma csendben
+      // kilépne a fullscreenből). Ilyenkor a portalTarget-et békén hagyjuk.
+      if (modalRef.current && document.fullscreenElement && modalRef.current.contains(document.fullscreenElement)) {
+        return;
+      }
       if (openedInFullscreenRef.current && !document.fullscreenElement) {
         setPortalTarget(document.body);
         handleClose();
@@ -1076,35 +1163,70 @@ function StopTimetableModal({ onClose, dayType, lang, initialStop, initialMode }
     return () => { window.__stopViewerOpen = false; };
   }, []);
 
-  // Chromium Keyboard Lock: fullscreenből nyitva lefoglaljuk az ESC-et, így az
-  // NEM lépteti ki a böngészőt a fullscreenből, hanem eljut a mi kezelőnkhöz és
-  // csak a modalt zárja — a térkép fullscreenben marad. (Hosszan nyomott ESC
-  // böngésző-garanciaként továbbra is kilép — arra a fullscreenchange ág zár.)
-  // Nem támogatott böngészőben (Firefox/Safari) marad a fallback: egy ESC a
-  // fullscreent és a modalt együtt zárja.
+  // Chromium Keyboard Lock: amíg a modal (vagy egy leszármazottja) fullscreenben
+  // van, lefoglaljuk az ESC-et, így az NEM lépteti ki natívan a böngészőt a
+  // fullscreenből, hanem eljut a mi keydown-kezelőnkhöz (lásd lentebb), ami a
+  // vissza-nyíllal egyező logikával dönt (lista→választó-nézet, vagy zárás).
+  // FONTOS: ezt a `modalFsState`-hez kötjük (NEM egy mountkor egyszer rögzített
+  // reffel), mert a modal most már UTÓLAG is fullscreenbe léphet (a StopPickerMap
+  // ⛶ gombjával) — ekkor a "csak ha már fullscreenben nyílt meg" feltétel sosem
+  // teljesült volna, és a böngésző az ELSŐ ESC-et a JS-ünk megkerülésével,
+  // némán elnyelte volna (a modal ilyenkor csak kilépett fullscreenből, a
+  // belső nézet -- lista/térkép -- nem váltott, két további ESC kellett a
+  // teljes bezáráshoz). Nem támogatott böngészőben (Firefox/Safari) marad a
+  // fallback: egy ESC a fullscreent és a modalt együtt zárja.
   React.useEffect(() => {
-    if (openedInFullscreenRef.current && navigator.keyboard && navigator.keyboard.lock) {
-      navigator.keyboard.lock(['Escape']).catch(() => {});
-      return () => {
-        // A lock feloldását megvárakoztatjuk az ESC felengedéséig (+ rövid ráhagyás):
-        // ha a modal záró ESC-je közben oldanánk fel, a böngésző a keyup-ot / az
-        // ismétlődő keydown-t már lock nélkül látná, és kiléptetné a fullscreent is.
-        let done = false;
-        const doUnlock = () => {
-          if (done) return; done = true;
-          window.removeEventListener('keyup', onUp);
-          try { navigator.keyboard.unlock(); } catch (e) {}
-        };
-        const onUp = (e) => { if (e.key === 'Escape') setTimeout(doUnlock, 100); };
-        window.addEventListener('keyup', onUp);
-        setTimeout(doUnlock, 1200); // fallback, ha nem ESC zárta a modalt
+    if (!modalFsState || !navigator.keyboard || !navigator.keyboard.lock) return;
+    navigator.keyboard.lock(['Escape']).catch(() => {});
+    return () => {
+      // A lock feloldását megvárakoztatjuk az ESC felengedéséig (+ rövid ráhagyás):
+      // ha a modal záró ESC-je közben oldanánk fel, a böngésző a keyup-ot / az
+      // ismétlődő keydown-t már lock nélkül látná, és kiléptetné a fullscreent is.
+      let done = false;
+      const doUnlock = () => {
+        if (done) return; done = true;
+        window.removeEventListener('keyup', onUp);
+        try { navigator.keyboard.unlock(); } catch (e) {}
       };
-    }
-  }, []);
+      const onUp = (e) => { if (e.key === 'Escape') setTimeout(doUnlock, 100); };
+      window.addEventListener('keyup', onUp);
+      setTimeout(doUnlock, 1200); // fallback, ha nem ESC zárta a modalt
+    };
+  }, [modalFsState]);
   const [activeDayType, setActiveDayType] = React.useState(dayType || "workday");
   const [activeIds, setActiveIds] = React.useState(null); // null = minden vonal aktív
   const [viewMode, setViewMode] = React.useState(initialMode === 'intercity' ? 'intercity' : 'city'); // 'city' | 'intercity'
+  const [pickerViewMode, setPickerViewMode] = React.useState('list'); // 'list' | 'map' -- a megálló-választó nézet módja
   const intercitySupported = !!window.INTERCITY_BUSES_FULL;
+
+  // Az utoljára kiválasztott megálló neve -- vissza-lépéskor (vissza-nyíl vagy ESC)
+  // a kereső mezőben megmarad, nem ugrik vissza üresre (a lista nézetnél); nem
+  // önmagában a "kiválasztott" state, mert az `selectedStop`-nak null-ra kell
+  // váltania, hogy a lista/térkép nézet visszaváltson.
+  const [lastStopQuery, setLastStopQuery] = React.useState(initialStop || "");
+
+  // Vissza-lépéskor (selectedStop truthy -> null) a fókusz explicit a választó-nézet
+  // első érdemi vezérlőjére kerüljön -- enélkül a korábban fókuszált elem (pl. a
+  // "Vissza" gomb) `display:none` alá kerül, a böngésző elveszíti róla a fókuszt,
+  // és tipikusan a <body>-ra esik vissza (rossz billentyűzetes/screen reader UX-nél).
+  const prevSelectedStopRef = React.useRef(selectedStop);
+  React.useEffect(() => {
+    if (prevSelectedStopRef.current && !selectedStop) {
+      const target = pickerViewMode === 'map'
+        ? document.getElementById('picker-map-toggle-btn')
+        : document.getElementById('stop-viewer-search');
+      target?.focus();
+    }
+    prevSelectedStopRef.current = selectedStop;
+  }, [selectedStop, pickerViewMode]);
+
+  function toggleModalFullscreen() {
+    if (!document.fullscreenElement) {
+      modalRef.current?.requestFullscreen().catch(e => console.error('StopTimetableModal fullscreen hiba:', e.name, e.message));
+    } else {
+      document.exitFullscreen();
+    }
+  }
 
   // --- Modal boilerplate (history back, ESC, scroll-lock, fókusz) ---
   const didPushRef = React.useRef(false);
@@ -1131,12 +1253,19 @@ function StopTimetableModal({ onClose, dayType, lang, initialStop, initialMode }
   }, []);
 
   React.useEffect(() => {
-    const handler = (e) => { if (e.key === 'Escape') { window.__escGuardUntil = Date.now() + 600; handleClose(); } };
+    const handler = (e) => {
+      if (e.key !== 'Escape') return;
+      window.__escGuardUntil = Date.now() + 600;
+      // Indulási-lista nézetben az ESC ugyanazt csinálja, mint a vissza-nyíl
+      // (egy lépést lép vissza a választó-nézetre) -- csak a választó-nézetnél
+      // zárja be a teljes modalt.
+      if (selectedStop) { setSelectedStop(null); setActiveIds(null); }
+      else handleClose();
+    };
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
-  }, []);
+  }, [selectedStop]);
 
-  const modalRef = React.useRef(null);
   const closeButtonRef = React.useRef(null);
   const triggerRef = React.useRef(null);
   React.useEffect(() => {
@@ -1167,6 +1296,14 @@ function StopTimetableModal({ onClose, dayType, lang, initialStop, initialMode }
   }, []);
 
   // --- Adatok ---
+  // A StopPickerMap-nak stabil (nem minden render-nél újra-létrehozott) tömb-referencia
+  // kell, különben a benne lévő useEffect([platforms]) minden render-nél újraépítené a
+  // Leaflet térképet, nullázva a zoom/pan állapotot -- pontosan ez történt korábban.
+  const pickerMapPlatforms = React.useMemo(() => {
+    if (viewMode === 'intercity') return (window._intercityPlatforms && window._intercityPlatforms()) || [];
+    return (window._cityPlatforms && window._cityPlatforms()) || [];
+  }, [viewMode]);
+
   const dirsAtStop = React.useMemo(() => {
     if (!selectedStop || viewMode !== 'city' || !window.getCityRoutesForPlatformLabel) return [];
     return window.getCityRoutesForPlatformLabel(selectedStop);
@@ -1287,11 +1424,16 @@ function StopTimetableModal({ onClose, dayType, lang, initialStop, initialMode }
         aria-label={selectedStop || (t.stopViewerTitle || "Megállók")}
         style={{
           background: 'white',
-          borderRadius: isDesktop ? 20 : '20px 20px 0 0',
+          borderRadius: modalFsState ? 0 : (isDesktop ? 20 : '20px 20px 0 0'),
           width: '100%',
-          maxWidth: isDesktop ? 560 : 680,
-          maxHeight: isDesktop ? '80vh' : '90vh',
-          minHeight: selectedStop ? (isDesktop ? '60vh' : '70vh') : undefined,
+          maxWidth: modalFsState ? '100%' : (isDesktop ? 560 : 680),
+          // Térkép-választó nézetben (nem fullscreen) nagyobb teret adunk a modalnak, hogy a
+          // térkép lehetőleg belső görgetés nélkül elférjen -- a fullscreen gomb továbbra is
+          // elérhető, ha a kis képernyőn mégsem férne ki teljesen. Ha a modal MAGA
+          // fullscreenben van, teljes magasságot foglal.
+          maxHeight: modalFsState ? '100%' : ((pickerViewMode === 'map' && !selectedStop) ? (isDesktop ? '92vh' : '95vh') : (isDesktop ? '80vh' : '90vh')),
+          height: modalFsState ? '100%' : undefined,
+          minHeight: modalFsState ? undefined : (selectedStop ? (isDesktop ? '60vh' : '70vh') : undefined),
           overflow: 'hidden', display: 'flex', flexDirection: 'column',
           boxShadow: '0 8px 40px rgba(0,0,0,0.35)',
           fontFamily: 'Nunito, sans-serif',
@@ -1320,15 +1462,19 @@ function StopTimetableModal({ onClose, dayType, lang, initialStop, initialMode }
           {selectedStop && (
             <button
               onClick={() => { setSelectedStop(null); setActiveIds(null); }}
-              title={t.changeStop || "Megálló váltása"}
-              aria-label={t.changeStop || "Megálló váltása"}
+              title={t.changeStop || "Vissza"}
+              aria-label={t.changeStop || "Vissza"}
               style={{
                 background: 'rgba(255,255,255,0.25)', border: 'none',
                 borderRadius: '50%', width: 36, height: 36,
-                cursor: 'pointer', color: 'white', fontSize: 16,
+                cursor: 'pointer', color: 'white',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
               }}
-            >🔍</button>
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="15 18 9 12 15 6"></polyline>
+              </svg>
+            </button>
           )}
           <button
             ref={closeButtonRef}
@@ -1343,14 +1489,22 @@ function StopTimetableModal({ onClose, dayType, lang, initialStop, initialMode }
           >✕</button>
         </div>
 
-        {!selectedStop ? (
-          /* Megálló-választó nézet */
-          <div style={{ padding: '24px 20px 32px' }}>
+        {/* Megálló-választó nézet -- MINDIG renderelve marad (nem szűnik meg, amikor egy
+            megálló ki van választva), csak CSS-sel elrejtve. Enélkül a StopPickerMap Leaflet-
+            példánya minden "vissza"-lépésnél újra létrejönne, elveszítve a zoom/pan állapotot. */}
+          <div style={{
+            padding: modalFsState ? '12px 16px' : '24px 20px 32px',
+            flex: 1,
+            overflowY: (modalFsState && pickerViewMode === 'map') ? 'hidden' : 'auto',
+            minHeight: 0,
+            display: selectedStop ? 'none' : (modalFsState ? 'flex' : 'block'),
+            flexDirection: 'column',
+          }}>
             {intercitySupported && (
-              <div role="radiogroup" style={{ display: 'flex', gap: 6, marginBottom: 14 }}>
+              <div role="radiogroup" style={{ display: 'flex', gap: 6, marginBottom: 14, flexShrink: 0 }}>
                 {[['city', t.stopViewerCityMode || 'Helyi megállók'], ['intercity', t.stopViewerIntercityMode || 'Helyközi megállók']].map(([mode, label]) => (
                   <button key={mode} type="button" role="radio" aria-checked={viewMode === mode}
-                    onClick={() => { setViewMode(mode); setActiveIds(null); }}
+                    onClick={() => { setViewMode(mode); setActiveIds(null); setLastStopQuery(""); }}
                     style={{
                       flex: 1, background: viewMode === mode ? 'var(--accent)' : 'var(--line)',
                       color: viewMode === mode ? 'white' : 'var(--ink)',
@@ -1361,21 +1515,47 @@ function StopTimetableModal({ onClose, dayType, lang, initialStop, initialMode }
                 ))}
               </div>
             )}
-            <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--ink)', marginBottom: 12 }}>
-              {t.stopViewerPick || "Melyik megálló indulásait nézzük?"}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12, gap: 8, flexShrink: 0 }}>
+              <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--ink)' }}>
+                {t.stopViewerPick || "Melyik megálló indulásait nézzük?"}
+              </div>
+              <div role="radiogroup" style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
+                {[['list', t.stopPickerListMode || '📋 Lista'], ['map', t.stopPickerMapMode || '🗺️ Térkép']].map(([m, label]) => (
+                  <button key={m} type="button" role="radio" aria-checked={pickerViewMode === m}
+                    id={m === 'map' ? 'picker-map-toggle-btn' : undefined}
+                    onClick={() => setPickerViewMode(m)}
+                    style={{
+                      background: pickerViewMode === m ? 'var(--accent)' : 'var(--line)',
+                      color: pickerViewMode === m ? 'white' : 'var(--ink)',
+                      border: 'none', borderRadius: 8, padding: '5px 10px',
+                      fontFamily: 'Nunito,sans-serif', fontSize: 11, fontWeight: 800, cursor: 'pointer',
+                    }}
+                  >{label}</button>
+                ))}
+              </div>
             </div>
-            {window.StopSearch ? (
+            {pickerViewMode === 'map' ? (
+              <StopPickerMap
+                lang={lang}
+                platforms={pickerMapPlatforms}
+                onSelect={(label) => { setSelectedStop(label); setLastStopQuery(label); setActiveIds(null); }}
+                fsState={modalFsState}
+                onToggleFullscreen={toggleModalFullscreen}
+              />
+            ) : window.StopSearch ? (
               <window.StopSearch
                 id="stop-viewer-search"
-                value=""
-                onChange={(s) => { if (s) { setSelectedStop(s); setActiveIds(null); } }}
+                value={lastStopQuery}
+                onChange={(s) => { setLastStopQuery(s); if (s) { setSelectedStop(s); setActiveIds(null); } }}
                 placeholder={t.stopSearchPlaceholder || "— Keress megálló névre —"}
                 stopList={viewMode === 'intercity' && window.getIntercityStops ? window.getIntercityStops() : undefined}
               />
             ) : null}
           </div>
-        ) : (
-          <>
+
+        {/* Indulási-lista nézet -- szintén mindig renderelve, csak elrejtve, a fentivel
+            szimmetrikusan (ugyanaz az indoklás: ne szűnjön meg állapotváltáskor). */}
+        <div style={{ display: selectedStop ? 'flex' : 'none', flexDirection: 'column', flex: 1, minHeight: 0 }}>
             {/* Vonal-chipek */}
             <div style={{
               display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center',
@@ -1454,8 +1634,7 @@ function StopTimetableModal({ onClose, dayType, lang, initialStop, initialMode }
                 ))}
               </div>
             )}
-          </>
-        )}
+        </div>
       </div>
     </div>
   );

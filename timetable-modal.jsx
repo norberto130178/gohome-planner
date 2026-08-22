@@ -5,6 +5,27 @@
 // Counter to safely manage body scroll lock with multiple potential modals
 let _modalOpenCount = 0;
 
+// Egy busz-irány `stops` listája a TELJES irányt (összes GTFS shape-variáns unióját)
+// tartalmazza. Ha egy kiválasztott induláshoz ismert a valódi GTFS shape_id (pl. a
+// 13-as busz "Hotelig" rövidített indulásainál), ez a segédfüggvény visszaadja, mely
+// megállók vannak TÉNYLEGESEN ezen a konkrét shape-en -- ugyanazt a lefedettség-
+// ellenőrzést használva, amit a BusRouteMap heurisztikája is (megálló koordinátája
+// max ~50m-re legyen a shape legközelebbi pontjától). Közös hely, hogy a térkép
+// (BusRouteMap), a megálló-idővonal (StopTimeline) és a kártya-fejléc (BusTimetableModal
+// "N közbülső megálló" számlálója) ne triplikálja/ne fusson szét ugyanez a logika.
+function stopsOnShape(stops, busId, shapeId) {
+  const shape = shapeId && (window.CITY_SHAPES || {})[busId]?.find(s => s.shape_id === shapeId);
+  if (!shape || !window.nearestShapeIdx) return stops;
+  const filtered = stops.filter(stop => {
+    const idx = window.nearestShapeIdx(shape.coords, stop.lat, stop.lon);
+    const p = shape.coords[idx];
+    return Math.hypot(p[0] - stop.lat, p[1] - stop.lon) < 0.00045;
+  });
+  // Biztonsági fallback: ha valamiért 2-nél kevesebb megállót adna a szűrés
+  // (nem várt geometriai eltérés), a teljes listával térünk vissza inkább.
+  return filtered.length >= 2 ? filtered : stops;
+}
+
 /* ── StopSearch — kereshető megálló-választó (közös: city.html + index.html) ── */
 // A dropdown-sorok mellett látszó színes vonal-chipeket adja, PLATFORM-CÍMKÉNKÉNT
 // (nem puszta néven, ld. _cityPlatforms() a data.js-ben) -- egy megállónév ugyanis
@@ -291,13 +312,15 @@ function BusTimetableModal({ busId, onClose, fromStop, isWeekend: isWeekendProp,
 
   function getDeps(bus) {
     let sched = bus.departures[activeDayType] || {};
+    const shapeLookup = (window.CITY_DEP_SHAPES?.[bus.id + '|' + bus.direction]?.[activeDayType]) || {};
     const deps = [];
     Object.entries(sched)
       .sort((a, b) => Number(a[0]) - Number(b[0]))
       .forEach(([h, rawMins]) => rawMins.forEach(raw => {
         const m = typeof raw === "object" ? raw.t : raw;
         const note = typeof raw === "object" ? raw.n : null;
-        deps.push({ mins: Number(h) * 60 + m, note });
+        const mins = Number(h) * 60 + m;
+        deps.push({ mins, note, shapeId: shapeLookup[mins] || null });
       }));
     return deps;
   }
@@ -395,7 +418,8 @@ function BusTimetableModal({ busId, onClose, fromStop, isWeekend: isWeekendProp,
   const selBus = allDirs[selDirIdx];
   const selDepObj = dirData[selDirIdx]?.deps[selected.depIdx];
   const selDep = selDepObj?.mins;
-  const middleCount = selBus.stops.length - 2;
+  const selDepShapeId = selDepObj?.shapeId;
+  const middleCount = stopsOnShape(selBus.stops, selBus.id, selDepShapeId).length - 2;
   const isDesktop = window.innerWidth >= 640;
 
   const modal = (
@@ -563,7 +587,7 @@ function BusTimetableModal({ busId, onClose, fromStop, isWeekend: isWeekendProp,
             </button>
             {stopsOpen && (
               <div style={{ maxHeight: '45vh', overflowY: 'auto' }}>
-                <StopTimeline bus={selBus} selectedDep={selDep} nowMins={nowMins} fmt={fmt} lang={lang} />
+                <StopTimeline bus={selBus} selectedDep={selDep} selectedShapeId={selDepShapeId} nowMins={nowMins} fmt={fmt} lang={lang} />
               </div>
             )}
           </div>
@@ -589,7 +613,7 @@ function BusTimetableModal({ busId, onClose, fromStop, isWeekend: isWeekendProp,
         {/* Térkép szekció */}
         {mapOpen && (
           <div style={{ flex: 1, minHeight: 320, borderTop: '2px solid var(--line)', display: 'flex', flexDirection: 'column' }}>
-            <BusRouteMap bus={selBus} color={bus0.color} selectedDep={selDep} nowMins={nowMins} fmt={fmt}
+            <BusRouteMap bus={selBus} color={bus0.color} selectedDep={selDep} selectedShapeId={selDepShapeId} nowMins={nowMins} fmt={fmt}
               modalRef={modalRef} lang={lang} />
           </div>
         )}
@@ -600,9 +624,12 @@ function BusTimetableModal({ busId, onClose, fromStop, isWeekend: isWeekendProp,
   return ReactDOM.createPortal(modal, document.body);
 }
 
-function StopTimeline({ bus, selectedDep, nowMins, fmt, lang }) {
+function StopTimeline({ bus, selectedDep, selectedShapeId, nowMins, fmt, lang }) {
   const t = (window.I18N && window.I18N[lang || "hu"]) || window.I18N?.hu || {};
-  const stops = bus.stops;
+  // `bus.stops` a TELJES irány (összes variáns) megállólistája -- ha a kiválasztott
+  // induláshoz ismert a valódi GTFS shape (rövidített/eltérő útvonal, pl. "Hotelig"),
+  // csak azokat a megállókat mutatjuk, amik ténylegesen a shape útvonalán vannak.
+  const stops = stopsOnShape(bus.stops, bus.id, selectedShapeId);
   const first = stops[0];
   const last = stops[stops.length - 1];
   const middle = stops.slice(1, -1);
@@ -685,12 +712,12 @@ function StopTimeline({ bus, selectedDep, nowMins, fmt, lang }) {
   );
 }
 
-function BusRouteMap({ bus, color, selectedDep, nowMins, fmt, modalRef, lang }) {
+function BusRouteMap({ bus, color, selectedDep, selectedShapeId, nowMins, fmt, modalRef, lang }) {
   const t = (window.I18N && window.I18N[lang || "hu"]) || window.I18N?.hu || {};
   const mapRef = React.useRef(null);
   const instanceRef = React.useRef(null);
   const fitCoordsRef = React.useRef(null);
-  const busKey = `${bus.id}-${bus.direction}-${selectedDep ?? 'none'}`;
+  const busKey = `${bus.id}-${bus.direction}-${selectedDep ?? 'none'}-${selectedShapeId ?? 'none'}`;
 
   React.useEffect(() => {
     const handler = () => setTimeout(() => {
@@ -717,7 +744,18 @@ function BusRouteMap({ bus, color, selectedDep, nowMins, fmt, modalRef, lang }) 
     const shapes = (window.CITY_SHAPES || {})[bus.id];
     let routeCoords = null;
 
-    if (shapes && shapes.length && window.nearestShapeIdx) {
+    // Ha a kiválasztott induláshoz ismert a valódi GTFS shape_id (city-dep-shapes.js,
+    // ld. _gtfs_update/15-generate-dep-shapes.js), azt használjuk KÖZVETLENÜL --
+    // nincs szükség a lenti heurisztikus (végpont+lefedettség) találgatásra, ami
+    // igazoltan rossz variánst is választhat (pl. 13-as busz "Hotelig" rövidített
+    // indulásainál a teljes hosszú útvonalat rajzolta ki). A heurisztika csak akkor
+    // fut, ha nincs ismert shape_id ehhez az induláshoz (fallback, változatlan).
+    const directShape = selectedShapeId && shapes
+      ? shapes.find(s => s.shape_id === selectedShapeId)
+      : null;
+    if (directShape) {
+      routeCoords = directShape.coords;
+    } else if (shapes && shapes.length && window.nearestShapeIdx) {
       const first = stops[0], last = stops[stops.length - 1];
       const isCircular = first.name === last.name;
 
@@ -810,16 +848,25 @@ function BusRouteMap({ bus, color, selectedDep, nowMins, fmt, modalRef, lang }) 
       }
     }
 
-    // Endpoints snappelése a pontos megálló-koordinátákra (shape nearest-point eltérés kiküszöbölése)
+    // Endpoints snappelése a pontos megálló-koordinátákra (shape nearest-point eltérés kiküszöbölése).
+    // FONTOS: ha `directShape` (valódi GTFS shape_id-lookup) adta a shape-et, NEM snappelünk --
+    // a `stops` a TELJES irány (összes variáns) végpontja, ami rövidített indulásnál (pl. "Hotelig")
+    // eltér a shape valódi végpontjától. A heurisztikus fallbacknél ez a snap továbbra is kell,
+    // mert ott a `stops` végpontjaihoz IGAZÍTVA lett kiválasztva a shape.
     const rawCoords = routeCoords || allStopCoords;
-    const finalCoords = rawCoords.length >= 2 && routeCoords
+    const finalCoords = rawCoords.length >= 2 && routeCoords && !directShape
       ? [[stops[0].lat, stops[0].lon], ...rawCoords.slice(1, -1), [stops[stops.length - 1].lat, stops[stops.length - 1].lon]]
       : rawCoords;
     L.polyline(finalCoords, { color, weight: 5, opacity: 0.85 }).addTo(map);
 
-    // Megálló jelölők + iránnyilak a közbülsőkön
-    stops.forEach((stop, i) => {
-      const isTerminal = i === 0 || i === stops.length - 1;
+    // Megálló jelölők + iránnyilak a közbülsőkön. `stops` a TELJES irány (összes
+    // variáns) megállólistája -- rövidített induláshoz (pl. "Hotelig") ebből csak
+    // azokat mutatjuk, amik a KIVÁLASZTOTT shape útvonalán ténylegesen rajta vannak,
+    // különben a rövidített indulásnál is az egész (hosszú) irány összes megállója +
+    // kitalált ideje jelenne meg.
+    const markerStops = directShape ? stopsOnShape(stops, bus.id, selectedShapeId) : stops;
+    markerStops.forEach((stop, i) => {
+      const isTerminal = i === 0 || i === markerStops.length - 1;
       const time = selectedDep !== undefined ? selectedDep + stop.offset : null;
       const isPast = time !== null && time < nowMins;
       const r = isTerminal ? 9 : 6;
@@ -842,7 +889,7 @@ function BusRouteMap({ bus, color, selectedDep, nowMins, fmt, modalRef, lang }) 
 
       // Irányjel a közbülső megállókon
       if (!isTerminal && i > 0) {
-        const prev = stops[i - 1], next = stops[i + 1] || stop;
+        const prev = markerStops[i - 1], next = markerStops[i + 1] || stop;
         const dy = next.lat - prev.lat, dx = next.lon - prev.lon;
         const angle = Math.atan2(dx, dy) * 180 / Math.PI;
         const svg = `<svg xmlns="http://www.w3.org/2000/svg"
@@ -857,11 +904,14 @@ function BusRouteMap({ bus, color, selectedDep, nowMins, fmt, modalRef, lang }) 
       }
     });
 
+    // Rövidített (directShape) induláskor a nézetet is csak a ténylegesen megjelenő
+    // szakaszra igazítjuk, ne a teljes (hosszú) irány teljes kiterjedésére.
+    const fitCoords = directShape ? markerStops.map(s => [s.lat, s.lon]) : allStopCoords;
     instanceRef.current = map;
-    fitCoordsRef.current = allStopCoords;
+    fitCoordsRef.current = fitCoords;
     setTimeout(() => {
       map.invalidateSize();
-      map.fitBounds(allStopCoords, { padding: [30, 30] });
+      map.fitBounds(fitCoords, { padding: [30, 30] });
     }, 50);
 
     return () => { map.remove(); instanceRef.current = null; };

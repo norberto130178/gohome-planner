@@ -86,7 +86,7 @@ for (const trip of trips) {
   const bucket = bucketForService(trip.service_id);
   const stopTimes = {};
   for (const s of seq) stopTimes[s.stop_id] = toMinutesOfDay(s.time);
-  entry.trips.push({ bucket, stopTimes });
+  entry.trips.push({ bucket, stopTimes, shapeId: trip.shape_id || null, tripId: trip.trip_id });
 }
 
 const out = [...result.values()];

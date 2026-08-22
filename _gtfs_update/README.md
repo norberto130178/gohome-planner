@@ -68,6 +68,35 @@ MenetBrand-tükör a praktikusabb út.
     ld. a script forrását egy módosított változatban, vagy egyszerűen nézd
     át kézzel az eltéréseket route_short_name szerint).
 
+13. `14-generate-city-shapes.js` — legenerálja a `city-shapes.js`-t
+    (városi buszok térkép-vonalai) a `veszprem/` mappa `shapes.txt`+
+    `trips.txt`+`routes.txt`-jéből — UGYANABBÓL a snapshotból, mint a
+    `03-extract-veszprem.js`, hogy a `shape_id`-k garantáltan egyezzenek a
+    kettő közt (korábban egy külön, elavuló `_tmp_geocoding/` snapshotot
+    használó, nem dokumentált szkript — `_temp/generate-city-shapes.js` —
+    végezte ezt, most a rutin lánc része). A WANTED busz-lista a
+    `city-data.js`-ből származik (nem kézzel karbantartott tömb).
+14. `15-generate-dep-shapes.js` — legenerálja a `city-dep-shapes.js`-t:
+    minden városi busz-induláshoz (busId+irány+napszak+perc) hozzárendeli a
+    valódi GTFS `shape_id`-t, a `04-diff-veszprem.js`-ével azonos
+    anchor-stop-illesztéssel. **Teljesen KÜLÖN fájl a `city-data.js`-től**
+    (az kézi kurálás, tömör JS-literál formátumú, nem tiszta JSON — gépi
+    visszaírás kockázatos lenne rá). A `timetable-modal.jsx` `BusRouteMap`-je
+    ezt olvassa ki, hogy egy kiválasztott induláshoz a MEGFELELŐ GTFS
+    shape-variánst rajzolja ki a térképre (nem egy végpont-távolság+
+    megálló-lefedettség heurisztikával találgatva, ami igazoltan rossz
+    variánst is választhatott — pl. a 13-as busz "Hotelig" rövidített
+    indulásainál a teljes hosszú útvonalat rajzolta ki, 2026-08-22-én
+    javítva). Kétséges esetek (egy percen belül több eltérő shapeId)
+    kihagyva a lookupból — ilyenkor a `BusRouteMap` a régi heurisztikára
+    esik vissza, változatlanul. Jelenleg 100%-os a lefedettség (2141/2141
+    induláshoz sikerült shape_id-t rendelni).
+
+**FONTOS jövőbeli GTFS-frissítéskor**: a `14`/`15` lépéseket IS újra kell
+futtatni a `03-extract-veszprem.js` után (nem csak a helyközi 05-12 láncot)
+— korábban a `city-shapes.js` generálása teljesen külön, nem dokumentált
+folyamat volt, könnyű volt elfelejteni.
+
 ## Kézi, egyszeri patch-scriptek (nem a fenti automatikus lánc része)
 
 - `13-add-missing-stops.js` — a 2026-08-21-i útvonal-áttekintés során,

@@ -34,41 +34,23 @@ A `CityRouteMap` és shape logika jelenleg inline Babel scriptben van a `city.ht
 
 ### ✅ 7. Munkanap/hétvége váltó — KÉSZ
 
-### 8. Útvonal-változat jelzők a menetrend modalban
-A menetrendben egyes indulási időknél betűjelölések vannak (pl. `A`, `N`, `V`) amelyek azt jelzik, hogy az adott járat rövidebb vagy eltérő útvonalon megy. Ezek jelenleg nem jelennek meg a modalban, az adatokból ki is vannak szűrve.
-- Szükséges: a betűjelölések tárolása az adatstruktúrában és megjelenítése az időpontoknál (pl. tooltip vagy kis badge)
-- Lásd még: 11. Útvonal-változat jelzők adatstruktúra
+### ✅ 8. Útvonal-változat jelzők a menetrend modalban — KÉSZ (2026-08-22-én ellenőrizve)
+Megvalósítva: a `city-data.js` minden érintett indulásnál tárolja a `{t, n}` alakot (`n` = betűjelölés), minden érintett buszhoz van `footnotes` mező. A `timetable-modal.jsx` mindkét modalban (`BusTimetableModal` és `StopTimetableModal`) kirajzolja superscriptként az időpont mellett, plusz lábjegyzet-legenda a magyarázattal.
 
-### 9. Compound annotációk kezelése a UI-ban
-Egyes indulási időknél több betűjelölés is érvényes egyszerre — pl. `Hv` = "csak Hotelig" + "csak vasárnap". Ezek `n: 'Hv'` alakban vannak tárolva a `city-data.js`-ben, a `footnotes` objektumban viszont `H` és `V` külön-külön szerepelnek.
-- A `timetable-modal.jsx` jelenleg `footnotes[n]`-t keres — `'Hv'` esetén nem talál semmit
-- **Megoldás:** az annotáció kiírásánál az `n` értéket karakterenként split-elni, és mindegyikhez külön `footnotes[char]` lookup-ot végezni
-- Ugyanez vonatkozik a tooltip/badge megjelenítésre is: mindkét annotációt külön sorban vagy vesszővel elválasztva felsorolni
-- Érintett vonal jelenleg: **13-as busz** hétvégi indulásai (`Hv`)
+### ✅ 9. Compound annotációk kezelése a UI-ban — KÉSZ (2026-08-22-én ellenőrizve)
+A `StopTimetableModal` (`timetable-modal.jsx` ~1373. sor, `usedFootnotes`) karakterenként bontja az `n` értéket, kis/nagybetű-független lookuppal (`fn[ch] || fn[ch.toUpperCase()]`) — a 13-as busz "Hv" jelölése (H + V külön footnote) helyesen mindkét magyarázatot megjeleníti. Az összes buszra (5,6,8,13,16,18,21,47) leellenőrizve: nincs olyan használt jelölés-karakter, aminek ne lenne footnote-szövege.
 
-### 10. Shape–indulás összerendelés (térképnézet pontosítása)
-A 7-es, 10-es, 13-as buszoknál több GTFS shape létezik (különböző route variánsok), a térkép jelenleg heurisztikával választ közülük — ez nem mindig tökéletes.
-- **Gyökér ok:** egy buszhoz minden megálló szerepel a `city-data.js`-ben (összes variáns), de egy adott indulás csak az egyik variáns shape-jéhez tartozik
-- **Megoldás:** a betűjelölések bevezetésekor rendelni hozzá `shape_id`-t is — a GTFS `trips.txt`-ben a `trip_id → shape_id` kapcsolat megvan, ezt kell a menetrend adatokhoz kötni
+### 10. Shape–indulás összerendelés (térképnézet pontosítása) — MEGERŐSÍTETT, ÉLESBEN REPRODUKÁLT HIBA (2026-08-22)
+A 7-es, 10-es, 13-as buszoknál több GTFS shape létezik, a térkép heurisztikával választ közülük — **ez a hiba valós, Puppeteerrel élesben is reprodukálva**: a 13-as busz 07:34-es, "Hv" (Hotelig közlekedik) jelölésű hétvégi indulásánál a térkép a TELJES 137 pontos hosszú útvonalat rajzolta ki a helyes, rövid (70 pontos, Hotelnél véget érő) shape helyett.
+- **Gyökér ok:** egy buszhoz minden megálló szerepel a `city-data.js`-ben (összes variáns), de egy adott indulás csak az egyik variáns shape-jéhez tartozik — jelenleg nincs `shape_id` az indulás-adaton
+- **Megoldás:** a betűjelöléssel együtt tárolni `shape_id`-t is (pl. `{t: 454, n: 'Hv', shapeId: '...'}`) — a GTFS `trips.txt`-ben a `trip_id → shape_id` kapcsolat megvan, a `_gtfs_update/03-extract-veszprem.js`-t kellene bővíteni ezzel
 - Ekkor egy konkrét induláshoz egyértelműen tudja a térkép a helyes shape-t kirajzolni, nincs szükség heurisztikára
+- A 7-es busz 2 shape-je valószínűleg csak sima oda-vissza irány-pár, nem valódi route-eltérés — ott lehet, hogy nincs is tényleges hiba, ezt még nem ellenőriztük konkrét esetre
 
 ## Adatstruktúra
 
-### 11. Útvonal-változat jelzők (betűkódok az indulási időknél)
-A menetrend PDF-ben egyes indulási időpontok után betű áll, amely azt jelzi, hogy az adott járat egy rövidebb vagy eltérő útvonalon közlekedik. A betűk jelentése oldalanként eltérő, a PDF Megjegyzés szekciójából kiolvasható.
-
-Példák:
-- `A`: "Vasútállomásig közlekedik" (rövidebb végállomás)
-- `T`: "Tüzér utcai fordulóig közlekedik"
-- `V`: "Valeo, főporta érintése nélkül közlekedik"
-- `H`, `U`, `N`, `o`, `v` stb.: más-más jelentés vonalaként
-
-**Jelenlegi állapot:** a betűket a parser levágatja, az információ elvész.
-
-**Szükséges fejlesztés:**
-- `departures` struktúrában eltárolni a jelölős időpontokat külön: `{ time: 10, note: 'A' }`
-- Minden irányhoz `footnotes` mező: `{ 'A': 'Vasútállomásig közlekedik', ... }`
-- Útvonaltervező logikában figyelembe venni: ha a célmegálló nincs a rövidített útvonalon, az adott indulást ne ajánlja
+### ✅ 11. Útvonal-változat jelzők (betűkódok az indulási időknél) — KÉSZ (2026-08-22-én ellenőrizve)
+Megvalósítva: `departures` szerkezet `{t, n}` alakban tárolja a jelölős időpontokat, minden irányhoz van `footnotes` mező (`{ 'A': 'Vasútállomásig közlekedik', ... }`). **Egy rész még nem ellenőrzött**: hogy az útvonaltervező (`planCityRoutes` stb.) figyelembe veszi-e, ha a célmegálló nincs a rövidített útvonalon (pl. Hotelig rövidített indulást nem ajánlana-e tévesen egy Hotelen túli célhoz) — ezt legközelebb, ha ehhez a témához visszatérünk, külön meg kell nézni.
 
 ### ✅ 12. Szombat/vasárnap külön menetrend — KÉSZ
 

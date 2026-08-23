@@ -251,7 +251,7 @@ window.CITY_BUSES_FULL = [
     { name: "Hotel", offset: 11, lat: 47.092137, lon: 17.912489, spId: "VBUSZ_SP1661" },
     { name: "Veszprém autóbusz-állomás", offset: 13, lat: 47.095453, lon: 17.913235, spId: "VBUSZ_SP1694" },
     { name: "Petőfi Sándor utca", offset: 14, lat: 47.099204, lon: 17.913319, spId: "VBUSZ_SP1696" },
-    { name: "Munkácsy Mihály utca", offset: 15, lat: 47.101875, lon: 17.913898, spId: "VBUSZ_SP1756" },
+    { name: "Munkácsy Mihály utca", offset: 15, lat: 47.103169, lon: 17.915452, spId: "VBUSZ_SP1756" },
     { name: "Haszkovó utca", offset: 17, lat: 47.107427, lon: 17.918619, spId: "VBUSZ_SP1743" },
     { name: "Laktanya", offset: 19, lat: 47.110559, lon: 17.914595, spId: "VBUSZ_SP1703" },
     { name: "Aulich Lajos utca", offset: 20, lat: 47.114858, lon: 17.913969, spId: "VBUSZ_SP1746" },

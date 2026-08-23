@@ -106,6 +106,7 @@ function MobileSettingsPill({ state, setState, open, setOpen, onTimetable }) {
   function goNow() { setState({ ...state, mode: "now" }); }
 
   const hp = state.homeStopPicker || {};
+  const nbp = state.nemesvamosBoardPicker || {};
 
   return (
     <>
@@ -155,8 +156,20 @@ function MobileSettingsPill({ state, setState, open, setOpen, onTimetable }) {
               onClick={() => setState({...state, direction:"home"})}>{t.directionHome}</button>
           </div>
         </div>
-        {state.direction === "home" && hp.stops && (
+        {state.direction === "home" && state.schoolData?.helykoziOnly && nbp.stops && (
           <div style={{padding:"4px 20px 12px 20px"}}>
+            <window.DestinationPickerWidget
+              stops={nbp.stops} linesMap={nbp.linesMap}
+              value={nbp.value} onSelect={nbp.onSelect} onClear={nbp.onClear}
+              query={nbp.query} onQueryChange={nbp.onQueryChange}
+              lang={state.lang} isMobile={true}
+              icon="🚏" label={t.nemesvamosBoardLabel} labelEn={t.nemesvamosBoardLabel}
+              placeholder={t.nemesvamosBoardPlaceholder} ariaLabel={t.nemesvamosBoardAriaLabel}
+            />
+          </div>
+        )}
+        {state.direction === "home" && hp.stops && (
+          <div style={{padding:"0 20px 12px 20px"}}>
             <window.DestinationPickerWidget
               stops={hp.stops} linesMap={hp.linesMap}
               value={hp.value} onSelect={hp.onSelect} onClear={hp.onClear}

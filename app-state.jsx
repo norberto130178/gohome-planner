@@ -11,7 +11,7 @@ window.currentLang = () => localStorage.getItem("hazaut.lang") || "hu";
 // ── DestinationPickerWidget — önálló, stabil komponens ──────────────
 // Azért van a hook-on kívül definiálva, hogy ne mountolódjon újra
 // minden hook re-rendernél (ami az input fókuszt elvesztette volna).
-function DestinationPickerWidget({ stops, linesMap, value, onSelect, onClear, lang, isMobile, query: controlledQuery, onQueryChange }) {
+function DestinationPickerWidget({ stops, linesMap, value, onSelect, onClear, lang, isMobile, query: controlledQuery, onQueryChange, icon, label, labelEn, placeholder, ariaLabel }) {
   const [internalQuery, setInternalQuery] = React.useState("");
   const query = onQueryChange !== undefined ? controlledQuery : internalQuery;
   const setQuery = onQueryChange !== undefined ? onQueryChange : setInternalQuery;
@@ -48,7 +48,7 @@ function DestinationPickerWidget({ stops, linesMap, value, onSelect, onClear, la
   return (
     <div ref={wrapRef} style={{display:"flex",alignItems:"center",gap:8}}>
       <span style={{fontSize:19,fontWeight:800,color:labelColor,letterSpacing:'0.1em',textTransform:'uppercase',marginRight:4}}>
-        🏠{!isMobile && <> {lang==="hu"?"Célállomás":"Destination"}:</>}
+        {icon || "🏠"}{!isMobile && <> {lang==="hu"?(label||"Célállomás"):(labelEn||"Destination")}:</>}
       </span>
       <div className="stop-picker-input-wrap">
         {value ? (
@@ -58,9 +58,9 @@ function DestinationPickerWidget({ stops, linesMap, value, onSelect, onClear, la
           </button>
         ) : (
           <input type="text" className="stop-picker-input"
-            placeholder={lang==="hu"?"Megálló keresése...":"Search stop..."}
+            placeholder={placeholder || (lang==="hu"?"Megálló keresése...":"Search stop...")}
             role="combobox"
-            aria-label={lang==="hu" ? "Célállomás megálló keresése" : "Search destination stop"}
+            aria-label={ariaLabel || (lang==="hu" ? "Célállomás megálló keresése" : "Search destination stop")}
             aria-expanded={open}
             aria-haspopup="listbox"
             value={query}
@@ -171,6 +171,8 @@ function useAppState(options = {}) {
   const [schoolHolidayRange, setSchoolHolidayRangeState] = useState(() => window.SchoolHolidayUtil.getRange());
   const [homeStop, setHomeStop] = useState(null);
   const [homeStopQuery, setHomeStopQuery] = useState("");
+  const [nemesvamosBoardStop, setNemesvamosBoardStop] = useState(null);
+  const [nemesvamosBoardQuery, setNemesvamosBoardQuery] = useState("");
   const [settingsKey, setSettingsKey] = useState(0);
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 640);
 
@@ -246,6 +248,16 @@ function useAppState(options = {}) {
     const nearestStop = schoolData.nearbyStops?.[0];
     const schoolWalkMins = nearestStop ? Math.ceil(nearestStop.dist / 80) : 0;
 
+    // Hazafelé jövet, ha a user egy másik nemesvámosi megállót választott (nem az
+    // iskola legközelebbi -- alapértelmezett -- megállóját), NEM tudjuk honnan
+    // indul ténylegesen (lehet zeneóra, barát -- nem feltétlenül az iskolától) --
+    // ilyenkor nincs feltételezett gyaloglási idő/távolság, a kártya a helyközi
+    // busznál kezdődik. GPS-alapú, valós helyzetből számolt táv egy jövőbeli
+    // (mobil nézetes) feladat, most szándékosan nincs kézi beviteli mező sem
+    // (a user kifejezetten nem akarja).
+    const homeWalkMins = nemesvamosBoardStop ? 0 : schoolWalkMins;
+    const homeWalkDist = nemesvamosBoardStop ? null : nearestStop?.dist;
+
     if (direction === "school") {
       if (schoolData.helykoziOnly) {
         return window.planSchoolRoutes({
@@ -299,12 +311,12 @@ function useAppState(options = {}) {
     // home direction
     if (schoolData.helykoziOnly) {
       const homeRoutes = window.planRoutes({
-        now, walkMin: schoolWalkMins, maxResults: 6,
-        homeStop: homeStopName, schoolHoliday,
+        now, walkMin: homeWalkMins, maxResults: 6,
+        homeStop: homeStopName, boardStop: nemesvamosBoardStop, schoolHoliday,
       });
       homeRoutes.forEach(r => {
-        r.walkToSchool = schoolWalkMins;
-        r.walkToSchoolDist = nearestStop?.dist;
+        r.walkToSchool = homeWalkMins;
+        r.walkToSchoolDist = homeWalkDist;
       });
       return homeRoutes;
     }
@@ -320,7 +332,7 @@ function useAppState(options = {}) {
       r.homeStopName = homeStopName;
     });
     return cityRoutes;
-  }, [now, direction, schoolFilter, schoolHoliday, settingsKey, settingsHomeStop, schoolData, homeStop]);
+  }, [now, direction, schoolFilter, schoolHoliday, settingsKey, settingsHomeStop, schoolData, homeStop, nemesvamosBoardStop]);
 
   const t = window.I18N[lang];
 
@@ -334,7 +346,7 @@ function useAppState(options = {}) {
   };
 
   // --- State object & dispatcher ---
-  const state = { now, mode, customTime, missed, lang, routes, dayOffset, direction, schoolFilter, schoolHoliday, schoolHolidayMode, schoolHolidayRange, homeStop, compactMode, isMobile, schoolData, settingsHomeStop };
+  const state = { now, mode, customTime, missed, lang, routes, dayOffset, direction, schoolFilter, schoolHoliday, schoolHolidayMode, schoolHolidayRange, homeStop, nemesvamosBoardStop, compactMode, isMobile, schoolData, settingsHomeStop };
   state.setSchoolFilter = setSchoolFilter;
   const toggleCompact = () => setCompactMode(c => !c);
   state.toggleCompact = toggleCompact;
@@ -397,6 +409,32 @@ function useAppState(options = {}) {
     return Array.from(validSet).sort((a, b) => a.localeCompare(b, 'hu'));
   }, []);
 
+  // Nemesvámoson belüli megállók, ahonnan a gyerek hazafelé jövet felszállhat --
+  // a "haza" irányú helyközi útvonalak megálló-sorrendje szerint, a fordulótól a
+  // Haribóig (a user által jóváhagyott tartomány) -- a "Vilmapusztai elágazás"
+  // szándékosan kimarad, mert az Haribo UTÁN jön (Veszprém felé vezető úti
+  // csomópont, nem a faluban van).
+  const NEMESVAMOS_BOARD_STOPS = [
+    "Nemesvámos, autóbusz-forduló",
+    "Nemesvámos, ABC",
+    "Nemesvámos, autóbusz-váróterem",
+    "Nemesvámos, Dózsa György utca",
+    "Nemesvámos, Köfém",
+    "Nemesvámos, Haribo",
+  ];
+  const nemesvamosBoardLinesMap = useMemo(() => {
+    const map = {};
+    for (const bus of (window.INTERCITY_BUSES_FULL || []).filter(r => r.dir === 'haza')) {
+      for (const s of bus.stops) {
+        if (!NEMESVAMOS_BOARD_STOPS.includes(s.name)) continue;
+        if (!map[s.name]) map[s.name] = [];
+        if (!map[s.name].some(b => b.id === bus.id))
+          map[s.name].push({ id: bus.id, color: bus.color });
+      }
+    }
+    return map;
+  }, []);
+
   const stopLinesMap = useMemo(() => {
     const map = {};
     for (const bus of window.CITY_BUSES_FULL || []) {
@@ -421,6 +459,15 @@ function useAppState(options = {}) {
     onClear: () => { setHomeStop(null); setHomeStopQuery(""); },
     query: homeStopQuery,
     onQueryChange: setHomeStopQuery,
+  };
+  state.nemesvamosBoardPicker = {
+    stops: NEMESVAMOS_BOARD_STOPS,
+    linesMap: nemesvamosBoardLinesMap,
+    value: nemesvamosBoardStop,
+    onSelect: (stop) => { setNemesvamosBoardStop(stop); setNemesvamosBoardQuery(""); },
+    onClear: () => { setNemesvamosBoardStop(null); setNemesvamosBoardQuery(""); },
+    query: nemesvamosBoardQuery,
+    onQueryChange: setNemesvamosBoardQuery,
   };
 
   // --- Shared sub-components ---

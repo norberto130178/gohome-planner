@@ -22,13 +22,6 @@ A `CityRouteMap` és shape logika jelenleg inline Babel scriptben van a `city.ht
 `index.html` (HazaÚt) a `CITY_BUSES`-t (`city-buses.js`) használja, `city.html` a `CITY_BUSES_FULL`-t (`city-data.js`). Két hasonló adatstruktúra párhuzamosan karbantartva.
 **Teendő:** Előbb megérteni mi a szándékos különbség, majd az `index.html`-t átállítani `CITY_BUSES_FULL`-ra és `city-buses.js`-t törölni.
 
-### 5. Megálló név normalizálás centralizálása
-`normStop()` csak `route-card.jsx`-ben van, de hasonló illesztési logika (`includes`, `split(' /')[0]`) több fájlban szétszórva hardkódolva.
-**Teendő:** Globális `normalizeStopName()` helper `data.js`-ben / `BUS_UTILS`-ban.
-
-### 6. Leaflet map inicializálás helper (alacsony prioritás)
-3 helyen van `L.map() + tileLayer(...)` — `route-card.jsx` kétszer, `timetable-modal.jsx` egyszer.
-**Teendő:** Közös `createLeafletMap(container)` helper ha tile layer konfig változna.
 
 ## Menetrend modal (city.html)
 
@@ -40,17 +33,13 @@ Megvalósítva: a `city-data.js` minden érintett indulásnál tárolja a `{t, n
 ### ✅ 9. Compound annotációk kezelése a UI-ban — KÉSZ (2026-08-22-én ellenőrizve)
 A `StopTimetableModal` (`timetable-modal.jsx` ~1373. sor, `usedFootnotes`) karakterenként bontja az `n` értéket, kis/nagybetű-független lookuppal (`fn[ch] || fn[ch.toUpperCase()]`) — a 13-as busz "Hv" jelölése (H + V külön footnote) helyesen mindkét magyarázatot megjeleníti. Az összes buszra (5,6,8,13,16,18,21,47) leellenőrizve: nincs olyan használt jelölés-karakter, aminek ne lenne footnote-szövege.
 
-### 10. Shape–indulás összerendelés (térképnézet pontosítása) — MEGERŐSÍTETT, ÉLESBEN REPRODUKÁLT HIBA (2026-08-22)
-A 7-es, 10-es, 13-as buszoknál több GTFS shape létezik, a térkép heurisztikával választ közülük — **ez a hiba valós, Puppeteerrel élesben is reprodukálva**: a 13-as busz 07:34-es, "Hv" (Hotelig közlekedik) jelölésű hétvégi indulásánál a térkép a TELJES 137 pontos hosszú útvonalat rajzolta ki a helyes, rövid (70 pontos, Hotelnél véget érő) shape helyett.
-- **Gyökér ok:** egy buszhoz minden megálló szerepel a `city-data.js`-ben (összes variáns), de egy adott indulás csak az egyik variáns shape-jéhez tartozik — jelenleg nincs `shape_id` az indulás-adaton
-- **Megoldás:** a betűjelöléssel együtt tárolni `shape_id`-t is (pl. `{t: 454, n: 'Hv', shapeId: '...'}`) — a GTFS `trips.txt`-ben a `trip_id → shape_id` kapcsolat megvan, a `_gtfs_update/03-extract-veszprem.js`-t kellene bővíteni ezzel
-- Ekkor egy konkrét induláshoz egyértelműen tudja a térkép a helyes shape-t kirajzolni, nincs szükség heurisztikára
-- A 7-es busz 2 shape-je valószínűleg csak sima oda-vissza irány-pár, nem valódi route-eltérés — ott lehet, hogy nincs is tényleges hiba, ezt még nem ellenőriztük konkrét esetre
+### ✅ 10. Shape–indulás összerendelés (térképnézet pontosítása) — KÉSZ (2026-08-22, v3.31)
+Megvalósítva: minden induláshoz valódi GTFS `shape_id` van hozzárendelve egy külön generált fájlban (`city-dep-shapes.js`, `_gtfs_update/15-generate-dep-shapes.js`), a `BusRouteMap` ezt használja közvetlenül a heurisztika helyett. 100%-os lefedettség. Részletek: [[project-pending-issues]] "Városi buszvonalak térkép shape-választása".
 
 ## Adatstruktúra
 
 ### ✅ 11. Útvonal-változat jelzők (betűkódok az indulási időknél) — KÉSZ (2026-08-22-én ellenőrizve)
-Megvalósítva: `departures` szerkezet `{t, n}` alakban tárolja a jelölős időpontokat, minden irányhoz van `footnotes` mező (`{ 'A': 'Vasútállomásig közlekedik', ... }`). **Egy rész még nem ellenőrzött**: hogy az útvonaltervező (`planCityRoutes` stb.) figyelembe veszi-e, ha a célmegálló nincs a rövidített útvonalon (pl. Hotelig rövidített indulást nem ajánlana-e tévesen egy Hotelen túli célhoz) — ezt legközelebb, ha ehhez a témához visszatérünk, külön meg kell nézni.
+Megvalósítva: `departures` szerkezet `{t, n}` alakban tárolja a jelölős időpontokat, minden irányhoz van `footnotes` mező (`{ 'A': 'Vasútállomásig közlekedik', ... }`). Egy kapcsolódó, nem ellenőrzött kérdés (kezeli-e az útvonaltervező a rövidített indulásokat helyesen) átkerült az útvonaltervező-hibáról szóló memória-tételbe ([[project-future-tasks]] "FONTOS: útvonaltervező...").
 
 ### ✅ 12. Szombat/vasárnap külön menetrend — KÉSZ
 

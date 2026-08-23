@@ -26,6 +26,12 @@ function RouteCard({ route, index, isPrimary, t, style, isWeekend, dayType, nowM
   const totalM = totalMin % 60;
   const totalStr = totalH > 0 ? `${totalH}${t.hour} ${totalM}${t.min}` : `${totalM} ${t.min}`;
 
+  // Ha a user egyedi (nem alapértelmezett) nemesvámosi felszállási megállót
+  // választott, nem tudjuk honnan indul ténylegesen (zeneóra, barát stb.) --
+  // ilyenkor a "gyalog az iskolától" lépést és a hozzá tartozó idő/táv címkét
+  // elrejtjük, a kártya egyenesen a helyközi busznál kezdődik.
+  const showSchoolWalk = !route.helykoziBoardStop || route.helykoziBoardStop === "Nemesvámos, autóbusz-váróterem";
+
   const busColor = route.localBus.color;
   // Mikor indult ez a konkrét helyi járat a saját (útvonal szerinti) kiindulópontjáról --
   // ugyanaz a "recept" mint a helyközi busznál a `helykoziDepBuszall`.
@@ -69,20 +75,24 @@ function RouteCard({ route, index, isPrimary, t, style, isWeekend, dayType, nowM
       )}
 
       <div className="route-steps">
-        {/* Step 1: Indulás otthonról/iskolából */}
-        <div className="route-step step-walk">
-          <div className="step-time">{fmt(route.departLeaveHome)}</div>
-          <div className="step-icon">🚶</div>
-          <div className="step-body">
-            <div className="step-title">{t.leaveAt}</div>
-            <div className="step-sub">{schoolData?.name || t.school}</div>
-          </div>
-        </div>
+        {showSchoolWalk && (
+          <>
+            {/* Step 1: Indulás otthonról/iskolából */}
+            <div className="route-step step-walk">
+              <div className="step-time">{fmt(route.departLeaveHome)}</div>
+              <div className="step-icon">🚶</div>
+              <div className="step-body">
+                <div className="step-title">{t.leaveAt}</div>
+                <div className="step-sub">{schoolData?.name || t.school}</div>
+              </div>
+            </div>
 
-        <div className="step-connector">
-          <div className="connector-line" />
-          <div className="connector-label">{t.walkTo}{route.walkToSchool ? ` · ${route.walkToSchool} ${t.min}${route.walkToSchoolDist ? ` (${route.walkToSchoolDist} m)` : ""}` : ""}</div>
-        </div>
+            <div className="step-connector">
+              <div className="connector-line" />
+              <div className="connector-label">{t.walkTo}{route.walkToSchool ? ` · ${route.walkToSchool} ${t.min}${route.walkToSchoolDist ? ` (${route.walkToSchoolDist} m)` : ""}` : ""}</div>
+            </div>
+          </>
+        )}
 
         {/* Step 2: Helyközi busz */}
         <div className="route-step step-bus-1">
@@ -94,7 +104,7 @@ function RouteCard({ route, index, isPrimary, t, style, isWeekend, dayType, nowM
               {route.helykoziLine && <span style={{background:'#2B1E3F',color:'#FFF7EC',padding:'2px 8px',borderRadius:8,fontSize:12,marginLeft:6}}>#{route.helykoziLine}</span>}
               {route.helykoziOriginDep != null && <span style={{fontSize:12,marginLeft:6,opacity:0.7}}>({fmt(route.helykoziOriginDep)})</span>}
             </div>
-            <div className="step-sub">Nemesvámos, autóbusz-váróterem → {route.transferStopShort || route.transferStop}</div>
+            <div className="step-sub">{route.helykoziBoardStop || "Nemesvámos, autóbusz-váróterem"} → {route.transferStopShort || route.transferStop}</div>
             {route.helykoziOrigin && route.helykoziTerminus && (
               <div style={{color:'var(--accent)',fontWeight:700,fontSize:12,marginTop:2}}>
                 {route.helykoziOrigin} → {route.helykoziTerminus}

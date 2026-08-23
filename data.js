@@ -108,6 +108,7 @@ function _haversineM(lat1, lon1, lat2, lon2) {
   const a = Math.sin(Δφ/2)**2 + Math.cos(φ1)*Math.cos(φ2)*Math.sin(Δλ/2)**2;
   return Math.round(R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
 }
+window._haversineM = _haversineM;
 
 // Nyári szünet dátumtartomány + "Automatikus / Mindig / Soha" mód kezelése.
 // Megosztott a két app között (mindkettő betölti a data.js-t), mert ugyanaz a
@@ -520,6 +521,7 @@ window.getCityDeparturesForPlatformLabel = function (label, dayType) {
 window.planRoutes = function planRoutes({
   now, walkMin, maxResults,
   homeStop,
+  boardStop,
   schoolHoliday,
 }) {
   const U = window.BUS_UTILS;
@@ -540,8 +542,9 @@ window.planRoutes = function planRoutes({
   const seen = new Set();
 
   for (const icRoute of icRoutes) {
-    // Felszállási megálló Nemesvámoson: autóbusz-váróterem
-    const boardStopIdx = icRoute.stops.findIndex(s => s.name === "Nemesvámos, autóbusz-váróterem");
+    // Felszállási megálló Nemesvámoson: alapból az autóbusz-váróterem, de a user
+    // választhat más, ténylegesen a faluban lévő megállót is (boardStop paraméter).
+    const boardStopIdx = icRoute.stops.findIndex(s => s.name === (boardStop || "Nemesvámos, autóbusz-váróterem"));
     if (boardStopIdx === -1) continue;
 
     for (const trip of (icRoute.trips || [])) {
@@ -594,6 +597,11 @@ window.planRoutes = function planRoutes({
               helykoziOrigin: trip.origin || null,
               helykoziOriginDep: trip.originDep ?? null,
               helykoziTerminus: trip.terminus || null,
+              // A trip VALÓDI (GTFS-eredetű) origója (helykoziOrigin) attól függetlenül
+              // fix, hogy a user melyik megállóból akar felszállni -- ez itt viszont a
+              // TÉNYLEGESEN kiválasztott/használt nemesvámosi felszállási pont, amit a
+              // kártyán a "honnan" szövegnél ezt kell mutatni, nem a helykoziOrigin-t.
+              helykoziBoardStop: boardStop || "Nemesvámos, autóbusz-váróterem",
               transferStop: cityStopName,
               transferStopShort: _TRANSFER_SHORT[icVeszpStop.name] || icVeszpStop.name.replace('Veszprém, ', ''),
               transferStopId: icVeszpStop.name,

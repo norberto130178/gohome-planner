@@ -49,6 +49,7 @@ const ALL_STOPS = window.getCityStops();
 
 // ── StopSearch ───────────────────────────────────────────────────────
 function StopSearch({ value, onChange, placeholder, id, stopList }) {
+  const lang = (window.currentLang && window.currentLang()) || "hu";
   const [query, setQuery] = React.useState(value || "");
   const [open, setOpen] = React.useState(false);
   const [dropdownStyle, setDropdownStyle] = React.useState({});
@@ -189,6 +190,8 @@ function StopSearch({ value, onChange, placeholder, id, stopList }) {
           onMouseDown={e => e.preventDefault()}
           onClick={() => { setQuery(""); onChange(""); ref.current?.querySelector('input')?.focus(); }}
           onBlur={handleBlur}
+          aria-label={lang === "hu" ? "Megálló keresés törlése" : "Clear stop search"}
+          title={lang === "hu" ? "Megálló keresés törlése" : "Clear stop search"}
           style={{
             position: "absolute", right: 4, top: "50%", transform: "translateY(-50%)",
             background: "none", border: "none", cursor: "pointer",

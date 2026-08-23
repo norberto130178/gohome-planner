@@ -30,7 +30,13 @@ function CityRouteMap({ route, fromStop, toStop, lang }) {
   const containerRef = React.useRef(null);
   const instanceRef = React.useRef(null);
   const fitCoordsRef = React.useRef(null);
+  const timeLabelMarkersRef = React.useRef([]);
+  const [showTimeLabels, setShowTimeLabels] = React.useState(true);
   const routeKey = `${route.type}-${route.bus1?.id}-${route.boardAt}-${fromStop}-${toStop}`;
+
+  React.useEffect(() => {
+    timeLabelMarkersRef.current.forEach(m => m.setOpacity(showTimeLabels ? 1 : 0));
+  }, [showTimeLabels, routeKey]);
 
   React.useEffect(() => {
     if (!mapRef.current) return;
@@ -42,6 +48,7 @@ function CityRouteMap({ route, fromStop, toStop, lang }) {
     }).addTo(map);
 
     const allCoords = [];
+    timeLabelMarkersRef.current = [];
     const fmt = m => window.BUS_UTILS.fmtTime(m);
 
     function drawSegment(bus, from, to, color) {
@@ -79,10 +86,11 @@ function CityRouteMap({ route, fromStop, toStop, lang }) {
         }).addTo(map).bindPopup(() => window.stopPopupContent(stop.name, time !== null ? fmt(time) : null, null, null, platform ? platform.label : null));
         if (time !== null) {
           const labelHtml = `<div style="position:absolute;left:${r + 5}px;top:-10px;background:white;border:1.5px solid ${color};border-radius:4px;padding:1px 6px;font-size:11px;font-weight:700;color:#222;white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,0.15);">${fmt(time)}</div>`;
-          L.marker([stop.lat, stop.lon], {
+          const labelMarker = L.marker([stop.lat, stop.lon], {
             icon: L.divIcon({ className: '', html: labelHtml, iconSize: [0, 0], iconAnchor: [0, 0] }),
-            interactive: false, zIndexOffset: 200,
+            interactive: false, zIndexOffset: 200, opacity: showTimeLabels ? 1 : 0,
           }).addTo(map);
+          timeLabelMarkersRef.current.push(labelMarker);
         }
         if (!isTerminal && i > 0) {
           const prev = seg[i - 1], next = seg[i + 1] || stop;
@@ -130,6 +138,7 @@ function CityRouteMap({ route, fromStop, toStop, lang }) {
 
     instanceRef.current = map;
     return () => { map.remove(); instanceRef.current = null; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [routeKey]);
 
   const [fsState, setFsState] = React.useState(false);
@@ -158,6 +167,15 @@ function CityRouteMap({ route, fromStop, toStop, lang }) {
   return (
     <div ref={containerRef} style={{ position: 'relative', borderTop: '2px solid var(--line)' }}>
       <div ref={mapRef} style={{ height: fsState ? '100%' : 300, width: '100%' }} />
+      <button onClick={() => setShowTimeLabels(v => !v)} title={showTimeLabels ? (t.hideTimeLabels || 'Időcímkék elrejtése') : (t.showTimeLabels || 'Időcímkék mutatása')} aria-label={showTimeLabels ? (t.hideTimeLabels || 'Időcímkék elrejtése') : (t.showTimeLabels || 'Időcímkék mutatása')} aria-pressed={showTimeLabels} style={{
+        position: 'absolute', top: fsState ? 28 : 10, right: fsState ? 76 : 56, zIndex: 1000,
+        background: showTimeLabels ? '#1a73e8' : 'white',
+        border: '2px solid #1a73e8',
+        borderRadius: 8, padding: '4px 8px', cursor: 'pointer',
+        fontSize: 16, lineHeight: 1, boxShadow: '0 2px 6px rgba(0,0,0,0.25)',
+        color: showTimeLabels ? 'white' : '#1a73e8',
+        opacity: showTimeLabels ? 1 : 0.7,
+      }}>🏷️</button>
       <button onClick={toggleFullscreen} title={fsState ? (t.exitFullscreen || 'Kilépés') : (t.fullscreen || 'Teljes képernyő')} aria-label={fsState ? (t.exitFullscreen || 'Kilépés') : (t.fullscreen || 'Teljes képernyő')} style={{
         position: 'absolute', top: fsState ? 28 : 10, right: fsState ? 28 : 10, zIndex: 1000,
         background: '#1a73e8',

@@ -240,7 +240,13 @@ function HomeRouteMap({ route }) {
   const containerRef = React.useRef(null);
   const instanceRef = React.useRef(null);
   const fitCoordsRef = React.useRef(null);
+  const timeLabelMarkersRef = React.useRef([]);
+  const [showTimeLabels, setShowTimeLabels] = React.useState(true);
   const routeKey = `${route.helykoziLine}-${route.helykoziDep}-${route.transferStop}`;
+
+  React.useEffect(() => {
+    timeLabelMarkersRef.current.forEach(m => m.setOpacity(showTimeLabels ? 1 : 0));
+  }, [showTimeLabels, routeKey]);
 
   React.useEffect(() => {
     if (!mapRef.current || instanceRef.current) return;
@@ -251,6 +257,7 @@ function HomeRouteMap({ route }) {
     }).addTo(map);
 
     const allCoords = [];
+    timeLabelMarkersRef.current = [];
     const fmt = m => window.BUS_UTILS.fmtTime(m);
 
     // 1. Helyközi szakasz: Nemesvámos → transferStop -- MINDEN köztes megálló kirajzolva
@@ -292,7 +299,8 @@ function HomeRouteMap({ route }) {
           .addTo(map).bindPopup(() => window.stopPopupContent(stop.name, time != null ? fmt(time) : null, null, platform ? platform.label : stop.name));
         if (time != null) {
           const labelHtml = `<div style="position:absolute;left:${r + 5}px;top:-10px;background:white;border:1.5px solid ${hkColor};border-radius:4px;padding:1px 6px;font-size:11px;font-weight:700;color:#222;white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,0.15);">${fmt(time)}</div>`;
-          L.marker([stop.lat, stop.lon], { icon: L.divIcon({ className: '', html: labelHtml, iconSize: [0, 0], iconAnchor: [0, 0] }), interactive: false, zIndexOffset: 200 }).addTo(map);
+          const labelMarker = L.marker([stop.lat, stop.lon], { icon: L.divIcon({ className: '', html: labelHtml, iconSize: [0, 0], iconAnchor: [0, 0] }), interactive: false, zIndexOffset: 200, opacity: showTimeLabels ? 1 : 0 }).addTo(map);
+          timeLabelMarkersRef.current.push(labelMarker);
         }
         allCoords.push([stop.lat, stop.lon]);
       });
@@ -354,10 +362,11 @@ function HomeRouteMap({ route }) {
         }).addTo(map).bindPopup(() => window.stopPopupContent(stop.name, time !== null ? fmt(time) : null, null, null, cityPlatform ? cityPlatform.label : null));
         if (time !== null) {
           const labelHtml = `<div style="position:absolute;left:${r + 5}px;top:-10px;background:white;border:1.5px solid ${localBus.color};border-radius:4px;padding:1px 6px;font-size:11px;font-weight:700;color:#222;white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,0.15);">${fmt(time)}</div>`;
-          L.marker([stop.lat, stop.lon], {
+          const labelMarker = L.marker([stop.lat, stop.lon], {
             icon: L.divIcon({ className: '', html: labelHtml, iconSize: [0, 0], iconAnchor: [0, 0] }),
-            interactive: false, zIndexOffset: 200,
+            interactive: false, zIndexOffset: 200, opacity: showTimeLabels ? 1 : 0,
           }).addTo(map);
+          timeLabelMarkersRef.current.push(labelMarker);
         }
         if (!isTerminal && i > 0) {
           const prev = segStops[i - 1], next = segStops[i + 1] || stop;
@@ -381,6 +390,7 @@ function HomeRouteMap({ route }) {
     }, 200);
 
     return () => { map.remove(); instanceRef.current = null; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [routeKey]);
 
   const [fsState, setFsState] = React.useState(false);
@@ -409,6 +419,15 @@ function HomeRouteMap({ route }) {
   return (
     <div ref={containerRef} style={{ borderTop: '2px solid var(--line)', position: 'relative' }}>
       <div ref={mapRef} style={{ height: fsState ? '100%' : 300, width: '100%' }} />
+      <button onClick={() => setShowTimeLabels(v => !v)} title={showTimeLabels ? (_t.hideTimeLabels || 'Időcímkék elrejtése') : (_t.showTimeLabels || 'Időcímkék mutatása')} aria-label={showTimeLabels ? (_t.hideTimeLabels || 'Időcímkék elrejtése') : (_t.showTimeLabels || 'Időcímkék mutatása')} aria-pressed={showTimeLabels} style={{
+        position: 'absolute', top: fsState ? 28 : 10, right: fsState ? 76 : 56, zIndex: 1000,
+        background: showTimeLabels ? '#1a73e8' : 'white',
+        border: '2px solid #1a73e8',
+        borderRadius: 8, padding: '4px 8px', cursor: 'pointer',
+        fontSize: 16, lineHeight: 1, boxShadow: '0 2px 6px rgba(0,0,0,0.25)',
+        color: showTimeLabels ? 'white' : '#1a73e8',
+        opacity: showTimeLabels ? 1 : 0.7,
+      }}>🏷️</button>
       <button onClick={toggleFullscreen} title={fsState ? _t.exitFullscreen : _t.fullscreen} aria-label={fsState ? (_t.exitFullscreen || "Kilépés") : (_t.fullscreen || "Teljes képernyő")} style={{
         position: 'absolute', top: fsState ? 28 : 10, right: fsState ? 28 : 10, zIndex: 1000,
         background: '#1a73e8',
@@ -448,13 +467,20 @@ function CitySchoolRouteMap({ route, direction, schoolData }) {
   const containerRef = React.useRef(null);
   const instanceRef = React.useRef(null);
   const fitCoordsRef = React.useRef(null);
+  const timeLabelMarkersRef = React.useRef([]);
+  const [showTimeLabels, setShowTimeLabels] = React.useState(true);
   const routeKey = `${route.type}-${route.bus1?.id}-${route.boardAt}`;
+
+  React.useEffect(() => {
+    timeLabelMarkersRef.current.forEach(m => m.setOpacity(showTimeLabels ? 1 : 0));
+  }, [showTimeLabels, routeKey]);
 
   React.useEffect(() => {
     if (!mapRef.current || instanceRef.current) return;
     const map = L.map(mapRef.current, { zoomControl: true });
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
     const allCoords = [];
+    timeLabelMarkersRef.current = [];
     const fmt = m => window.BUS_UTILS.fmtTime(m);
 
     const nearestStopName = route.nearestStopName || schoolData?.nearbyStops?.[0]?.name || '';
@@ -494,7 +520,8 @@ function CitySchoolRouteMap({ route, direction, schoolData }) {
           .addTo(map).bindPopup(() => window.stopPopupContent(stop.name, fmt(time), null, null, cityPlatform ? cityPlatform.label : null));
         if (isTerminal) {
           const labelHtml = `<div style="position:absolute;left:${r + 5}px;top:-10px;background:white;border:1.5px solid ${bus.color};border-radius:4px;padding:1px 6px;font-size:11px;font-weight:700;color:#222;white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,0.15);">${fmt(time)}</div>`;
-          L.marker([stop.lat, stop.lon], { icon: L.divIcon({ className: '', html: labelHtml, iconSize: [0, 0], iconAnchor: [0, 0] }), interactive: false, zIndexOffset: 200 }).addTo(map);
+          const labelMarker = L.marker([stop.lat, stop.lon], { icon: L.divIcon({ className: '', html: labelHtml, iconSize: [0, 0], iconAnchor: [0, 0] }), interactive: false, zIndexOffset: 200, opacity: showTimeLabels ? 1 : 0 }).addTo(map);
+          timeLabelMarkersRef.current.push(labelMarker);
         }
         if (!isTerminal && i > 0) {
           const prev = segStops[i - 1], next = segStops[i + 1] || stop;
@@ -549,7 +576,8 @@ function CitySchoolRouteMap({ route, direction, schoolData }) {
       }).addTo(map).bindPopup(`<b>${schoolData.name}</b>`);
       if (route.arriveSchool != null) {
         const tHtml = `<div style="position:absolute;left:14px;top:-10px;background:white;border:1.5px solid #333;border-radius:4px;padding:1px 6px;font-size:11px;font-weight:700;color:#222;white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,0.15);">${fmt(route.arriveSchool)}</div>`;
-        L.marker([schoolData.lat, schoolData.lon], { icon: L.divIcon({ className: '', html: tHtml, iconSize: [0, 0], iconAnchor: [0, 0] }), interactive: false, zIndexOffset: 600 }).addTo(map);
+        const schoolLabelMarker = L.marker([schoolData.lat, schoolData.lon], { icon: L.divIcon({ className: '', html: tHtml, iconSize: [0, 0], iconAnchor: [0, 0] }), interactive: false, zIndexOffset: 600, opacity: showTimeLabels ? 1 : 0 }).addTo(map);
+        timeLabelMarkersRef.current.push(schoolLabelMarker);
       }
       allCoords.push([schoolData.lat, schoolData.lon]);
     }
@@ -563,6 +591,7 @@ function CitySchoolRouteMap({ route, direction, schoolData }) {
     }, 200);
 
     return () => { map.remove(); instanceRef.current = null; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [routeKey]);
 
   const [fsState, setFsState] = React.useState(false);
@@ -591,6 +620,15 @@ function CitySchoolRouteMap({ route, direction, schoolData }) {
   return (
     <div ref={containerRef} style={{ borderTop: '2px solid var(--line)', position: 'relative' }}>
       <div ref={mapRef} style={{ height: fsState ? '100%' : 300, width: '100%' }} />
+      <button onClick={() => setShowTimeLabels(v => !v)} title={showTimeLabels ? (_t.hideTimeLabels || 'Időcímkék elrejtése') : (_t.showTimeLabels || 'Időcímkék mutatása')} aria-label={showTimeLabels ? (_t.hideTimeLabels || 'Időcímkék elrejtése') : (_t.showTimeLabels || 'Időcímkék mutatása')} aria-pressed={showTimeLabels} style={{
+        position: 'absolute', top: fsState ? 28 : 10, right: fsState ? 76 : 56, zIndex: 1000,
+        background: showTimeLabels ? '#1a73e8' : 'white',
+        border: '2px solid #1a73e8',
+        borderRadius: 8, padding: '4px 8px', cursor: 'pointer',
+        fontSize: 16, lineHeight: 1, boxShadow: '0 2px 6px rgba(0,0,0,0.25)',
+        color: showTimeLabels ? 'white' : '#1a73e8',
+        opacity: showTimeLabels ? 1 : 0.7,
+      }}>🏷️</button>
       <button onClick={toggleFullscreen} title={fsState ? _t.exitFullscreen : _t.fullscreen} aria-label={fsState ? (_t.exitFullscreen || "Kilépés") : (_t.fullscreen || "Teljes képernyő")} style={{
         position: 'absolute', top: fsState ? 28 : 10, right: fsState ? 28 : 10, zIndex: 1000,
         background: '#1a73e8', border: '2px solid #1a73e8',
@@ -1660,7 +1698,13 @@ function SchoolRouteMap({ route, schoolData }) {
   const containerRef = React.useRef(null);
   const instanceRef = React.useRef(null);
   const fitCoordsRef = React.useRef(null);
+  const timeLabelMarkersRef = React.useRef([]);
+  const [showTimeLabels, setShowTimeLabels] = React.useState(true);
   const routeKey = `${route.helykoziLine}-${route.helykoziDep}-${route.transferStop}-${schoolData?.id}`;
+
+  React.useEffect(() => {
+    timeLabelMarkersRef.current.forEach(m => m.setOpacity(showTimeLabels ? 1 : 0));
+  }, [showTimeLabels, routeKey]);
 
   React.useEffect(() => {
     if (!mapRef.current || instanceRef.current) return;
@@ -1671,6 +1715,7 @@ function SchoolRouteMap({ route, schoolData }) {
     }).addTo(map);
 
     const allCoords = [];
+    timeLabelMarkersRef.current = [];
     const fmt = m => window.BUS_UTILS.fmtTime(m);
 
     const volanLat = route.transferLat, volanLon = route.transferLon;
@@ -1717,7 +1762,8 @@ function SchoolRouteMap({ route, schoolData }) {
           .addTo(map).bindPopup(() => window.stopPopupContent(stop.name, time !== null ? fmt(time) : null, null, null, cityPlatform ? cityPlatform.label : null));
         if (time !== null) {
           const labelHtml = `<div style="position:absolute;left:${r + 5}px;top:-10px;background:white;border:1.5px solid ${localBus.color};border-radius:4px;padding:1px 6px;font-size:11px;font-weight:700;color:#222;white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,0.15);">${fmt(time)}</div>`;
-          L.marker([stop.lat, stop.lon], { icon: L.divIcon({ className: '', html: labelHtml, iconSize: [0, 0], iconAnchor: [0, 0] }), interactive: false, zIndexOffset: 200 }).addTo(map);
+          const labelMarker = L.marker([stop.lat, stop.lon], { icon: L.divIcon({ className: '', html: labelHtml, iconSize: [0, 0], iconAnchor: [0, 0] }), interactive: false, zIndexOffset: 200, opacity: showTimeLabels ? 1 : 0 }).addTo(map);
+          timeLabelMarkersRef.current.push(labelMarker);
         }
         if (!isTerminal && i > 0) {
           const prev = segStops[i - 1], next = segStops[i + 1] || stop;
@@ -1764,7 +1810,8 @@ function SchoolRouteMap({ route, schoolData }) {
           .addTo(map).bindPopup(() => window.stopPopupContent(stop.name, time != null ? fmt(time) : null, null, platform ? platform.label : stop.name));
         if (time != null) {
           const labelHtml = `<div style="position:absolute;left:${r + 5}px;top:-10px;background:white;border:1.5px solid ${hkColor};border-radius:4px;padding:1px 6px;font-size:11px;font-weight:700;color:#222;white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,0.15);">${fmt(time)}</div>`;
-          L.marker([stop.lat, stop.lon], { icon: L.divIcon({ className: '', html: labelHtml, iconSize: [0, 0], iconAnchor: [0, 0] }), interactive: false, zIndexOffset: 200 }).addTo(map);
+          const labelMarker = L.marker([stop.lat, stop.lon], { icon: L.divIcon({ className: '', html: labelHtml, iconSize: [0, 0], iconAnchor: [0, 0] }), interactive: false, zIndexOffset: 200, opacity: showTimeLabels ? 1 : 0 }).addTo(map);
+          timeLabelMarkersRef.current.push(labelMarker);
         }
         allCoords.push([stop.lat, stop.lon]);
       });
@@ -1793,7 +1840,8 @@ function SchoolRouteMap({ route, schoolData }) {
       }).addTo(map).bindPopup(`<b>${schoolData.name}</b>`);
       if (route.arriveSchool != null) {
         const tHtml = `<div style="position:absolute;left:14px;top:-10px;background:white;border:1.5px solid #555;border-radius:4px;padding:1px 6px;font-size:11px;font-weight:700;color:#222;white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,0.15);">${fmt(route.arriveSchool)}</div>`;
-        L.marker([schoolData.lat, schoolData.lon], { icon: L.divIcon({ className: '', html: tHtml, iconSize: [0, 0], iconAnchor: [0, 0] }), interactive: false, zIndexOffset: 600 }).addTo(map);
+        const schoolLabelMarker = L.marker([schoolData.lat, schoolData.lon], { icon: L.divIcon({ className: '', html: tHtml, iconSize: [0, 0], iconAnchor: [0, 0] }), interactive: false, zIndexOffset: 600, opacity: showTimeLabels ? 1 : 0 }).addTo(map);
+        timeLabelMarkersRef.current.push(schoolLabelMarker);
       }
       allCoords.push([schoolData.lat, schoolData.lon]);
     }
@@ -1807,6 +1855,7 @@ function SchoolRouteMap({ route, schoolData }) {
     }, 200);
 
     return () => { map.remove(); instanceRef.current = null; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [routeKey]);
 
   const [fsState, setFsState] = React.useState(false);
@@ -1835,6 +1884,15 @@ function SchoolRouteMap({ route, schoolData }) {
   return (
     <div ref={containerRef} style={{ borderTop: '2px solid var(--line)', position: 'relative' }}>
       <div ref={mapRef} style={{ height: fsState ? '100%' : 300, width: '100%' }} />
+      <button onClick={() => setShowTimeLabels(v => !v)} title={showTimeLabels ? (_t.hideTimeLabels || 'Időcímkék elrejtése') : (_t.showTimeLabels || 'Időcímkék mutatása')} aria-label={showTimeLabels ? (_t.hideTimeLabels || 'Időcímkék elrejtése') : (_t.showTimeLabels || 'Időcímkék mutatása')} aria-pressed={showTimeLabels} style={{
+        position: 'absolute', top: fsState ? 28 : 10, right: fsState ? 76 : 56, zIndex: 1000,
+        background: showTimeLabels ? '#1a73e8' : 'white',
+        border: '2px solid #1a73e8',
+        borderRadius: 8, padding: '4px 8px', cursor: 'pointer',
+        fontSize: 16, lineHeight: 1, boxShadow: '0 2px 6px rgba(0,0,0,0.25)',
+        color: showTimeLabels ? 'white' : '#1a73e8',
+        opacity: showTimeLabels ? 1 : 0.7,
+      }}>🏷️</button>
       <button onClick={toggleFullscreen} title={fsState ? _t.exitFullscreen : _t.fullscreen} aria-label={fsState ? (_t.exitFullscreen || "Kilépés") : (_t.fullscreen || "Teljes képernyő")} style={{
         position: 'absolute', top: fsState ? 28 : 10, right: fsState ? 28 : 10, zIndex: 1000,
         background: '#1a73e8',

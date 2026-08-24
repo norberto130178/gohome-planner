@@ -34,6 +34,10 @@ window.planCityRoutes = function planCityRoutes({
   const seen = new Set();
   // Csak azonos spId-jű megállónál valóban közvetlen (nem gyalogos) átszállás
   const trueDirectSeen = new Set();
+  // Minden gyaloglást igénylő átszállás-jelölt (akár az azonos-nevű-de-más-platformos
+  // 1-átszállásos ágból, akár a lentebbi walk-graph-os ágból) ide gyűlik -- a végén EGY
+  // közös csoportosítási lépés dönti el, melyik marad meg a results-ban (ld. lentebb).
+  const walkTransferCandidates = [];
 
   // ── DIRECT ROUTES ──────────────────────────────────────────
   for (const bus of buses) {
@@ -141,7 +145,7 @@ window.planCityRoutes = function planCityRoutes({
               trueDirectSeen.add(`SD|${bus1.id}|${bus1.direction}|${dep1}|${bus2.id}|${bus2.direction}|${dep2}`);
             }
 
-            results.push({
+            const entry = {
               type: "transfer",
               departLeaveOrigin: boardAt1 - walkMin,
               boardAt: boardAt1,
@@ -154,7 +158,11 @@ window.planCityRoutes = function planCityRoutes({
               arriveAt,
               totalDuration: arriveAt - (boardAt1 - walkMin),
               ...(transferWalk ? { walkTransfer: transferWalk, walkToStop: ts.name, walkTransferSameStop: true } : {}),
-            });
+            };
+            // A gyaloglást igénylő (transferWalk) jelöltek nem kerülnek rögtön a
+            // results-ba -- ld. a walkTransferCandidates-hez fűzött indoklást lentebb.
+            if (transferWalk) walkTransferCandidates.push(entry);
+            else results.push(entry);
           }
         }
       }
@@ -252,8 +260,33 @@ window.planCityRoutes = function planCityRoutes({
     }
   }
 
-  // A legjobb walk-transferek beillesztése az eredmények közé
-  for (const r of bestWalkMap.values()) results.push(r);
+  // A gyaloglást igénylő átszállás-jelöltek (akár az azonos-nevű-más-platformos
+  // 1-átszállásos ágból, akár a lenti walk-graph-os ágból származnak) csoportosítása:
+  // ha UGYANAZ a bus1-járat ÉS UGYANAZ a bus2-járat több lehetséges leszállási/gyalogos
+  // ponton keresztül is elérhető, az valójában EGY döntés (csak más leszállóhellyel),
+  // nem több külön alternatíva -- korábban ez 3-8 majdnem-egyforma kártyát is
+  // elfoglalt a (limitált) eredménylistából, kiszorítva más, ténylegesen eltérő
+  // kombinációkat. Csak a két szélsőértéket tartjuk meg: a legrövidebb gyaloglásút
+  // és a leghosszabb bus1-es utazást (legkésőbbi leszállás bus1-ről) -- a köztes
+  // variánsok (amik sem nem a legkevesebb gyaloglást, sem a legtöbb buszon-ülést nem
+  // adják) kiesnek.
+  const allWalkCandidates = [...walkTransferCandidates, ...bestWalkMap.values()];
+  const tripGroups = new Map();
+  for (const r of allWalkCandidates) {
+    const tripKey = `${r.bus1.id}|${r.bus1.direction}|${r.boardAt}|${r.bus2.id}|${r.bus2.direction}|${r.arriveAt}`;
+    if (!tripGroups.has(tripKey)) tripGroups.set(tripKey, []);
+    tripGroups.get(tripKey).push(r);
+  }
+  for (const group of tripGroups.values()) {
+    if (group.length === 1) {
+      results.push(group[0]);
+      continue;
+    }
+    const shortestWalk = group.reduce((best, r) => r.walkTransfer.distM < best.walkTransfer.distM ? r : best);
+    const longestRide = group.reduce((best, r) => r.arriveAtTransfer > best.arriveAtTransfer ? r : best);
+    results.push(shortestWalk);
+    if (longestRide !== shortestWalk) results.push(longestRide);
+  }
 
   // Sort by arrival time, then total duration, then walk distance (prefer shorter walk)
   results.sort((a, b) =>

@@ -784,7 +784,7 @@ function CityApp() {
       fromStop: effectiveFrom,
       toStop: effectiveTo,
       walkMin,
-      maxResults: 6,
+      maxResults: 9,
       schoolHoliday: overrides.schoolHoliday ?? window.SchoolHolidayUtil.resolve(schoolHolidayMode, planTime),
     });
     setResults(r);

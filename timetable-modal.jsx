@@ -30,6 +30,10 @@ function stopsOnShape(stops, busId, shapeId) {
 // A dropdown-sorok mellett látszó színes vonal-chipeket adja, PLATFORM-CÍMKÉNKÉNT
 // (nem puszta néven, ld. _cityPlatforms() a data.js-ben) -- egy megállónév ugyanis
 // több külön fizikai platformot is jelenthet, ezeket külön kell számolni.
+// A lookup kulcsa lehet platform-CÍMKE (megálló-néző, ld. getCityStops()) VAGY
+// sima megállónév (útvonaltervező, ld. city-app.jsx cityStopNames) -- mindkét
+// alakra fel kell venni a bejegyzést, mert a StopSearch dropdown-ja mindkét
+// forrásból kaphatja a megjelenítendő "stop" szöveget.
 const STOP_LINES = (() => {
   const map = {};
   const platforms = window._cityPlatforms ? window._cityPlatforms() : [];
@@ -38,8 +42,10 @@ const STOP_LINES = (() => {
     bus.stops.forEach((s, idx) => {
       if (idx === bus.stops.length - 1) return; // végállomás, csak érkezés
       const label = labelBySpId.get(s.spId) || s.name;
-      if (!map[label]) map[label] = [];
-      if (!map[label].some(b => b.id === bus.id)) map[label].push({ id: bus.id, color: bus.color });
+      for (const key of new Set([label, s.name])) {
+        if (!map[key]) map[key] = [];
+        if (!map[key].some(b => b.id === bus.id)) map[key].push({ id: bus.id, color: bus.color });
+      }
     });
   }
   return map;

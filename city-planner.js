@@ -174,6 +174,14 @@ window.planCityRoutes = function planCityRoutes({
           const toOff2 = U.stopOffset(bus2, toStop);
           if (toOff2 <= tsOff2) continue;
 
+          // Skip if bus2 serves fromStop anywhere before toStop (boarding bus2 at
+          // fromStop directly would give the same or better result) -- ugyanaz a
+          // védelem, mint a fenti azonos-fizikai-megállós átszállásnál; itt hiányzott,
+          // ezért engedett át felesleges gyalogos kerülőt olyan busz2-re, ami amúgy is
+          // közvetlenül indul fromStop-ból.
+          const fromOff2 = U.stopOffset(bus2, fromStop);
+          if (fromOff2 !== null && fromOff2 < toOff2) continue;
+
           const deps2 = U.getDepartures(bus2, dayType);
           if (deps2.length === 0) continue;
 

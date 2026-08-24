@@ -33,12 +33,17 @@ function RouteCard({ route, index, isPrimary, t, style, isWeekend, dayType, nowM
   const showSchoolWalk = !route.helykoziBoardStop || route.helykoziBoardStop === "Nemesvámos, autóbusz-váróterem";
 
   const busColor = route.localBus.color;
+  // A transferLocalStop NÉV többször is szerepelhet ugyanazon a buszon (pl. "Petőfi
+  // Színház" a 42-esnél, két külön fizikai ponton) -- ha ismert a pontos platform
+  // (transferLocalSpId, ld. data.js planRoutes), azt kell használni, nem az első
+  // névegyezést, különben rossz felszállási időt számolnánk.
+  const localTransferStop = (route.transferLocalSpId && route.localBus.stops.find(ss => ss.spId === route.transferLocalSpId))
+    || route.localBus.stops.find(ss => ss.name === route.transferLocalStop);
   // Mikor indult ez a konkrét helyi járat a saját (útvonal szerinti) kiindulópontjáról --
   // ugyanaz a "recept" mint a helyközi busznál a `helykoziDepBuszall`.
-  const localBoardOffset = U.stopOffset(route.localBus, route.transferLocalStop);
+  const localBoardOffset = localTransferStop?.offset ?? null;
   const localOriginDep = localBoardOffset != null ? route.localBoardAt - localBoardOffset : null;
 
-  const localTransferStop = route.localBus.stops.find(ss => ss.name === route.transferLocalStop);
   const fromBoard = route.localBoardAt - (localTransferStop?.offset || 0);
   const localTransferIdx = localTransferStop ? route.localBus.stops.indexOf(localTransferStop) : 0;
   const localHomeIdx = route.localBus.stops.findIndex(ss => ss.name === route.homeStop);
@@ -321,7 +326,12 @@ function HomeRouteMap({ route }) {
     const localBus = route.localBus;
     const cityShapes = (window.CITY_SHAPES || {})[localBus.id] || [];
     const homeStopName = route.homeStop || 'Csererdő';
-    const boardStopIdx = localBus.stops.findIndex(s => s.name === route.transferLocalStop);
+    // Ld. RouteCard indoklását: transferLocalSpId-vel pontosan a helyes fizikai
+    // platformot keressük, ha ismert (a puszta név ambiguus lehet, pl. 42-es busz
+    // "Petőfi Színház"-a).
+    const boardStopIdx = route.transferLocalSpId
+      ? localBus.stops.findIndex(s => s.spId === route.transferLocalSpId)
+      : localBus.stops.findIndex(s => s.name === route.transferLocalStop);
     const homeStopIdx  = localBus.stops.findIndex(s => s.name === homeStopName);
     const boardStop = localBus.stops[boardStopIdx];
     const homeStop  = localBus.stops[homeStopIdx];
@@ -1498,7 +1508,10 @@ function SchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, nowMi
   const hasWalk = route.walkAfterBus > 0;
 
   const schoolBoardingStop = route.localBus.stops.find(ss => ss.name === route.boardingStopName);
-  const schoolTransferStop = route.localBus.stops.find(ss => ss.name === route.transferLocalStop);
+  // Ld. a fenti (RouteCard) indoklást: transferLocalSpId-vel a pontos fizikai platformot
+  // keressük, ha ismert, mert a puszta név ambiguus lehet ugyanazon a buszon belül.
+  const schoolTransferStop = (route.transferLocalSpId && route.localBus.stops.find(ss => ss.spId === route.transferLocalSpId))
+    || route.localBus.stops.find(ss => ss.name === route.transferLocalStop);
   const schoolFromBoard = route.localBoardAt - (schoolBoardingStop?.offset || 0);
   const schoolBoardingIdx = schoolBoardingStop ? route.localBus.stops.indexOf(schoolBoardingStop) : 0;
   const schoolTransferIdx = schoolTransferStop ? route.localBus.stops.indexOf(schoolTransferStop) : route.localBus.stops.length - 1;
@@ -1737,7 +1750,9 @@ function SchoolRouteMap({ route, schoolData }) {
     const cityShapes = (window.CITY_SHAPES || {})[localBus.id] || [];
     const boardingStopIdx = localBus.stops.findIndex(s => normStop(s.name) === normStop(route.boardingStopName));
     const startStop = localBus.stops[boardingStopIdx >= 0 ? boardingStopIdx : 0];
-    const transferStopIdx = localBus.stops.findIndex(s => s.name === route.transferLocalStop);
+    const transferStopIdx = route.transferLocalSpId
+      ? localBus.stops.findIndex(s => s.spId === route.transferLocalSpId)
+      : localBus.stops.findIndex(s => s.name === route.transferLocalStop);
     const transferStop = localBus.stops[transferStopIdx];
     const localDep = startStop ? route.localBoardAt - startStop.offset : null;
 

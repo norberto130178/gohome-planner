@@ -566,12 +566,19 @@ window.planRoutes = function planRoutes({
           if (bus.stops[0]?.name === "Csererdő") continue;
           if (!U.busVisits(bus, cityStopName)) continue;
           if (!U.busVisits(bus, targetStop)) continue;
-          const transferOffset = U.stopOffset(bus, cityStopName);
+          // Ha a megállónév TÖBBSZÖR szerepel ugyanezen a buszon (pl. "Petőfi Színház" a
+          // 42-esnél, "Veszprém autóbusz-állomás" a 12-esnél, két külön fizikai ponton),
+          // az első előfordulás (U.stopOffset/bus.stops.find névre keres) nem feltétlenül
+          // a valódi platform, amit a helyközi busz is használ -- az icVeszpStop.citySpId-vel
+          // egyező előfordulást kell előnyben részesíteni, különben rossz felszállási időt
+          // és/vagy téves (hiányzó vagy felesleges) gyaloglás-jelzést számolnánk.
+          const transferCandidates = bus.stops.filter(s => s.name === cityStopName);
+          const busStopAtTransfer = transferCandidates.find(s => s.spId === icVeszpStop.citySpId) || transferCandidates[0];
+          const transferOffset = busStopAtTransfer?.offset ?? null;
           const targetOffset = U.stopOffset(bus, targetStop);
-          if (targetOffset <= transferOffset) continue;
+          if (transferOffset === null || targetOffset === null || targetOffset <= transferOffset) continue;
 
           let walkAtTransfer = null;
-          const busStopAtTransfer = bus.stops.find(s => s.name === cityStopName);
           if (busStopAtTransfer?.spId && icVeszpStop.citySpId && busStopAtTransfer.spId !== icVeszpStop.citySpId) {
             const edge = (walkGraph[icVeszpStop.citySpId] || []).find(n => n.spId === busStopAtTransfer.spId);
             if (edge) walkAtTransfer = { distM: edge.distM, walkMin: edge.walkMin };
@@ -606,6 +613,7 @@ window.planRoutes = function planRoutes({
               transferStopShort: _TRANSFER_SHORT[icVeszpStop.name] || icVeszpStop.name.replace('Veszprém, ', ''),
               transferStopId: icVeszpStop.name,
               transferLocalStop: cityStopName,
+              transferLocalSpId: busStopAtTransfer?.spId || null,
               transferLat: icVeszpStop.lat,
               transferLon: icVeszpStop.lon,
               waitAtTransfer: localBoardAt - icArriveAtVeszp,
@@ -698,11 +706,15 @@ window.planSchoolRoutes = function planSchoolRoutes({
 
       for (const bus of schoolBuses) {
         const fromOffset = U.stopOffset(bus, fromStop);
-        const transOffset = U.stopOffset(bus, cityStopName);
+        // Ld. a planRoutes-beli indoklást: a megállónév többszöri előfordulása ugyanazon
+        // a buszon (pl. "Petőfi Színház" a 42-esnél) esetén az icBoardStop.citySpId-vel
+        // egyező előfordulást kell választani, nem az elsőt.
+        const transferCandidates = bus.stops.filter(s => s.name === cityStopName);
+        const busStopAtTransfer = transferCandidates.find(s => s.spId === icBoardStop.citySpId) || transferCandidates[0];
+        const transOffset = busStopAtTransfer?.offset ?? null;
         if (fromOffset === null || transOffset === null || transOffset <= fromOffset) continue;
 
         let walkAtTransfer = null;
-        const busStopAtTransfer = bus.stops.find(s => s.name === cityStopName);
         if (busStopAtTransfer?.spId && icBoardStop.citySpId && busStopAtTransfer.spId !== icBoardStop.citySpId) {
           const edge = (walkGraph[icBoardStop.citySpId] || []).find(n => n.spId === busStopAtTransfer.spId);
           if (edge) walkAtTransfer = { distM: edge.distM, walkMin: edge.walkMin };
@@ -761,6 +773,7 @@ window.planSchoolRoutes = function planSchoolRoutes({
             transferStopShort: _TRANSFER_SHORT[icBoardStop.name] || icBoardStop.name.replace('Veszprém, ', ''),
             transferStopId: icBoardStop.name,
             transferLocalStop: cityStopName,
+            transferLocalSpId: busStopAtTransfer?.spId || null,
             transferLat: icBoardStop.lat,
             transferLon: icBoardStop.lon,
             walkToSchool,
@@ -800,9 +813,13 @@ window.planSchoolRoutes = function planSchoolRoutes({
 
         const walkBuses = (window.CITY_BUSES_FULL || []).filter(bus => U.busVisits(bus, fromStop));
         for (const bus of walkBuses) {
-          if (!U.busVisits(bus, walkFromStop)) continue;
+          // Ld. a fenti indoklást: a walkFromStop NÉV többször is szerepelhet ugyanazon a
+          // buszon -- itt viszont pontosan tudjuk a keresett fizikai pont spId-jét
+          // (walkFromSpId), ezért közvetlenül azzal keresünk, nem névvel.
+          const walkStopObj = bus.stops.find(s => s.spId === walkFromSpId);
+          if (!walkStopObj) continue;
           const fromOffset = U.stopOffset(bus, fromStop);
-          const walkOffset = U.stopOffset(bus, walkFromStop);
+          const walkOffset = walkStopObj.offset;
           if (fromOffset === null || walkOffset === null || walkOffset <= fromOffset) continue;
 
           const directOffset = U.stopOffset(bus, cityStopName);
@@ -851,6 +868,7 @@ window.planSchoolRoutes = function planSchoolRoutes({
               transferStopShort: _TRANSFER_SHORT[icBoardStop.name] || icBoardStop.name.replace('Veszprém, ', ''),
               transferStopId: icBoardStop.name + "_walk",
               transferLocalStop: walkFromStop,
+              transferLocalSpId: walkFromSpId,
               transferLat: icBoardStop.lat,
               transferLon: icBoardStop.lon,
               walkToSchool,

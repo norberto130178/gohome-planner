@@ -40,30 +40,42 @@ window.planCityRoutes = function planCityRoutes({
   const walkTransferCandidates = [];
 
   // ── DIRECT ROUTES ──────────────────────────────────────────
+  // Ha a fromStop/toStop NÉV többször is szerepel EGYETLEN busz megállólistájában (pl.
+  // körjáratnál a végállomás neve az induláskor ÉS a kör végén is, más spId-vel -- ld.
+  // "Veszprém autóbusz-állomás" a 12-es buszon), egyetlen U.stopOffset hívás mindig csak
+  // az ELSŐ előfordulást adná vissza -- ez körjáratoknál teljesen elrejthet valós,
+  // működő útvonalakat (pl. ha a cél épp a MÁSODIK előfordulás lenne). Ehelyett minden
+  // (induló előfordulás, célzó előfordulás) PÁRT megvizsgálunk, és csak azokat tartjuk
+  // meg, ahol a cél ténylegesen később van az útvonalon, mint az indulás.
   for (const bus of buses) {
-    if (!U.busVisits(bus, fromStop)) continue;
-    if (!U.busVisits(bus, toStop)) continue;
-    const fromOff = U.stopOffset(bus, fromStop);
-    const toOff   = U.stopOffset(bus, toStop);
-    if (toOff <= fromOff) continue;
+    const fromOccs = bus.stops.filter(s => s.name === fromStop);
+    const toOccs = bus.stops.filter(s => s.name === toStop);
+    if (fromOccs.length === 0 || toOccs.length === 0) continue;
 
-    for (const dep of U.getDepartures(bus, dayType)) {
-      const boardAt  = dep + fromOff;
-      if (boardAt < earliestBoard) continue;
-      const arriveAt = dep + toOff;
+    for (const fromS of fromOccs) {
+      for (const toS of toOccs) {
+        if (toS.offset <= fromS.offset) continue;
+        const fromOff = fromS.offset, toOff = toS.offset;
 
-      const key = `D|${bus.id}|${bus.direction}|${dep}`;
-      if (seen.has(key)) continue;
-      seen.add(key);
+        for (const dep of U.getDepartures(bus, dayType)) {
+          const boardAt  = dep + fromOff;
+          if (boardAt < earliestBoard) continue;
+          const arriveAt = dep + toOff;
 
-      results.push({
-        type: "direct",
-        departLeaveOrigin: boardAt - walkMin,
-        boardAt,
-        bus1: bus,
-        arriveAt,
-        totalDuration: arriveAt - (boardAt - walkMin),
-      });
+          const key = `D|${bus.id}|${bus.direction}|${dep}|${fromS.spId}|${toS.spId}`;
+          if (seen.has(key)) continue;
+          seen.add(key);
+
+          results.push({
+            type: "direct",
+            departLeaveOrigin: boardAt - walkMin,
+            boardAt,
+            bus1: bus,
+            arriveAt,
+            totalDuration: arriveAt - (boardAt - walkMin),
+          });
+        }
+      }
     }
   }
 
@@ -71,98 +83,118 @@ window.planCityRoutes = function planCityRoutes({
   // bus1: fromStop → transferStop
   // bus2: transferStop → toStop
   for (const bus1 of buses) {
-    if (!U.busVisits(bus1, fromStop)) continue;
-    const fromOff1 = U.stopOffset(bus1, fromStop);
+    // Ld. a DIRECT ROUTES-nál lévő indoklást: a fromStop név többször is szerepelhet
+    // bus1-en (pl. körjáratnál a végállomás), ezért minden előfordulást kipróbálunk.
+    const fromOccs1 = bus1.stops.filter(s => s.name === fromStop);
+    if (fromOccs1.length === 0) continue;
     const deps1 = U.getDepartures(bus1, dayType);
     if (deps1.length === 0) continue;
+    const toOccs1 = bus1.stops.filter(s => s.name === toStop);
 
-    // collect stops reachable after fromStop on bus1
-    const forwardStops = bus1.stops.filter(s => s.offset > fromOff1);
-    const toOff1 = U.stopOffset(bus1, toStop);
+    for (const fromS1 of fromOccs1) {
+      const fromOff1 = fromS1.offset;
 
-    for (const ts of forwardStops) {
-      for (const bus2 of buses) {
-        if (bus2.id === bus1.id && bus2.direction === bus1.direction) continue;
+      // collect stops reachable after fromStop on bus1 (ehhez a KONKRÉT fromS1
+      // előforduláshoz képest -- körjáratnál más-más megállók érhetők el aszerint,
+      // hogy melyik előfordulásból indulunk)
+      const forwardStops = bus1.stops.filter(s => s.offset > fromOff1);
+      // "maradjunk bus1-en" védelem: a toStop LEGKORÁBBAN elérhető előfordulása
+      // bus1-en, ebből a fromS1-ből nézve (ha van ilyen egyáltalán)
+      const reachableToOffs1 = toOccs1.filter(s => s.offset > fromOff1).map(s => s.offset);
+      const bestToOff1 = reachableToOffs1.length ? Math.min(...reachableToOffs1) : null;
 
-        // Ha a "ts.name" megállónév TÖBBSZÖR szerepel bus2 megállólistájában (pl. "Petőfi
-        // Színház" a 42-esnél, két külön fizikai ponton), az U.stopOffset/bus2.stops.find
-        // (első előfordulásra) rossz platformot választhatna -- ehelyett az azonos spId-jű
-        // (fizikailag ugyanaz a pont, ha van ilyen), különben a ts-hez legközelebbi
-        // előfordulást választjuk.
-        const stop2Candidates = bus2.stops.filter(s => s.name === ts.name);
-        if (stop2Candidates.length === 0) continue;
-        if (!U.busVisits(bus2, toStop)) continue;
-        let stop2AtTs = stop2Candidates.find(s => s.spId === ts.spId);
-        if (!stop2AtTs) {
-          stop2AtTs = stop2Candidates.reduce((best, s) => {
-            if (s.lat == null) return best;
-            if (!best || best.lat == null) return s;
-            if (ts.lat == null) return best;
-            return _haversineM(ts.lat, ts.lon, s.lat, s.lon) < _haversineM(ts.lat, ts.lon, best.lat, best.lon) ? s : best;
-          }, null) || stop2Candidates[0];
-        }
-        const tsOff2  = stop2AtTs.offset;
-        const toOff2  = U.stopOffset(bus2, toStop);
-        if (toOff2 === null || toOff2 <= tsOff2) continue;
+      for (const ts of forwardStops) {
+        for (const bus2 of buses) {
+          if (bus2.id === bus1.id && bus2.direction === bus1.direction) continue;
 
-        // Skip if bus2 serves fromStop anywhere before toStop
-        // (boarding bus2 at fromStop directly would give the same or better result)
-        const fromOff2 = U.stopOffset(bus2, fromStop);
-        if (fromOff2 !== null && fromOff2 < toOff2) continue;
+          // Ha a "ts.name" megállónév TÖBBSZÖR szerepel bus2 megállólistájában (pl. "Petőfi
+          // Színház" a 42-esnél, két külön fizikai ponton), az U.stopOffset/bus2.stops.find
+          // (első előfordulásra) rossz platformot választhatna -- ehelyett az azonos spId-jű
+          // (fizikailag ugyanaz a pont, ha van ilyen), különben a ts-hez legközelebbi
+          // előfordulást választjuk.
+          const stop2Candidates = bus2.stops.filter(s => s.name === ts.name);
+          if (stop2Candidates.length === 0) continue;
+          let stop2AtTs = stop2Candidates.find(s => s.spId === ts.spId);
+          if (!stop2AtTs) {
+            stop2AtTs = stop2Candidates.reduce((best, s) => {
+              if (s.lat == null) return best;
+              if (!best || best.lat == null) return s;
+              if (ts.lat == null) return best;
+              return _haversineM(ts.lat, ts.lon, s.lat, s.lon) < _haversineM(ts.lat, ts.lon, best.lat, best.lon) ? s : best;
+            }, null) || stop2Candidates[0];
+          }
+          const tsOff2  = stop2AtTs.offset;
 
-        const deps2 = U.getDepartures(bus2, dayType);
-        if (deps2.length === 0) continue;
+          // Ld. a DIRECT ROUTES-nál lévő indoklást: a toStop is többször szerepelhet
+          // bus2-n -- minden előfordulást kipróbálunk.
+          const toOccs2 = bus2.stops.filter(s => s.name === toStop);
+          if (toOccs2.length === 0) continue;
 
-        // Megálló fizikai azonosság: ha bus1 és bus2 megállója eltérő spId-jű,
-        // gyalogos átkelés szükséges (pl. Hotel SP1660 ↔ SP1661)
-        const samePhysical = ts.spId && stop2AtTs?.spId && ts.spId === stop2AtTs.spId;
-        let transferWalk = null;
-        if (!samePhysical && ts.spId && stop2AtTs?.spId && ts.lat != null && stop2AtTs?.lat != null) {
-          const distM = _haversineM(ts.lat, ts.lon, stop2AtTs.lat, stop2AtTs.lon);
-          if (distM >= 10) transferWalk = { distM, walkMin: Math.ceil(distM / 80) };
-        }
-        const transferWalkMin = transferWalk ? transferWalk.walkMin : 0;
+          for (const toS2 of toOccs2) {
+            const toOff2 = toS2.offset;
+            if (toOff2 <= tsOff2) continue;
 
-        for (const dep1 of deps1) {
-          const boardAt1   = dep1 + fromOff1;
-          if (boardAt1 < earliestBoard) continue;
-          const arriveAtTs = dep1 + ts.offset;
+            // Skip if bus2 serves fromStop anywhere before toStop (boarding bus2 at
+            // fromStop directly would give the same or better result) -- MINDEN fromStop
+            // előfordulást megnézünk bus2-n, nem csak az elsőt.
+            const fromOccs2 = bus2.stops.filter(s => s.name === fromStop);
+            if (fromOccs2.some(s => s.offset < toOff2)) continue;
 
-          for (const dep2 of deps2) {
-            const boardAt2 = dep2 + tsOff2;
-            if (boardAt2 < arriveAtTs + transferWalkMin) continue;
+            const deps2 = U.getDepartures(bus2, dayType);
+            if (deps2.length === 0) continue;
 
-            const arriveAt = dep2 + toOff2;
-
-            // Skip if staying on bus1 would reach toStop at least as early
-            if (toOff1 !== null && dep1 + toOff1 <= arriveAt) continue;
-
-            const key = `T|${bus1.id}|${bus1.direction}|${dep1}|${bus2.id}|${bus2.direction}|${dep2}|${ts.name}`;
-            if (seen.has(key)) continue;
-            seen.add(key);
-
-            if (samePhysical) {
-              trueDirectSeen.add(`SD|${bus1.id}|${bus1.direction}|${dep1}|${bus2.id}|${bus2.direction}|${dep2}`);
+            // Megálló fizikai azonosság: ha bus1 és bus2 megállója eltérő spId-jű,
+            // gyalogos átkelés szükséges (pl. Hotel SP1660 ↔ SP1661)
+            const samePhysical = ts.spId && stop2AtTs?.spId && ts.spId === stop2AtTs.spId;
+            let transferWalk = null;
+            if (!samePhysical && ts.spId && stop2AtTs?.spId && ts.lat != null && stop2AtTs?.lat != null) {
+              const distM = _haversineM(ts.lat, ts.lon, stop2AtTs.lat, stop2AtTs.lon);
+              if (distM >= 10) transferWalk = { distM, walkMin: Math.ceil(distM / 80) };
             }
+            const transferWalkMin = transferWalk ? transferWalk.walkMin : 0;
 
-            const entry = {
-              type: "transfer",
-              departLeaveOrigin: boardAt1 - walkMin,
-              boardAt: boardAt1,
-              bus1,
-              transferStopName: ts.name,
-              arriveAtTransfer: arriveAtTs,
-              waitAtTransfer: boardAt2 - arriveAtTs,
-              bus2,
-              boardAt2,
-              arriveAt,
-              totalDuration: arriveAt - (boardAt1 - walkMin),
-              ...(transferWalk ? { walkTransfer: transferWalk, walkToStop: ts.name, walkTransferSameStop: true } : {}),
-            };
-            // A gyaloglást igénylő (transferWalk) jelöltek nem kerülnek rögtön a
-            // results-ba -- ld. a walkTransferCandidates-hez fűzött indoklást lentebb.
-            if (transferWalk) walkTransferCandidates.push(entry);
-            else results.push(entry);
+            for (const dep1 of deps1) {
+              const boardAt1   = dep1 + fromOff1;
+              if (boardAt1 < earliestBoard) continue;
+              const arriveAtTs = dep1 + ts.offset;
+
+              for (const dep2 of deps2) {
+                const boardAt2 = dep2 + tsOff2;
+                if (boardAt2 < arriveAtTs + transferWalkMin) continue;
+
+                const arriveAt = dep2 + toOff2;
+
+                // Skip if staying on bus1 would reach toStop at least as early
+                if (bestToOff1 !== null && dep1 + bestToOff1 <= arriveAt) continue;
+
+                const key = `T|${bus1.id}|${bus1.direction}|${dep1}|${bus2.id}|${bus2.direction}|${dep2}|${ts.name}|${fromS1.spId}|${toS2.spId}`;
+                if (seen.has(key)) continue;
+                seen.add(key);
+
+                if (samePhysical) {
+                  trueDirectSeen.add(`SD|${bus1.id}|${bus1.direction}|${dep1}|${bus2.id}|${bus2.direction}|${dep2}`);
+                }
+
+                const entry = {
+                  type: "transfer",
+                  departLeaveOrigin: boardAt1 - walkMin,
+                  boardAt: boardAt1,
+                  bus1,
+                  transferStopName: ts.name,
+                  arriveAtTransfer: arriveAtTs,
+                  waitAtTransfer: boardAt2 - arriveAtTs,
+                  bus2,
+                  boardAt2,
+                  arriveAt,
+                  totalDuration: arriveAt - (boardAt1 - walkMin),
+                  ...(transferWalk ? { walkTransfer: transferWalk, walkToStop: ts.name, walkTransferSameStop: true } : {}),
+                };
+                // A gyaloglást igénylő (transferWalk) jelöltek nem kerülnek rögtön a
+                // results-ba -- ld. a walkTransferCandidates-hez fűzött indoklást lentebb.
+                if (transferWalk) walkTransferCandidates.push(entry);
+                else results.push(entry);
+              }
+            }
           }
         }
       }
@@ -176,13 +208,19 @@ window.planCityRoutes = function planCityRoutes({
   const bestWalkMap = new Map();
 
   for (const bus1 of buses) {
-    if (!U.busVisits(bus1, fromStop)) continue;
-    const fromOff1 = U.stopOffset(bus1, fromStop);
+    // Ld. a DIRECT ROUTES-nál lévő indoklást: a fromStop név többször is szerepelhet
+    // bus1-en -- minden előfordulást kipróbálunk.
+    const fromOccs1 = bus1.stops.filter(s => s.name === fromStop);
+    if (fromOccs1.length === 0) continue;
     const deps1 = U.getDepartures(bus1, dayType);
     if (deps1.length === 0) continue;
+    const toOccs1 = bus1.stops.filter(s => s.name === toStop);
 
-    const forwardStops = bus1.stops.filter(s => s.offset > fromOff1);
-    const toOff1 = U.stopOffset(bus1, toStop);
+    for (const fromS1 of fromOccs1) {
+      const fromOff1 = fromS1.offset;
+      const forwardStops = bus1.stops.filter(s => s.offset > fromOff1);
+      const reachableToOffs1 = toOccs1.filter(s => s.offset > fromOff1).map(s => s.offset);
+      const bestToOff1 = reachableToOffs1.length ? Math.min(...reachableToOffs1) : null;
 
     for (const ts of forwardStops) {
       const neighbors = walkGraph[ts.spId] || [];
@@ -198,18 +236,24 @@ window.planCityRoutes = function planCityRoutes({
             ? bus2.stops.find(s => s.spId === walkToSpId)
             : bus2.stops.find(s => s.name === walkToStop);
           if (!walkStop2) continue;
-          if (!U.busVisits(bus2, toStop)) continue;
           const tsOff2 = walkStop2.offset;
-          const toOff2 = U.stopOffset(bus2, toStop);
-          if (toOff2 === null || toOff2 <= tsOff2) continue;
+
+          // Ld. a DIRECT ROUTES-nál lévő indoklást: a toStop is többször szerepelhet
+          // bus2-n -- minden előfordulást kipróbálunk.
+          const toOccs2 = bus2.stops.filter(s => s.name === toStop);
+          if (toOccs2.length === 0) continue;
+
+          for (const toS2 of toOccs2) {
+          const toOff2 = toS2.offset;
+          if (toOff2 <= tsOff2) continue;
 
           // Skip if bus2 serves fromStop anywhere before toStop (boarding bus2 at
           // fromStop directly would give the same or better result) -- ugyanaz a
           // védelem, mint a fenti azonos-fizikai-megállós átszállásnál; itt hiányzott,
           // ezért engedett át felesleges gyalogos kerülőt olyan busz2-re, ami amúgy is
-          // közvetlenül indul fromStop-ból.
-          const fromOff2 = U.stopOffset(bus2, fromStop);
-          if (fromOff2 !== null && fromOff2 < toOff2) continue;
+          // közvetlenül indul fromStop-ból. Minden fromStop előfordulást megnézünk.
+          const fromOccs2 = bus2.stops.filter(s => s.name === fromStop);
+          if (fromOccs2.some(s => s.offset < toOff2)) continue;
 
           const deps2 = U.getDepartures(bus2, dayType);
           if (deps2.length === 0) continue;
@@ -231,10 +275,11 @@ window.planCityRoutes = function planCityRoutes({
 
               // Skip if staying on bus1 would reach toStop at least as early (same guard as the
               // same-physical-stop transfer loop above — this one was missing it entirely).
-              if (toOff1 !== null && dep1 + toOff1 <= arriveAt) continue;
+              if (bestToOff1 !== null && dep1 + bestToOff1 <= arriveAt) continue;
 
-              // Azonos csoporton belül csak a legrövidebb gyalogos marad
-              const groupKey = `WTG|${bus1.id}|${bus1.direction}|${dep1}|${ts.name}|${bus2.id}|${bus2.direction}|${dep2}`;
+              // Azonos csoporton belül csak a legrövidebb gyalogos marad (toS2.spId is a
+              // kulcs része, mert a toStop is többször szerepelhet bus2-n)
+              const groupKey = `WTG|${bus1.id}|${bus1.direction}|${dep1}|${ts.name}|${bus2.id}|${bus2.direction}|${dep2}|${toS2.spId}`;
               const prev = bestWalkMap.get(groupKey);
               if (prev && prev.walkTransfer.distM <= distM) continue;
 
@@ -255,8 +300,10 @@ window.planCityRoutes = function planCityRoutes({
               });
             }
           }
+          }
         }
       }
+    }
     }
   }
 

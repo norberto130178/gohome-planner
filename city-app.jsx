@@ -703,6 +703,15 @@ function CityApp() {
     return Array.from(m.values());
   }, []);
 
+  // A Honnan/Hova mezőknek sima megállónevek kellenek (a planCityRoutes ezekkel
+  // egyezteti a bus.stops[].name mezőt) -- NEM a getCityStops() platform-címkéi
+  // (pl. "Bakony Művek (Házgyár felé)"), amik a megálló-nézőnek valók, és amikkel
+  // a tervező soha nem talál egyezést.
+  const cityStopNames = React.useMemo(
+    () => [...new Set(allPhysicalStops.map(s => s.name))].sort((a, b) => a.localeCompare(b, 'hu')),
+    [allPhysicalStops]
+  );
+
   // Térképi popupok "Indulások" gombja ezen keresztül nyitja a megálló-nézőt
   React.useEffect(() => {
     window.__openStopViewer = (stopName, mode) => { setStopViewerStop(stopName || null); setStopViewerMode(mode || 'city'); setStopViewerOpen(true); };
@@ -948,13 +957,13 @@ function CityApp() {
               </div>
               <window.StopSearch id="from-stop" value={fromStop}
                 onChange={v => { setFromStop(v); localStorage.setItem("city_from", v); setResults(null); setFormCollapsed(false); }}
-                placeholder={t.stopPlaceholder} />
+                placeholder={t.stopPlaceholder} stopList={cityStopNames} />
             </div>
             <div style={{padding:"8px 12px 8px"}}>
               <label className="city-stop-label" htmlFor="to-stop" style={{display:"block"}}>{t.toLabel}</label>
               <window.StopSearch id="to-stop" value={toStop}
                 onChange={v => { setToStop(v); localStorage.setItem("city_to", v); setResults(null); setFormCollapsed(false); }}
-                placeholder={t.stopPlaceholder} />
+                placeholder={t.stopPlaceholder} stopList={cityStopNames} />
             </div>
             <div style={{padding:"8px 10px 10px"}}>
               <button

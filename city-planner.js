@@ -79,11 +79,27 @@ window.planCityRoutes = function planCityRoutes({
     for (const ts of forwardStops) {
       for (const bus2 of buses) {
         if (bus2.id === bus1.id && bus2.direction === bus1.direction) continue;
-        if (!U.busVisits(bus2, ts.name)) continue;
+
+        // Ha a "ts.name" megállónév TÖBBSZÖR szerepel bus2 megállólistájában (pl. "Petőfi
+        // Színház" a 42-esnél, két külön fizikai ponton), az U.stopOffset/bus2.stops.find
+        // (első előfordulásra) rossz platformot választhatna -- ehelyett az azonos spId-jű
+        // (fizikailag ugyanaz a pont, ha van ilyen), különben a ts-hez legközelebbi
+        // előfordulást választjuk.
+        const stop2Candidates = bus2.stops.filter(s => s.name === ts.name);
+        if (stop2Candidates.length === 0) continue;
         if (!U.busVisits(bus2, toStop)) continue;
-        const tsOff2  = U.stopOffset(bus2, ts.name);
+        let stop2AtTs = stop2Candidates.find(s => s.spId === ts.spId);
+        if (!stop2AtTs) {
+          stop2AtTs = stop2Candidates.reduce((best, s) => {
+            if (s.lat == null) return best;
+            if (!best || best.lat == null) return s;
+            if (ts.lat == null) return best;
+            return _haversineM(ts.lat, ts.lon, s.lat, s.lon) < _haversineM(ts.lat, ts.lon, best.lat, best.lon) ? s : best;
+          }, null) || stop2Candidates[0];
+        }
+        const tsOff2  = stop2AtTs.offset;
         const toOff2  = U.stopOffset(bus2, toStop);
-        if (toOff2 <= tsOff2) continue;
+        if (toOff2 === null || toOff2 <= tsOff2) continue;
 
         // Skip if bus2 serves fromStop anywhere before toStop
         // (boarding bus2 at fromStop directly would give the same or better result)
@@ -95,7 +111,6 @@ window.planCityRoutes = function planCityRoutes({
 
         // Megálló fizikai azonosság: ha bus1 és bus2 megállója eltérő spId-jű,
         // gyalogos átkelés szükséges (pl. Hotel SP1660 ↔ SP1661)
-        const stop2AtTs = bus2.stops.find(s => s.name === ts.name);
         const samePhysical = ts.spId && stop2AtTs?.spId && ts.spId === stop2AtTs.spId;
         let transferWalk = null;
         if (!samePhysical && ts.spId && stop2AtTs?.spId && ts.lat != null && stop2AtTs?.lat != null) {
@@ -163,16 +178,22 @@ window.planCityRoutes = function planCityRoutes({
 
     for (const ts of forwardStops) {
       const neighbors = walkGraph[ts.spId] || [];
-      for (const { name: walkToStop, distM, walkMin: wMin } of neighbors) {
+      for (const { name: walkToStop, spId: walkToSpId, distM, walkMin: wMin } of neighbors) {
         if (distM < 100) continue; // ugyanaz a fizikai megálló, kihagyjuk
 
         for (const bus2 of buses) {
           if (bus2.id === bus1.id && bus2.direction === bus1.direction) continue;
-          if (!U.busVisits(bus2, walkToStop)) continue;
+          // Ld. az 1-TRANSFER ágnál lévő indoklást: a walkToStop NÉV többször is
+          // szerepelhet bus2-n -- itt viszont pontosan ismerjük a keresett pont
+          // spId-jét (walkToSpId, a walkGraph éléből), ezért azzal keresünk.
+          const walkStop2 = walkToSpId
+            ? bus2.stops.find(s => s.spId === walkToSpId)
+            : bus2.stops.find(s => s.name === walkToStop);
+          if (!walkStop2) continue;
           if (!U.busVisits(bus2, toStop)) continue;
-          const tsOff2 = U.stopOffset(bus2, walkToStop);
+          const tsOff2 = walkStop2.offset;
           const toOff2 = U.stopOffset(bus2, toStop);
-          if (toOff2 <= tsOff2) continue;
+          if (toOff2 === null || toOff2 <= tsOff2) continue;
 
           // Skip if bus2 serves fromStop anywhere before toStop (boarding bus2 at
           // fromStop directly would give the same or better result) -- ugyanaz a

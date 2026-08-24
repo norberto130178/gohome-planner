@@ -140,6 +140,24 @@ folyamat volt, könnyű volt elfelejteni.
 - A `schedules.js`-ben lévő `window.SCHEDULES` objektumot **semelyik élő kód
   nem használja** — az `intercity-data.js` `INTERCITY_BUSES_FULL`-ja a
   ténylegesen futó adat (ezt olvassa a `data.js`).
+- **Ellenőrizd, van-e két EGYMÁST KÖVETŐ (nem csak azonos nevű, hanem a
+  megállólistában közvetlenül szomszédos) megálló, aminek a `stop_times.txt`
+  szerint IDENTIKUS (másodpercre egyező) az indulási/érkezési ideje, miközben
+  a `shape_dist_traveled` (vagy a megállók lat/lon koordinátája) szerint
+  ténylegesen jelentős (>150-200 méteres) távolság van köztük.** Ez a nyers
+  GTFS-forrás saját hibája/pontatlansága (nem a mi feldolgozó láncunké),
+  2026-08-24-én a Csererdő↔Bakony Művek megállópárnál (3-as és 8-as busz,
+  "Csererdő ▸ Haszkovó forduló felé" irány) találtuk meg: mindkét megálló
+  `5:00:00`-kor volt rögzítve, miközben 663 méter (`shape_dist_traveled`)
+  van köztük — ez a `city-planner.js` tervező-algoritmusában elrejtett egy
+  hibás "0 perc = szinte ugyanaz a pont" feltételezést, ami feleslegesen
+  bonyolult kerülő-útvonalakat engedett át olyankor, amikor a valódi direkt
+  busz épp nem járt. **Ökölszabály**: egy városi busz kb. 20-25 km/h átlagos
+  sebességgel kb. 170-200 métert tesz meg 30 másodperc alatt — ha két
+  szomszédos megálló ennél távolabb van, de a menetrend szerint 0 a köztük
+  eltelt idő, az szinte biztosan hibás forrásadat, kézzel javítandó a
+  `city-data.js`-ben (`offset` mező +1, ld. a Csererdő/Bakony Művek javítást
+  mintaként) — NEM a tervező-algoritmusban kompenzálandó.
 
 ## Mi NEM automatikus még
 

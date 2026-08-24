@@ -171,7 +171,7 @@ window.CITY_BUSES_FULL = [
   direction: "Csererdő ▸ Haszkovó forduló felé",
   stops: [
     { name: "Csererdő", offset: 0, lat: 47.115033, lon: 17.870271, spId: "VBUSZ_SP1635" },
-    { name: "Bakony Művek", offset: 0, lat: 47.114921, lon: 17.878502, spId: "VBUSZ_SP1633" },
+    { name: "Bakony Művek", offset: 1, lat: 47.114921, lon: 17.878502, spId: "VBUSZ_SP1633" },
     { name: "Házgyár", offset: 1, lat: 47.113748, lon: 17.883264, spId: "VBUSZ_SP1642" },
     { name: "Fórum", offset: 2, lat: 47.113096, lon: 17.88447, spId: "VBUSZ_SP1719" },
     { name: "Ipar utca", offset: 3, lat: 47.108897, lon: 17.890917, spId: "VBUSZ_SP1721" },
@@ -637,7 +637,7 @@ window.CITY_BUSES_FULL = [
   direction: "Csererdő ▸ Haszkovó forduló felé",
   stops: [
     { name: "Csererdő", offset: 0, lat: 47.115033, lon: 17.870271, spId: "VBUSZ_SP1635" },
-    { name: "Bakony Művek", offset: 0, lat: 47.114921, lon: 17.878502, spId: "VBUSZ_SP1633" },
+    { name: "Bakony Művek", offset: 1, lat: 47.114921, lon: 17.878502, spId: "VBUSZ_SP1633" },
     { name: "Continental", offset: 1, lat: 47.110388, lon: 17.876525, spId: "VBUSZ_SP1842" },
     { name: "Valeo, főporta", offset: 3, lat: 47.109901, lon: 17.881522, spId: "VBUSZ_SP1866" },
     { name: "Valeo", offset: 4, lat: 47.109044, lon: 17.876639, spId: "VBUSZ_SP1871" },

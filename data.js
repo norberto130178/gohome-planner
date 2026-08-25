@@ -476,6 +476,17 @@ function _cityPlatforms() {
 }
 window._cityPlatforms = _cityPlatforms;
 
+// Egy konkrét fizikai platform (spId) pontosított címkéje, ha van ilyen platform és
+// a neve ambiguus (több platform is van ugyanazon a néven) -- egyébként a sima nevet
+// adja vissza. A kártyákon ezzel jelezzük, PONTOSAN melyik megállóból indul/hova
+// érkezik egy adott útvonal, azoknál a (kisebbségi, de valós) neveknél, ahol ez
+// ténylegesen eltérő fizikai pontot jelenthet.
+window.cityPlatformLabel = function (spId, fallbackName) {
+  if (!spId) return fallbackName;
+  const p = _cityPlatforms().find(x => x.spId === spId);
+  return (p && p.label) || fallbackName;
+};
+
 window.getCityStops = function () {
   return _cityPlatforms().map(p => p.label).sort((a, b) => a.localeCompare(b, "hu"));
 };

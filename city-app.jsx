@@ -212,10 +212,18 @@ function CityRouteCard({ route, index, isPrimary, fromStop, toStop, walkMin, isW
     ? `${Math.floor(totalMin / 60)} ${t.hour || "h"} ${totalMin % 60} ${t.min || "min"}`
     : `${totalMin} ${t.min || "min"}`;
 
+  // A route.*SpId mezők (city-planner.js) a ténylegesen kiválasztott fizikai
+  // platformot rögzítik -- ha ismertek, ezekkel keresünk (nem puszta névvel), mert
+  // egy ambiguus névnek több előfordulása is lehet ugyanazon a buszon/megállólistán.
   const stops1 = route.bus1.stops;
-  const boardIdx1 = stops1.findIndex(s => s.name === fromStop);
+  const boardIdx1 = route.fromSpId
+    ? stops1.findIndex(s => s.spId === route.fromSpId)
+    : stops1.findIndex(s => s.name === fromStop);
   const alightName1 = route.type === 'direct' ? toStop : route.transferStopName;
-  const alightIdx1 = stops1.findIndex(s => s.name === alightName1);
+  const alightSpId1 = route.type === 'direct' ? route.toSpId : route.transferSpId;
+  const alightIdx1 = alightSpId1
+    ? stops1.findIndex(s => s.spId === alightSpId1)
+    : stops1.findIndex(s => s.name === alightName1);
   const fromBoard1 = route.boardAt - (boardIdx1 >= 0 ? stops1[boardIdx1].offset : 0);
   const visibleStops1 = boardIdx1 >= 0 && alightIdx1 >= 0 ? stops1.slice(boardIdx1, alightIdx1 + 1) : [];
 
@@ -223,8 +231,13 @@ function CityRouteCard({ route, index, isPrimary, fromStop, toStop, walkMin, isW
   if (route.type === 'transfer' && route.bus2) {
     const stops2 = route.bus2.stops;
     const boardName2 = route.walkToStop || route.transferStopName;
-    const boardIdx2 = stops2.findIndex(s => s.name === boardName2);
-    const alightIdx2 = stops2.findIndex(s => s.name === toStop);
+    const boardSpId2 = route.walkToSpId || route.transferSpId2;
+    const boardIdx2 = boardSpId2
+      ? stops2.findIndex(s => s.spId === boardSpId2)
+      : stops2.findIndex(s => s.name === boardName2);
+    const alightIdx2 = route.toSpId
+      ? stops2.findIndex(s => s.spId === route.toSpId)
+      : stops2.findIndex(s => s.name === toStop);
     fromBoard2 = route.boardAt2 - (boardIdx2 >= 0 ? stops2[boardIdx2].offset : 0);
     visibleStops2 = boardIdx2 >= 0 && alightIdx2 >= 0 ? stops2.slice(boardIdx2, alightIdx2 + 1) : [];
   }
@@ -303,7 +316,7 @@ function CityRouteCard({ route, index, isPrimary, fromStop, toStop, walkMin, isW
                 {window.busLabel(route.bus1, t)}
               </span>
             </div>
-            <div className="step-sub">{fromStop}</div>
+            <div className="step-sub">{window.cityPlatformLabel(route.fromSpId, fromStop)}</div>
           </div>
         </div>
 
@@ -317,7 +330,7 @@ function CityRouteCard({ route, index, isPrimary, fromStop, toStop, walkMin, isW
               <div className="step-time">{fmt(route.arriveAt)}</div>
               <div className="step-icon step-icon-home">📍</div>
               <div className="step-body">
-                <div className="step-title" style={{ fontWeight: 800 }}>{toStop}</div>
+                <div className="step-title" style={{ fontWeight: 800 }}>{window.cityPlatformLabel(route.toSpId, toStop)}</div>
                 <div className="step-sub">{t.arrivedLabel || "Megérkeztél"}</div>
               </div>
             </div>
@@ -334,7 +347,7 @@ function CityRouteCard({ route, index, isPrimary, fromStop, toStop, walkMin, isW
               <div className="step-body">
                 {route.walkTransfer ? (
                   <>
-                    <div className="step-title">{route.transferStopName} → {route.walkToStop}</div>
+                    <div className="step-title">{window.cityPlatformLabel(route.transferSpId, route.transferStopName)} → {window.cityPlatformLabel(route.walkToSpId, route.walkToStop)}</div>
                     <div className="step-sub">{route.walkTransfer.walkMin} {t.walkMinLabel || "perc gyalog"} · {route.walkTransfer.distM} m</div>
                     {route.waitAtTransfer - route.walkTransfer.walkMin > 0 && (
                       <div className="wait-pill">⏱ {route.waitAtTransfer - route.walkTransfer.walkMin} {t.waitLabel || "perc várakozás"}</div>
@@ -343,7 +356,7 @@ function CityRouteCard({ route, index, isPrimary, fromStop, toStop, walkMin, isW
                 ) : (
                   <>
                     <div className="step-title">{t.transfer || "Átszállás"}</div>
-                    <div className="step-sub">{route.transferStopName}</div>
+                    <div className="step-sub">{window.cityPlatformLabel(route.transferSpId, route.transferStopName)}</div>
                     <div className="wait-pill">⏱ {route.waitAtTransfer} {t.waitLabel || "perc várakozás"}</div>
                   </>
                 )}
@@ -362,7 +375,7 @@ function CityRouteCard({ route, index, isPrimary, fromStop, toStop, walkMin, isW
                     {window.busLabel(route.bus2, t)}
                   </span>
                 </div>
-                <div className="step-sub">{route.walkToStop || route.transferStopName}</div>
+                <div className="step-sub">{window.cityPlatformLabel(route.walkToSpId || route.transferSpId2, route.walkToStop || route.transferStopName)}</div>
               </div>
             </div>
             <div className="step-connector">
@@ -373,7 +386,7 @@ function CityRouteCard({ route, index, isPrimary, fromStop, toStop, walkMin, isW
               <div className="step-time">{fmt(route.arriveAt)}</div>
               <div className="step-icon step-icon-home">📍</div>
               <div className="step-body">
-                <div className="step-title" style={{ fontWeight: 800 }}>{toStop}</div>
+                <div className="step-title" style={{ fontWeight: 800 }}>{window.cityPlatformLabel(route.toSpId, toStop)}</div>
                 <div className="step-sub">{t.arrivedLabel || "Megérkeztél"}</div>
               </div>
             </div>

@@ -46,7 +46,9 @@ function RouteCard({ route, index, isPrimary, t, style, isWeekend, dayType, nowM
 
   const fromBoard = route.localBoardAt - (localTransferStop?.offset || 0);
   const localTransferIdx = localTransferStop ? route.localBus.stops.indexOf(localTransferStop) : 0;
-  const localHomeIdx = route.localBus.stops.findIndex(ss => ss.name === route.homeStop);
+  const localHomeIdx = route.homeSpId
+    ? route.localBus.stops.findIndex(ss => ss.spId === route.homeSpId)
+    : route.localBus.stops.findIndex(ss => ss.name === route.homeStop);
   const visibleStops = route.localBus.stops.slice(localTransferIdx, localHomeIdx >= 0 ? localHomeIdx + 1 : undefined);
 
   return (
@@ -132,8 +134,8 @@ function RouteCard({ route, index, isPrimary, t, style, isWeekend, dayType, nowM
           <div className="step-body">
             {route.walkAtTransfer ? (
               <>
-                <div className="step-title">{route.transferStop} → {route.transferStop}</div>
-                <div className="step-sub">{route.walkAtTransfer.walkMin} {t.min} {t.walkWord || "gyalog"} · {route.walkAtTransfer.distM} m</div>
+                <div className="step-title">{t.walkAction || "Sétálj"}</div>
+                <div className="step-sub">{route.transferStop} → {window.cityPlatformLabel(route.transferLocalSpId, route.transferStop)} · {route.walkAtTransfer.walkMin} {t.min} {t.walkWord || "gyalog"} · {route.walkAtTransfer.distM} m</div>
                 {route.waitAtTransfer - route.walkAtTransfer.walkMin > 0 && (
                   <div className="wait-pill">⏱ {route.waitAtTransfer - route.walkAtTransfer.walkMin} {t.min} {t.waitTime}</div>
                 )}
@@ -141,7 +143,7 @@ function RouteCard({ route, index, isPrimary, t, style, isWeekend, dayType, nowM
             ) : (
               <>
                 <div className="step-title">{t.transfer}</div>
-                <div className="step-sub">{route.transferStop}</div>
+                <div className="step-sub">{window.cityPlatformLabel(route.transferLocalSpId, route.transferStop)}</div>
                 <div className="wait-pill">⏱ {route.waitAtTransfer} {t.min} {t.waitTime}</div>
               </>
             )}
@@ -191,10 +193,10 @@ function RouteCard({ route, index, isPrimary, t, style, isWeekend, dayType, nowM
           <div className="step-time">{fmt(route.localArriveCsererdo)}</div>
           <div className="step-icon step-icon-home">🏡</div>
           <div className="step-body">
-            <div className="step-title" style={{ fontWeight: 800 }}>
-              {route.homeStop && route.homeStop !== "Csererdő" ? route.homeStop : t.home}
+            <div className="step-title">{t.arriveAt}</div>
+            <div className="step-sub">
+              {route.homeStop && route.homeStop !== "Csererdő" ? window.cityPlatformLabel(route.homeSpId, route.homeStop) : t.home}
             </div>
-            <div className="step-sub">{t.arriveAt}</div>
           </div>
         </div>
       </div>
@@ -739,7 +741,7 @@ function CitySchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, n
           <div className="step-icon">🚶</div>
           <div className="step-body">
             <div className="step-title">{t.leaveAt}</div>
-            <div className="step-sub">{direction === "school" ? homeStopName : nearestStopName}</div>
+            <div className="step-sub">{window.cityPlatformLabel(route.fromSpId, direction === "school" ? homeStopName : nearestStopName)}</div>
           </div>
         </div>
 
@@ -783,11 +785,18 @@ function CitySchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, n
               <div className="step-time">{fmt(route.arriveAtTransfer)}</div>
               <div className="step-icon">{route.walkTransfer ? "🚶" : "🔄"}</div>
               <div className="step-body">
-                <div className="step-title">{route.walkTransfer ? `${route.transferStopName} → ${route.walkToStop}` : (t.transfer + ": " + route.transferStopName)}</div>
-                {route.walkTransfer
-                  ? <div className="step-sub">{route.walkTransfer.walkMin} {t.min} {t.walkWord || "gyalog"} · {route.walkTransfer.distM} m</div>
-                  : <div className="wait-pill">⏱ {route.waitAtTransfer} {t.min} {t.waitTime}</div>
-                }
+                {route.walkTransfer ? (
+                  <>
+                    <div className="step-title">{t.walkAction || "Sétálj"}</div>
+                    <div className="step-sub">{route.transferStopName} → {window.cityPlatformLabel(route.walkToSpId, route.walkToStop)} · {route.walkTransfer.walkMin} {t.min} {t.walkWord || "gyalog"} · {route.walkTransfer.distM} m</div>
+                  </>
+                ) : (
+                  <>
+                    <div className="step-title">{t.transfer}</div>
+                    <div className="step-sub">{window.cityPlatformLabel(route.transferSpId, route.transferStopName)}</div>
+                    <div className="wait-pill">⏱ {route.waitAtTransfer} {t.min} {t.waitTime}</div>
+                  </>
+                )}
                 {route.walkTransfer && route.waitAtTransfer - route.walkTransfer.walkMin > 0 && (
                   <div className="wait-pill">⏱ {route.waitAtTransfer - route.walkTransfer.walkMin} {t.min} {t.waitTime}</div>
                 )}
@@ -838,7 +847,7 @@ function CitySchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, n
               <div className="step-time">{fmt(route.arriveAt)}</div>
               <div className="step-icon">🚏</div>
               <div className="step-body">
-                <div className="step-title">{nearestStopName}</div>
+                <div className="step-title">{window.cityPlatformLabel(route.toSpId, nearestStopName)}</div>
               </div>
             </div>
             {route.walkToSchool > 0 && (
@@ -851,8 +860,8 @@ function CitySchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, n
                   <div className="step-time">{fmt(route.arriveSchool)}</div>
                   <div className="step-icon">🏫</div>
                   <div className="step-body">
-                    <div className="step-title" style={{ fontWeight: 800 }}>{schoolData?.name}</div>
-                    <div className="step-sub">{t.arriveAt}</div>
+                    <div className="step-title">{t.arriveAt}</div>
+                    <div className="step-sub">{schoolData?.name}</div>
                   </div>
                 </div>
               </>
@@ -863,8 +872,8 @@ function CitySchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, n
             <div className="step-time">{fmt(route.arriveAt)}</div>
             <div className="step-icon step-icon-home">🏡</div>
             <div className="step-body">
-              <div className="step-title" style={{ fontWeight: 800 }}>{homeStopName || t.home}</div>
-              <div className="step-sub">{t.arriveAt}</div>
+              <div className="step-title">{t.arriveAt}</div>
+              <div className="step-sub">{window.cityPlatformLabel(route.toSpId, homeStopName || t.home)}</div>
             </div>
           </div>
         )}
@@ -1568,7 +1577,7 @@ function SchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, nowMi
               </span>
               {schoolFromBoard != null && <span style={{fontSize:12,marginLeft:6,opacity:0.7}}>({fmt(schoolFromBoard)})</span>}
             </div>
-            <div className="step-sub">{route.boardingStopName || "Csererdő"} → {hasWalk ? route.transferLocalStop : route.transferStopShort}</div>
+            <div className="step-sub">{window.cityPlatformLabel(route.boardingSpId, route.boardingStopName || "Csererdő")} → {hasWalk ? route.transferLocalStop : route.transferStopShort}</div>
           </div>
         </div>
 
@@ -1585,8 +1594,8 @@ function SchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, nowMi
               <div className="step-time">{fmt(route.localArriveAtTransfer)}</div>
               <div className="step-icon">🚶</div>
               <div className="step-body">
-                <div className="step-title">{route.walkAfterBus} {t.min} {t.walkWord || "gyalog"}{route.walkAfterBusDist ? ` (${route.walkAfterBusDist} m)` : ""}</div>
-                <div className="step-sub">{route.transferLocalStop} → {route.transferStopShort}</div>
+                <div className="step-title">{t.walkAction || "Sétálj"}</div>
+                <div className="step-sub">{window.cityPlatformLabel(route.transferLocalSpId, route.transferLocalStop)} → {route.transferStopShort} · {route.walkAfterBus} {t.min} {t.walkWord || "gyalog"}{route.walkAfterBusDist ? ` · ${route.walkAfterBusDist} m` : ""}</div>
               </div>
             </div>
             <div className="step-connector">
@@ -1602,8 +1611,8 @@ function SchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, nowMi
           <div className="step-body">
             {route.walkAtTransfer ? (
               <>
-                <div className="step-title">{route.transferStop} → {route.transferStop}</div>
-                <div className="step-sub">{route.walkAtTransfer.walkMin} {t.min} {t.walkWord || "gyalog"} · {route.walkAtTransfer.distM} m</div>
+                <div className="step-title">{t.walkAction || "Sétálj"}</div>
+                <div className="step-sub">{route.transferStop} → {window.cityPlatformLabel(route.transferLocalSpId, route.transferStop)} · {route.walkAtTransfer.walkMin} {t.min} {t.walkWord || "gyalog"} · {route.walkAtTransfer.distM} m</div>
                 {route.waitAtTransfer - route.walkAtTransfer.walkMin > 0 && (
                   <div className="wait-pill">⏱ {route.waitAtTransfer - route.walkAtTransfer.walkMin} {t.min} {t.waitTime}</div>
                 )}
@@ -1611,7 +1620,7 @@ function SchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, nowMi
             ) : (
               <>
                 <div className="step-title">{t.transfer}</div>
-                <div className="step-sub">{route.transferStop}</div>
+                <div className="step-sub">{window.cityPlatformLabel(route.transferLocalSpId, route.transferStop)}</div>
                 <div className="wait-pill">⏱ {route.waitAtTransfer} {t.min} {t.waitTime}</div>
               </>
             )}
@@ -1664,8 +1673,8 @@ function SchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, nowMi
           <div className="step-time">{fmt(route.arriveSchool)}</div>
           <div className="step-icon step-icon-home">🏫</div>
           <div className="step-body">
-            <div className="step-title" style={{ fontWeight: 800 }}>{schoolData?.name || t.arriveSchool}</div>
-            <div className="step-sub">{t.arriveSchool}</div>
+            <div className="step-title">{t.arriveSchool}</div>
+            <div className="step-sub">{schoolData?.name || ""}</div>
           </div>
         </div>
       </div>

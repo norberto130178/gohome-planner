@@ -594,8 +594,8 @@ window.planRoutes = function planRoutes({
           // KÉSŐBB van, mint az átszállás; a puszta U.stopOffset (első találat) körjáratnál
           // teljesen elrejthetett volna egy valós hazautat.
           const targetOccs = bus.stops.filter(s => s.name === targetStop);
-          const validTargetOffsets = [...new Set(targetOccs.filter(s => s.offset > transferOffset).map(s => s.offset))];
-          if (validTargetOffsets.length === 0) continue;
+          const validTargetStops = targetOccs.filter(s => s.offset > transferOffset);
+          if (validTargetStops.length === 0) continue;
 
           let walkAtTransfer = null;
           if (busStopAtTransfer?.spId && icVeszpStop.citySpId && busStopAtTransfer.spId !== icVeszpStop.citySpId) {
@@ -609,10 +609,11 @@ window.planRoutes = function planRoutes({
             const localBoardAt = localDep + transferOffset;
             if (localBoardAt < mustBoardBy) continue;
 
-            for (const targetOffset of validTargetOffsets) {
+            for (const targetStopObj of validTargetStops) {
+              const targetOffset = targetStopObj.offset;
               const localArriveHome = localDep + targetOffset;
 
-              const key = `${icRoute.id}-${boardAtVaroterem}-${bus.id}-${bus.direction}-${localDep}-${targetOffset}`;
+              const key = `${icRoute.id}-${boardAtVaroterem}-${bus.id}-${bus.direction}-${localDep}-${targetOffset}-${targetStopObj.spId}`;
               if (seen.has(key)) continue;
               seen.add(key);
 
@@ -643,6 +644,7 @@ window.planRoutes = function planRoutes({
                 localBoardAt,
                 localArriveCsererdo: localArriveHome,
                 homeStop: targetStop,
+                homeSpId: targetStopObj.spId || null,
                 totalDuration: localArriveHome - (boardAtVaroterem - walkMin),
               });
             }
@@ -738,8 +740,8 @@ window.planSchoolRoutes = function planSchoolRoutes({
         // buszon (pl. körjáratnál a végállomás a kör elején ÉS végén) -- minden
         // előfordulást kipróbálunk, ami ténylegesen KORÁBBAN van, mint az átszállás.
         const fromOccs = bus.stops.filter(s => s.name === fromStop);
-        const validFromOffsets = [...new Set(fromOccs.filter(s => s.offset < transOffset).map(s => s.offset))];
-        if (validFromOffsets.length === 0) continue;
+        const validFromStops = fromOccs.filter(s => s.offset < transOffset);
+        if (validFromStops.length === 0) continue;
 
         let walkAtTransfer = null;
         if (busStopAtTransfer?.spId && icBoardStop.citySpId && busStopAtTransfer.spId !== icBoardStop.citySpId) {
@@ -750,7 +752,8 @@ window.planSchoolRoutes = function planSchoolRoutes({
 
         const localDeps = U.getDepartures(bus, dayType);
         for (const localDep of localDeps) {
-          for (const fromOffset of validFromOffsets) {
+          for (const fromStopObj of validFromStops) {
+          const fromOffset = fromStopObj.offset;
           const boardAt = localDep + fromOffset;
           if (boardAt < earliestBoard) continue;
           const arriveAtTransfer = localDep + transOffset;
@@ -775,13 +778,14 @@ window.planSchoolRoutes = function planSchoolRoutes({
           // tűnt mintha a busz "nulla perc alatt" ért volna oda -- ld. user screenshot.
           const helykoziDepBuszall = matchingTrip.originDep ?? icDepAtStop;
 
-          const key = `${icBoardStop.name}-${bus.id}-${bus.direction}-${boardAt}-${icDepAtStop}`;
+          const key = `${icBoardStop.name}-${bus.id}-${bus.direction}-${boardAt}-${icDepAtStop}-${fromStopObj.spId}`;
           if (seen.has(key)) continue;
           seen.add(key);
 
           routes.push({
             departLeaveHome: boardAt - walkMin,
             boardingStopName: fromStop,
+            boardingSpId: fromStopObj.spId || null,
             localBus: bus,
             localBoardAt: boardAt,
             localArriveAtTransfer: arriveAtTransfer,
@@ -853,15 +857,16 @@ window.planSchoolRoutes = function planSchoolRoutes({
           // buszon -- minden előfordulást kipróbálunk, ami ténylegesen KORÁBBAN van,
           // mint a gyaloglás kiindulópontja.
           const fromOccsWalk = bus.stops.filter(s => s.name === fromStop);
-          const validFromOffsetsWalk = [...new Set(fromOccsWalk.filter(s => s.offset < walkOffset).map(s => s.offset))];
-          if (validFromOffsetsWalk.length === 0) continue;
+          const validFromStopsWalk = fromOccsWalk.filter(s => s.offset < walkOffset);
+          if (validFromStopsWalk.length === 0) continue;
 
           const directOffset = U.stopOffset(bus, cityStopName);
           if (directOffset !== null && directOffset > walkOffset) continue;
 
           const localDeps = U.getDepartures(bus, dayType);
           for (const localDep of localDeps) {
-            for (const fromOffset of validFromOffsetsWalk) {
+            for (const fromStopObjWalk of validFromStopsWalk) {
+            const fromOffset = fromStopObjWalk.offset;
             const boardAt = localDep + fromOffset;
             if (boardAt < earliestBoard) continue;
             const arriveAtWalkStop = localDep + walkOffset;
@@ -881,10 +886,11 @@ window.planSchoolRoutes = function planSchoolRoutes({
 
             // Ld. a fenti indoklást: a trip valódi kiindulópontjának ideje, nem fix index-lookup.
             const helykoziDepBuszall = matchingTrip2.originDep ?? icDepAtStop;
-            const walkKey = `${icBoardStop.name}-${bus.id}-${bus.direction}-${boardAt}-${icDepAtStop}`;
+            const walkKey = `${icBoardStop.name}-${bus.id}-${bus.direction}-${boardAt}-${icDepAtStop}-${fromStopObjWalk.spId}`;
             const candidate = {
               departLeaveHome: boardAt - walkMin,
               boardingStopName: fromStop,
+              boardingSpId: fromStopObjWalk.spId || null,
               localBus: bus,
               localBoardAt: boardAt,
               localArriveAtTransfer: arriveAtWalkStop,

@@ -107,7 +107,7 @@ function RouteCard({ route, index, isPrimary, t, style, isWeekend, dayType, nowM
           <div className="step-icon bus-icon-regional">🚌</div>
           <div className="step-body">
             <div className="step-title">
-              {t.catchBus}
+              {t.boardBus || "Szállj fel"}
               {route.helykoziLine && <span style={{background:'#2B1E3F',color:'#FFF7EC',padding:'2px 8px',borderRadius:8,fontSize:12,marginLeft:6}}>#{route.helykoziLine}</span>}
               {route.helykoziOriginDep != null && <span style={{fontSize:12,marginLeft:6,opacity:0.7}}>({fmt(route.helykoziOriginDep)})</span>}
             </div>
@@ -171,7 +171,7 @@ function RouteCard({ route, index, isPrimary, t, style, isWeekend, dayType, nowM
           </div>
           <div className="step-body">
             <div className="step-title">
-              {t.takeLocal}{" "}
+              {t.boardBus || "Szállj fel"}{" "}
               <span style={{ color: busColor, fontWeight: 800 }}>
                 {window.busLabel(route.localBus, t)}
               </span>
@@ -193,7 +193,7 @@ function RouteCard({ route, index, isPrimary, t, style, isWeekend, dayType, nowM
           <div className="step-time">{fmt(route.localArriveCsererdo)}</div>
           <div className="step-icon step-icon-home">🏡</div>
           <div className="step-body">
-            <div className="step-title">{t.arriveAt}</div>
+            <div className="step-title">{t.arrivedLabel || "Megérkeztél"}</div>
             <div className="step-sub">
               {route.homeStop && route.homeStop !== "Csererdő" ? window.cityPlatformLabel(route.homeSpId, route.homeStop) : t.home}
             </div>
@@ -767,7 +767,7 @@ function CitySchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, n
           </div>
           <div className="step-body">
             <div className="step-title">
-              {t.takeLocal}{" "}
+              {t.boardBus || "Szállj fel"}{" "}
               <span style={{ color: route.bus1.color, fontWeight: 800 }}>{window.busLabel(route.bus1, t)}</span>
             </div>
             <div className="step-sub">{window.busDirection(route.bus1, t)}</div>
@@ -821,7 +821,7 @@ function CitySchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, n
               </div>
               <div className="step-body">
                 <div className="step-title">
-                  {t.takeLocal}{" "}
+                  {t.boardBus || "Szállj fel"}{" "}
                   <span style={{ color: route.bus2.color, fontWeight: 800 }}>{window.busLabel(route.bus2, t)}</span>
                 </div>
                 <div className="step-sub">{window.busDirection(route.bus2, t)}</div>
@@ -847,7 +847,8 @@ function CitySchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, n
               <div className="step-time">{fmt(route.arriveAt)}</div>
               <div className="step-icon">🚏</div>
               <div className="step-body">
-                <div className="step-title">{window.cityPlatformLabel(route.toSpId, nearestStopName)}</div>
+                <div className="step-title">{route.walkToSchool > 0 ? (t.alightBus || "Szállj le") : (t.arriveSchool || "Megérkeztél az iskolába")}</div>
+                <div className="step-sub">{window.cityPlatformLabel(route.toSpId, nearestStopName)}</div>
               </div>
             </div>
             {route.walkToSchool > 0 && (
@@ -860,7 +861,7 @@ function CitySchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, n
                   <div className="step-time">{fmt(route.arriveSchool)}</div>
                   <div className="step-icon">🏫</div>
                   <div className="step-body">
-                    <div className="step-title">{t.arriveAt}</div>
+                    <div className="step-title">{t.arriveSchool || "Megérkeztél az iskolába"}</div>
                     <div className="step-sub">{schoolData?.name}</div>
                   </div>
                 </div>
@@ -872,7 +873,7 @@ function CitySchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, n
             <div className="step-time">{fmt(route.arriveAt)}</div>
             <div className="step-icon step-icon-home">🏡</div>
             <div className="step-body">
-              <div className="step-title">{t.arriveAt}</div>
+              <div className="step-title">{t.arrivedLabel || "Megérkeztél"}</div>
               <div className="step-sub">{window.cityPlatformLabel(route.toSpId, homeStopName || t.home)}</div>
             </div>
           </div>
@@ -1571,7 +1572,7 @@ function SchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, nowMi
           </div>
           <div className="step-body">
             <div className="step-title">
-              {t.catchLocal}{" "}
+              {t.boardBus || "Szállj fel"}{" "}
               <span style={{ color: busColor, fontWeight: 800 }}>
                 {window.busLabel(route.localBus, t)}
               </span>
@@ -1636,7 +1637,7 @@ function SchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, nowMi
           <div className="step-icon bus-icon-regional">🚌</div>
           <div className="step-body">
             <div className="step-title">
-              {t.catchRegional}
+              {t.boardBus || "Szállj fel"}
               {route.helykoziLine && <span style={{background:'#2B1E3F',color:'#FFF7EC',padding:'2px 8px',borderRadius:8,fontSize:12,marginLeft:6}}>#{route.helykoziLine}</span>}
               {route.helykoziDepBuszall != null && <span style={{fontSize:12,marginLeft:6,opacity:0.7}}>({fmt(route.helykoziDepBuszall)})</span>}
             </div>
@@ -1660,7 +1661,8 @@ function SchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, nowMi
           <div className="step-time">{fmt(route.helykoziArrive)}</div>
           <div className="step-icon">🚏</div>
           <div className="step-body">
-            <div className="step-title">{t.schoolStop}</div>
+            <div className="step-title">{t.alightBus || "Szállj le"}</div>
+            <div className="step-sub">{t.schoolStop}</div>
           </div>
         </div>
 

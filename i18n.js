@@ -138,6 +138,7 @@ window.I18N = {
     schoolHolidayToggle: "Tanszünet",
     // City route cards
     boardBus: "Szállj fel",
+    alightBus: "Szállj le",
     walkAction: "Sétálj",
     departLabel: "Indulj el",
     walkToStopLabel: "perc gyaloglás a megállóhoz",
@@ -310,6 +311,7 @@ window.I18N = {
     schoolHolidayToggle: "Holiday",
     // City route cards
     boardBus: "Board",
+    alightBus: "Get off",
     walkAction: "Walk",
     departLabel: "Depart",
     walkToStopLabel: "min walk to stop",

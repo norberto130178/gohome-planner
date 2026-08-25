@@ -330,8 +330,8 @@ function CityRouteCard({ route, index, isPrimary, fromStop, toStop, walkMin, isW
               <div className="step-time">{fmt(route.arriveAt)}</div>
               <div className="step-icon step-icon-home">📍</div>
               <div className="step-body">
-                <div className="step-title" style={{ fontWeight: 800 }}>{window.cityPlatformLabel(route.toSpId, toStop)}</div>
-                <div className="step-sub">{t.arrivedLabel || "Megérkeztél"}</div>
+                <div className="step-title">{t.arrivedLabel || "Megérkeztél"}</div>
+                <div className="step-sub">{window.cityPlatformLabel(route.toSpId, toStop)}</div>
               </div>
             </div>
           </>
@@ -347,8 +347,8 @@ function CityRouteCard({ route, index, isPrimary, fromStop, toStop, walkMin, isW
               <div className="step-body">
                 {route.walkTransfer ? (
                   <>
-                    <div className="step-title">{window.cityPlatformLabel(route.transferSpId, route.transferStopName)} → {window.cityPlatformLabel(route.walkToSpId, route.walkToStop)}</div>
-                    <div className="step-sub">{route.walkTransfer.walkMin} {t.walkMinLabel || "perc gyalog"} · {route.walkTransfer.distM} m</div>
+                    <div className="step-title">{t.walkAction || "Sétálj"}</div>
+                    <div className="step-sub">{window.cityPlatformLabel(route.transferSpId, route.transferStopName)} → {route.walkToStop} · {route.walkTransfer.walkMin} {t.walkMinLabel || "perc gyalog"} · {route.walkTransfer.distM} m</div>
                     {route.waitAtTransfer - route.walkTransfer.walkMin > 0 && (
                       <div className="wait-pill">⏱ {route.waitAtTransfer - route.walkTransfer.walkMin} {t.waitLabel || "perc várakozás"}</div>
                     )}
@@ -386,8 +386,8 @@ function CityRouteCard({ route, index, isPrimary, fromStop, toStop, walkMin, isW
               <div className="step-time">{fmt(route.arriveAt)}</div>
               <div className="step-icon step-icon-home">📍</div>
               <div className="step-body">
-                <div className="step-title" style={{ fontWeight: 800 }}>{window.cityPlatformLabel(route.toSpId, toStop)}</div>
-                <div className="step-sub">{t.arrivedLabel || "Megérkeztél"}</div>
+                <div className="step-title">{t.arrivedLabel || "Megérkeztél"}</div>
+                <div className="step-sub">{window.cityPlatformLabel(route.toSpId, toStop)}</div>
               </div>
             </div>
           </>

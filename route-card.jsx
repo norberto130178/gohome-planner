@@ -128,30 +128,30 @@ function RouteCard({ route, index, isPrimary, t, style, isWeekend, dayType, nowM
         </div>
 
         {/* Step 3: Átszállás */}
-        <div className="route-step step-transfer">
-          <div className="step-time">{fmt(route.helykoziArrive)}</div>
-          <div className="step-icon">{route.walkAtTransfer ? "🚶" : "🔄"}</div>
-          <div className="step-body">
-            {route.walkAtTransfer ? (
-              <>
-                <div className="step-title">{t.walkAction || "Sétálj"}</div>
-                <div className="step-sub">{route.transferStop} → {window.cityPlatformLabel(route.transferLocalSpId, route.transferStop)} · {route.walkAtTransfer.walkMin} {t.min} {t.walkWord || "gyalog"} · {route.walkAtTransfer.distM} m</div>
-                {route.waitAtTransfer - route.walkAtTransfer.walkMin > 0 && (
-                  <div className="wait-pill">⏱ {route.waitAtTransfer - route.walkAtTransfer.walkMin} {t.min} {t.waitTime}</div>
-                )}
-              </>
-            ) : (
-              <>
-                <div className="step-title">{t.transfer}</div>
-                <div className="step-sub">{window.cityPlatformLabel(route.transferLocalSpId, route.transferStop)}</div>
-                <div className="wait-pill">⏱ {route.waitAtTransfer} {t.min} {t.waitTime}</div>
-              </>
-            )}
+        {route.walkAtTransfer ? (
+          <div className="route-step step-transfer">
+            <div className="step-time">{fmt(route.helykoziArrive)}</div>
+            <div className="step-icon">🚏</div>
+            <div className="step-body">
+              <div className="step-title">{t.alightBus || "Szállj le"}</div>
+              <div className="step-sub">{window.intercityPlatformLabel(route.helykoziArriveSpId, route.transferStop)}</div>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="route-step step-transfer">
+            <div className="step-time">{fmt(route.helykoziArrive)}</div>
+            <div className="step-icon">🔄</div>
+            <div className="step-body">
+              <div className="step-title">{t.transfer}</div>
+              <div className="step-sub">{window.cityPlatformLabel(route.transferLocalSpId, route.transferStop)}</div>
+              <div className="wait-pill">⏱ {route.waitAtTransfer} {t.min} {t.waitTime}</div>
+            </div>
+          </div>
+        )}
 
         <div className="step-connector">
           <div className="connector-line" />
+          {route.walkAtTransfer && <div className="connector-label">{route.walkAtTransfer.walkMin} {t.min} {t.walkWord || "gyalog"} ({route.walkAtTransfer.distM} m)</div>}
         </div>
 
         {/* Step 4: Helyi busz */}
@@ -177,7 +177,10 @@ function RouteCard({ route, index, isPrimary, t, style, isWeekend, dayType, nowM
               </span>
               {localOriginDep != null && <span style={{fontSize:12,marginLeft:6,opacity:0.7}}>({fmt(localOriginDep)})</span>}
             </div>
-            <div className="step-sub">{window.busDirection(route.localBus, t)}</div>
+            <div className="step-sub">{window.cityPlatformLabel(route.transferLocalSpId, route.transferStop)}</div>
+            {route.walkAtTransfer && route.waitAtTransfer - route.walkAtTransfer.walkMin > 0 && (
+              <div className="wait-pill">⏱ {route.waitAtTransfer - route.walkAtTransfer.walkMin} {t.min} {t.waitTime}</div>
+            )}
           </div>
         </div>
 
@@ -735,20 +738,24 @@ function CitySchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, n
       </div>
 
       <div className="route-steps">
-        {/* Indulás (gyaloglással ha van) */}
-        <div className="route-step step-walk">
-          <div className="step-time">{fmt(route.departLeaveHome)}</div>
-          <div className="step-icon">🚶</div>
-          <div className="step-body">
-            <div className="step-title">{t.leaveAt}</div>
-            <div className="step-sub">{window.cityPlatformLabel(route.fromSpId, direction === "school" ? homeStopName : nearestStopName)}</div>
-          </div>
-        </div>
-
-        <div className="step-connector">
-          <div className="connector-line" />
-          {walkMin > 0 && <div className="connector-label">{walkMin} {t.min} {t.walkWord || "gyalog"}</div>}
-        </div>
+        {/* Indulás (gyaloglással a megállóig) -- csak akkor külön lépés, ha valóban van
+            gyaloglás, különben ugyanazt a helyet mutatná mint a következő "Szállj fel"
+            lépés (ld. CityRouteCard analóg megoldása, ugyanerről az adatforrásról). */}
+        {walkMin > 0 && (
+          <>
+            <div className="route-step step-walk">
+              <div className="step-time">{fmt(route.departLeaveHome)}</div>
+              <div className="step-icon">🚶</div>
+              <div className="step-body">
+                <div className="step-title">{t.departLabel || "Indulj el"}</div>
+                <div className="step-sub">{walkMin} {t.walkToStopLabel || "perc gyaloglás a megállóhoz"}</div>
+              </div>
+            </div>
+            <div className="step-connector">
+              <div className="connector-line" />
+            </div>
+          </>
+        )}
 
         {/* Busz 1 */}
         <div className="route-step step-bus-1">
@@ -770,7 +777,7 @@ function CitySchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, n
               {t.boardBus || "Szállj fel"}{" "}
               <span style={{ color: route.bus1.color, fontWeight: 800 }}>{window.busLabel(route.bus1, t)}</span>
             </div>
-            <div className="step-sub">{window.busDirection(route.bus1, t)}</div>
+            <div className="step-sub">{window.cityPlatformLabel(route.fromSpId, direction === "school" ? homeStopName : nearestStopName)}</div>
           </div>
         </div>
 
@@ -781,29 +788,31 @@ function CitySchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, n
               <div className="connector-label">{bus1TravelMin} {t.min}</div>
             </div>
 
-            <div className="route-step step-transfer">
-              <div className="step-time">{fmt(route.arriveAtTransfer)}</div>
-              <div className="step-icon">{route.walkTransfer ? "🚶" : "🔄"}</div>
-              <div className="step-body">
-                {route.walkTransfer ? (
-                  <>
-                    <div className="step-title">{t.walkAction || "Sétálj"}</div>
-                    <div className="step-sub">{route.transferStopName} → {window.cityPlatformLabel(route.walkToSpId, route.walkToStop)} · {route.walkTransfer.walkMin} {t.min} {t.walkWord || "gyalog"} · {route.walkTransfer.distM} m</div>
-                  </>
-                ) : (
-                  <>
-                    <div className="step-title">{t.transfer}</div>
-                    <div className="step-sub">{window.cityPlatformLabel(route.transferSpId, route.transferStopName)}</div>
-                    <div className="wait-pill">⏱ {route.waitAtTransfer} {t.min} {t.waitTime}</div>
-                  </>
-                )}
-                {route.walkTransfer && route.waitAtTransfer - route.walkTransfer.walkMin > 0 && (
-                  <div className="wait-pill">⏱ {route.waitAtTransfer - route.walkTransfer.walkMin} {t.min} {t.waitTime}</div>
-                )}
+            {route.walkTransfer ? (
+              <div className="route-step step-transfer">
+                <div className="step-time">{fmt(route.arriveAtTransfer)}</div>
+                <div className="step-icon">🚏</div>
+                <div className="step-body">
+                  <div className="step-title">{t.alightBus || "Szállj le"}</div>
+                  <div className="step-sub">{window.cityPlatformLabel(route.transferSpId, route.transferStopName)}</div>
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="route-step step-transfer">
+                <div className="step-time">{fmt(route.arriveAtTransfer)}</div>
+                <div className="step-icon">🔄</div>
+                <div className="step-body">
+                  <div className="step-title">{t.transfer}</div>
+                  <div className="step-sub">{window.cityPlatformLabel(route.transferSpId, route.transferStopName)}</div>
+                  <div className="wait-pill">⏱ {route.waitAtTransfer} {t.min} {t.waitTime}</div>
+                </div>
+              </div>
+            )}
 
-            <div className="step-connector"><div className="connector-line" /></div>
+            <div className="step-connector">
+              <div className="connector-line" />
+              {route.walkTransfer && <div className="connector-label">{route.walkTransfer.walkMin} {t.min} {t.walkWord || "gyalog"} ({route.walkTransfer.distM} m)</div>}
+            </div>
 
             <div className="route-step step-bus-2">
               <div className="step-time">{fmt(route.boardAt2)}</div>
@@ -824,7 +833,10 @@ function CitySchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, n
                   {t.boardBus || "Szállj fel"}{" "}
                   <span style={{ color: route.bus2.color, fontWeight: 800 }}>{window.busLabel(route.bus2, t)}</span>
                 </div>
-                <div className="step-sub">{window.busDirection(route.bus2, t)}</div>
+                <div className="step-sub">{window.cityPlatformLabel(route.walkToSpId || route.transferSpId2, route.walkToStop || route.transferStopName)}</div>
+                {route.walkTransfer && route.waitAtTransfer - route.walkTransfer.walkMin > 0 && (
+                  <div className="wait-pill">⏱ {route.waitAtTransfer - route.walkTransfer.walkMin} {t.min} {t.waitTime}</div>
+                )}
               </div>
             </div>
 
@@ -1593,43 +1605,47 @@ function SchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, nowMi
           <>
             <div className="route-step step-transfer">
               <div className="step-time">{fmt(route.localArriveAtTransfer)}</div>
-              <div className="step-icon">🚶</div>
+              <div className="step-icon">🚏</div>
               <div className="step-body">
-                <div className="step-title">{t.walkAction || "Sétálj"}</div>
-                <div className="step-sub">{window.cityPlatformLabel(route.transferLocalSpId, route.transferLocalStop)} → {route.transferStopShort} · {route.walkAfterBus} {t.min} {t.walkWord || "gyalog"}{route.walkAfterBusDist ? ` · ${route.walkAfterBusDist} m` : ""}</div>
+                <div className="step-title">{t.alightBus || "Szállj le"}</div>
+                <div className="step-sub">{window.cityPlatformLabel(route.transferLocalSpId, route.transferLocalStop)}</div>
               </div>
             </div>
             <div className="step-connector">
               <div className="connector-line" />
-              <div className="connector-label">{route.walkAfterBus} {t.min}</div>
+              <div className="connector-label">{route.walkAfterBus} {t.min} {t.walkWord || "gyalog"}{route.walkAfterBusDist ? ` (${route.walkAfterBusDist} m)` : ""}</div>
             </div>
           </>
         )}
 
-        <div className="route-step step-transfer">
-          <div className="step-time">{fmt(route.transferReadyAt)}</div>
-          <div className="step-icon">{route.walkAtTransfer ? "🚶" : "🔄"}</div>
-          <div className="step-body">
-            {route.walkAtTransfer ? (
-              <>
-                <div className="step-title">{t.walkAction || "Sétálj"}</div>
-                <div className="step-sub">{route.transferStop} → {window.cityPlatformLabel(route.transferLocalSpId, route.transferStop)} · {route.walkAtTransfer.walkMin} {t.min} {t.walkWord || "gyalog"} · {route.walkAtTransfer.distM} m</div>
-                {route.waitAtTransfer - route.walkAtTransfer.walkMin > 0 && (
-                  <div className="wait-pill">⏱ {route.waitAtTransfer - route.walkAtTransfer.walkMin} {t.min} {t.waitTime}</div>
-                )}
-              </>
-            ) : (
-              <>
-                <div className="step-title">{t.transfer}</div>
-                <div className="step-sub">{window.cityPlatformLabel(route.transferLocalSpId, route.transferStop)}</div>
-                <div className="wait-pill">⏱ {route.waitAtTransfer} {t.min} {t.waitTime}</div>
-              </>
-            )}
+        {route.walkAtTransfer ? (
+          <div className="route-step step-transfer">
+            <div className="step-time">{fmt(route.transferReadyAt)}</div>
+            <div className="step-icon">🚏</div>
+            <div className="step-body">
+              <div className="step-title">{t.alightBus || "Szállj le"}</div>
+              <div className="step-sub">{window.cityPlatformLabel(route.transferLocalSpId, route.transferStop)}</div>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="route-step step-transfer">
+            <div className="step-time">{fmt(route.transferReadyAt)}</div>
+            <div className="step-icon">🔄</div>
+            <div className="step-body">
+              <div className="step-title">{t.transfer}</div>
+              {/* hasWalk esetén a transferLocalSpId a MÁR ELHAGYOTT (leszállási) pontra
+                  mutat -- a WALK_GRAPH-os gyaloglás UTÁN itt már a helyközi busz saját
+                  átszállóhelyén állunk, amihez nincs külön tárolt spId, ezért csak a
+                  puszta nevet mutatjuk (ld. data.js planSchoolRoutes WALK-TRANSFER ága). */}
+              <div className="step-sub">{hasWalk ? route.transferStop : window.cityPlatformLabel(route.transferLocalSpId, route.transferStop)}</div>
+              <div className="wait-pill">⏱ {route.waitAtTransfer} {t.min} {t.waitTime}</div>
+            </div>
+          </div>
+        )}
 
         <div className="step-connector">
           <div className="connector-line" />
+          {route.walkAtTransfer && <div className="connector-label">{route.walkAtTransfer.walkMin} {t.min} {t.walkWord || "gyalog"} ({route.walkAtTransfer.distM} m)</div>}
         </div>
 
         <div className="route-step step-bus-1">
@@ -1641,11 +1657,14 @@ function SchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, nowMi
               {route.helykoziLine && <span style={{background:'#2B1E3F',color:'#FFF7EC',padding:'2px 8px',borderRadius:8,fontSize:12,marginLeft:6}}>#{route.helykoziLine}</span>}
               {route.helykoziDepBuszall != null && <span style={{fontSize:12,marginLeft:6,opacity:0.7}}>({fmt(route.helykoziDepBuszall)})</span>}
             </div>
-            <div className="step-sub">{route.transferStopShort} → Nemesvámos</div>
+            <div className="step-sub">{window.intercityPlatformLabel(route.helykoziBoardSpId, route.transferStopShort)} → Nemesvámos</div>
             {route.helykoziOrigin && route.helykoziTerminus && (
               <div style={{color:'var(--accent)',fontWeight:700,fontSize:12,marginTop:2}}>
                 {route.helykoziOrigin} → {route.helykoziTerminus}
               </div>
+            )}
+            {route.walkAtTransfer && route.waitAtTransfer - route.walkAtTransfer.walkMin > 0 && (
+              <div className="wait-pill">⏱ {route.waitAtTransfer - route.walkAtTransfer.walkMin} {t.min} {t.waitTime}</div>
             )}
           </div>
         </div>

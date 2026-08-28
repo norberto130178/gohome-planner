@@ -341,29 +341,29 @@ function CityRouteCard({ route, index, isPrimary, fromStop, toStop, walkMin, isW
               <div className="connector-line" />
               <div className="connector-label">{route.arriveAtTransfer - route.boardAt} {t.min}</div>
             </div>
-            <div className="route-step">
-              <div className="step-time">{fmt(route.arriveAtTransfer)}</div>
-              <div className="step-icon">{route.walkTransfer ? "🚶" : "🔄"}</div>
-              <div className="step-body">
-                {route.walkTransfer ? (
-                  <>
-                    <div className="step-title">{t.walkAction || "Sétálj"}</div>
-                    <div className="step-sub">{window.cityPlatformLabel(route.transferSpId, route.transferStopName)} → {route.walkToStop} · {route.walkTransfer.walkMin} {t.walkMinLabel || "perc gyalog"} · {route.walkTransfer.distM} m</div>
-                    {route.waitAtTransfer - route.walkTransfer.walkMin > 0 && (
-                      <div className="wait-pill">⏱ {route.waitAtTransfer - route.walkTransfer.walkMin} {t.waitLabel || "perc várakozás"}</div>
-                    )}
-                  </>
-                ) : (
-                  <>
-                    <div className="step-title">{t.transfer || "Átszállás"}</div>
-                    <div className="step-sub">{window.cityPlatformLabel(route.transferSpId, route.transferStopName)}</div>
-                    <div className="wait-pill">⏱ {route.waitAtTransfer} {t.waitLabel || "perc várakozás"}</div>
-                  </>
-                )}
+            {route.walkTransfer ? (
+              <div className="route-step">
+                <div className="step-time">{fmt(route.arriveAtTransfer)}</div>
+                <div className="step-icon">🚏</div>
+                <div className="step-body">
+                  <div className="step-title">{t.alightBus || "Szállj le"}</div>
+                  <div className="step-sub">{window.cityPlatformLabel(route.transferSpId, route.transferStopName)}</div>
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="route-step">
+                <div className="step-time">{fmt(route.arriveAtTransfer)}</div>
+                <div className="step-icon">🔄</div>
+                <div className="step-body">
+                  <div className="step-title">{t.transfer || "Átszállás"}</div>
+                  <div className="step-sub">{window.cityPlatformLabel(route.transferSpId, route.transferStopName)}</div>
+                  <div className="wait-pill">⏱ {route.waitAtTransfer} {t.waitLabel || "perc várakozás"}</div>
+                </div>
+              </div>
+            )}
             <div className="step-connector">
               <div className="connector-line" />
+              {route.walkTransfer && <div className="connector-label">{route.walkTransfer.walkMin} {t.walkMinLabel || "perc gyalog"} ({route.walkTransfer.distM} m)</div>}
             </div>
             <div className="route-step">
               <div className="step-time">{fmt(route.boardAt2)}</div>
@@ -376,6 +376,9 @@ function CityRouteCard({ route, index, isPrimary, fromStop, toStop, walkMin, isW
                   </span>
                 </div>
                 <div className="step-sub">{window.cityPlatformLabel(route.walkToSpId || route.transferSpId2, route.walkToStop || route.transferStopName)}</div>
+                {route.walkTransfer && route.waitAtTransfer - route.walkTransfer.walkMin > 0 && (
+                  <div className="wait-pill">⏱ {route.waitAtTransfer - route.walkTransfer.walkMin} {t.waitLabel || "perc várakozás"}</div>
+                )}
               </div>
             </div>
             <div className="step-connector">

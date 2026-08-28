@@ -487,6 +487,16 @@ window.cityPlatformLabel = function (spId, fallbackName) {
   return (p && p.label) || fallbackName;
 };
 
+// Ugyanaz a minta, mint window.cityPlatformLabel, csak a helyközi (Nemesvámos-Veszprém
+// korridor) platformokra (_intercityPlatforms(), ld. fentebb) -- a kártyákon a helyközi
+// busz felszállási lépésénél kell, ha az adott megállónévnek (pl. "Veszprém autóbusz-
+// állomás", "Komakút tér") több fizikai beállója/platformja is van.
+window.intercityPlatformLabel = function (spId, fallbackName) {
+  if (!spId) return fallbackName;
+  const p = _intercityPlatforms().find(x => x.spId === spId);
+  return (p && p.label) || fallbackName;
+};
+
 window.getCityStops = function () {
   return _cityPlatforms().map(p => p.label).sort((a, b) => a.localeCompare(b, "hu"));
 };
@@ -634,6 +644,11 @@ window.planRoutes = function planRoutes({
                 transferStop: cityStopName,
                 transferStopShort: _TRANSFER_SHORT[icVeszpStop.name] || icVeszpStop.name.replace('Veszprém, ', ''),
                 transferStopId: icVeszpStop.name,
+                // A helyközi busz saját (VOLÁN) platform-azonosítója itt -- NEM ugyanaz,
+                // mint a transferLocalSpId (ami a HELYI busz felszállóhelyét jelöli, a
+                // gyaloglás UTÁN). Ha ennek a névnek (pl. "Veszprém autóbusz-állomás")
+                // több beállója/platformja van, ez teszi lehetővé a pontosítást a kártyán.
+                helykoziArriveSpId: icVeszpStop.spId || null,
                 transferLocalStop: cityStopName,
                 transferLocalSpId: busStopAtTransfer?.spId || null,
                 transferLat: icVeszpStop.lat,
@@ -801,6 +816,9 @@ window.planSchoolRoutes = function planSchoolRoutes({
             helykoziOrigin: matchingTrip.origin || null,
             helykoziTerminus: matchingTrip.terminus || null,
             helykoziTripDeps: matchingTrip.deps,
+            // A helyközi busz saját (VOLÁN) platform-azonosítója -- ld. a planRoutes-beli
+            // helykoziArriveSpId indoklását, itt a FELSZÁLLÁS oldalára (icBoardStop).
+            helykoziBoardSpId: icBoardStop.spId || null,
             transferStop: cityStopName,
             transferStopShort: _TRANSFER_SHORT[icBoardStop.name] || icBoardStop.name.replace('Veszprém, ', ''),
             transferStopId: icBoardStop.name,
@@ -905,6 +923,7 @@ window.planSchoolRoutes = function planSchoolRoutes({
               helykoziOrigin: matchingTrip2.origin || null,
               helykoziTerminus: matchingTrip2.terminus || null,
               helykoziTripDeps: matchingTrip2.deps,
+              helykoziBoardSpId: icBoardStop.spId || null,
               transferStop: cityStopName,
               transferStopShort: _TRANSFER_SHORT[icBoardStop.name] || icBoardStop.name.replace('Veszprém, ', ''),
               transferStopId: icBoardStop.name + "_walk",

@@ -285,6 +285,17 @@ function CityRouteCard({ route, index, isPrimary, fromStop, toStop, walkMin, isW
               fontFamily: 'inherit', fontWeight: 800, verticalAlign: 'middle',
             }}
           >🗺</button>
+          <button
+            onClick={() => window.printCard(cardRef.current)}
+            title={t.printRoute || "Nyomtatás"}
+            aria-label={t.printRoute || "Nyomtatás"}
+            style={{
+              marginLeft: 6, background: 'var(--line)',
+              border: 'none', borderRadius: 8, padding: '2px 8px',
+              cursor: 'pointer', fontSize: 14, color: 'var(--ink)',
+              fontFamily: 'inherit', fontWeight: 800, verticalAlign: 'middle',
+            }}
+          >🖨️</button>
         </span>
       </div>
 

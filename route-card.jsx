@@ -75,6 +75,17 @@ function RouteCard({ route, index, isPrimary, t, style, isWeekend, dayType, nowM
               fontFamily: 'inherit', fontWeight: 800, verticalAlign: 'middle',
             }}
           >🗺</button>
+          <button
+            onClick={() => window.printCard(cardRef.current)}
+            title={t.printRoute || "Nyomtatás"}
+            aria-label={t.printRoute || "Nyomtatás"}
+            style={{
+              marginLeft: 6, background: 'var(--line)',
+              border: 'none', borderRadius: 8, padding: '2px 8px',
+              cursor: 'pointer', fontSize: 14, color: 'var(--ink)',
+              fontFamily: 'inherit', fontWeight: 800, verticalAlign: 'middle',
+            }}
+          >🖨️</button>
         </span>
       </div>
       {route.homeStop && route.homeStop !== "Csererdő" && (
@@ -734,6 +745,17 @@ function CitySchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, n
               fontFamily: 'inherit', fontWeight: 800, verticalAlign: 'middle',
             }}
           >🗺</button>
+          <button
+            onClick={() => window.printCard(cardRef.current)}
+            title={t.printRoute || "Nyomtatás"}
+            aria-label={t.printRoute || "Nyomtatás"}
+            style={{
+              marginLeft: 6, background: 'var(--line)',
+              border: 'none', borderRadius: 8, padding: '2px 8px',
+              cursor: 'pointer', fontSize: 14, color: 'var(--ink)',
+              fontFamily: 'inherit', fontWeight: 800, verticalAlign: 'middle',
+            }}
+          >🖨️</button>
         </span>
       </div>
 
@@ -1563,6 +1585,17 @@ function SchoolRouteCard({ route, index, isPrimary, t, isWeekend, dayType, nowMi
               fontFamily: 'inherit', fontWeight: 800, verticalAlign: 'middle',
             }}
           >🗺</button>
+          <button
+            onClick={() => window.printCard(cardRef.current)}
+            title={t.printRoute || "Nyomtatás"}
+            aria-label={t.printRoute || "Nyomtatás"}
+            style={{
+              marginLeft: 6, background: 'var(--line)',
+              border: 'none', borderRadius: 8, padding: '2px 8px',
+              cursor: 'pointer', fontSize: 14, color: 'var(--ink)',
+              fontFamily: 'inherit', fontWeight: 800, verticalAlign: 'middle',
+            }}
+          >🖨️</button>
         </span>
       </div>
 

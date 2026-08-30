@@ -932,3 +932,56 @@ select:focus-visible,
     transition: none;
   }
 }
+
+/* ============================================================
+   Kártya nyomtatása — window.printCard() (data.js) tölti fel
+   ============================================================ */
+#__printPortal { display: none; }
+
+@media print {
+  /* Nyomtatáskor minden más eltűnik, csak a portál (a kiválasztott kártya
+     másolata) marad látható -- ez sokkal robusztusabb, mint a portál körüli
+     teljes DOM-fát elemenként elrejteni. */
+  body.print-single-card > *:not(#__printPortal) { display: none !important; }
+  html:has(body.print-single-card),
+  body.print-single-card {
+    background: white !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  body.print-single-card #__printPortal {
+    display: block !important;
+    max-width: 380px;
+    margin: 0;
+    padding: 16px 18px;
+    border: 2px solid #000;
+    border-radius: 14px;
+    font-family: 'Nunito', sans-serif;
+    color: #000;
+  }
+  #__printPortal .route-card-header {
+    border-bottom: 2px solid #000;
+  }
+  #__printPortal .route-card-badge,
+  #__printPortal .route-card-total,
+  #__printPortal .step-time,
+  #__printPortal .step-title {
+    color: #000 !important;
+  }
+  #__printPortal .step-sub {
+    color: #333 !important;
+  }
+  #__printPortal .wait-pill {
+    background: #eee !important;
+    color: #000 !important;
+    box-shadow: none !important;
+  }
+  #__printPortal .connector-line { background: #999 !important; }
+  #__printPortal .step-icon { box-shadow: none !important; }
+
+  /* Kisebb, kb. fél-A4-es laptméret, hogy ne teljes A4-en nyomtasson egy
+     kártyát -- a legtöbb böngésző/PDF-mentés figyelembe veszi; ha a
+     nyomtató/OS csak A4-et/Lettert támogat, a fenti max-width akkor is
+     kompakt tartja magát a tartalmat, csak több üres hely marad körülötte. */
+  @page { size: A5; margin: 10mm; }
+}

@@ -959,3 +959,45 @@ window.planSchoolRoutes = function planSchoolRoutes({
 
   return filtered.slice(0, maxResults);
 };
+
+// ============================================================
+// Egy útvonalkártya nyomtatása -- mind a 4 kártyatípus (RouteCard,
+// SchoolRouteCard, CitySchoolRouteCard, CityRouteCard) ugyanezt hívja a saját
+// `cardRef.current`-jével (mindegyiknek van már ilyen ref-je a térkép-görgetéshez).
+//
+// Nem az egész oldalt nyomtatjuk (böngésző alapértelmezés) -- csak a kiválasztott
+// kártya fejlécét+lépéseit másoljuk egy rejtett, a <body> aljára fűzött "portál"
+// div-be (a térkép/gombok nélkül), és CSS-sel csak azt tesszük láthatóvá nyomtatáskor
+// (ld. styles.css @media print). Ez sokkal robusztusabb, mint megpróbálni elrejteni
+// a kártya körüli teljes DOM-fát elemenként -- itt egyszerűen minden más eltűnik,
+// csak a portál tartalma marad.
+window.printCard = function (cardEl) {
+  if (!cardEl) return;
+  let portal = document.getElementById('__printPortal');
+  if (!portal) {
+    portal = document.createElement('div');
+    portal.id = '__printPortal';
+    document.body.appendChild(portal);
+  }
+  portal.innerHTML = '';
+
+  const header = cardEl.querySelector('.route-card-header');
+  const steps = cardEl.querySelector('.route-steps');
+  if (!header || !steps) return;
+
+  const headerClone = header.cloneNode(true);
+  headerClone.querySelectorAll('button').forEach(b => b.remove());
+  const stepsClone = steps.cloneNode(true);
+
+  portal.appendChild(headerClone);
+  portal.appendChild(stepsClone);
+
+  document.body.classList.add('print-single-card');
+  window.print();
+};
+
+window.addEventListener('afterprint', function () {
+  document.body.classList.remove('print-single-card');
+  const portal = document.getElementById('__printPortal');
+  if (portal) portal.innerHTML = '';
+});

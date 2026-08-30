@@ -979,9 +979,13 @@ select:focus-visible,
   #__printPortal .connector-line { background: #999 !important; }
   #__printPortal .step-icon { box-shadow: none !important; }
 
-  /* Kisebb, kb. fél-A4-es laptméret, hogy ne teljes A4-en nyomtasson egy
-     kártyát -- a legtöbb böngésző/PDF-mentés figyelembe veszi; ha a
-     nyomtató/OS csak A4-et/Lettert támogat, a fenti max-width akkor is
-     kompakt tartja magát a tartalmat, csak több üres hely marad körülötte. */
-  @page { size: A5; margin: 10mm; }
+  /* Szándékosan NEM állítunk be @page size-t (pl. A5-öt) -- ha az eltér a
+     ténylegesen betöltött papírtól, sok nyomtató-driver/OS nyomtatási
+     szolgáltatás (főleg tableten/mobilon, ahol nincs kézi felülbírálási
+     lehetőség a párbeszédablakban) automatikusan "igazítja lapra + középre
+     helyezi" a tartalmat -- ez okozta, hogy a kártya középre került a lapon
+     ahelyett, hogy a bal-felső sarokban maradt volna. Csak a margót adjuk
+     meg; a fenti max-width önmagában kompakttá teszi a tartalmat, bármilyen
+     papírméreten, méret-eltérés (és az azzal járó auto-igazítás) nélkül. */
+  @page { margin: 10mm; }
 }

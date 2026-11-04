@@ -47,6 +47,9 @@ MenetBrand-tükör a praktikusabb út.
    ártalmatlan (pl. egy vonalnak genuinely több, eltérő hosszúságú
    route-variánsa van, mint a 2/5/47-es busznál), de előfordulhat köztük
    valódi adathiba is, mint a 4A esetében volt.
+   **A `city-data.js` kézi javítása után MINDIG futtasd a
+   `17-verify-city-stops.js`-t** (ld. lentebb) — a `04-diff` csak az
+   indulási időket veti össze, a megállósort/peronokat nem.
 5. `05-filter-intercity-trips.js` — az országos VOLÁNBUSZ GTFS-ből kiszűri a
    Nemesvámos-i vonalakat (`WANTED_LINES` tömb — **ha új vonal kerül be, ezt
    kézzel bővíteni kell**).
@@ -142,6 +145,20 @@ folyamat volt, könnyű volt elfelejteni.
   script `PATCHES` listája a referencia. A patch után újra kell generálni:
   `14`, `15`, `_tmp_geocoding/build-walk-graph.js`, és a `schools.js`
   érintett (belvárosi) iskoláinak `nearbyStops` listáját.
+
+- `17-verify-city-stops.js` — **ellenőrző script, minden városi frissítés
+  végén futtatandó** (`node _gtfs_update/17-verify-city-stops.js`, kilépési
+  kód 1, ha eltérés van). A `city-data.js` minden irányának megállósorát
+  peron-ID (spId) szinten veti össze a legjobban illeszkedő GTFS-
+  menetváltozattal, és a megállóneveket a `stops.txt`-vel. Azért kell, mert a
+  menetrend-ablak a megállókat a GTFS shape-re szűri, így a rossz megállósor
+  vagy a rossz oldali peron a felületen nem látszik, csak a tervezőben és a
+  megálló-nézőben okoz hibát. 2026-11-04-én ez találta meg: a 16/28/43 PDF-ből
+  örökölt Dugovics–Paál–Egry–Kemecse kerülőjét, a "Continental" → "AUMOVIO"
+  névváltozást, és 9 irányban (4, 6, 8, 11, 16, 21) 24 felcserélt peront
+  (az app az ellentétes irány peronját használta) — mind javítva, azóta 0
+  eltérés. **Az ellenőrzés "régi eltérés" sorait ne tedd félre** — ezek
+  mind valódi hibák voltak.
 
 ## Amit tudni kell / ne ess bele ugyanabba a hibába
 

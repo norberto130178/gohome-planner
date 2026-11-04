@@ -722,14 +722,14 @@ window.SCHOOLS = [
       },
       {
         "name": "Tölgyfa utca",
-        "dist": 220,
+        "dist": 235,
         "buses": [
           "16",
           "6",
           "8Y"
         ],
-        "lat": 47.103564,
-        "lon": 17.927782
+        "lat": 47.103309,
+        "lon": 17.928091
       },
       {
         "name": "Bolgár Mihály utca",
@@ -1211,14 +1211,14 @@ window.SCHOOLS = [
       },
       {
         "name": "Tölgyfa utca",
-        "dist": 358,
+        "dist": 361,
         "buses": [
           "16",
           "6",
           "8Y"
         ],
-        "lat": 47.103564,
-        "lon": 17.927782
+        "lat": 47.103309,
+        "lon": 17.928091
       },
       {
         "name": "Őrház utca",

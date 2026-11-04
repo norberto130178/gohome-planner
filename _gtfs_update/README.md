@@ -21,7 +21,16 @@ MenetBrand-tükör a praktikusabb út.
    megtalálja, mikor vált a "tanítási időszak" (workday) a "nyári szünet"
    (schoolholiday) menetrendre. **Ezt minden frissítéskor újra kell futtatni**,
    a `03-extract-veszprem.js`-ben lévő `WORKDAY_CUTOFF` konstans be van égetve
-   az adott GTFS-snapshothoz.
+   az adott GTFS-snapshothoz. **Figyelem**: a helyi feed nem mindig fedi le a
+   teljes évet — a 2026-11-es feed csak 20261101–20261213 közt érvényes, és
+   nincs benne tanszüneti időszak. Ilyenkor a `WORKDAY_CUTOFF`-ot a feed végére
+   kell állítani (különben MINDEN hétköznapi trip "schoolholiday" lesz), és a
+   `04-diff` schoolholiday-eltéréseit figyelmen kívül kell hagyni (a
+   `city-data.js` schoolholiday adata ilyenkor marad a régi).
+   Frissítés előtt a régi `veszprem/`/`volanbusz/` mappát érdemes
+   `*_old_YYYYMMDD/` néven megtartani (gitignore-olva) — a régi és az új feed
+   összevetése választja szét a valódi változást a régóta meglévő kézi
+   kurálási eltérésektől.
 2. `02-day-signatures.js` — feltáró script, megmutatja a service_id-k
    napszak-mintázatát (`_HP`/`_SZ`/`_VV` szuffixumok jelentése).
 3. `03-extract-veszprem.js` — kinyeri a helyi buszok menetrendjét
@@ -121,6 +130,19 @@ folyamat volt, könnyű volt elfelejteni.
   — ez NEM automatizálható biztonságosan (a döntés mindig "ez tényleg
   Nemesvámos belterületi, ténylegesen használt megálló-e" jellegű ítélet).
 
+- `16-patch-belvaros-2026-11.js` — a 2026-11-es városi feedben a Petőfi
+  Színháznál folyó építkezés miatti **ideiglenes** (a user szerint kb. 1 éves)
+  belvárosi megálló-átszervezés átvezetése a `city-data.js` megállólistáiba:
+  Iskola utca (SP1824), Megyeház tér (SP1664), régi Petőfi Színház (SP1670)
+  helyett az új "Megyeház tér (Petőfi Színház)" (SP2185) és a Petőfi Színház
+  (SP1630); 8A rövidítés a Megyeház tér (Petőfi Színház)-ig, 16 (hétvége)
+  hosszabbítás Csererdőig, 4A/15A végállomás-platformcsere. NEM idempotens.
+  **Az építkezés végén** (amikor egy új GTFS-ben a régi stop_id-k
+  visszatérnek) a visszaálláshoz a `veszprem_old_20260816/` snapshot és a
+  script `PATCHES` listája a referencia. A patch után újra kell generálni:
+  `14`, `15`, `_tmp_geocoding/build-walk-graph.js`, és a `schools.js`
+  érintett (belvárosi) iskoláinak `nearbyStops` listáját.
+
 ## Amit tudni kell / ne ess bele ugyanabba a hibába
 
 - **Ne az "első GTFS-sor" legyen az időpont-referencia egy irányhoz** — előfordul,
@@ -128,6 +150,15 @@ folyamat volt, könnyű volt elfelejteni.
   "első megálló" előtt (pl. a 2-es busz Endrődi iránya valójában a Harmat
   utcáról indul, 1 perccel korábban, minden egyes indulásnál). Mindig a
   konkrét megálló-azonosítóra (`stop_id`/`spId`) horgonyozz, ne pozícióra.
+- **Más peron-ID = más megálló**, akkor is, ha méterekre van a másiktól — soha
+  ne cseréld/vond össze közelség alapján. Ha egy menetváltozat más peronról
+  indul (vagy más megállósort jár), külön irány-blokk kell a `city-data.js`-ben
+  a GTFS szerinti spId-kkel, `variantOf: "<fő irány direction-je>"` mezővel —
+  a menetrend-ablak ezt a fő irány oszlopába sorolja (jegyzettel), a tervező
+  pedig külön buszként, a saját megállólistájával számol. Példa: a 2-es hajnali
+  menete (hétköznap 5:04, hétvégén 5:25) az Endrődi Sándor lakótelep SP1859-es
+  peronjáról, Harmat utca nélkül (2026-11-04). A diff-scriptek ezt a blokkot
+  is külön irányként látják.
   Ha egy ilyen eltérés **100%-ban konzisztens** az összes trip-en, az valós
   hiányzó megálló, nem hiba a diffben — ha csak **egy kisebbség**-nél (kb.
   <20%) jelenik meg, az általában legit rövidített/alternatív útvonalváltozat,

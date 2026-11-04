@@ -317,21 +317,25 @@ function BusTimetableModal({ busId, onClose, fromStop, isWeekend: isWeekendProp,
   function goNext() { setCurrentBusId(allBusIds[(currentIdx + 1) % allBusIds.length]); }
   function goPrev() { setCurrentBusId(allBusIds[(currentIdx - 1 + allBusIds.length) % allBusIds.length]); }
 
-  const allDirs = (window.CITY_BUSES_FULL || []).filter(b => b.id === currentBusId);
+  // Variáns-blokk (variantOf: egy másik irány direction-je, pl. a 2-es hajnali menete
+  // másik peronról) nem kap külön oszlopot -- az indulásai a fő irány oszlopába
+  // kerülnek, de kiválasztva a saját megállólistáját/térképét mutatjuk.
+  const allBlocks = (window.CITY_BUSES_FULL || []).filter(b => b.id === currentBusId);
+  const allDirs = allBlocks.filter(b => !b.variantOf);
 
-  function getDeps(bus) {
-    let sched = bus.departures[activeDayType] || {};
-    const shapeLookup = (window.CITY_DEP_SHAPES?.[bus.id + '|' + bus.direction]?.[activeDayType]) || {};
+  function getDeps(dirBus) {
     const deps = [];
-    Object.entries(sched)
-      .sort((a, b) => Number(a[0]) - Number(b[0]))
-      .forEach(([h, rawMins]) => rawMins.forEach(raw => {
+    for (const bus of allBlocks.filter(b => b === dirBus || b.variantOf === dirBus.direction)) {
+      const sched = bus.departures[activeDayType] || {};
+      const shapeLookup = (window.CITY_DEP_SHAPES?.[bus.id + '|' + bus.direction]?.[activeDayType]) || {};
+      Object.entries(sched).forEach(([h, rawMins]) => rawMins.forEach(raw => {
         const m = typeof raw === "object" ? raw.t : raw;
         const note = typeof raw === "object" ? raw.n : null;
         const mins = Number(h) * 60 + m;
-        deps.push({ mins, note, shapeId: shapeLookup[mins] || null });
+        deps.push({ mins, note, shapeId: shapeLookup[mins] || null, bus });
       }));
-    return deps;
+    }
+    return deps.sort((a, b) => a.mins - b.mins);
   }
 
   const dirData = allDirs.map(bus => {
@@ -424,8 +428,8 @@ function BusTimetableModal({ busId, onClose, fromStop, isWeekend: isWeekendProp,
 
   const bus0 = allDirs[0];
   const selDirIdx = Math.min(selected.dirIdx, allDirs.length - 1);
-  const selBus = allDirs[selDirIdx];
   const selDepObj = dirData[selDirIdx]?.deps[selected.depIdx];
+  const selBus = selDepObj?.bus || allDirs[selDirIdx];
   const selDep = selDepObj?.mins;
   const selDepShapeId = selDepObj?.shapeId;
   const middleCount = stopsOnShape(selBus.stops, selBus.id, selDepShapeId).length - 2;
@@ -603,9 +607,9 @@ function BusTimetableModal({ busId, onClose, fromStop, isWeekend: isWeekendProp,
         )}
 
         {/* Footnotes legend */}
-        {allDirs.some(b => b.footnotes && Object.keys(b.footnotes).length > 0) && (
+        {allBlocks.some(b => b.footnotes && Object.keys(b.footnotes).length > 0) && (
           <div style={{ flexShrink:0, borderTop:'1px solid var(--line)', padding:'8px 14px', background:'#fafafa' }}>
-            {allDirs.filter(b => b.footnotes).map((b, di) => (
+            {allBlocks.filter(b => b.footnotes).map((b, di) => (
               Object.entries(b.footnotes).map(([k, v]) => {
                 const [huText, enText] = v.split(' / ');
                 const text = lang === "hu" ? huText : (enText || huText);

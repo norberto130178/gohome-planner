@@ -1,6 +1,6 @@
 // Auto-generated — ne szerkeszd kézzel!
 // Generálva: _tmp_geocoding/build-walk-graph.js | Max távolság: 500m | Sebesség: 80m/perc
-// Megállók: 257 | Kapcsolatok: 1240
+// Megállók: 251 | Kapcsolatok: 1175
 window.WALK_GRAPH_NODES = {
   "VBUSZ_SP1632": "Veszprém vasútállomás",
   "VBUSZ_SP1747": "Aulich Lajos utca",
@@ -26,7 +26,7 @@ window.WALK_GRAPH_NODES = {
   "VBUSZ_SP1650": "Pápai út 25.",
   "VBUSZ_SP1735": "Völgyhíd tér",
   "VBUSZ_SP1737": "Harmat utca",
-  "VBUSZ_SP1670": "Petőfi Színház",
+  "VBUSZ_SP2185": "Megyeház tér (Petőfi Színház)",
   "VBUSZ_SP1661": "Hotel",
   "VBUSZ_SP1694": "Veszprém autóbusz-állomás",
   "VBUSZ_SP1696": "Petőfi Sándor utca",
@@ -50,6 +50,7 @@ window.WALK_GRAPH_NODES = {
   "VBUSZ_SP1706": "Deák Ferenc iskola",
   "VBUSZ_SP1708": "Aulich utca, garázstelep",
   "VBUSZ_SP1710": "Láhner György utca",
+  "VBUSZ_SP1859": "Endrődi Sándor lakótelep",
   "VBUSZ_SP1673": "Haszkovó forduló",
   "VBUSZ_SP1742": "Haszkovó utca",
   "VBUSZ_SP1740": "Őrház utca",
@@ -81,7 +82,6 @@ window.WALK_GRAPH_NODES = {
   "VBUSZ_SP1713": "Kisréti utca",
   "VBUSZ_SP1716": "Jutaspusztai elágazás",
   "VBUSZ_SP1755": "Munkácsy Mihály utca",
-  "VBUSZ_SP1664": "Megyeház tér",
   "VBUSZ_SP1621": "Komakút tér / Pannon Egyetem",
   "VBUSZ_SP1757": "Egyetem utca / ActiCity",
   "VBUSZ_SP1761": "Egyetem utca / Stadion utca",
@@ -97,7 +97,6 @@ window.WALK_GRAPH_NODES = {
   "VBUSZ_SP1762": "Egyetem utca / Stadion utca",
   "VBUSZ_SP1758": "Egyetem utca / ActiCity",
   "VBUSZ_SP1756": "Munkácsy Mihály utca",
-  "VBUSZ_SP1674": "Vámosi úti forduló",
   "VBUSZ_SP1676": "Tüzér utcai forduló",
   "VBUSZ_SP1772": "Papvásár utca",
   "VBUSZ_SP1770": "Tüzér utca",
@@ -155,9 +154,8 @@ window.WALK_GRAPH_NODES = {
   "VBUSZ_SP1803": "Fecske utca",
   "VBUSZ_SP1789": "Vilonyai utca",
   "VBUSZ_SP1814": "Füredi utca",
-  "VBUSZ_SP1824": "Iskola utca",
   "VBUSZ_SP1643": "Házgyári út / Henger utca",
-  "VBUSZ_SP1842": "Continental",
+  "VBUSZ_SP1842": "AUMOVIO",
   "VBUSZ_SP1802": "Fecske utca",
   "VBUSZ_SP1774": "Ranolder János tér",
   "VBUSZ_SP1775": "Jókai utca / Ruttner-ház",
@@ -180,10 +178,6 @@ window.WALK_GRAPH_NODES = {
   "VBUSZ_SP1717": "Posta-garázs",
   "VBUSZ_SP1718": "Posta-garázs",
   "VBUSZ_SP1672": "Komfort",
-  "VBUSZ_SP1808": "Dugovics Titusz utca",
-  "VBUSZ_SP1816": "Paál László utca",
-  "VBUSZ_SP1818": "Egry József utca",
-  "VBUSZ_SP1820": "Kemecse utca",
   "VBUSZ_SP1898": "Dózsa György tér",
   "VBUSZ_SP1899": "Csatárhegy, Lejtős út",
   "VBUSZ_SP1890": "Csatárhegy, Kápolna út",
@@ -202,7 +196,7 @@ window.WALK_GRAPH_NODES = {
   "VBUSZ_SP1887": "Sepsiszentgyörgy utca",
   "VBUSZ_SP1671": "Tirat-Carmel utca",
   "VBUSZ_SP1665": "Pápai úti forduló",
-  "VBUSZ_SP1841": "Continental",
+  "VBUSZ_SP1841": "AUMOVIO",
   "VBUSZ_SP1622": "Hunyadi János utca",
   "VBUSZ_SP1683": "Veszprém autóbusz-állomás",
   "VBUSZ_SP1638": "82-es út, bevásárlóközpont",
@@ -230,7 +224,6 @@ window.WALK_GRAPH_NODES = {
   "VBUSZ_SP1885": "Veszprémi Sportuszoda",
   "VBUSZ_SP1896": "Gyulafirátót, Hajmáskéri út",
   "VBUSZ_SP1897": "Szegfű utca",
-  "VBUSZ_SP1809": "Dugovics Titusz utca",
   "VBUSZ_SP1895": "Hotel",
   "VOLAN_hkir_558455_9": "Veszprém, autóbusz-állomás",
   "VOLAN_hkir_558516_1": "Veszprém, Komakút tér",
@@ -256,9 +249,10 @@ window.WALK_GRAPH_NODES = {
   "VOLAN_hkir_558566_99": "Veszprém, vasútállomás",
   "VOLAN_hkir_558455_10": "Veszprém, autóbusz-állomás",
   "VOLAN_hkir_557858_1": "Nemesvámos, autóbusz-váróterem",
+  "VOLAN_hkir_557856_1": "Nemesvámos, ABC",
+  "VOLAN_hkir_557862_1": "Nemesvámos, autóbusz-forduló",
   "VOLAN_hkir_557862_2": "Nemesvámos, autóbusz-forduló",
-  "VOLAN_hkir_557856_2": "Nemesvámos, ABC",
-  "VOLAN_hkir_557856_1": "Nemesvámos, ABC"
+  "VOLAN_hkir_557856_2": "Nemesvámos, ABC"
 };
 window.WALK_GRAPH = {
   "VBUSZ_SP1632": [
@@ -1295,7 +1289,7 @@ window.WALK_GRAPH = {
     {
       "spId": "VBUSZ_SP1756",
       "name": "Munkácsy Mihály utca",
-      "distM": 257,
+      "distM": 262,
       "walkMin": 4
     },
     {
@@ -1363,8 +1357,8 @@ window.WALK_GRAPH = {
     {
       "spId": "VBUSZ_SP1756",
       "name": "Munkácsy Mihály utca",
-      "distM": 321,
-      "walkMin": 5
+      "distM": 287,
+      "walkMin": 4
     },
     {
       "spId": "VOLAN_hkir_558506_2",
@@ -1573,12 +1567,6 @@ window.WALK_GRAPH = {
       "walkMin": 2
     },
     {
-      "spId": "VBUSZ_SP1756",
-      "name": "Munkácsy Mihály utca",
-      "distM": 219,
-      "walkMin": 3
-    },
-    {
       "spId": "VBUSZ_SP1739",
       "name": "Pipacs utca",
       "distM": 368,
@@ -1588,6 +1576,12 @@ window.WALK_GRAPH = {
       "spId": "VBUSZ_SP1778",
       "name": "Csutorás utca",
       "distM": 392,
+      "walkMin": 5
+    },
+    {
+      "spId": "VBUSZ_SP1756",
+      "name": "Munkácsy Mihály utca",
+      "distM": 396,
       "walkMin": 5
     },
     {
@@ -1641,12 +1635,6 @@ window.WALK_GRAPH = {
       "walkMin": 1
     },
     {
-      "spId": "VBUSZ_SP1756",
-      "name": "Munkácsy Mihály utca",
-      "distM": 225,
-      "walkMin": 3
-    },
-    {
       "spId": "VBUSZ_SP1739",
       "name": "Pipacs utca",
       "distM": 335,
@@ -1655,6 +1643,12 @@ window.WALK_GRAPH = {
     {
       "spId": "VBUSZ_SP1738",
       "name": "Pipacs utca",
+      "distM": 392,
+      "walkMin": 5
+    },
+    {
+      "spId": "VBUSZ_SP1756",
+      "name": "Munkácsy Mihály utca",
       "distM": 392,
       "walkMin": 5
     },
@@ -1711,8 +1705,8 @@ window.WALK_GRAPH = {
     {
       "spId": "VBUSZ_SP1756",
       "name": "Munkácsy Mihály utca",
-      "distM": 196,
-      "walkMin": 3
+      "distM": 15,
+      "walkMin": 1
     },
     {
       "spId": "VBUSZ_SP1700",
@@ -1785,56 +1779,68 @@ window.WALK_GRAPH = {
     {
       "spId": "VBUSZ_SP1755",
       "name": "Munkácsy Mihály utca",
-      "distM": 196,
-      "walkMin": 3
-    },
-    {
-      "spId": "VBUSZ_SP1697",
-      "name": "Petőfi Sándor utca",
-      "distM": 219,
-      "walkMin": 3
-    },
-    {
-      "spId": "VBUSZ_SP1698",
-      "name": "Petőfi Sándor utca",
-      "distM": 225,
-      "walkMin": 3
+      "distM": 15,
+      "walkMin": 1
     },
     {
       "spId": "VBUSZ_SP1700",
       "name": "Jutasi út / Barátság park",
-      "distM": 257,
-      "walkMin": 4
-    },
-    {
-      "spId": "VBUSZ_SP1696",
-      "name": "Petőfi Sándor utca",
-      "distM": 300,
-      "walkMin": 4
-    },
-    {
-      "spId": "VBUSZ_SP1739",
-      "name": "Pipacs utca",
-      "distM": 311,
+      "distM": 262,
       "walkMin": 4
     },
     {
       "spId": "VBUSZ_SP1699",
       "name": "Jutasi út / Barátság park",
-      "distM": 321,
-      "walkMin": 5
+      "distM": 287,
+      "walkMin": 4
+    },
+    {
+      "spId": "VBUSZ_SP1739",
+      "name": "Pipacs utca",
+      "distM": 303,
+      "walkMin": 4
     },
     {
       "spId": "VBUSZ_SP1738",
       "name": "Pipacs utca",
-      "distM": 350,
-      "walkMin": 5
+      "distM": 312,
+      "walkMin": 4
     },
     {
       "spId": "VBUSZ_SP1740",
       "name": "Őrház utca",
-      "distM": 496,
-      "walkMin": 7
+      "distM": 349,
+      "walkMin": 5
+    },
+    {
+      "spId": "VBUSZ_SP1741",
+      "name": "Őrház utca",
+      "distM": 365,
+      "walkMin": 5
+    },
+    {
+      "spId": "VBUSZ_SP1698",
+      "name": "Petőfi Sándor utca",
+      "distM": 392,
+      "walkMin": 5
+    },
+    {
+      "spId": "VBUSZ_SP1697",
+      "name": "Petőfi Sándor utca",
+      "distM": 396,
+      "walkMin": 5
+    },
+    {
+      "spId": "VBUSZ_SP1879",
+      "name": "Akácfa utca",
+      "distM": 447,
+      "walkMin": 6
+    },
+    {
+      "spId": "VBUSZ_SP1696",
+      "name": "Petőfi Sándor utca",
+      "distM": 470,
+      "walkMin": 6
     }
   ],
   "VBUSZ_SP1696": [
@@ -1849,12 +1855,6 @@ window.WALK_GRAPH = {
       "name": "Petőfi Sándor utca",
       "distM": 86,
       "walkMin": 2
-    },
-    {
-      "spId": "VBUSZ_SP1756",
-      "name": "Munkácsy Mihály utca",
-      "distM": 300,
-      "walkMin": 4
     },
     {
       "spId": "VBUSZ_SP1778",
@@ -1911,6 +1911,12 @@ window.WALK_GRAPH = {
       "walkMin": 6
     },
     {
+      "spId": "VBUSZ_SP1756",
+      "name": "Munkácsy Mihály utca",
+      "distM": 470,
+      "walkMin": 6
+    },
+    {
       "spId": "VBUSZ_SP1755",
       "name": "Munkácsy Mihály utca",
       "distM": 483,
@@ -1955,15 +1961,15 @@ window.WALK_GRAPH = {
       "walkMin": 4
     },
     {
+      "spId": "VBUSZ_SP1756",
+      "name": "Munkácsy Mihály utca",
+      "distM": 312,
+      "walkMin": 4
+    },
+    {
       "spId": "VBUSZ_SP1755",
       "name": "Munkácsy Mihály utca",
       "distM": 324,
-      "walkMin": 5
-    },
-    {
-      "spId": "VBUSZ_SP1756",
-      "name": "Munkácsy Mihály utca",
-      "distM": 350,
       "walkMin": 5
     },
     {
@@ -2013,7 +2019,7 @@ window.WALK_GRAPH = {
     {
       "spId": "VBUSZ_SP1756",
       "name": "Munkácsy Mihály utca",
-      "distM": 311,
+      "distM": 303,
       "walkMin": 4
     },
     {
@@ -2671,6 +2677,12 @@ window.WALK_GRAPH = {
       "walkMin": 5
     },
     {
+      "spId": "VBUSZ_SP2185",
+      "name": "Megyeház tér (Petőfi Színház)",
+      "distM": 362,
+      "walkMin": 5
+    },
+    {
       "spId": "VBUSZ_SP1694",
       "name": "Veszprém autóbusz-állomás",
       "distM": 365,
@@ -2686,12 +2698,6 @@ window.WALK_GRAPH = {
       "spId": "VBUSZ_SP1730",
       "name": "Rózsa utca",
       "distM": 373,
-      "walkMin": 5
-    },
-    {
-      "spId": "VBUSZ_SP1664",
-      "name": "Megyeház tér",
-      "distM": 375,
       "walkMin": 5
     },
     {
@@ -2752,12 +2758,6 @@ window.WALK_GRAPH = {
       "spId": "VBUSZ_SP1621",
       "name": "Komakút tér / Pannon Egyetem",
       "distM": 482,
-      "walkMin": 7
-    },
-    {
-      "spId": "VBUSZ_SP1670",
-      "name": "Petőfi Színház",
-      "distM": 484,
       "walkMin": 7
     },
     {
@@ -2835,6 +2835,12 @@ window.WALK_GRAPH = {
       "walkMin": 5
     },
     {
+      "spId": "VBUSZ_SP2185",
+      "name": "Megyeház tér (Petőfi Színház)",
+      "distM": 366,
+      "walkMin": 5
+    },
+    {
       "spId": "VBUSZ_SP1730",
       "name": "Rózsa utca",
       "distM": 372,
@@ -2850,12 +2856,6 @@ window.WALK_GRAPH = {
       "spId": "VBUSZ_SP1694",
       "name": "Veszprém autóbusz-állomás",
       "distM": 373,
-      "walkMin": 5
-    },
-    {
-      "spId": "VBUSZ_SP1664",
-      "name": "Megyeház tér",
-      "distM": 380,
       "walkMin": 5
     },
     {
@@ -2928,12 +2928,6 @@ window.WALK_GRAPH = {
       "spId": "VOLAN_hkir_558516_2",
       "name": "Veszprém, Komakút tér",
       "distM": 488,
-      "walkMin": 7
-    },
-    {
-      "spId": "VBUSZ_SP1670",
-      "name": "Petőfi Színház",
-      "distM": 491,
       "walkMin": 7
     }
   ],
@@ -3561,15 +3555,15 @@ window.WALK_GRAPH = {
       "walkMin": 4
     },
     {
-      "spId": "VBUSZ_SP1668",
-      "name": "Komakút tér / Pannon Egyetem",
-      "distM": 313,
+      "spId": "VBUSZ_SP2185",
+      "name": "Megyeház tér (Petőfi Színház)",
+      "distM": 301,
       "walkMin": 4
     },
     {
-      "spId": "VBUSZ_SP1664",
-      "name": "Megyeház tér",
-      "distM": 315,
+      "spId": "VBUSZ_SP1668",
+      "name": "Komakút tér / Pannon Egyetem",
+      "distM": 313,
       "walkMin": 4
     },
     {
@@ -3609,21 +3603,9 @@ window.WALK_GRAPH = {
       "walkMin": 6
     },
     {
-      "spId": "VBUSZ_SP1670",
-      "name": "Petőfi Színház",
-      "distM": 454,
-      "walkMin": 6
-    },
-    {
       "spId": "VBUSZ_SP1781",
       "name": "Virág Benedek utca",
       "distM": 460,
-      "walkMin": 6
-    },
-    {
-      "spId": "VBUSZ_SP1824",
-      "name": "Iskola utca",
-      "distM": 470,
       "walkMin": 6
     },
     {
@@ -3683,15 +3665,15 @@ window.WALK_GRAPH = {
       "walkMin": 3
     },
     {
+      "spId": "VBUSZ_SP2185",
+      "name": "Megyeház tér (Petőfi Színház)",
+      "distM": 313,
+      "walkMin": 4
+    },
+    {
       "spId": "VBUSZ_SP1760",
       "name": "Radnóti Miklós tér",
       "distM": 321,
-      "walkMin": 5
-    },
-    {
-      "spId": "VBUSZ_SP1664",
-      "name": "Megyeház tér",
-      "distM": 327,
       "walkMin": 5
     },
     {
@@ -3731,22 +3713,10 @@ window.WALK_GRAPH = {
       "walkMin": 6
     },
     {
-      "spId": "VBUSZ_SP1670",
-      "name": "Petőfi Színház",
-      "distM": 465,
-      "walkMin": 6
-    },
-    {
       "spId": "VBUSZ_SP1781",
       "name": "Virág Benedek utca",
       "distM": 469,
       "walkMin": 6
-    },
-    {
-      "spId": "VBUSZ_SP1824",
-      "name": "Iskola utca",
-      "distM": 483,
-      "walkMin": 7
     },
     {
       "spId": "VBUSZ_SP1826",
@@ -3811,10 +3781,10 @@ window.WALK_GRAPH = {
       "walkMin": 4
     },
     {
-      "spId": "VBUSZ_SP1664",
-      "name": "Megyeház tér",
-      "distM": 410,
-      "walkMin": 6
+      "spId": "VBUSZ_SP2185",
+      "name": "Megyeház tér (Petőfi Színház)",
+      "distM": 395,
+      "walkMin": 5
     },
     {
       "spId": "VBUSZ_SP1668",
@@ -3885,28 +3855,16 @@ window.WALK_GRAPH = {
       "walkMin": 2
     },
     {
-      "spId": "VBUSZ_SP1670",
-      "name": "Petőfi Színház",
-      "distM": 160,
-      "walkMin": 2
-    },
-    {
       "spId": "VBUSZ_SP1630",
       "name": "Petőfi Színház",
       "distM": 190,
       "walkMin": 3
     },
     {
-      "spId": "VBUSZ_SP1664",
-      "name": "Megyeház tér",
-      "distM": 206,
+      "spId": "VBUSZ_SP2185",
+      "name": "Megyeház tér (Petőfi Színház)",
+      "distM": 211,
       "walkMin": 3
-    },
-    {
-      "spId": "VBUSZ_SP1824",
-      "name": "Iskola utca",
-      "distM": 241,
-      "walkMin": 4
     },
     {
       "spId": "VBUSZ_SP1775",
@@ -4287,6 +4245,12 @@ window.WALK_GRAPH = {
       "walkMin": 5
     },
     {
+      "spId": "VBUSZ_SP2185",
+      "name": "Megyeház tér (Petőfi Színház)",
+      "distM": 383,
+      "walkMin": 5
+    },
+    {
       "spId": "VOLAN_hkir_558455_9",
       "name": "Veszprém, autóbusz-állomás",
       "distM": 386,
@@ -4296,12 +4260,6 @@ window.WALK_GRAPH = {
       "spId": "VOLAN_hkir_558455_10",
       "name": "Veszprém, autóbusz-állomás",
       "distM": 391,
-      "walkMin": 5
-    },
-    {
-      "spId": "VBUSZ_SP1664",
-      "name": "Megyeház tér",
-      "distM": 396,
       "walkMin": 5
     },
     {
@@ -4567,107 +4525,101 @@ window.WALK_GRAPH = {
       "walkMin": 7
     }
   ],
-  "VBUSZ_SP1670": [
+  "VBUSZ_SP2185": [
     {
       "spId": "VOLAN_hkir_558558_2",
       "name": "Veszprém, Színház",
-      "distM": 10,
-      "walkMin": 1
-    },
-    {
-      "spId": "VBUSZ_SP1630",
-      "name": "Petőfi Színház",
-      "distM": 42,
-      "walkMin": 1
-    },
-    {
-      "spId": "VBUSZ_SP1824",
-      "name": "Iskola utca",
-      "distM": 81,
+      "distM": 151,
       "walkMin": 2
-    },
-    {
-      "spId": "VBUSZ_SP1664",
-      "name": "Megyeház tér",
-      "distM": 139,
-      "walkMin": 2
-    },
-    {
-      "spId": "VBUSZ_SP1781",
-      "name": "Virág Benedek utca",
-      "distM": 160,
-      "walkMin": 2
-    },
-    {
-      "spId": "VBUSZ_SP1774",
-      "name": "Ranolder János tér",
-      "distM": 200,
-      "walkMin": 3
     },
     {
       "spId": "VBUSZ_SP1621",
       "name": "Komakút tér / Pannon Egyetem",
-      "distM": 249,
-      "walkMin": 4
+      "distM": 174,
+      "walkMin": 3
     },
     {
       "spId": "VOLAN_hkir_558516_1",
       "name": "Veszprém, Komakút tér",
-      "distM": 251,
-      "walkMin": 4
+      "distM": 175,
+      "walkMin": 3
     },
     {
-      "spId": "VBUSZ_SP1754",
-      "name": "Pázmándi utca",
-      "distM": 285,
-      "walkMin": 4
+      "spId": "VBUSZ_SP1630",
+      "name": "Petőfi Színház",
+      "distM": 189,
+      "walkMin": 3
     },
     {
       "spId": "VOLAN_hkir_558516_2",
       "name": "Veszprém, Komakút tér",
-      "distM": 294,
-      "walkMin": 4
+      "distM": 208,
+      "walkMin": 3
+    },
+    {
+      "spId": "VBUSZ_SP1781",
+      "name": "Virág Benedek utca",
+      "distM": 211,
+      "walkMin": 3
     },
     {
       "spId": "VBUSZ_SP1668",
       "name": "Komakút tér / Pannon Egyetem",
-      "distM": 302,
-      "walkMin": 4
-    },
-    {
-      "spId": "VBUSZ_SP1775",
-      "name": "Jókai utca / Ruttner-ház",
-      "distM": 375,
-      "walkMin": 5
+      "distM": 212,
+      "walkMin": 3
     },
     {
       "spId": "VBUSZ_SP1629",
       "name": "Kórház",
-      "distM": 454,
-      "walkMin": 6
-    },
-    {
-      "spId": "VBUSZ_SP1753",
-      "name": "Kiskőrösi utca",
-      "distM": 455,
-      "walkMin": 6
+      "distM": 301,
+      "walkMin": 4
     },
     {
       "spId": "VBUSZ_SP1645",
       "name": "Kórház",
-      "distM": 465,
-      "walkMin": 6
+      "distM": 313,
+      "walkMin": 4
+    },
+    {
+      "spId": "VBUSZ_SP1774",
+      "name": "Ranolder János tér",
+      "distM": 324,
+      "walkMin": 5
+    },
+    {
+      "spId": "VBUSZ_SP1754",
+      "name": "Pázmándi utca",
+      "distM": 329,
+      "walkMin": 5
     },
     {
       "spId": "VBUSZ_SP1660",
       "name": "Hotel",
-      "distM": 484,
-      "walkMin": 7
+      "distM": 362,
+      "walkMin": 5
     },
     {
       "spId": "VBUSZ_SP1661",
       "name": "Hotel",
-      "distM": 491,
+      "distM": 366,
+      "walkMin": 5
+    },
+    {
+      "spId": "VBUSZ_SP1895",
+      "name": "Hotel",
+      "distM": 383,
+      "walkMin": 5
+    },
+    {
+      "spId": "VBUSZ_SP1875",
+      "name": "Vörösmarty Mihály tér",
+      "distM": 395,
+      "walkMin": 5
+    },
+    {
+      "spId": "VBUSZ_SP1775",
+      "name": "Jókai utca / Ruttner-ház",
+      "distM": 497,
       "walkMin": 7
     }
   ],
@@ -4691,27 +4643,15 @@ window.WALK_GRAPH = {
       "walkMin": 1
     },
     {
-      "spId": "VBUSZ_SP1664",
-      "name": "Megyeház tér",
-      "distM": 213,
+      "spId": "VBUSZ_SP2185",
+      "name": "Megyeház tér (Petőfi Színház)",
+      "distM": 212,
       "walkMin": 3
     },
     {
       "spId": "VBUSZ_SP1754",
       "name": "Pázmándi utca",
       "distM": 254,
-      "walkMin": 4
-    },
-    {
-      "spId": "VBUSZ_SP1824",
-      "name": "Iskola utca",
-      "distM": 261,
-      "walkMin": 4
-    },
-    {
-      "spId": "VBUSZ_SP1670",
-      "name": "Petőfi Színház",
-      "distM": 302,
       "walkMin": 4
     },
     {
@@ -4787,116 +4727,6 @@ window.WALK_GRAPH = {
       "walkMin": 7
     }
   ],
-  "VBUSZ_SP1664": [
-    {
-      "spId": "VOLAN_hkir_558558_2",
-      "name": "Veszprém, Színház",
-      "distM": 138,
-      "walkMin": 2
-    },
-    {
-      "spId": "VBUSZ_SP1670",
-      "name": "Petőfi Színház",
-      "distM": 139,
-      "walkMin": 2
-    },
-    {
-      "spId": "VBUSZ_SP1824",
-      "name": "Iskola utca",
-      "distM": 164,
-      "walkMin": 3
-    },
-    {
-      "spId": "VBUSZ_SP1621",
-      "name": "Komakút tér / Pannon Egyetem",
-      "distM": 172,
-      "walkMin": 3
-    },
-    {
-      "spId": "VOLAN_hkir_558516_1",
-      "name": "Veszprém, Komakút tér",
-      "distM": 173,
-      "walkMin": 3
-    },
-    {
-      "spId": "VBUSZ_SP1630",
-      "name": "Petőfi Színház",
-      "distM": 174,
-      "walkMin": 3
-    },
-    {
-      "spId": "VBUSZ_SP1781",
-      "name": "Virág Benedek utca",
-      "distM": 206,
-      "walkMin": 3
-    },
-    {
-      "spId": "VOLAN_hkir_558516_2",
-      "name": "Veszprém, Komakút tér",
-      "distM": 208,
-      "walkMin": 3
-    },
-    {
-      "spId": "VBUSZ_SP1668",
-      "name": "Komakút tér / Pannon Egyetem",
-      "distM": 213,
-      "walkMin": 3
-    },
-    {
-      "spId": "VBUSZ_SP1774",
-      "name": "Ranolder János tér",
-      "distM": 314,
-      "walkMin": 4
-    },
-    {
-      "spId": "VBUSZ_SP1629",
-      "name": "Kórház",
-      "distM": 315,
-      "walkMin": 4
-    },
-    {
-      "spId": "VBUSZ_SP1754",
-      "name": "Pázmándi utca",
-      "distM": 318,
-      "walkMin": 4
-    },
-    {
-      "spId": "VBUSZ_SP1645",
-      "name": "Kórház",
-      "distM": 327,
-      "walkMin": 5
-    },
-    {
-      "spId": "VBUSZ_SP1660",
-      "name": "Hotel",
-      "distM": 375,
-      "walkMin": 5
-    },
-    {
-      "spId": "VBUSZ_SP1661",
-      "name": "Hotel",
-      "distM": 380,
-      "walkMin": 5
-    },
-    {
-      "spId": "VBUSZ_SP1895",
-      "name": "Hotel",
-      "distM": 396,
-      "walkMin": 5
-    },
-    {
-      "spId": "VBUSZ_SP1875",
-      "name": "Vörösmarty Mihály tér",
-      "distM": 410,
-      "walkMin": 6
-    },
-    {
-      "spId": "VBUSZ_SP1775",
-      "name": "Jókai utca / Ruttner-ház",
-      "distM": 487,
-      "walkMin": 7
-    }
-  ],
   "VBUSZ_SP1621": [
     {
       "spId": "VOLAN_hkir_558516_1",
@@ -4917,15 +4747,9 @@ window.WALK_GRAPH = {
       "walkMin": 1
     },
     {
-      "spId": "VBUSZ_SP1664",
-      "name": "Megyeház tér",
-      "distM": 172,
-      "walkMin": 3
-    },
-    {
-      "spId": "VBUSZ_SP1824",
-      "name": "Iskola utca",
-      "distM": 207,
+      "spId": "VBUSZ_SP2185",
+      "name": "Megyeház tér (Petőfi Színház)",
+      "distM": 174,
       "walkMin": 3
     },
     {
@@ -4933,12 +4757,6 @@ window.WALK_GRAPH = {
       "name": "Pázmándi utca",
       "distM": 223,
       "walkMin": 3
-    },
-    {
-      "spId": "VBUSZ_SP1670",
-      "name": "Petőfi Színház",
-      "distM": 249,
-      "walkMin": 4
     },
     {
       "spId": "VOLAN_hkir_558558_2",
@@ -5107,15 +4925,9 @@ window.WALK_GRAPH = {
       "walkMin": 1
     },
     {
-      "spId": "VBUSZ_SP1664",
-      "name": "Megyeház tér",
-      "distM": 173,
-      "walkMin": 3
-    },
-    {
-      "spId": "VBUSZ_SP1824",
-      "name": "Iskola utca",
-      "distM": 210,
+      "spId": "VBUSZ_SP2185",
+      "name": "Megyeház tér (Petőfi Színház)",
+      "distM": 175,
       "walkMin": 3
     },
     {
@@ -5123,12 +4935,6 @@ window.WALK_GRAPH = {
       "name": "Pázmándi utca",
       "distM": 225,
       "walkMin": 3
-    },
-    {
-      "spId": "VBUSZ_SP1670",
-      "name": "Petőfi Színház",
-      "distM": 251,
-      "walkMin": 4
     },
     {
       "spId": "VOLAN_hkir_558558_2",
@@ -5241,8 +5047,8 @@ window.WALK_GRAPH = {
       "walkMin": 1
     },
     {
-      "spId": "VBUSZ_SP1664",
-      "name": "Megyeház tér",
+      "spId": "VBUSZ_SP2185",
+      "name": "Megyeház tér (Petőfi Színház)",
       "distM": 208,
       "walkMin": 3
     },
@@ -5250,18 +5056,6 @@ window.WALK_GRAPH = {
       "spId": "VBUSZ_SP1754",
       "name": "Pázmándi utca",
       "distM": 246,
-      "walkMin": 4
-    },
-    {
-      "spId": "VBUSZ_SP1824",
-      "name": "Iskola utca",
-      "distM": 252,
-      "walkMin": 4
-    },
-    {
-      "spId": "VBUSZ_SP1670",
-      "name": "Petőfi Színház",
-      "distM": 294,
       "walkMin": 4
     },
     {
@@ -5345,33 +5139,21 @@ window.WALK_GRAPH = {
   ],
   "VOLAN_hkir_558558_2": [
     {
-      "spId": "VBUSZ_SP1670",
-      "name": "Petőfi Színház",
-      "distM": 10,
-      "walkMin": 1
-    },
-    {
       "spId": "VBUSZ_SP1630",
       "name": "Petőfi Színház",
       "distM": 49,
       "walkMin": 1
     },
     {
-      "spId": "VBUSZ_SP1824",
-      "name": "Iskola utca",
-      "distM": 91,
-      "walkMin": 2
-    },
-    {
-      "spId": "VBUSZ_SP1664",
-      "name": "Megyeház tér",
-      "distM": 138,
-      "walkMin": 2
-    },
-    {
       "spId": "VBUSZ_SP1781",
       "name": "Virág Benedek utca",
       "distM": 150,
+      "walkMin": 2
+    },
+    {
+      "spId": "VBUSZ_SP2185",
+      "name": "Megyeház tér (Petőfi Színház)",
+      "distM": 151,
       "walkMin": 2
     },
     {
@@ -5455,27 +5237,15 @@ window.WALK_GRAPH = {
   ],
   "VBUSZ_SP1630": [
     {
-      "spId": "VBUSZ_SP1670",
-      "name": "Petőfi Színház",
-      "distM": 42,
-      "walkMin": 1
-    },
-    {
       "spId": "VOLAN_hkir_558558_2",
       "name": "Veszprém, Színház",
       "distM": 49,
       "walkMin": 1
     },
     {
-      "spId": "VBUSZ_SP1824",
-      "name": "Iskola utca",
-      "distM": 64,
-      "walkMin": 1
-    },
-    {
-      "spId": "VBUSZ_SP1664",
-      "name": "Megyeház tér",
-      "distM": 174,
+      "spId": "VBUSZ_SP2185",
+      "name": "Megyeház tér (Petőfi Színház)",
+      "distM": 189,
       "walkMin": 3
     },
     {
@@ -5577,21 +5347,9 @@ window.WALK_GRAPH = {
       "walkMin": 4
     },
     {
-      "spId": "VBUSZ_SP1824",
-      "name": "Iskola utca",
-      "distM": 390,
-      "walkMin": 5
-    },
-    {
       "spId": "VBUSZ_SP1630",
       "name": "Petőfi Színház",
       "distM": 415,
-      "walkMin": 6
-    },
-    {
-      "spId": "VBUSZ_SP1670",
-      "name": "Petőfi Színház",
-      "distM": 455,
       "walkMin": 6
     },
     {
@@ -5620,12 +5378,6 @@ window.WALK_GRAPH = {
     }
   ],
   "VBUSZ_SP1754": [
-    {
-      "spId": "VBUSZ_SP1824",
-      "name": "Iskola utca",
-      "distM": 204,
-      "walkMin": 3
-    },
     {
       "spId": "VBUSZ_SP1621",
       "name": "Komakút tér / Pannon Egyetem",
@@ -5663,12 +5415,6 @@ window.WALK_GRAPH = {
       "walkMin": 4
     },
     {
-      "spId": "VBUSZ_SP1670",
-      "name": "Petőfi Színház",
-      "distM": 285,
-      "walkMin": 4
-    },
-    {
       "spId": "VOLAN_hkir_558558_2",
       "name": "Veszprém, Színház",
       "distM": 295,
@@ -5687,10 +5433,10 @@ window.WALK_GRAPH = {
       "walkMin": 4
     },
     {
-      "spId": "VBUSZ_SP1664",
-      "name": "Megyeház tér",
-      "distM": 318,
-      "walkMin": 4
+      "spId": "VBUSZ_SP2185",
+      "name": "Megyeház tér (Petőfi Színház)",
+      "distM": 329,
+      "walkMin": 5
     },
     {
       "spId": "VBUSZ_SP1767",
@@ -5713,98 +5459,6 @@ window.WALK_GRAPH = {
     {
       "spId": "VBUSZ_SP1758",
       "name": "Egyetem utca / ActiCity",
-      "distM": 483,
-      "walkMin": 7
-    }
-  ],
-  "VBUSZ_SP1824": [
-    {
-      "spId": "VBUSZ_SP1630",
-      "name": "Petőfi Színház",
-      "distM": 64,
-      "walkMin": 1
-    },
-    {
-      "spId": "VBUSZ_SP1670",
-      "name": "Petőfi Színház",
-      "distM": 81,
-      "walkMin": 2
-    },
-    {
-      "spId": "VOLAN_hkir_558558_2",
-      "name": "Veszprém, Színház",
-      "distM": 91,
-      "walkMin": 2
-    },
-    {
-      "spId": "VBUSZ_SP1664",
-      "name": "Megyeház tér",
-      "distM": 164,
-      "walkMin": 3
-    },
-    {
-      "spId": "VBUSZ_SP1754",
-      "name": "Pázmándi utca",
-      "distM": 204,
-      "walkMin": 3
-    },
-    {
-      "spId": "VBUSZ_SP1621",
-      "name": "Komakút tér / Pannon Egyetem",
-      "distM": 207,
-      "walkMin": 3
-    },
-    {
-      "spId": "VOLAN_hkir_558516_1",
-      "name": "Veszprém, Komakút tér",
-      "distM": 210,
-      "walkMin": 3
-    },
-    {
-      "spId": "VBUSZ_SP1781",
-      "name": "Virág Benedek utca",
-      "distM": 241,
-      "walkMin": 4
-    },
-    {
-      "spId": "VOLAN_hkir_558516_2",
-      "name": "Veszprém, Komakút tér",
-      "distM": 252,
-      "walkMin": 4
-    },
-    {
-      "spId": "VBUSZ_SP1668",
-      "name": "Komakút tér / Pannon Egyetem",
-      "distM": 261,
-      "walkMin": 4
-    },
-    {
-      "spId": "VBUSZ_SP1774",
-      "name": "Ranolder János tér",
-      "distM": 263,
-      "walkMin": 4
-    },
-    {
-      "spId": "VBUSZ_SP1753",
-      "name": "Kiskőrösi utca",
-      "distM": 390,
-      "walkMin": 5
-    },
-    {
-      "spId": "VBUSZ_SP1775",
-      "name": "Jókai utca / Ruttner-ház",
-      "distM": 431,
-      "walkMin": 6
-    },
-    {
-      "spId": "VBUSZ_SP1629",
-      "name": "Kórház",
-      "distM": 470,
-      "walkMin": 6
-    },
-    {
-      "spId": "VBUSZ_SP1645",
-      "name": "Kórház",
       "distM": 483,
       "walkMin": 7
     }
@@ -5835,28 +5489,16 @@ window.WALK_GRAPH = {
       "walkMin": 3
     },
     {
-      "spId": "VBUSZ_SP1670",
-      "name": "Petőfi Színház",
-      "distM": 200,
-      "walkMin": 3
-    },
-    {
-      "spId": "VBUSZ_SP1824",
-      "name": "Iskola utca",
-      "distM": 263,
-      "walkMin": 4
-    },
-    {
       "spId": "VBUSZ_SP1782",
       "name": "Jókai utca / Ruttner-ház",
       "distM": 313,
       "walkMin": 4
     },
     {
-      "spId": "VBUSZ_SP1664",
-      "name": "Megyeház tér",
-      "distM": 314,
-      "walkMin": 4
+      "spId": "VBUSZ_SP2185",
+      "name": "Megyeház tér (Petőfi Színház)",
+      "distM": 324,
+      "walkMin": 5
     },
     {
       "spId": "VBUSZ_SP1736",
@@ -5963,27 +5605,15 @@ window.WALK_GRAPH = {
       "walkMin": 5
     },
     {
-      "spId": "VBUSZ_SP1670",
-      "name": "Petőfi Színház",
-      "distM": 375,
-      "walkMin": 5
-    },
-    {
-      "spId": "VBUSZ_SP1824",
-      "name": "Iskola utca",
-      "distM": 431,
-      "walkMin": 6
-    },
-    {
       "spId": "VBUSZ_SP1778",
       "name": "Csutorás utca",
       "distM": 483,
       "walkMin": 7
     },
     {
-      "spId": "VBUSZ_SP1664",
-      "name": "Megyeház tér",
-      "distM": 487,
+      "spId": "VBUSZ_SP2185",
+      "name": "Megyeház tér (Petőfi Színház)",
+      "distM": 497,
       "walkMin": 7
     }
   ],
@@ -6037,6 +5667,12 @@ window.WALK_GRAPH = {
       "walkMin": 6
     },
     {
+      "spId": "VBUSZ_SP1859",
+      "name": "Endrődi Sándor lakótelep",
+      "distM": 460,
+      "walkMin": 6
+    },
+    {
       "spId": "VBUSZ_SP1751",
       "name": "Endrődi Sándor lakótelep",
       "distM": 462,
@@ -6055,6 +5691,12 @@ window.WALK_GRAPH = {
       "name": "Harmat utca",
       "distM": 14,
       "walkMin": 1
+    },
+    {
+      "spId": "VBUSZ_SP1859",
+      "name": "Endrődi Sándor lakótelep",
+      "distM": 217,
+      "walkMin": 3
     },
     {
       "spId": "VBUSZ_SP1751",
@@ -6107,6 +5749,12 @@ window.WALK_GRAPH = {
       "walkMin": 1
     },
     {
+      "spId": "VBUSZ_SP1859",
+      "name": "Endrődi Sándor lakótelep",
+      "distM": 206,
+      "walkMin": 3
+    },
+    {
       "spId": "VBUSZ_SP1751",
       "name": "Endrődi Sándor lakótelep",
       "distM": 211,
@@ -6150,6 +5798,12 @@ window.WALK_GRAPH = {
     }
   ],
   "VBUSZ_SP1751": [
+    {
+      "spId": "VBUSZ_SP1859",
+      "name": "Endrődi Sándor lakótelep",
+      "distM": 10,
+      "walkMin": 1
+    },
     {
       "spId": "VBUSZ_SP1737",
       "name": "Harmat utca",
@@ -6201,6 +5855,12 @@ window.WALK_GRAPH = {
       "walkMin": 4
     },
     {
+      "spId": "VBUSZ_SP1859",
+      "name": "Endrődi Sándor lakótelep",
+      "distM": 389,
+      "walkMin": 5
+    },
+    {
       "spId": "VBUSZ_SP1737",
       "name": "Harmat utca",
       "distM": 394,
@@ -6222,6 +5882,56 @@ window.WALK_GRAPH = {
       "spId": "VBUSZ_SP1767",
       "name": "Szegfű utca",
       "distM": 481,
+      "walkMin": 7
+    }
+  ],
+  "VBUSZ_SP1859": [
+    {
+      "spId": "VBUSZ_SP1751",
+      "name": "Endrődi Sándor lakótelep",
+      "distM": 10,
+      "walkMin": 1
+    },
+    {
+      "spId": "VBUSZ_SP1737",
+      "name": "Harmat utca",
+      "distM": 206,
+      "walkMin": 3
+    },
+    {
+      "spId": "VBUSZ_SP1736",
+      "name": "Harmat utca",
+      "distM": 217,
+      "walkMin": 3
+    },
+    {
+      "spId": "VBUSZ_SP1752",
+      "name": "Endrődi Sándor utca",
+      "distM": 389,
+      "walkMin": 5
+    },
+    {
+      "spId": "VBUSZ_SP1780",
+      "name": "Patak tér (Veszprém Zoo)",
+      "distM": 416,
+      "walkMin": 6
+    },
+    {
+      "spId": "VBUSZ_SP1779",
+      "name": "Patak tér (Veszprém Zoo)",
+      "distM": 426,
+      "walkMin": 6
+    },
+    {
+      "spId": "VBUSZ_SP1782",
+      "name": "Jókai utca / Ruttner-ház",
+      "distM": 460,
+      "walkMin": 6
+    },
+    {
+      "spId": "VBUSZ_SP1735",
+      "name": "Völgyhíd tér",
+      "distM": 489,
       "walkMin": 7
     }
   ],
@@ -6267,6 +5977,12 @@ window.WALK_GRAPH = {
       "name": "Endrődi Sándor lakótelep",
       "distM": 424,
       "walkMin": 6
+    },
+    {
+      "spId": "VBUSZ_SP1859",
+      "name": "Endrődi Sándor lakótelep",
+      "distM": 426,
+      "walkMin": 6
     }
   ],
   "VBUSZ_SP1780": [
@@ -6310,6 +6026,12 @@ window.WALK_GRAPH = {
       "spId": "VBUSZ_SP1751",
       "name": "Endrődi Sándor lakótelep",
       "distM": 414,
+      "walkMin": 6
+    },
+    {
+      "spId": "VBUSZ_SP1859",
+      "name": "Endrődi Sándor lakótelep",
+      "distM": 416,
       "walkMin": 6
     },
     {
@@ -6553,6 +6275,12 @@ window.WALK_GRAPH = {
       "name": "Endrődi Sándor lakótelep",
       "distM": 479,
       "walkMin": 6
+    },
+    {
+      "spId": "VBUSZ_SP1859",
+      "name": "Endrődi Sándor lakótelep",
+      "distM": 489,
+      "walkMin": 7
     },
     {
       "spId": "VBUSZ_SP1780",
@@ -7376,13 +7104,13 @@ window.WALK_GRAPH = {
     },
     {
       "spId": "VBUSZ_SP1842",
-      "name": "Continental",
+      "name": "AUMOVIO",
       "distM": 286,
       "walkMin": 4
     },
     {
       "spId": "VBUSZ_SP1841",
-      "name": "Continental",
+      "name": "AUMOVIO",
       "distM": 317,
       "walkMin": 4
     },
@@ -7420,13 +7148,13 @@ window.WALK_GRAPH = {
     },
     {
       "spId": "VBUSZ_SP1842",
-      "name": "Continental",
+      "name": "AUMOVIO",
       "distM": 150,
       "walkMin": 2
     },
     {
       "spId": "VBUSZ_SP1841",
-      "name": "Continental",
+      "name": "AUMOVIO",
       "distM": 181,
       "walkMin": 3
     },
@@ -7488,7 +7216,7 @@ window.WALK_GRAPH = {
     },
     {
       "spId": "VBUSZ_SP1842",
-      "name": "Continental",
+      "name": "AUMOVIO",
       "distM": 481,
       "walkMin": 7
     }
@@ -7522,13 +7250,13 @@ window.WALK_GRAPH = {
     },
     {
       "spId": "VBUSZ_SP1842",
-      "name": "Continental",
+      "name": "AUMOVIO",
       "distM": 93,
       "walkMin": 2
     },
     {
       "spId": "VBUSZ_SP1841",
-      "name": "Continental",
+      "name": "AUMOVIO",
       "distM": 121,
       "walkMin": 2
     },
@@ -7566,7 +7294,7 @@ window.WALK_GRAPH = {
     },
     {
       "spId": "VBUSZ_SP1841",
-      "name": "Continental",
+      "name": "AUMOVIO",
       "distM": 379,
       "walkMin": 5
     },
@@ -7578,7 +7306,7 @@ window.WALK_GRAPH = {
     },
     {
       "spId": "VBUSZ_SP1842",
-      "name": "Continental",
+      "name": "AUMOVIO",
       "distM": 382,
       "walkMin": 5
     },
@@ -7616,7 +7344,7 @@ window.WALK_GRAPH = {
   "VBUSZ_SP1842": [
     {
       "spId": "VBUSZ_SP1841",
-      "name": "Continental",
+      "name": "AUMOVIO",
       "distM": 33,
       "walkMin": 1
     },
@@ -7660,7 +7388,7 @@ window.WALK_GRAPH = {
   "VBUSZ_SP1841": [
     {
       "spId": "VBUSZ_SP1842",
-      "name": "Continental",
+      "name": "AUMOVIO",
       "distM": 33,
       "walkMin": 1
     },
@@ -7716,13 +7444,13 @@ window.WALK_GRAPH = {
     },
     {
       "spId": "VBUSZ_SP1841",
-      "name": "Continental",
+      "name": "AUMOVIO",
       "distM": 266,
       "walkMin": 4
     },
     {
       "spId": "VBUSZ_SP1842",
-      "name": "Continental",
+      "name": "AUMOVIO",
       "distM": 298,
       "walkMin": 4
     },
@@ -8541,12 +8269,6 @@ window.WALK_GRAPH = {
       "walkMin": 4
     },
     {
-      "spId": "VBUSZ_SP1674",
-      "name": "Vámosi úti forduló",
-      "distM": 322,
-      "walkMin": 5
-    },
-    {
       "spId": "VBUSZ_SP1766",
       "name": "Stadion",
       "distM": 408,
@@ -8661,12 +8383,6 @@ window.WALK_GRAPH = {
       "name": "Kórház",
       "distM": 485,
       "walkMin": 7
-    },
-    {
-      "spId": "VBUSZ_SP1808",
-      "name": "Dugovics Titusz utca",
-      "distM": 497,
-      "walkMin": 7
     }
   ],
   "VBUSZ_SP1757": [
@@ -8725,12 +8441,6 @@ window.WALK_GRAPH = {
       "walkMin": 6
     },
     {
-      "spId": "VBUSZ_SP1808",
-      "name": "Dugovics Titusz utca",
-      "distM": 416,
-      "walkMin": 6
-    },
-    {
       "spId": "VBUSZ_SP1668",
       "name": "Komakút tér / Pannon Egyetem",
       "distM": 417,
@@ -8740,12 +8450,6 @@ window.WALK_GRAPH = {
       "spId": "VOLAN_hkir_558516_2",
       "name": "Veszprém, Komakút tér",
       "distM": 424,
-      "walkMin": 6
-    },
-    {
-      "spId": "VBUSZ_SP1809",
-      "name": "Dugovics Titusz utca",
-      "distM": 444,
       "walkMin": 6
     },
     {
@@ -8799,6 +8503,12 @@ window.WALK_GRAPH = {
       "walkMin": 5
     },
     {
+      "spId": "VBUSZ_SP1756",
+      "name": "Munkácsy Mihály utca",
+      "distM": 349,
+      "walkMin": 5
+    },
+    {
       "spId": "VBUSZ_SP1755",
       "name": "Munkácsy Mihály utca",
       "distM": 350,
@@ -8826,12 +8536,6 @@ window.WALK_GRAPH = {
       "spId": "VBUSZ_SP1804",
       "name": "Március 15. utca",
       "distM": 484,
-      "walkMin": 7
-    },
-    {
-      "spId": "VBUSZ_SP1756",
-      "name": "Munkácsy Mihály utca",
-      "distM": 496,
       "walkMin": 7
     }
   ],
@@ -8885,6 +8589,12 @@ window.WALK_GRAPH = {
       "walkMin": 6
     },
     {
+      "spId": "VBUSZ_SP1756",
+      "name": "Munkácsy Mihály utca",
+      "distM": 447,
+      "walkMin": 6
+    },
+    {
       "spId": "VBUSZ_SP1785",
       "name": "Bolgár Mihály utca",
       "distM": 447,
@@ -8932,6 +8642,12 @@ window.WALK_GRAPH = {
       "spId": "VBUSZ_SP1739",
       "name": "Pipacs utca",
       "distM": 337,
+      "walkMin": 5
+    },
+    {
+      "spId": "VBUSZ_SP1756",
+      "name": "Munkácsy Mihály utca",
+      "distM": 365,
       "walkMin": 5
     },
     {
@@ -9988,7 +9704,7 @@ window.WALK_GRAPH = {
     },
     {
       "spId": "VBUSZ_SP1841",
-      "name": "Continental",
+      "name": "AUMOVIO",
       "distM": 493,
       "walkMin": 7
     },
@@ -10503,18 +10219,6 @@ window.WALK_GRAPH = {
       "walkMin": 1
     },
     {
-      "spId": "VBUSZ_SP1808",
-      "name": "Dugovics Titusz utca",
-      "distM": 75,
-      "walkMin": 1
-    },
-    {
-      "spId": "VBUSZ_SP1809",
-      "name": "Dugovics Titusz utca",
-      "distM": 105,
-      "walkMin": 2
-    },
-    {
       "spId": "VBUSZ_SP1814",
       "name": "Füredi utca",
       "distM": 162,
@@ -10569,12 +10273,6 @@ window.WALK_GRAPH = {
       "walkMin": 6
     },
     {
-      "spId": "VBUSZ_SP1816",
-      "name": "Paál László utca",
-      "distM": 437,
-      "walkMin": 6
-    },
-    {
       "spId": "VBUSZ_SP1766",
       "name": "Stadion",
       "distM": 466,
@@ -10613,27 +10311,9 @@ window.WALK_GRAPH = {
       "walkMin": 4
     },
     {
-      "spId": "VBUSZ_SP1808",
-      "name": "Dugovics Titusz utca",
-      "distM": 294,
-      "walkMin": 4
-    },
-    {
-      "spId": "VBUSZ_SP1809",
-      "name": "Dugovics Titusz utca",
-      "distM": 317,
-      "walkMin": 4
-    },
-    {
       "spId": "VBUSZ_SP1757",
       "name": "Egyetem utca / ActiCity",
       "distM": 380,
-      "walkMin": 5
-    },
-    {
-      "spId": "VBUSZ_SP1820",
-      "name": "Kemecse utca",
-      "distM": 391,
       "walkMin": 5
     },
     {
@@ -10658,18 +10338,6 @@ window.WALK_GRAPH = {
       "spId": "VBUSZ_SP1758",
       "name": "Egyetem utca / ActiCity",
       "distM": 454,
-      "walkMin": 6
-    },
-    {
-      "spId": "VBUSZ_SP1816",
-      "name": "Paál László utca",
-      "distM": 460,
-      "walkMin": 6
-    },
-    {
-      "spId": "VBUSZ_SP1818",
-      "name": "Egry József utca",
-      "distM": 472,
       "walkMin": 6
     }
   ],
@@ -10769,12 +10437,6 @@ window.WALK_GRAPH = {
       "name": "József Attila utca / egyetemi kollégium",
       "distM": 448,
       "walkMin": 6
-    },
-    {
-      "spId": "VBUSZ_SP1820",
-      "name": "Kemecse utca",
-      "distM": 460,
-      "walkMin": 6
     }
   ],
   "VBUSZ_SP1766": [
@@ -10873,12 +10535,6 @@ window.WALK_GRAPH = {
       "name": "Egyetem utca / Stadion utca",
       "distM": 466,
       "walkMin": 6
-    },
-    {
-      "spId": "VBUSZ_SP1820",
-      "name": "Kemecse utca",
-      "distM": 472,
-      "walkMin": 6
     }
   ],
   "VBUSZ_SP1764": [
@@ -10913,24 +10569,6 @@ window.WALK_GRAPH = {
       "walkMin": 4
     },
     {
-      "spId": "VBUSZ_SP1808",
-      "name": "Dugovics Titusz utca",
-      "distM": 311,
-      "walkMin": 4
-    },
-    {
-      "spId": "VBUSZ_SP1809",
-      "name": "Dugovics Titusz utca",
-      "distM": 333,
-      "walkMin": 5
-    },
-    {
-      "spId": "VBUSZ_SP1820",
-      "name": "Kemecse utca",
-      "distM": 367,
-      "walkMin": 5
-    },
-    {
       "spId": "VBUSZ_SP1822",
       "name": "Stadion utca / Kemecse utca",
       "distM": 398,
@@ -10955,18 +10593,6 @@ window.WALK_GRAPH = {
       "walkMin": 6
     },
     {
-      "spId": "VBUSZ_SP1816",
-      "name": "Paál László utca",
-      "distM": 453,
-      "walkMin": 6
-    },
-    {
-      "spId": "VBUSZ_SP1818",
-      "name": "Egry József utca",
-      "distM": 454,
-      "walkMin": 6
-    },
-    {
       "spId": "VBUSZ_SP1758",
       "name": "Egyetem utca / ActiCity",
       "distM": 475,
@@ -10979,18 +10605,6 @@ window.WALK_GRAPH = {
       "name": "Egyetem utca / Stadion utca",
       "distM": 22,
       "walkMin": 1
-    },
-    {
-      "spId": "VBUSZ_SP1808",
-      "name": "Dugovics Titusz utca",
-      "distM": 73,
-      "walkMin": 1
-    },
-    {
-      "spId": "VBUSZ_SP1809",
-      "name": "Dugovics Titusz utca",
-      "distM": 101,
-      "walkMin": 2
     },
     {
       "spId": "VBUSZ_SP1814",
@@ -11035,12 +10649,6 @@ window.WALK_GRAPH = {
       "walkMin": 5
     },
     {
-      "spId": "VBUSZ_SP1816",
-      "name": "Paál László utca",
-      "distM": 417,
-      "walkMin": 6
-    },
-    {
       "spId": "VBUSZ_SP1765",
       "name": "Stadion",
       "distM": 436,
@@ -11082,18 +10690,6 @@ window.WALK_GRAPH = {
       "spId": "VBUSZ_SP1813",
       "name": "Mester utca",
       "distM": 292,
-      "walkMin": 4
-    },
-    {
-      "spId": "VBUSZ_SP1809",
-      "name": "Dugovics Titusz utca",
-      "distM": 292,
-      "walkMin": 4
-    },
-    {
-      "spId": "VBUSZ_SP1808",
-      "name": "Dugovics Titusz utca",
-      "distM": 297,
       "walkMin": 4
     },
     {
@@ -11147,18 +10743,6 @@ window.WALK_GRAPH = {
       "walkMin": 4
     },
     {
-      "spId": "VBUSZ_SP1808",
-      "name": "Dugovics Titusz utca",
-      "distM": 292,
-      "walkMin": 4
-    },
-    {
-      "spId": "VBUSZ_SP1809",
-      "name": "Dugovics Titusz utca",
-      "distM": 298,
-      "walkMin": 4
-    },
-    {
       "spId": "VBUSZ_SP1762",
       "name": "Egyetem utca / Stadion utca",
       "distM": 312,
@@ -11203,21 +10787,9 @@ window.WALK_GRAPH = {
       "walkMin": 2
     },
     {
-      "spId": "VBUSZ_SP1808",
-      "name": "Dugovics Titusz utca",
-      "distM": 155,
-      "walkMin": 2
-    },
-    {
       "spId": "VBUSZ_SP1761",
       "name": "Egyetem utca / Stadion utca",
       "distM": 162,
-      "walkMin": 3
-    },
-    {
-      "spId": "VBUSZ_SP1809",
-      "name": "Dugovics Titusz utca",
-      "distM": 164,
       "walkMin": 3
     },
     {
@@ -11269,192 +10841,6 @@ window.WALK_GRAPH = {
       "walkMin": 6
     }
   ],
-  "VBUSZ_SP1808": [
-    {
-      "spId": "VBUSZ_SP1809",
-      "name": "Dugovics Titusz utca",
-      "distM": 30,
-      "walkMin": 1
-    },
-    {
-      "spId": "VBUSZ_SP1762",
-      "name": "Egyetem utca / Stadion utca",
-      "distM": 73,
-      "walkMin": 1
-    },
-    {
-      "spId": "VBUSZ_SP1761",
-      "name": "Egyetem utca / Stadion utca",
-      "distM": 75,
-      "walkMin": 1
-    },
-    {
-      "spId": "VBUSZ_SP1814",
-      "name": "Füredi utca",
-      "distM": 155,
-      "walkMin": 2
-    },
-    {
-      "spId": "VBUSZ_SP1622",
-      "name": "Hunyadi János utca",
-      "distM": 265,
-      "walkMin": 4
-    },
-    {
-      "spId": "VBUSZ_SP1646",
-      "name": "Füredidomb",
-      "distM": 292,
-      "walkMin": 4
-    },
-    {
-      "spId": "VBUSZ_SP1763",
-      "name": "Stadion utca / Wartha Vince utca",
-      "distM": 294,
-      "walkMin": 4
-    },
-    {
-      "spId": "VBUSZ_SP1815",
-      "name": "Füredi utca",
-      "distM": 297,
-      "walkMin": 4
-    },
-    {
-      "spId": "VBUSZ_SP1764",
-      "name": "Stadion utca / Wartha Vince utca",
-      "distM": 311,
-      "walkMin": 4
-    },
-    {
-      "spId": "VBUSZ_SP1816",
-      "name": "Paál László utca",
-      "distM": 396,
-      "walkMin": 5
-    },
-    {
-      "spId": "VBUSZ_SP1757",
-      "name": "Egyetem utca / ActiCity",
-      "distM": 416,
-      "walkMin": 6
-    },
-    {
-      "spId": "VBUSZ_SP1758",
-      "name": "Egyetem utca / ActiCity",
-      "distM": 497,
-      "walkMin": 7
-    }
-  ],
-  "VBUSZ_SP1809": [
-    {
-      "spId": "VBUSZ_SP1808",
-      "name": "Dugovics Titusz utca",
-      "distM": 30,
-      "walkMin": 1
-    },
-    {
-      "spId": "VBUSZ_SP1762",
-      "name": "Egyetem utca / Stadion utca",
-      "distM": 101,
-      "walkMin": 2
-    },
-    {
-      "spId": "VBUSZ_SP1761",
-      "name": "Egyetem utca / Stadion utca",
-      "distM": 105,
-      "walkMin": 2
-    },
-    {
-      "spId": "VBUSZ_SP1814",
-      "name": "Füredi utca",
-      "distM": 164,
-      "walkMin": 3
-    },
-    {
-      "spId": "VBUSZ_SP1622",
-      "name": "Hunyadi János utca",
-      "distM": 243,
-      "walkMin": 4
-    },
-    {
-      "spId": "VBUSZ_SP1815",
-      "name": "Füredi utca",
-      "distM": 292,
-      "walkMin": 4
-    },
-    {
-      "spId": "VBUSZ_SP1646",
-      "name": "Füredidomb",
-      "distM": 298,
-      "walkMin": 4
-    },
-    {
-      "spId": "VBUSZ_SP1763",
-      "name": "Stadion utca / Wartha Vince utca",
-      "distM": 317,
-      "walkMin": 4
-    },
-    {
-      "spId": "VBUSZ_SP1764",
-      "name": "Stadion utca / Wartha Vince utca",
-      "distM": 333,
-      "walkMin": 5
-    },
-    {
-      "spId": "VBUSZ_SP1816",
-      "name": "Paál László utca",
-      "distM": 381,
-      "walkMin": 5
-    },
-    {
-      "spId": "VBUSZ_SP1757",
-      "name": "Egyetem utca / ActiCity",
-      "distM": 444,
-      "walkMin": 6
-    }
-  ],
-  "VBUSZ_SP1816": [
-    {
-      "spId": "VBUSZ_SP1818",
-      "name": "Egry József utca",
-      "distM": 261,
-      "walkMin": 4
-    },
-    {
-      "spId": "VBUSZ_SP1809",
-      "name": "Dugovics Titusz utca",
-      "distM": 381,
-      "walkMin": 5
-    },
-    {
-      "spId": "VBUSZ_SP1808",
-      "name": "Dugovics Titusz utca",
-      "distM": 396,
-      "walkMin": 5
-    },
-    {
-      "spId": "VBUSZ_SP1762",
-      "name": "Egyetem utca / Stadion utca",
-      "distM": 417,
-      "walkMin": 6
-    },
-    {
-      "spId": "VBUSZ_SP1761",
-      "name": "Egyetem utca / Stadion utca",
-      "distM": 437,
-      "walkMin": 6
-    },
-    {
-      "spId": "VBUSZ_SP1764",
-      "name": "Stadion utca / Wartha Vince utca",
-      "distM": 453,
-      "walkMin": 6
-    },
-    {
-      "spId": "VBUSZ_SP1763",
-      "name": "Stadion utca / Wartha Vince utca",
-      "distM": 460,
-      "walkMin": 6
-    }
-  ],
   "VBUSZ_SP1622": [
     {
       "spId": "VBUSZ_SP1815",
@@ -11467,18 +10853,6 @@ window.WALK_GRAPH = {
       "name": "Füredi utca",
       "distM": 234,
       "walkMin": 3
-    },
-    {
-      "spId": "VBUSZ_SP1809",
-      "name": "Dugovics Titusz utca",
-      "distM": 243,
-      "walkMin": 4
-    },
-    {
-      "spId": "VBUSZ_SP1808",
-      "name": "Dugovics Titusz utca",
-      "distM": 265,
-      "walkMin": 4
     },
     {
       "spId": "VBUSZ_SP1646",
@@ -11528,18 +10902,6 @@ window.WALK_GRAPH = {
       "spId": "VBUSZ_SP1863",
       "name": "Vámosi úti forduló",
       "distM": 278,
-      "walkMin": 4
-    },
-    {
-      "spId": "VBUSZ_SP1674",
-      "name": "Vámosi úti forduló",
-      "distM": 285,
-      "walkMin": 4
-    },
-    {
-      "spId": "VBUSZ_SP1820",
-      "name": "Kemecse utca",
-      "distM": 286,
       "walkMin": 4
     },
     {
@@ -11629,12 +10991,6 @@ window.WALK_GRAPH = {
       "walkMin": 4
     },
     {
-      "spId": "VBUSZ_SP1674",
-      "name": "Vámosi úti forduló",
-      "distM": 259,
-      "walkMin": 4
-    },
-    {
       "spId": "VOLAN_hkir_558503_1",
       "name": "Veszprém, József Attila utca",
       "distM": 283,
@@ -11650,12 +11006,6 @@ window.WALK_GRAPH = {
       "spId": "VBUSZ_SP1620",
       "name": "József Attila utca / egyetemi kollégium",
       "distM": 294,
-      "walkMin": 4
-    },
-    {
-      "spId": "VBUSZ_SP1820",
-      "name": "Kemecse utca",
-      "distM": 296,
       "walkMin": 4
     },
     {
@@ -11707,94 +11057,6 @@ window.WALK_GRAPH = {
       "walkMin": 6
     }
   ],
-  "VBUSZ_SP1818": [
-    {
-      "spId": "VBUSZ_SP1816",
-      "name": "Paál László utca",
-      "distM": 261,
-      "walkMin": 4
-    },
-    {
-      "spId": "VBUSZ_SP1820",
-      "name": "Kemecse utca",
-      "distM": 364,
-      "walkMin": 5
-    },
-    {
-      "spId": "VBUSZ_SP1764",
-      "name": "Stadion utca / Wartha Vince utca",
-      "distM": 454,
-      "walkMin": 6
-    },
-    {
-      "spId": "VBUSZ_SP1763",
-      "name": "Stadion utca / Wartha Vince utca",
-      "distM": 472,
-      "walkMin": 6
-    }
-  ],
-  "VBUSZ_SP1820": [
-    {
-      "spId": "VBUSZ_SP1822",
-      "name": "Stadion utca / Kemecse utca",
-      "distM": 286,
-      "walkMin": 4
-    },
-    {
-      "spId": "VBUSZ_SP1823",
-      "name": "Stadion utca / Kemecse utca",
-      "distM": 296,
-      "walkMin": 4
-    },
-    {
-      "spId": "VBUSZ_SP1818",
-      "name": "Egry József utca",
-      "distM": 364,
-      "walkMin": 5
-    },
-    {
-      "spId": "VBUSZ_SP1764",
-      "name": "Stadion utca / Wartha Vince utca",
-      "distM": 367,
-      "walkMin": 5
-    },
-    {
-      "spId": "VBUSZ_SP1763",
-      "name": "Stadion utca / Wartha Vince utca",
-      "distM": 391,
-      "walkMin": 5
-    },
-    {
-      "spId": "VBUSZ_SP1857",
-      "name": "Vámosi úti forduló",
-      "distM": 434,
-      "walkMin": 6
-    },
-    {
-      "spId": "VBUSZ_SP1674",
-      "name": "Vámosi úti forduló",
-      "distM": 441,
-      "walkMin": 6
-    },
-    {
-      "spId": "VBUSZ_SP1765",
-      "name": "Stadion",
-      "distM": 460,
-      "walkMin": 6
-    },
-    {
-      "spId": "VBUSZ_SP1863",
-      "name": "Vámosi úti forduló",
-      "distM": 462,
-      "walkMin": 6
-    },
-    {
-      "spId": "VBUSZ_SP1766",
-      "name": "Stadion",
-      "distM": 472,
-      "walkMin": 6
-    }
-  ],
   "VBUSZ_SP1620": [
     {
       "spId": "VOLAN_hkir_558503_1",
@@ -11842,12 +11104,6 @@ window.WALK_GRAPH = {
       "spId": "VBUSZ_SP1823",
       "name": "Stadion utca / Kemecse utca",
       "distM": 294,
-      "walkMin": 4
-    },
-    {
-      "spId": "VBUSZ_SP1674",
-      "name": "Vámosi úti forduló",
-      "distM": 297,
       "walkMin": 4
     },
     {
@@ -11937,12 +11193,6 @@ window.WALK_GRAPH = {
       "walkMin": 4
     },
     {
-      "spId": "VBUSZ_SP1674",
-      "name": "Vámosi úti forduló",
-      "distM": 316,
-      "walkMin": 4
-    },
-    {
       "spId": "VBUSZ_SP1766",
       "name": "Stadion",
       "distM": 399,
@@ -11993,12 +11243,6 @@ window.WALK_GRAPH = {
       "walkMin": 4
     },
     {
-      "spId": "VBUSZ_SP1674",
-      "name": "Vámosi úti forduló",
-      "distM": 283,
-      "walkMin": 4
-    },
-    {
       "spId": "VBUSZ_SP1823",
       "name": "Stadion utca / Kemecse utca",
       "distM": 283,
@@ -12036,12 +11280,6 @@ window.WALK_GRAPH = {
     }
   ],
   "VBUSZ_SP1857": [
-    {
-      "spId": "VBUSZ_SP1674",
-      "name": "Vámosi úti forduló",
-      "distM": 13,
-      "walkMin": 1
-    },
     {
       "spId": "VBUSZ_SP1863",
       "name": "Vámosi úti forduló",
@@ -12083,68 +11321,6 @@ window.WALK_GRAPH = {
       "name": "Veszprém, József Attila utca",
       "distM": 313,
       "walkMin": 4
-    },
-    {
-      "spId": "VBUSZ_SP1820",
-      "name": "Kemecse utca",
-      "distM": 434,
-      "walkMin": 6
-    }
-  ],
-  "VBUSZ_SP1674": [
-    {
-      "spId": "VBUSZ_SP1857",
-      "name": "Vámosi úti forduló",
-      "distM": 13,
-      "walkMin": 1
-    },
-    {
-      "spId": "VBUSZ_SP1863",
-      "name": "Vámosi úti forduló",
-      "distM": 42,
-      "walkMin": 1
-    },
-    {
-      "spId": "VBUSZ_SP1823",
-      "name": "Stadion utca / Kemecse utca",
-      "distM": 259,
-      "walkMin": 4
-    },
-    {
-      "spId": "VOLAN_hkir_558503_1",
-      "name": "Veszprém, József Attila utca",
-      "distM": 283,
-      "walkMin": 4
-    },
-    {
-      "spId": "VBUSZ_SP1822",
-      "name": "Stadion utca / Kemecse utca",
-      "distM": 285,
-      "walkMin": 4
-    },
-    {
-      "spId": "VBUSZ_SP1620",
-      "name": "József Attila utca / egyetemi kollégium",
-      "distM": 297,
-      "walkMin": 4
-    },
-    {
-      "spId": "VBUSZ_SP1667",
-      "name": "József Attila utca / egyetemi kollégium",
-      "distM": 316,
-      "walkMin": 4
-    },
-    {
-      "spId": "VOLAN_hkir_558503_2",
-      "name": "Veszprém, József Attila utca",
-      "distM": 322,
-      "walkMin": 5
-    },
-    {
-      "spId": "VBUSZ_SP1820",
-      "name": "Kemecse utca",
-      "distM": 441,
-      "walkMin": 6
     }
   ],
   "VBUSZ_SP1863": [
@@ -12152,12 +11328,6 @@ window.WALK_GRAPH = {
       "spId": "VBUSZ_SP1857",
       "name": "Vámosi úti forduló",
       "distM": 38,
-      "walkMin": 1
-    },
-    {
-      "spId": "VBUSZ_SP1674",
-      "name": "Vámosi úti forduló",
-      "distM": 42,
       "walkMin": 1
     },
     {
@@ -12195,12 +11365,6 @@ window.WALK_GRAPH = {
       "name": "Veszprém, József Attila utca",
       "distM": 281,
       "walkMin": 4
-    },
-    {
-      "spId": "VBUSZ_SP1820",
-      "name": "Kemecse utca",
-      "distM": 462,
-      "walkMin": 6
     }
   ],
   "VBUSZ_SP1676": [
@@ -15261,7 +14425,7 @@ window.WALK_GRAPH = {
     {
       "spId": "VOLAN_hkir_557863_2",
       "name": "Nemesvámos, Haribo",
-      "distM": 1,
+      "distM": 16,
       "walkMin": 1
     },
     {
@@ -15293,7 +14457,7 @@ window.WALK_GRAPH = {
     {
       "spId": "VOLAN_hkir_557863_2",
       "name": "Nemesvámos, Haribo",
-      "distM": 303,
+      "distM": 311,
       "walkMin": 4
     },
     {
@@ -15325,7 +14489,7 @@ window.WALK_GRAPH = {
     {
       "spId": "VOLAN_hkir_557863_2",
       "name": "Nemesvámos, Haribo",
-      "distM": 291,
+      "distM": 299,
       "walkMin": 4
     },
     {
@@ -15345,19 +14509,19 @@ window.WALK_GRAPH = {
     {
       "spId": "VOLAN_hkir_557863_1",
       "name": "Nemesvámos, Haribo",
-      "distM": 1,
+      "distM": 16,
       "walkMin": 1
     },
     {
       "spId": "VOLAN_hkir_557864_2",
       "name": "Nemesvámos, Köfém",
-      "distM": 291,
+      "distM": 299,
       "walkMin": 4
     },
     {
       "spId": "VOLAN_hkir_557864_1",
       "name": "Nemesvámos, Köfém",
-      "distM": 303,
+      "distM": 311,
       "walkMin": 4
     }
   ],
@@ -15551,38 +14715,6 @@ window.WALK_GRAPH = {
       "walkMin": 6
     }
   ],
-  "VOLAN_hkir_557856_2": [
-    {
-      "spId": "VOLAN_hkir_557856_1",
-      "name": "Nemesvámos, ABC",
-      "distM": 69,
-      "walkMin": 1
-    },
-    {
-      "spId": "VOLAN_hkir_557858_1",
-      "name": "Nemesvámos, autóbusz-váróterem",
-      "distM": 337,
-      "walkMin": 5
-    },
-    {
-      "spId": "VOLAN_hkir_557862_2",
-      "name": "Nemesvámos, autóbusz-forduló",
-      "distM": 355,
-      "walkMin": 5
-    },
-    {
-      "spId": "VOLAN_hkir_557858_2",
-      "name": "Nemesvámos, autóbusz-váróterem",
-      "distM": 408,
-      "walkMin": 6
-    },
-    {
-      "spId": "VOLAN_hkir_557858_3",
-      "name": "Nemesvámos, autóbusz-váróterem",
-      "distM": 448,
-      "walkMin": 6
-    }
-  ],
   "VOLAN_hkir_557856_1": [
     {
       "spId": "VOLAN_hkir_557856_2",
@@ -15613,6 +14745,50 @@ window.WALK_GRAPH = {
       "name": "Nemesvámos, autóbusz-forduló",
       "distM": 423,
       "walkMin": 6
+    },
+    {
+      "spId": "VOLAN_hkir_557862_1",
+      "name": "Nemesvámos, autóbusz-forduló",
+      "distM": 432,
+      "walkMin": 6
+    }
+  ],
+  "VOLAN_hkir_557856_2": [
+    {
+      "spId": "VOLAN_hkir_557856_1",
+      "name": "Nemesvámos, ABC",
+      "distM": 69,
+      "walkMin": 1
+    },
+    {
+      "spId": "VOLAN_hkir_557858_1",
+      "name": "Nemesvámos, autóbusz-váróterem",
+      "distM": 337,
+      "walkMin": 5
+    },
+    {
+      "spId": "VOLAN_hkir_557862_2",
+      "name": "Nemesvámos, autóbusz-forduló",
+      "distM": 355,
+      "walkMin": 5
+    },
+    {
+      "spId": "VOLAN_hkir_557862_1",
+      "name": "Nemesvámos, autóbusz-forduló",
+      "distM": 364,
+      "walkMin": 5
+    },
+    {
+      "spId": "VOLAN_hkir_557858_2",
+      "name": "Nemesvámos, autóbusz-váróterem",
+      "distM": 408,
+      "walkMin": 6
+    },
+    {
+      "spId": "VOLAN_hkir_557858_3",
+      "name": "Nemesvámos, autóbusz-váróterem",
+      "distM": 448,
+      "walkMin": 6
     }
   ],
   "VOLAN_hkir_557866_1": [
@@ -15631,7 +14807,33 @@ window.WALK_GRAPH = {
       "walkMin": 1
     }
   ],
+  "VOLAN_hkir_557862_1": [
+    {
+      "spId": "VOLAN_hkir_557862_2",
+      "name": "Nemesvámos, autóbusz-forduló",
+      "distM": 17,
+      "walkMin": 1
+    },
+    {
+      "spId": "VOLAN_hkir_557856_2",
+      "name": "Nemesvámos, ABC",
+      "distM": 364,
+      "walkMin": 5
+    },
+    {
+      "spId": "VOLAN_hkir_557856_1",
+      "name": "Nemesvámos, ABC",
+      "distM": 432,
+      "walkMin": 6
+    }
+  ],
   "VOLAN_hkir_557862_2": [
+    {
+      "spId": "VOLAN_hkir_557862_1",
+      "name": "Nemesvámos, autóbusz-forduló",
+      "distM": 17,
+      "walkMin": 1
+    },
     {
       "spId": "VOLAN_hkir_557856_2",
       "name": "Nemesvámos, ABC",

@@ -11,7 +11,7 @@ const path = require('path');
 const { parseCsv } = require('./lib/csv');
 
 const DIR = path.join(__dirname, 'veszprem');
-const WORKDAY_CUTOFF = '20260619'; // last day of the school-term "_HP" service block (inclusive)
+const WORKDAY_CUTOFF = '20261213'; // last day of the school-term "_HP" service block (inclusive) -- 2026-11 feed: covers 20261101-20261213, no schoolholiday period in it
 
 const calDates = parseCsv(path.join(DIR, 'calendar_dates.txt'));
 const serviceDates = new Map();

@@ -66,6 +66,30 @@ az itt leírt `parse-menetrend.js`/`pdfplumber` tervet. A `_tmp_geocoding/`-beli
 PDF-alapú szkriptek (parse-menetrend.js, update-from-pdf.py/js, stb.) azóta
 egyszeri, lezárt eszközök, nem kell tovább fejleszteni őket.
 
+### 20. Forgalomfüggő (menetenkénti) menetidők a városi buszoknál (felvéve 2026-11-04)
+
+A `city-data.js` minden irányhoz egyetlen, megállónkénti menetidőt (offset) tárol,
+ami még a PDF-füzetből származik (a megállókba kirakott menetrend is ilyen, egyetlen
+menetidő-táblás). A GTFS viszont menetenként, napszaktól függő időket ad — a GTFS-et
+használó appok és a megállók digitális kijelzői valószínűleg ezt mutatják. Példa: az
+1-es Valeo, főporta → Veszprém vasútállomás az appban 19 perc, a GTFS-ben 18–24 perc
+(este átlag 18,7, csúcsidőben átlag 21,1).
+
+**Következmény:** felszállásnál biztonságos (a busz legfeljebb később jön), de az
+érkezés és a szoros átszállás csúcsidőben túl optimista lehet (2–5 perc).
+
+**Teendő:** a városi járatokat is menetenkénti időkre átállítani, ahogy az
+`intercity-data.js`-ben már így van (`trips[].deps` megállónként). Érinti a
+`city-data.js` szerkezetét, a GTFS-pipeline-t (`03`/`04`), az útvonaltervezőt
+(`city-planner.js`, `data.js`) és a kártyákat/menetrend-ablakot. Köztes, egyszerűbb
+megoldás lehetne a csúcsidős átlag offsetként, de az csak részben pontos.
+
+### 21. Városi GTFS-feed frissítése — HATÁRIDŐ: 2026-12-13
+
+A 2026-11-es városi feed csak 2026-12-13-ig érvényes, és nincs benne tanszüneti
+időszak (a `city-data.js` schoolholiday adata a nyári). December elején újra le kell
+tölteni, és a végén lefuttatni a `_gtfs_update/17-verify-city-stops.js`-t.
+
 ## VeszprémBusz teljes hálózat (city.html)
 
 ### ✅ 17. Hiányzó buszjáratok adatbázisa — KÉSZ
@@ -75,7 +99,7 @@ egyszeri, lezárt eszközök, nem kell tovább fejleszteni őket.
 ### ✅ KÉSZ — Buszútvonalak megjelenítése térképen
 - GPS koordináták + SP platform ID-k bekerültek a `city-data.js`-be (stop-editor2.html + manuális validálás)
 - Leaflet.js + OpenStreetMap térképnézet a menetrend modalban (🗺 gomb), útvonal + megállók jelölőkkel
-- Irány-helyes SP platform hozzárendelés (jobb-oldal szabály, `fix-rightside.js`)
+- Irány-helyes SP platform hozzárendelés (jobb-oldal szabály, `fix-rightside.js`) — 2026-11-04: 9 irányban rossz peront adott, a GTFS szerint javítva (v3.56); azóta a peronokat a `_gtfs_update/17-verify-city-stops.js` ellenőrzi
 
 ## UI
 

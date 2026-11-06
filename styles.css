@@ -989,3 +989,82 @@ select:focus-visible,
      papírméreten, méret-eltérés (és az azzal járó auto-igazítás) nélkül. */
   @page { margin: 10mm; }
 }
+
+/* ============================================================
+   Megálló menetrendjének nyomtatása (A4) — window.printStopTimetable()
+   (data.js) tölti fel ugyanazt a #__printPortal-t, mint a kártya-nyomtatás.
+   ============================================================ */
+@media print {
+  body.print-stop-timetable > *:not(#__printPortal) { display: none !important; }
+  html:has(body.print-stop-timetable),
+  body.print-stop-timetable {
+    background: white !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  /* A margót a portál saját paddingja adja, nem a @page margó -- így akkor is
+     marad szegély, ha a nyomtatási ablakban "Margók: Nincs" van kiválasztva
+     (különben a jobb hasáb táblázatai a papír széléig érnek). A nevesített
+     oldal (pst) margója ezért 0, hogy alapértelmezett beállításnál se duplázódjon. */
+  @page pst { margin: 0; }
+  body.print-stop-timetable #__printPortal {
+    page: pst;
+    box-sizing: border-box;
+    width: 100%;
+    padding: 12mm;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+    display: block !important;
+    font-family: 'Nunito', sans-serif;
+    color: #000;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  #__printPortal .pst-head {
+    border-bottom: 2px solid #000;
+    padding-bottom: 6px;
+    margin-bottom: 10px;
+  }
+  #__printPortal .pst-title { font-size: 20px; font-weight: 900; }
+  #__printPortal .pst-sub { font-size: 11px; color: #333; }
+  /* Két hasáb: a vonalblokkok így jellemzően elférnek egy A4-es lapon. */
+  #__printPortal .pst-lines-wrap { column-count: 2; column-gap: 14px; }
+  #__printPortal .pst-line {
+    break-inside: avoid;
+    margin-bottom: 12px;
+  }
+  #__printPortal .pst-line-head {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 4px;
+  }
+  #__printPortal .pst-badge {
+    color: #fff; font-weight: 900; font-size: 13px;
+    border-radius: 6px; padding: 2px 7px;
+  }
+  #__printPortal .pst-dest { font-size: 11px; }
+  #__printPortal .pst-table {
+    width: 100%;
+    box-sizing: border-box;
+    table-layout: fixed;
+    border-collapse: collapse;
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+  }
+  #__printPortal .pst-table th,
+  #__printPortal .pst-table td {
+    border: 1px solid #999;
+    padding: 2px 4px;
+    text-align: left;
+    vertical-align: top;
+  }
+  #__printPortal .pst-table th { background: #eee; font-weight: 800; }
+  #__printPortal .pst-table .pst-h {
+    width: 26px; text-align: center; font-weight: 900; background: #f4f4f4;
+  }
+  #__printPortal .pst-none { color: #999; }
+  #__printPortal .pst-table sup { font-size: 8px; font-weight: 900; }
+  #__printPortal .pst-legend {
+    font-size: 10px; margin-top: 3px;
+    display: flex; flex-wrap: wrap; gap: 2px 10px;
+  }
+}

@@ -996,8 +996,85 @@ window.printCard = function (cardEl) {
   window.print();
 };
 
+// Egy helyközi megálló (platform-címke) teljes menetrendje nyomtatható, A4-es lapra
+// szánt formában -- a megálló-néző (StopTimetableModal) 🖨️ gombja hívja. Vonalanként
+// (buszszám szerint) egy blokk: sorok = órák, oszlopok = naptípusok (MINDHÁROM, nem
+// csak a nézőben épp kiválasztott -- egy kinyomtatott lapnak minden napra jónak kell
+// lennie), cellákban a percek. Ha egy vonal menetei különböző végállomásra mennek, a
+// leggyakoribb jelöletlen, a többi betűjelet kap (a, b, ...) magyarázattal, mint a
+// nyomtatott menetrendekben. `lineIds`: csak ezek a vonalak (a nézőben bekapcsolt
+// chipek); null = mind. Ugyanazt a #__printPortal-t használja, mint a printCard.
+window.printStopTimetable = function (label, lineIds, lang) {
+  const t = (window.I18N && window.I18N[lang || "hu"]) || window.I18N?.hu || {};
+  const fmt2 = (n) => String(n).padStart(2, "0");
+  const esc = (s) => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const dayTypes = [
+    ["workday", t.workday || "Munkanap"],
+    ["schoolholiday", t.schoolHolidayLabel || "Tanszünet"],
+    ["weekend", t.weekend || "Hétvége"],
+  ];
+
+  // busId -> { bus, deps: { dayType: [{mins, dest}] } }
+  const lines = new Map();
+  for (const [dt] of dayTypes) {
+    for (const d of window.getIntercityDeparturesForPlatformLabel(label, dt)) {
+      if (lineIds && !lineIds.has(d.bus.id)) continue;
+      if (!lines.has(d.bus.id)) lines.set(d.bus.id, { bus: d.bus, deps: {} });
+      const entry = lines.get(d.bus.id);
+      (entry.deps[dt] = entry.deps[dt] || []).push({ mins: d.mins, dest: d.terminus || d.to || "" });
+    }
+  }
+  const sorted = [...lines.values()].sort((a, b) => parseFloat(a.bus.id) - parseFloat(b.bus.id) || a.bus.id.localeCompare(b.bus.id));
+
+  let html = `<div class="pst-head"><div class="pst-title">🚏 ${esc(label)}</div>` +
+    `<div class="pst-sub">${esc(t.printTimetableTitle || "Helyközi buszok indulásai")} · ${esc(t.printedOn || "Nyomtatva")}: ${new Date().toLocaleDateString(lang === "en" ? "en-GB" : "hu-HU")}</div></div>`;
+
+  html += `<div class="pst-lines-wrap">`;
+  for (const { bus, deps } of sorted) {
+    // Végállomás-jelölés: a leggyakoribb jelöletlen, a többi a, b, c...
+    const destCount = new Map();
+    for (const arr of Object.values(deps)) for (const d of arr) destCount.set(d.dest, (destCount.get(d.dest) || 0) + 1);
+    const dests = [...destCount.entries()].sort((a, b) => b[1] - a[1]).map(e => e[0]);
+    const mark = new Map(dests.map((d, i) => [d, i === 0 ? "" : String.fromCharCode(96 + i)]));
+
+    const hours = new Set();
+    for (const arr of Object.values(deps)) for (const d of arr) hours.add(Math.floor(d.mins / 60));
+    const hourList = [...hours].sort((a, b) => a - b);
+
+    html += `<div class="pst-line"><div class="pst-line-head"><span class="pst-badge" style="background:${esc(bus.color)}">${esc(bus.id)}</span>` +
+      `<span class="pst-dest">${esc(t.printTowards || "Végállomás")}: <b>${esc(dests[0] || "")}</b></span></div>`;
+    html += `<table class="pst-table"><thead><tr><th class="pst-h">${esc(t.printHour || "Óra")}</th>` +
+      dayTypes.map(([, name]) => `<th>${esc(name)}</th>`).join("") + `</tr></thead><tbody>`;
+    for (const h of hourList) {
+      html += `<tr><td class="pst-h">${h}</td>`;
+      for (const [dt] of dayTypes) {
+        const cell = (deps[dt] || []).filter(d => Math.floor(d.mins / 60) === h).sort((a, b) => a.mins - b.mins)
+          .map(d => `${fmt2(d.mins % 60)}${mark.get(d.dest) ? `<sup>${mark.get(d.dest)}</sup>` : ""}`);
+        html += `<td>${cell.join(" ") || "<span class=\"pst-none\">–</span>"}</td>`;
+      }
+      html += `</tr>`;
+    }
+    html += `</tbody></table>`;
+    const legend = dests.slice(1).map(d => `<span><sup>${mark.get(d)}</sup> ${esc(d)}</span>`);
+    if (legend.length) html += `<div class="pst-legend">${legend.join("")}</div>`;
+    html += `</div>`;
+  }
+  html += `</div>`;
+
+  let portal = document.getElementById('__printPortal');
+  if (!portal) {
+    portal = document.createElement('div');
+    portal.id = '__printPortal';
+    document.body.appendChild(portal);
+  }
+  portal.innerHTML = html;
+  document.body.classList.add('print-stop-timetable');
+  window.print();
+};
+
 window.addEventListener('afterprint', function () {
   document.body.classList.remove('print-single-card');
+  document.body.classList.remove('print-stop-timetable');
   const portal = document.getElementById('__printPortal');
   if (portal) portal.innerHTML = '';
 });

@@ -1545,6 +1545,19 @@ function StopTimetableModal({ onClose, dayType, lang, initialStop, initialMode }
               {dayTabs}
             </div>
           </div>
+          {selectedStop && viewMode === 'intercity' && lines.length > 0 && window.printStopTimetable && (
+            <button
+              onClick={() => window.printStopTimetable(selectedStop, activeIds, lang)}
+              title={t.printStopTimetable || "Megálló menetrendjének nyomtatása"}
+              aria-label={t.printStopTimetable || "Megálló menetrendjének nyomtatása"}
+              style={{
+                background: 'rgba(255,255,255,0.25)', border: 'none',
+                borderRadius: '50%', width: 36, height: 36,
+                cursor: 'pointer', fontSize: 17,
+                display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+              }}
+            >🖨️</button>
+          )}
           {selectedStop && (
             <button
               onClick={() => { setSelectedStop(null); setActiveIds(null); }}
